@@ -280,14 +280,19 @@
   }
   .route-summary b{ color:#3bd332; }
   .invoice-summary{
-    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;
     background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); border-radius:8px;
     padding:8px 10px; margin:10px 4px 2px;
   }
+  .invoice-summary-range{ display:flex; align-items:center; gap:6px; flex:0 1 auto; }
+  .invoice-summary-range input[type=date]{ width:auto; flex:0 0 auto; padding:5px 6px; font-size:.76rem; }
+  .invoice-range-sep{ font-size:.74rem; color:rgba(255,255,255,.6); flex:0 0 auto; }
   .invoice-summary.grand{
     background:rgba(59,211,50,.12); border:1px solid rgba(59,211,50,.4);
+    flex-direction:column; justify-content:center; text-align:center;
   }
-  .invoice-summary.grand .invoice-summary-total{ font-weight:700; }
+  .invoice-summary.grand .invoice-summary-range{ justify-content:center; width:100%; }
+  .invoice-summary.grand .invoice-summary-total{ font-weight:700; width:100%; }
   .reset-invoices-btn{
     width:100%; margin-top:6px; padding:7px 10px; border:1px solid #fff; border-radius:8px;
     background:rgba(224,139,125,.12); color:#fff; font-size:.78rem; cursor:pointer;
@@ -473,19 +478,25 @@
     padding:3px 6px; font-size:.75rem; cursor:pointer;
   }
   .order-history-actions button:hover{ background:rgba(255,255,255,.15); }
-  .client-card .cbillname{ font-size:.7rem; color:rgba(255,255,255,.5); margin-top:1px; }
-  .client-card .caddr{ font-size:.78rem; color:rgba(255,255,255,.62); margin-top:2px; }
-  .client-card .cphone{ font-size:.78rem; color:#9fc3ff; margin-top:2px; }
+  .client-card .cbillname{ font-size:.82rem; color:#fff; margin-top:3px; }
+  .client-card .caddr-group{ margin-top:10px; }
+  .client-card .caddr{ font-size:.82rem; color:#fff; margin-top:3px; }
+  .client-card .cphone{ font-size:.82rem; color:#fff; margin-top:3px; }
   .client-card .phone-link{ color:#9fc3ff; text-decoration:underline; cursor:pointer; }
   .client-card .phone-link:hover{ color:#c3dcff; }
-  .client-card .cnotes{
-    font-size:.75rem; color:rgba(255,255,255,.68); margin-top:4px; padding-top:4px;
-    border-top:1px dashed rgba(255,255,255,.18); white-space:pre-wrap; word-break:break-word;
+  .client-card .cprice{ font-size:.82rem; color:#fff; font-weight:700; margin-top:10px; }
+  .client-card .cprice b{ color:#9fc3ff; }
+  .client-card .cnotes-block{
+    margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,.3);
+  }
+  .client-card .cnotes-title{ font-size:.82rem; font-weight:700; color:#fff; }
+  .client-card .cnotes-text{
+    font-size:.8rem; color:rgba(255,255,255,.85); margin-top:3px; white-space:pre-wrap; word-break:break-word;
   }
   .updates-log{
-    margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,.18);
+    margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,.3);
   }
-  .updates-log-title{ font-size:.72rem; font-weight:700; color:rgba(255,255,255,.7); margin-bottom:3px; }
+  .updates-log-title{ font-size:.82rem; font-weight:700; color:#fff; margin-bottom:3px; }
   .update-entry{ font-size:.74rem; color:rgba(255,255,255,.85); margin-top:2px; word-break:break-word; }
   .update-entry .update-date{ color:var(--gold); font-weight:700; }
   .edit-updates-list{ margin-bottom:6px; }
@@ -2148,13 +2159,20 @@
       <div class="card-details" style="display:${isCardOpen ? 'block' : 'none'}">
         ${c.name ? `<div class="cbillname">שם לחשבונית: ${escapeHtml(c.name)}</div>` : ""}
         ${c.contact ? `<div class="cbillname">איש קשר: ${escapeHtml(c.contact)}</div>` : ""}
-        <div class="caddr">${escapeHtml(c.address)}</div>
-        ${c.phone ? `<div class="cphone">📞 <a href="tel:${escapeHtml(telHref(c.phone))}" class="phone-link" title="חייג ללקוח">${escapeHtml(c.phone)}</a></div>` : ""}
-        ${c.price ? `<div class="cphone">מחיר ליחידה: ₪${escapeHtml(c.price)}</div>` : ""}
-        ${c.notes ? `<div class="cnotes">📝 ${escapeHtml(c.notes)}</div>` : ""}
+        <div class="caddr-group">
+          <div class="caddr">כתובת: ${escapeHtml(c.address)}</div>
+          ${c.phone ? `<div class="cphone">טלפון: <a href="tel:${escapeHtml(telHref(c.phone))}" class="phone-link" title="חייג ללקוח">${escapeHtml(c.phone)}</a></div>` : ""}
+        </div>
+        ${c.price ? `<div class="cprice">מחיר ליחידה: <b>₪${escapeHtml(c.price)}</b></div>` : ""}
+        ${c.notes ? `
+          <div class="cnotes-block">
+            <div class="cnotes-title">הערות:</div>
+            <div class="cnotes-text">${escapeHtml(c.notes)}</div>
+          </div>
+        ` : ""}
         ${(c.updates && c.updates.length) ? `
           <div class="updates-log">
-            <div class="updates-log-title">📋 עדכונים</div>
+            <div class="updates-log-title">עדכונים</div>
             ${c.updates.slice().sort((a,b)=> b.date.localeCompare(a.date)).map(u => `
               <div class="update-entry"><span class="update-date">${escapeHtml(u.date)}</span> — ${escapeHtml(u.text)}</div>
             `).join('')}
@@ -2517,26 +2535,36 @@
     }
   }
 
-  let grandSummaryDate = null; // remembers the chosen date across re-renders
+  let grandSummaryFromDate = null; // remembers the chosen date range across re-renders
+  let grandSummaryToDate = null;
 
   function renderGrandInvoiceSummary(){
     const container = document.getElementById('grandInvoiceSummary');
     if(clients.length === 0){ container.innerHTML = ""; return; }
-    if(!grandSummaryDate) grandSummaryDate = localDateString();
+    const today = localDateString();
+    if(!grandSummaryFromDate) grandSummaryFromDate = today;
+    if(!grandSummaryToDate) grandSummaryToDate = today;
     container.innerHTML = `
       <div class="invoice-summary grand" style="margin-top:12px">
-        <input type="date" class="grand-invoice-date" value="${grandSummaryDate}">
+        <div class="invoice-summary-range">
+          <input type="date" class="grand-invoice-from" value="${grandSummaryFromDate}">
+          <span class="invoice-range-sep">עד</span>
+          <input type="date" class="grand-invoice-to" value="${grandSummaryToDate}">
+        </div>
         <div class="invoice-summary-total">סה״כ כל התיקיות: <b>₪0</b></div>
       </div>
       <button class="reset-invoices-btn" title="מאפס לכולם, לא ניתן לשחזר">🗑 אפס את כל הסכומים ל-0</button>
     `;
-    const dateInput = container.querySelector('.grand-invoice-date');
+    const fromInput = container.querySelector('.grand-invoice-from');
+    const toInput = container.querySelector('.grand-invoice-to');
     const totalEl = container.querySelector('.invoice-summary-total b');
-    dateInput.addEventListener('click', e=>e.stopPropagation());
+    fromInput.addEventListener('click', e=>e.stopPropagation());
+    toInput.addEventListener('click', e=>e.stopPropagation());
     function refresh(){
-      grandSummaryDate = dateInput.value;
+      grandSummaryFromDate = fromInput.value;
+      grandSummaryToDate = toInput.value;
       const total = clients.reduce((sum, c)=>{
-        if(c.lastInvoiceDate === grandSummaryDate){
+        if(c.lastInvoiceDate && c.lastInvoiceDate >= grandSummaryFromDate && c.lastInvoiceDate <= grandSummaryToDate){
           const val = parseFloat(c.lastInvoice);
           if(!isNaN(val)) return sum + val;
         }
@@ -2544,7 +2572,8 @@
       }, 0);
       totalEl.textContent = `₪${total.toFixed(2)}`;
     }
-    dateInput.addEventListener('change', refresh);
+    fromInput.addEventListener('change', refresh);
+    toInput.addEventListener('change', refresh);
     refresh();
 
     container.querySelector('.reset-invoices-btn').addEventListener('click', ()=>{
