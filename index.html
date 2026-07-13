@@ -326,6 +326,11 @@
     0%, 100%{ opacity:1; transform:scale(1); }
     50%{ opacity:.25; transform:scale(.8); }
   }
+  .collect-payment-dot{
+    display:inline-block; width:12px; height:12px; border-radius:50%; flex:0 0 auto;
+    background:#36ff36; box-shadow:0 0 6px rgba(54,255,54,.9);
+    animation:callBeforeBlink 1.1s ease-in-out infinite;
+  }
   .cactions .toggle-call-before{
     background:transparent; border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.75);
     border-radius:6px; padding:4px 8px; font-size:.72rem; cursor:pointer;
@@ -333,6 +338,14 @@
   .cactions .toggle-call-before:hover{ background:rgba(255,255,255,.1); }
   .cactions .toggle-call-before.active{
     background:rgba(255,59,59,.18); border-color:#ff3b3b; color:#ff8a8a;
+  }
+  .cactions .toggle-collect-payment{
+    background:transparent; border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.75);
+    border-radius:6px; padding:4px 8px; font-size:.72rem; cursor:pointer;
+  }
+  .cactions .toggle-collect-payment:hover{ background:rgba(255,255,255,.1); }
+  .cactions .toggle-collect-payment.active{
+    background:rgba(54,255,54,.18); border-color:#36ff36; color:#9dffa0;
   }
   .client-card[draggable="true"]{ cursor:grab; }
   .client-card.dragging{ opacity:.35; border-color:var(--gold); }
@@ -441,7 +454,11 @@
   .order-history{
     padding:14px 20px; border-top:1px solid rgba(255,255,255,.15); background:rgba(0,0,0,.15);
   }
-  .order-history-title{ font-weight:700; font-size:.85rem; margin-bottom:8px; }
+  .order-history-title{
+    font-weight:700; font-size:.85rem; margin-bottom:8px; cursor:pointer;
+    display:flex; align-items:center; gap:6px; user-select:none;
+  }
+  .order-history-chevron{ font-size:.75rem; display:inline-block; width:12px; }
   .order-history-row{
     display:flex; align-items:center; gap:8px; padding:8px; margin-bottom:6px;
     background:rgba(255,255,255,.06); border-radius:8px;
@@ -459,10 +476,35 @@
   .client-card .cbillname{ font-size:.7rem; color:rgba(255,255,255,.5); margin-top:1px; }
   .client-card .caddr{ font-size:.78rem; color:rgba(255,255,255,.62); margin-top:2px; }
   .client-card .cphone{ font-size:.78rem; color:#9fc3ff; margin-top:2px; }
+  .client-card .phone-link{ color:#9fc3ff; text-decoration:underline; cursor:pointer; }
+  .client-card .phone-link:hover{ color:#c3dcff; }
   .client-card .cnotes{
     font-size:.75rem; color:rgba(255,255,255,.68); margin-top:4px; padding-top:4px;
     border-top:1px dashed rgba(255,255,255,.18); white-space:pre-wrap; word-break:break-word;
   }
+  .updates-log{
+    margin-top:6px; padding-top:6px; border-top:1px dashed rgba(255,255,255,.18);
+  }
+  .updates-log-title{ font-size:.72rem; font-weight:700; color:rgba(255,255,255,.7); margin-bottom:3px; }
+  .update-entry{ font-size:.74rem; color:rgba(255,255,255,.85); margin-top:2px; word-break:break-word; }
+  .update-entry .update-date{ color:var(--gold); font-weight:700; }
+  .edit-updates-list{ margin-bottom:6px; }
+  .edit-update-row{
+    display:flex; align-items:baseline; gap:6px; font-size:.78rem; padding:4px 2px;
+    border-bottom:1px dashed rgba(255,255,255,.12);
+  }
+  .edit-update-row .update-date{ color:var(--gold); font-weight:700; flex:0 0 auto; white-space:nowrap; }
+  .edit-update-row .edit-update-text{ flex:1 1 auto; word-break:break-word; }
+  .edit-update-row .edit-update-del{
+    background:transparent; border:none; color:rgba(255,255,255,.6); cursor:pointer; font-size:.78rem; flex:0 0 auto;
+  }
+  .edit-update-row .edit-update-del:hover{ color:#e08b7d; }
+  .edit-update-add-row{ display:flex; gap:6px; margin-bottom:8px; }
+  .edit-update-add-row input{ flex:1 1 auto; }
+  .edit-update-add-btn{
+    flex:0 0 auto; background:#1c3fd6; color:#fff; border:none; border-radius:7px; padding:0 12px; cursor:pointer; font-size:.82rem;
+  }
+  .edit-update-add-btn:hover{ background:#1533ad; }
   .client-card .invoice-divider{
     border-top:1px dashed rgba(255,255,255,.18); margin-top:8px;
   }
@@ -489,9 +531,6 @@
   .client-card .cactions button{
     font-size:.72rem; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); color:#fff; border-radius:6px;
     padding:3px 8px; cursor:pointer;
-  }
-  .client-card .cactions button.move-up, .client-card .cactions button.move-down{
-    padding:3px 7px; font-size:.7rem; flex:0 0 auto;
   }
   .client-card .cactions button:disabled{ opacity:.3; cursor:default; }
   .client-card .cactions button.del{ color:#e08b7d; }
@@ -1562,7 +1601,7 @@
             ${c.name ? `<div style="font-size:.72rem;color:#8a8f93;margin-bottom:4px">שם לחשבונית: ${escapeHtml(c.name)}</div>` : ""}
             ${c.contact ? `<div style="font-size:.72rem;color:#8a8f93;margin-bottom:4px">איש קשר: ${escapeHtml(c.contact)}</div>` : ""}
             <div style="font-size:.8rem;color:#5B6B6A">${escapeHtml(c.address)}</div>
-            ${c.phone ? `<div style="font-size:.8rem;color:#3E5C76;margin-top:2px">${escapeHtml(c.phone)}</div>` : ""}
+            ${c.phone ? `<div style="font-size:.8rem;color:#3E5C76;margin-top:2px">📞 <a href="tel:${escapeHtml(telHref(c.phone))}" style="color:#3E5C76">${escapeHtml(c.phone)}</a></div>` : ""}
             ${c.notes ? `<div style="font-size:.78rem;margin-top:4px">${escapeHtml(c.notes)}</div>` : ""}
             <div style="margin-top:8px;display:flex;gap:6px">
               <button onclick="window.__deleteClient('${c.id}')" style="font-size:.72rem;border:1px solid #ddd;border-radius:6px;padding:3px 8px;cursor:pointer;color:#9C3B2E;background:#fff">מחק</button>
@@ -1604,6 +1643,10 @@
     });
 
     return bounds;
+  }
+
+  function telHref(phone){
+    return (phone || "").replace(/[^\d+]/g, "");
   }
 
   function escapeHtml(s){
@@ -1713,8 +1756,8 @@
           <button class="order-save-btn">💾 שמור הזמנה${orderModalEditingId ? ' (עדכון)' : ''}</button>
         </div>
         <div class="order-history">
-          <div class="order-history-title">היסטוריית הזמנות</div>
-          <div class="order-history-list"></div>
+          <div class="order-history-title"><span class="order-history-chevron">▸</span> היסטוריית הזמנות</div>
+          <div class="order-history-list" style="display:none"></div>
         </div>
       `;
 
@@ -1728,6 +1771,14 @@
           itemsEl.style.display = isOpen ? 'none' : 'block';
           chevron.textContent = isOpen ? '▸' : '▾';
         });
+      });
+
+      modal.querySelector('.order-history-title').addEventListener('click', ()=>{
+        const listEl = modal.querySelector('.order-history-list');
+        const chevron = modal.querySelector('.order-history-chevron');
+        const isOpen = listEl.style.display !== 'none';
+        listEl.style.display = isOpen ? 'none' : 'block';
+        chevron.textContent = isOpen ? '▸' : '▾';
       });
 
       const noOrderCheckbox = modal.querySelector('.no-order-checkbox');
@@ -1898,6 +1949,12 @@
       <input type="text" class="edit-housenum" value="${escapeHtml(c.houseNumber||'')}">
       <label>הערות</label>
       <textarea class="edit-notes">${escapeHtml(c.notes||'')}</textarea>
+      <label>עדכונים</label>
+      <div class="edit-updates-list"></div>
+      <div class="edit-update-add-row">
+        <input type="text" class="edit-update-input" placeholder="עדכון חדש (יתווסף עם תאריך היום)">
+        <button class="edit-update-add-btn" type="button">+ הוסף</button>
+      </div>
       <div class="edit-error" style="display:none;color:#e08b7d;font-size:.78rem;margin-top:4px"></div>
       <div class="edit-addr-suggestions" style="display:none;margin-top:6px"></div>
       <div class="cactions">
@@ -1906,6 +1963,49 @@
       </div>
     `;
     card.addEventListener('click', e=>e.stopPropagation());
+
+    function renderEditUpdates(){
+      const listEl = card.querySelector('.edit-updates-list');
+      const updates = (c.updates || []).slice().sort((a,b)=> b.date.localeCompare(a.date));
+      if(updates.length === 0){
+        listEl.innerHTML = `<div class="empty" style="padding:4px 2px;font-size:.76rem">אין עדיין עדכונים.</div>`;
+        return;
+      }
+      listEl.innerHTML = updates.map(u => `
+        <div class="edit-update-row" data-update-id="${u.id}">
+          <span class="update-date">${escapeHtml(u.date)}</span>
+          <span class="edit-update-text">${escapeHtml(u.text)}</span>
+          <button class="edit-update-del" data-update-id="${u.id}" title="מחיקת העדכון הזה">🗑</button>
+        </div>
+      `).join('');
+      listEl.querySelectorAll('.edit-update-del').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          c.updates = (c.updates || []).filter(u => u.id !== btn.dataset.updateId);
+          saveData();
+          renderEditUpdates();
+        });
+      });
+    }
+    renderEditUpdates();
+
+    card.querySelector('.edit-update-add-btn').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const input = card.querySelector('.edit-update-input');
+      const text = input.value.trim();
+      if(!text) return;
+      c.updates = c.updates || [];
+      c.updates.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), date: localDateString(), text });
+      saveData();
+      input.value = '';
+      renderEditUpdates();
+    });
+    card.querySelector('.edit-update-input').addEventListener('click', e=>e.stopPropagation());
+    card.querySelector('.edit-update-input').addEventListener('keydown', (e)=>{
+      e.stopPropagation();
+      if(e.key === 'Enter'){ e.preventDefault(); card.querySelector('.edit-update-add-btn').click(); }
+    });
+
     card.querySelector('.cancel-edit').addEventListener('click', (e)=>{
       e.stopPropagation();
       editingClientId = null;
@@ -2022,6 +2122,7 @@
       <div class="card-summary-row">
         <div class="card-summary-right">
           ${c.callBefore ? `<span class="call-before-dot" title="להתקשר לפני ההגעה"></span>` : ""}
+          ${c.collectPayment ? `<span class="collect-payment-dot" title="לגבות תשלום"></span>` : ""}
           ${routeNumber ? `<input type="color" class="stop-color-input" value="${stopColor}" title="בחירת צבע לכתובת הזו - כדי להבדיל בין רחובות שונים">` : ""}
           <a href="javascript:void(0)" class="cname-link" title="לחצו לצפייה/הוספה של הזמנה">${c.business ? escapeHtml(c.business) : escapeHtml(c.name)}</a>
         </div>
@@ -2048,9 +2149,17 @@
         ${c.name ? `<div class="cbillname">שם לחשבונית: ${escapeHtml(c.name)}</div>` : ""}
         ${c.contact ? `<div class="cbillname">איש קשר: ${escapeHtml(c.contact)}</div>` : ""}
         <div class="caddr">${escapeHtml(c.address)}</div>
-        ${c.phone ? `<div class="cphone">${escapeHtml(c.phone)}</div>` : ""}
+        ${c.phone ? `<div class="cphone">📞 <a href="tel:${escapeHtml(telHref(c.phone))}" class="phone-link" title="חייג ללקוח">${escapeHtml(c.phone)}</a></div>` : ""}
         ${c.price ? `<div class="cphone">מחיר ליחידה: ₪${escapeHtml(c.price)}</div>` : ""}
         ${c.notes ? `<div class="cnotes">📝 ${escapeHtml(c.notes)}</div>` : ""}
+        ${(c.updates && c.updates.length) ? `
+          <div class="updates-log">
+            <div class="updates-log-title">📋 עדכונים</div>
+            ${c.updates.slice().sort((a,b)=> b.date.localeCompare(a.date)).map(u => `
+              <div class="update-entry"><span class="update-date">${escapeHtml(u.date)}</span> — ${escapeHtml(u.text)}</div>
+            `).join('')}
+          </div>
+        ` : ""}
         ${showSkipToggle ? `
           <div class="invoice-divider"></div>
           <div class="invoice-field">
@@ -2067,12 +2176,9 @@
           <select class="temp-folder-select"></select>
         `}
         <div class="cactions">
-          ${moveHandlers ? `
-            <button class="move-up" title="הזז מעלה" ${moveHandlers.isFirst ? 'disabled' : ''}>▲</button>
-            <button class="move-down" title="הזז מטה" ${moveHandlers.isLast ? 'disabled' : ''}>▼</button>
-          ` : ""}
           ${showSkipToggle ? `<button class="toggle-skip" title="${c.skipRoute ? 'הכלל שוב במסלול' : 'דלג על הכתובת הזו היום, בלי למחוק אותה'}">${c.skipRoute ? '▶ כלול היום' : '⏸ דלג היום'}</button>` : ""}
           <button class="toggle-call-before ${c.callBefore ? 'active' : ''}" title="${c.callBefore ? 'בטל תזכורת התקשרות' : 'סמן שצריך להתקשר לפני ההגעה'}">📞 להתקשר לפני</button>
+          <button class="toggle-collect-payment ${c.collectPayment ? 'active' : ''}" title="${c.collectPayment ? 'בטל תזכורת גביה' : 'סמן שצריך לגבות תשלום'}">💰 לגבות תשלום</button>
           <button class="edit-client" title="עריכת פרטי הלקוח">✎ ערוך</button>
           <button class="focus">מקם על המפה</button>
           <button class="del">מחק</button>
@@ -2094,6 +2200,13 @@
     callBeforeBtn.addEventListener('click', (e)=>{
       e.stopPropagation();
       c.callBefore = !c.callBefore;
+      saveData();
+      renderAll();
+    });
+    const collectPaymentBtn = card.querySelector('.toggle-collect-payment');
+    collectPaymentBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      c.collectPayment = !c.collectPayment;
       saveData();
       renderAll();
     });
@@ -2170,10 +2283,6 @@
       });
     }
     if(moveHandlers){
-      const upBtn = card.querySelector('.move-up');
-      const downBtn = card.querySelector('.move-down');
-      upBtn.addEventListener('click', (e)=>{ e.stopPropagation(); moveHandlers.up(); });
-      downBtn.addEventListener('click', (e)=>{ e.stopPropagation(); moveHandlers.down(); });
       const posInput = card.querySelector('.pos-input');
       if(posInput){
         posInput.addEventListener('click', e=>e.stopPropagation());
