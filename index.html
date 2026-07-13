@@ -298,6 +298,11 @@
     background:rgba(224,139,125,.12); color:#fff; font-size:.78rem; cursor:pointer;
   }
   .reset-invoices-btn:hover{ background:rgba(224,139,125,.22); }
+  .send-daily-report-btn{
+    width:100%; margin-top:8px; padding:7px 10px; border:1px solid #73dd5c; border-radius:8px;
+    background:rgba(115,221,92,.14); color:#fff; font-size:.78rem; cursor:pointer;
+  }
+  .send-daily-report-btn:hover{ background:rgba(115,221,92,.25); }
   .invoice-summary input[type=date]{ width:auto; flex:0 0 auto; padding:5px 8px; font-size:.8rem; }
   .invoice-summary-total{ font-size:.85rem; color:#fff; white-space:nowrap; }
   .invoice-summary-total b{ color:#3bd332; }
@@ -479,16 +484,20 @@
   }
   .order-history-actions button:hover{ background:rgba(255,255,255,.15); }
   .client-card .cbillname{ font-size:.82rem; color:#fff; margin-top:3px; }
-  .client-card .caddr-group{ margin-top:10px; position:relative; }
+  .client-card .caddr-group{ margin-top:10px; }
+  .client-card .cprice-row{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    margin-top:10px; margin-bottom:-4px;
+  }
   .client-card .whatsapp-btn{
-    position:absolute; left:0; top:28px; display:inline-block; width:25px; height:25px; cursor:pointer;
+    display:inline-block; width:25px; height:25px; cursor:pointer; flex:0 0 auto;
   }
   .client-card .whatsapp-btn svg{ display:block; width:25px; height:25px; }
   .client-card .caddr{ font-size:.82rem; color:#fff; margin-top:3px; }
   .client-card .cphone{ font-size:.82rem; color:#fff; margin-top:3px; }
   .client-card .phone-link{ color:#9fc3ff; text-decoration:underline; cursor:pointer; }
   .client-card .phone-link:hover{ color:#c3dcff; }
-  .client-card .cprice{ font-size:.82rem; color:rgba(255,255,255,.75); margin-top:10px; }
+  .client-card .cprice{ font-size:.82rem; color:rgba(255,255,255,.75); }
   .client-card .cnotes-block{
     margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,.3);
   }
@@ -2173,9 +2182,13 @@
         <div class="caddr-group">
           <div class="caddr">כתובת: ${escapeHtml(c.address)}</div>
           ${c.phone ? `<div class="cphone">טלפון: <a href="tel:${escapeHtml(telHref(c.phone))}" class="phone-link" title="חייג ללקוח">${escapeHtml(c.phone)}</a></div>` : ""}
-          ${c.phone ? `<a href="${escapeHtml(waHref(c.phone))}" target="_blank" class="whatsapp-btn" title="שליחת הודעת ווטסאפ ללקוח">${WHATSAPP_ICON_SVG}</a>` : ""}
         </div>
-        ${c.price ? `<div class="cprice">מחיר ליחידה: ₪${escapeHtml(c.price)}</div>` : ""}
+        ${(c.price || c.phone) ? `
+          <div class="cprice-row">
+            ${c.price ? `<div class="cprice">מחיר ליחידה: ₪${escapeHtml(c.price)}</div>` : `<div></div>`}
+            ${c.phone ? `<a href="${escapeHtml(waHref(c.phone))}" target="_blank" class="whatsapp-btn" title="שליחת הודעת ווטסאפ ללקוח">${WHATSAPP_ICON_SVG}</a>` : ""}
+          </div>
+        ` : ""}
         ${c.notes ? `
           <div class="cnotes-block">
             <div class="cnotes-title">הערות:</div>
@@ -2565,6 +2578,7 @@
         </div>
         <div class="invoice-summary-total">סה״כ כל התיקיות: <b>₪0</b></div>
       </div>
+      <button class="send-daily-report-btn">📤 שליחת דו״ח יומי</button>
       <button class="reset-invoices-btn" title="מאפס לכולם, לא ניתן לשחזר">🗑 אפס את כל הסכומים ל-0</button>
     `;
     const fromInput = container.querySelector('.grand-invoice-from');
@@ -2594,6 +2608,26 @@
       clients.forEach(c=>{ c.lastInvoice = ""; c.lastInvoiceDate = ""; });
       saveData();
       renderAll();
+    });
+
+    container.querySelector('.send-daily-report-btn').addEventListener('click', ()=>{
+      const fromDate = grandSummaryFromDate;
+      const toDate = grandSummaryToDate;
+      let orderCount = 0;
+      let total = 0;
+      clients.forEach(c=>{
+        (c.orders || []).forEach(o=>{
+          if(o.date >= fromDate && o.date <= toDate && (o.total || 0) > 0){
+            orderCount++;
+            total += (o.total || 0);
+          }
+        });
+      });
+      const rangeLabel = fromDate === toDate ? fromDate : `${fromDate} עד ${toDate}`;
+      const report = `דוח כל התיקיות: ${rangeLabel}\nכמות הזמנות חדשות: ${orderCount}\nסכום: ₪${total.toFixed(2)}`;
+      let waNumber = '052-3617178'.replace(/\D/g, '');
+      if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
+      window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(report)}`, '_blank');
     });
   }
 
@@ -2798,6 +2832,29 @@
         summaryDateInput.addEventListener('change', refreshInvoiceSummary);
         refreshInvoiceSummary();
         body.appendChild(invoiceSummary);
+
+        const folderReportBtn = document.createElement('button');
+        folderReportBtn.className = 'send-daily-report-btn';
+        folderReportBtn.textContent = '📤 שליחת דו״ח יומי';
+        folderReportBtn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          const chosenDate = summaryDateInput.value;
+          let orderCount = 0;
+          let total = 0;
+          members.forEach(m=>{
+            (m.orders || []).forEach(o=>{
+              if(o.date === chosenDate && (o.total || 0) > 0){
+                orderCount++;
+                total += (o.total || 0);
+              }
+            });
+          });
+          const report = `דוח יומי - תיקיית ${name}: ${chosenDate}\nכמות הזמנות חדשות: ${orderCount}\nסכום: ₪${total.toFixed(2)}`;
+          let waNumber = '052-3617178'.replace(/\D/g, '');
+          if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
+          window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(report)}`, '_blank');
+        });
+        body.appendChild(folderReportBtn);
       }
 
       group.appendChild(head);
