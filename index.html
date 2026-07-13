@@ -1,0 +1,3010 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מרכז לקוחות — ישראל</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+<style>
+  :root{
+    --ink:#12242C;
+    --ink-2:#1B3540;
+    --paper:#ECE7DC;
+    --paper-2:#F5F1E7;
+    --teal:#1E7A73;
+    --gold:#C79A2E;
+    --rust:#A85C32;
+    --plum:#6B4C7A;
+    --slate:#3E5C76;
+    --moss:#5C7A3A;
+    --line:rgba(18,36,44,.14);
+    --text:#12242C;
+    --muted:#5B6B6A;
+    --danger:#9C3B2E;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    font-family:'Roboto', -apple-system, "Segoe UI", "Noto Sans Hebrew", Arial, sans-serif;
+    background:#050b1c;
+    color:var(--text);
+    overflow:hidden;
+  }
+  #bgImage{
+    position:fixed; inset:-15%; z-index:-1; pointer-events:none;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(0,0,0,.7) 0%, rgba(0,0,0,.35) 30%, transparent 60%),
+      radial-gradient(ellipse 60% 45% at 22% 28%, rgba(90,60,220,.55), transparent 60%),
+      radial-gradient(ellipse 55% 50% at 78% 22%, rgba(160,40,190,.45), transparent 60%),
+      radial-gradient(ellipse 65% 55% at 65% 75%, rgba(40,70,210,.5), transparent 60%),
+      radial-gradient(ellipse 50% 45% at 15% 78%, rgba(120,30,170,.4), transparent 60%),
+      radial-gradient(circle at 50% 50%, #0a1030 0%, #050818 55%, #020410 100%);
+    background-size:180% 180%;
+    filter:saturate(1.15);
+    animation:bgDrift 26s ease-in-out infinite alternate;
+    will-change:background-position, transform;
+  }
+  body.bg-anim-paused #bgImage{ animation-play-state:paused; }
+  @keyframes bgDrift{
+    0%{ background-position:20% 30%; transform:scale(1); }
+    50%{ background-position:60% 60%; transform:scale(1.06); }
+    100%{ background-position:80% 20%; transform:scale(1.1); }
+  }
+  #starfield{
+    position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; display:block;
+  }
+  .app{
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+    z-index:1;
+  }
+  header{
+    background:transparent;
+    color:var(--paper-2);
+    height:76px;
+    padding:0 22px;
+    position:relative;
+    overflow:hidden;
+    flex:0 0 auto;
+  }
+  .header-logo{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    height:46px; width:auto; z-index:1;
+  }
+  header .actions{
+    position:absolute; left:22px; top:50%; transform:translateY(-50%);
+    display:flex; gap:10px; z-index:2;
+  }
+  header button.ghost{
+    background:transparent; border:1px solid rgba(245,241,231,.35); color:var(--paper-2);
+    padding:7px 12px; border-radius:8px; font-size:.82rem; cursor:pointer;
+  }
+  header button.ghost:hover{ background:rgba(245,241,231,.12); }
+
+  .main{
+    flex:1 1 auto;
+    display:flex;
+    min-height:0;
+  }
+  .sidebar{
+    width:400px;
+    flex:0 0 400px;
+    background:transparent;
+    border-left:none;
+    display:flex;
+    flex-direction:column;
+    min-height:0;
+  }
+  .sidebar .scroll{
+    flex:1 1 auto;
+    overflow-y:auto;
+    padding:16px 16px 90px;
+    scrollbar-width:thin;
+    scrollbar-color:#1c3fd6 transparent;
+  }
+  .sidebar .scroll::-webkit-scrollbar{ width:2px; }
+  .sidebar .scroll::-webkit-scrollbar-track{ background:transparent; }
+  .sidebar .scroll::-webkit-scrollbar-thumb{
+    background:#1c3fd6; border-radius:6px;
+  }
+  .sidebar .scroll::-webkit-scrollbar-thumb:hover{ background:#2a52e6; }
+  section.panel{
+    background:#021236;
+    color:#fff;
+    border:none;
+    border-radius:var(--radius);
+    padding:14px;
+    margin-bottom:14px;
+  }
+  #addClientPanel{
+    position:relative;
+    background-image:
+      radial-gradient(circle at 88% 92%, rgba(178,45,214,.65) 0%, rgba(178,45,214,0) 42%),
+      linear-gradient(135deg, #1c3fd6 0%, #0c1c72 30%, #030716 60%, #04061a 100%);
+    background-size: cover, cover;
+    background-position: center, center;
+    border:1px solid rgba(140,160,255,.35);
+    box-shadow: inset 0 0 16px rgba(120,150,255,.2), 0 0 18px rgba(178,45,214,.15);
+  }
+  #foldersPanel{ background:#1c3fd6; }
+  #addFolderBtn{ background:#021236; }
+  #addFolderBtn:hover{ background:#04205e; }
+  #searchPanel{ background:#1c3fd6; }
+  #clustersPanel{ background:#62167f; }
+  section.panel h2{
+    font-size:.95rem;
+    margin:0 0 10px;
+    font-family:'Roboto', -apple-system, "Segoe UI", "Noto Sans Hebrew", Arial, sans-serif;
+    font-weight:600;
+    color:#fff;
+    display:flex; align-items:center; gap:8px;
+  }
+  section.panel h2 .dot{ width:9px;height:9px;border-radius:50%;background:var(--teal); }
+  label{ display:block; font-size:.76rem; color:rgba(255,255,255,.62); margin:8px 0 4px; }
+  input[type=text], input[type=tel], input[type=number], input[type=date]{
+    width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:7px;
+    font-size:.9rem; background:#fff; color:#021236; font-family:inherit;
+  }
+  input[type=text]::placeholder, input[type=tel]::placeholder, input[type=number]::placeholder{ color:rgba(2,18,54,.45); }
+  input[type=text]:focus, input[type=tel]:focus, input[type=number]:focus{
+    outline:2px solid var(--teal); outline-offset:1px; background:#fff;
+  }
+  select{
+    width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:7px;
+    font-size:.9rem; background:#fff; font-family:inherit; color:#021236;
+  }
+  select option{ color:#021236; }
+  select:focus{ outline:2px solid var(--teal); outline-offset:1px; background:#fff; }
+  textarea{
+    width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:7px;
+    font-size:.87rem; font-family:inherit; resize:vertical; min-height:44px;
+    background:#fff; color:#021236;
+  }
+  textarea::placeholder{ color:rgba(2,18,54,.45); }
+  .row2{ display:flex; gap:8px; }
+  .row2 > div{ flex:1; }
+  button.primary{
+    margin-top:12px; width:100%; padding:10px; border:none; border-radius:8px;
+    background:#1c3fd6; color:#fff; font-size:.9rem; cursor:pointer; font-weight:600;
+  }
+  button.primary:disabled{ opacity:.55; cursor:default; }
+  button.primary:hover:not(:disabled){ background:#1533ad; }
+  .error-msg{
+    background:#F7E7E2; color:var(--danger); border:1px solid #E3B4A5; border-radius:7px;
+    padding:8px 10px; font-size:.8rem; margin-top:10px; display:none;
+  }
+  .addr-field-wrap{ position:relative; }
+  .suggestions{
+    position:absolute; top:100%; right:0; left:0; z-index:500;
+    background:#021236; border:1px solid rgba(255,255,255,.18); border-radius:8px;
+    box-shadow:0 6px 18px rgba(0,0,0,.35); margin-top:4px; max-height:220px; overflow-y:auto;
+    display:none;
+  }
+  .suggestions.open{ display:block; }
+  .suggestion-item{
+    padding:9px 10px; font-size:.82rem; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.12);
+    display:flex; gap:8px; align-items:flex-start; color:#fff;
+  }
+  .suggestion-item:last-child{ border-bottom:none; }
+  .suggestion-item:hover{ background:rgba(255,255,255,.08); }
+  .suggestion-item .num{
+    flex:0 0 auto; width:18px; height:18px; border-radius:50%; background:var(--gold); color:#fff;
+    font-size:.68rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:1px;
+  }
+  .suggestion-item .txt .main{ font-weight:600; }
+  .suggestion-item .txt .sub{ color:rgba(255,255,255,.55); font-size:.74rem; margin-top:1px; }
+  .suggest-hint{ font-size:.74rem; color:rgba(255,255,255,.55); margin-top:6px; }
+  .search-box{ position:relative; }
+  .search-box input{ padding-right:32px; }
+  .search-box svg{ position:absolute; right:9px; top:9px; width:16px; height:16px; opacity:.6; stroke:#021236; }
+
+  .slider-row{ display:flex; align-items:center; gap:10px; margin-top:4px; }
+  input[type=range]{
+    flex:1; -webkit-appearance:none; appearance:none; background:transparent; cursor:pointer;
+  }
+  input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:4px; background:#fff; }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
+    background:#1c3fd6; border:2px solid #fff; margin-top:-5px; cursor:pointer;
+  }
+  input[type=range]::-moz-range-track{ height:6px; border-radius:4px; background:#fff; }
+  input[type=range]::-moz-range-thumb{
+    width:16px; height:16px; border-radius:50%; background:#1c3fd6; border:2px solid #fff; cursor:pointer;
+  }
+  .slider-val{ font-size:.78rem; color:rgba(255,255,255,.6); min-width:52px; text-align:left; }
+
+  .cluster-group{ margin-bottom:10px; }
+  .cluster-group[draggable="true"] > .cluster-head{ cursor:grab; }
+  .cluster-group.dragging{ opacity:.4; }
+  .cluster-head{
+    display:flex; align-items:center; gap:3px; padding:8px 10px; border-radius:7px;
+    background:rgba(255,255,255,.06); cursor:pointer; border:1px solid rgba(255,255,255,.14); color:#fff;
+  }
+  .cluster-head:hover{ background:rgba(255,255,255,.12); }
+  .cluster-swatch{ width:12px; height:12px; border-radius:50%; flex:0 0 auto; }
+  .cluster-head .name{ font-weight:600; font-size:.85rem; flex:1; color:#fff; }
+  .cluster-head .count{ font-size:.74rem; color:#021236; background:#fff; padding:2px 7px; border-radius:20px; }
+  .cluster-head .folder-del{
+    flex:0 0 auto; background:transparent; border:none; color:#e08b7d; cursor:pointer;
+    font-size:.85rem; padding:2px 6px; border-radius:5px;
+  }
+  .cluster-head .folder-del:hover{ background:rgba(224,139,125,.18); }
+  .cluster-head .route-toggle{
+    flex:0 0 auto; background:transparent; border:none; color:rgba(255,255,255,.6); cursor:pointer;
+    font-size:.85rem; padding:2px 5px; border-radius:5px;
+  }
+  .cluster-head .route-toggle:hover{ background:rgba(255,255,255,.14); color:#fff; }
+  .cluster-head .route-toggle.active{ background:var(--gold); color:#021236; }
+  .cluster-head .rename-cluster, .cluster-head .reset-cluster-name, .cluster-head .rename-folder{
+    flex:0 0 auto; background:transparent; border:none; color:rgba(255,255,255,.6); cursor:pointer;
+    font-size:.8rem; padding:2px 5px; border-radius:5px;
+  }
+  .cluster-head .rename-cluster:hover, .cluster-head .reset-cluster-name:hover, .cluster-head .rename-folder:hover{ background:rgba(255,255,255,.14); color:#fff; }
+  .cluster-head .map-visibility-toggle{
+    flex:0 0 auto; background:transparent; border:none; color:rgba(255,255,255,.75); cursor:pointer;
+    font-size:.85rem; padding:2px 6px; border-radius:5px;
+  }
+  .cluster-head .map-visibility-toggle:hover{ background:rgba(255,255,255,.14); }
+  .cluster-head .map-visibility-toggle.off{ color:#e08b7d; opacity:.85; }
+  .cluster-rename-input{
+    flex:1; font-size:.85rem; font-weight:600; border:1px solid var(--teal); border-radius:6px;
+    padding:3px 7px; background:#fff; font-family:inherit; color:#021236; min-width:0;
+  }
+  input.folder-color-input, input.folder-swatch{
+    -webkit-appearance:none; appearance:none; border:none; padding:0; cursor:pointer;
+    border-radius:50%; background:none; overflow:hidden;
+  }
+  input.folder-color-input::-webkit-color-swatch-wrapper, input.folder-swatch::-webkit-color-swatch-wrapper{ padding:0; }
+  input.folder-color-input::-webkit-color-swatch, input.folder-swatch::-webkit-color-swatch{ border:1px solid rgba(255,255,255,.35); border-radius:50%; }
+  input.folder-color-input::-moz-color-swatch, input.folder-swatch::-moz-color-swatch{ border:1px solid rgba(255,255,255,.35); border-radius:50%; }
+  input.folder-color-input{ width:38px; height:38px; }
+  input.folder-swatch{ width:14px; height:14px; flex:0 0 auto; }
+  .cluster-body{ padding:6px 4px 2px 4px; }
+  .leg-connector{
+    display:flex; align-items:center; gap:6px; margin:2px 6px; padding:2px 0;
+  }
+  .leg-connector .leg-line{ flex:1; height:1px; background:rgba(255,255,255,.18); }
+  .leg-connector .leg-info{
+    white-space:nowrap; font-size:.66rem; color:rgba(255,255,255,.55); cursor:help;
+  }
+  .route-summary{
+    text-align:center; font-size:.82rem; color:#fff; background:rgba(59,211,50,.12);
+    border:1px solid rgba(59,211,50,.4); border-radius:8px; padding:8px 10px; margin:2px 4px 10px;
+    cursor:help;
+  }
+  .route-summary b{ color:#3bd332; }
+  .invoice-summary{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); border-radius:8px;
+    padding:8px 10px; margin:10px 4px 2px;
+  }
+  .invoice-summary.grand{
+    background:rgba(59,211,50,.12); border:1px solid rgba(59,211,50,.4);
+  }
+  .invoice-summary.grand .invoice-summary-total{ font-weight:700; }
+  .reset-invoices-btn{
+    width:100%; margin-top:6px; padding:7px 10px; border:1px solid #fff; border-radius:8px;
+    background:rgba(224,139,125,.12); color:#fff; font-size:.78rem; cursor:pointer;
+  }
+  .reset-invoices-btn:hover{ background:rgba(224,139,125,.22); }
+  .invoice-summary input[type=date]{ width:auto; flex:0 0 auto; padding:5px 8px; font-size:.8rem; }
+  .invoice-summary-total{ font-size:.85rem; color:#fff; white-space:nowrap; }
+  .invoice-summary-total b{ color:#3bd332; }
+  .service-time-tag{
+    font-size:.7rem; color:rgba(255,255,255,.6); margin-top:6px; padding-top:6px;
+    border-top:1px dashed rgba(255,255,255,.18);
+  }
+  .client-card{
+    padding:10px 10px; margin:6px 0; border-radius:7px; background:#111e63; border:none;
+    cursor:pointer; color:#fff; position:relative;
+  }
+  .client-card:hover{ background:#182a80; }
+  .client-card.card-alt{ background:#061c8a; }
+  .client-card.card-alt:hover{ background:#0a2bb0; }
+  .cluster-region-body .client-card{ background:#450d61; }
+  .cluster-region-body .client-card:hover{ background:#5a1180; }
+  .cluster-region-body .client-card.card-alt{ background:#330d46; }
+  .cluster-region-body .client-card.card-alt:hover{ background:#451160; }
+  .client-card.skipped-today{ background:#4a4a4a !important; opacity:.75; }
+  .client-card.skipped-today:hover{ background:#565656 !important; }
+  .skip-badge{
+    display:inline-block; font-size:.68rem; font-weight:700; color:#fff; background:rgba(255,255,255,.18);
+    padding:2px 8px; border-radius:20px; margin-top:6px;
+  }
+  .call-before-dot{
+    display:inline-block; width:12px; height:12px; border-radius:50%; flex:0 0 auto;
+    background:#ff3b3b; box-shadow:0 0 6px rgba(255,59,59,.9);
+    animation:callBeforeBlink 1.1s ease-in-out infinite;
+  }
+  @keyframes callBeforeBlink{
+    0%, 100%{ opacity:1; transform:scale(1); }
+    50%{ opacity:.25; transform:scale(.8); }
+  }
+  .cactions .toggle-call-before{
+    background:transparent; border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.75);
+    border-radius:6px; padding:4px 8px; font-size:.72rem; cursor:pointer;
+  }
+  .cactions .toggle-call-before:hover{ background:rgba(255,255,255,.1); }
+  .cactions .toggle-call-before.active{
+    background:rgba(255,59,59,.18); border-color:#ff3b3b; color:#ff8a8a;
+  }
+  .client-card[draggable="true"]{ cursor:grab; }
+  .client-card.dragging{ opacity:.35; border-color:var(--gold); }
+  .cluster-body{ transition:background .15s ease; }
+  .client-card input.stop-color-input{
+    -webkit-appearance:none; appearance:none; border:none; padding:0; cursor:pointer;
+    border-radius:50%; background:none; overflow:hidden; width:14px; height:14px; flex:0 0 auto;
+  }
+  .client-card input.stop-color-input::-webkit-color-swatch-wrapper{ padding:0; }
+  .client-card input.stop-color-input::-webkit-color-swatch{ border:1px solid rgba(255,255,255,.6); border-radius:50%; }
+  .client-card input.stop-color-input::-moz-color-swatch{ border:1px solid rgba(255,255,255,.6); border-radius:50%; }
+  .card-summary-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+  }
+  .card-summary-left{ display:flex; align-items:center; gap:8px; flex:0 1 auto; min-width:0; }
+  .card-summary-right{ display:flex; align-items:center; gap:8px; flex:0 1 auto; min-width:0; }
+  .pos-number-badge{
+    flex:0 0 auto; width:32px; height:20px; border-radius:10px;
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.4);
+    display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:#fff;
+  }
+  .pos-number-badge input.pos-input{
+    width:100%; height:100%; border:none; background:transparent; color:#fff; text-align:center;
+    font-size:.72rem; font-weight:700; padding:0; border-radius:10px; cursor:text;
+  }
+  .handled-toggle-wrap{ display:flex; align-items:center; gap:6px; flex:0 0 auto; }
+  .handled-switch{ position:relative; display:inline-block; width:32px; height:18px; flex:0 0 auto; }
+  .handled-switch input{ opacity:0; width:0; height:0; position:absolute; }
+  .handled-slider{
+    position:absolute; inset:0; background:#fff; border-radius:20px; cursor:pointer; transition:background .2s ease;
+    border:1px solid rgba(255,255,255,.4);
+  }
+  .handled-slider::before{
+    content:""; position:absolute; height:14px; width:14px; left:2px; top:50%;
+    transform:translateY(-50%);
+    background:#e03b3b; border-radius:50%; transition:transform .2s ease, background .2s ease;
+  }
+  .handled-checkbox:checked + .handled-slider::before{ transform:translateY(-50%) translateX(14px); background:#73dd5c; }
+  .handled-label{ display:inline-block; font-size:.7rem; color:#fff; white-space:nowrap; flex:0 0 auto; width:40px; text-align:right; }
+  .pos-number-badge input.pos-input:focus{ outline:2px solid var(--gold); }
+  .client-card .card-chevron{ font-size:.7rem; color:#fff; flex:0 0 auto; }
+  .client-card .card-details{ cursor:default; margin-top:8px; }
+  .client-card .cname-link{
+    color:#fff; text-decoration:underline; text-decoration-color:rgba(255,255,255,.6); cursor:pointer;
+    font-weight:600; font-size:.87rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  .client-card .cname-link:hover{ color:var(--gold); text-decoration-color:var(--gold); }
+
+  .order-modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:2000;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .order-modal{
+    background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:12px;
+    width:100%; max-width:640px; max-height:88vh; overflow-y:auto; color:#fff;
+    padding:0; box-shadow:0 10px 40px rgba(0,0,0,.5);
+  }
+  .order-modal-header{
+    display:flex; align-items:center; justify-content:space-between; gap:8px;
+    padding:14px 20px; border-bottom:1px solid rgba(255,255,255,.15); position:sticky; top:0;
+    background:#111e63; z-index:1;
+  }
+  .order-modal-header h3{ margin:0; font-size:1rem; }
+  .order-modal-close{
+    background:transparent; border:none; color:#fff; font-size:1.1rem; cursor:pointer; padding:2px 6px;
+  }
+  .order-modal-body{ padding:14px 20px; }
+  .order-cat{ margin-bottom:14px; }
+  .order-cat-title{
+    font-weight:700; font-size:.88rem; color:var(--gold); margin-bottom:6px; cursor:pointer;
+    display:flex; align-items:center; gap:6px; user-select:none;
+  }
+  .order-cat-title:hover{ color:#e0b84a; }
+  .order-cat-chevron{ font-size:.75rem; display:inline-block; width:12px; }
+  .order-cat-items{ padding-right:2px; }
+  .order-item-row{
+    display:grid; grid-template-columns:1fr auto 100px; align-items:center; gap:10px;
+    padding:6px 0; font-size:.85rem;
+  }
+  .order-item-check{
+    display:flex; align-items:center; gap:8px; cursor:pointer;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;
+  }
+  .order-item-check input{ width:auto; flex:0 0 auto; }
+  .order-item-qty-label{ color:rgba(255,255,255,.6); font-size:.78rem; white-space:nowrap; text-align:center; }
+  .order-item-qty{ width:100px; padding:5px 4px; font-size:.82rem; text-align:center; }
+  .no-order-row{
+    margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,.2);
+    font-size:.8rem; color:rgba(255,255,255,.75);
+  }
+  .no-order-row label{ display:flex; align-items:center; gap:8px; cursor:pointer; margin:0; }
+  .no-order-reason-wrap{ margin-top:8px; }
+  .no-order-reason-label{ font-size:.76rem; color:rgba(255,255,255,.6); margin:0 0 4px; display:block; }
+  .no-order-reason{ font-size:.82rem; }
+  .no-order-row input{ width:auto; flex:0 0 auto; }
+  .order-total-row{
+    margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,.2);
+    font-size:.88rem; text-align:center;
+  }
+  .order-total-row b{ color:#3bd332; }
+  .order-save-btn{
+    width:100%; margin-top:10px; padding:10px; border:none; border-radius:8px;
+    background:#1c3fd6; color:#fff; font-size:.9rem; cursor:pointer; font-weight:600;
+  }
+  .order-save-btn:hover{ background:#1533ad; }
+  .order-history{
+    padding:14px 20px; border-top:1px solid rgba(255,255,255,.15); background:rgba(0,0,0,.15);
+  }
+  .order-history-title{ font-weight:700; font-size:.85rem; margin-bottom:8px; }
+  .order-history-row{
+    display:flex; align-items:center; gap:8px; padding:8px; margin-bottom:6px;
+    background:rgba(255,255,255,.06); border-radius:8px;
+  }
+  .order-history-info{ flex:1 1 auto; min-width:0; }
+  .order-history-date{ font-size:.74rem; color:rgba(255,255,255,.6); }
+  .order-history-items{ font-size:.78rem; color:#fff; margin-top:2px; word-break:break-word; }
+  .order-history-total{ font-weight:700; color:#3bd332; font-size:.85rem; flex:0 0 auto; }
+  .order-history-actions{ display:flex; gap:4px; flex:0 0 auto; }
+  .order-history-actions button{
+    background:transparent; border:1px solid rgba(255,255,255,.3); color:#fff; border-radius:5px;
+    padding:3px 6px; font-size:.75rem; cursor:pointer;
+  }
+  .order-history-actions button:hover{ background:rgba(255,255,255,.15); }
+  .client-card .cbillname{ font-size:.7rem; color:rgba(255,255,255,.5); margin-top:1px; }
+  .client-card .caddr{ font-size:.78rem; color:rgba(255,255,255,.62); margin-top:2px; }
+  .client-card .cphone{ font-size:.78rem; color:#9fc3ff; margin-top:2px; }
+  .client-card .cnotes{
+    font-size:.75rem; color:rgba(255,255,255,.68); margin-top:4px; padding-top:4px;
+    border-top:1px dashed rgba(255,255,255,.18); white-space:pre-wrap; word-break:break-word;
+  }
+  .client-card .invoice-divider{
+    border-top:1px dashed rgba(255,255,255,.18); margin-top:8px;
+  }
+  .client-card .invoice-field{
+    display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px;
+  }
+  .client-card .invoice-field label{ font-size:.75rem; color:rgba(255,255,255,.6); margin:0; flex:0 0 auto; }
+  .client-card .invoice-field input{ width:90px; padding:5px 8px; font-size:.82rem; }
+  .client-card select.move-select, .client-card select.temp-folder-select{
+    width:100%; font-size:.72rem; padding:4px 6px; border:1px solid rgba(255,255,255,.22); border-radius:6px;
+    margin-top:4px; background:#fff; font-family:inherit; color:#021236; cursor:pointer;
+  }
+  .temp-folder-badge{
+    display:flex; align-items:center; justify-content:space-between; gap:6px; flex-wrap:wrap;
+    font-size:.7rem; color:#ffd479; background:rgba(255,183,0,.15); border:1px solid rgba(255,183,0,.4);
+    border-radius:6px; padding:5px 8px; margin-top:6px;
+  }
+  .remove-temp-btn{
+    background:transparent; border:1px solid rgba(255,255,255,.4); color:#fff; border-radius:5px;
+    padding:2px 6px; font-size:.68rem; cursor:pointer; flex:0 0 auto;
+  }
+  .remove-temp-btn:hover{ background:rgba(255,255,255,.15); }
+  .client-card .cactions{ display:flex; gap:6px; margin-top:6px; }
+  .client-card .cactions button{
+    font-size:.72rem; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); color:#fff; border-radius:6px;
+    padding:3px 8px; cursor:pointer;
+  }
+  .client-card .cactions button.move-up, .client-card .cactions button.move-down{
+    padding:3px 7px; font-size:.7rem; flex:0 0 auto;
+  }
+  .client-card .cactions button:disabled{ opacity:.3; cursor:default; }
+  .client-card .cactions button.del{ color:#e08b7d; }
+
+  .empty{
+    text-align:center; color:rgba(255,255,255,.55); font-size:.85rem; padding:26px 10px;
+  }
+
+  .map-wrap{ flex:1 1 auto; position:relative; min-height:0; padding:14px; background:transparent; }
+  #map{
+    position:absolute; inset:14px; border-radius:var(--radius); overflow:hidden;
+    border:none;
+  }
+  .leaflet-popup-content{ font-family:inherit; direction:rtl; }
+
+  footer.note{
+    flex:0 0 auto; background:var(--ink); color:var(--paper-2); font-size:.72rem;
+    padding:6px 20px; text-align:center; opacity:.85;
+  }
+  footer.note b{ color:var(--gold); }
+
+  @media (max-width:860px){
+    .main{ flex-direction:column; }
+    .sidebar{ width:100%; flex:0 0 auto; height:44vh; border-left:none; border-top:none; order:2; }
+    .map-wrap{ order:1; height:auto; flex:1 1 auto; }
+    .header-logo{ height:36px; }
+  }
+</style>
+</head>
+<body>
+<div id="bgImage"></div>
+<canvas id="starfield"></canvas>
+<div class="app">
+  <header>
+        <div class="actions">
+      <button class="ghost" id="refreshBtn" title="טען מחדש מהאחסון">↻ רענון</button>
+      <button class="ghost" id="fitAllBtn" title="הצג את כל הלקוחות במפה">⤢ הצג הכל</button>
+      <button class="ghost" id="animToggleBtn" title="עצירה/הפעלה של אנימציית הרקע (חוסך סוללה/ביצועים)">✨ רקע</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <div class="sidebar">
+      <div class="scroll">
+
+        <section class="panel" id="addClientPanel">
+          <h2 id="addClientHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px">
+            <span class="dot"></span> הוספת לקוח
+            <span id="addClientChevron" style="margin-right:auto;font-size:.8rem;transition:transform .15s ease">▾</span>
+          </h2>
+          <div id="addClientBody">
+          <label for="f-name">שם על גבי החשבונית</label>
+          <input type="text" id="f-name" placeholder="לדוגמה: דוד כהן / חברת ABC בע״מ">
+          <label for="f-business">שם העסק (מה שרשום על השלט / הכניסה) <span style="color:var(--gold)">*חובה</span></label>
+          <input type="text" id="f-business" placeholder="לדוגמה: מספרת שי, פיצה רומא...">
+          <label for="f-contact">שם איש הקשר</label>
+          <input type="text" id="f-contact" placeholder="לדוגמה: משה, מנהל המקום">
+          <div class="row2">
+            <div>
+              <label for="f-phone">טלפון</label>
+              <input type="tel" id="f-phone" placeholder="050-0000000">
+            </div>
+            <div>
+              <label for="f-price">מחיר ליחידה</label>
+              <input type="number" id="f-price" placeholder="₪0" step="0.01" min="0">
+            </div>
+          </div>
+          <label>כתובת</label>
+          <div class="addr-field-wrap">
+            <input type="text" id="f-city" placeholder="עיר" autocomplete="off">
+            <div class="row2" style="margin-top:8px">
+              <div style="flex:2"><input type="text" id="f-street" placeholder="רחוב" autocomplete="off"></div>
+              <div style="flex:1"><input type="text" id="f-housenum" placeholder="מספר" autocomplete="off" title="לתצוגה בלבד - לא משפיע על איתור המיקום במפה"></div>
+            </div>
+            <div class="suggestions" id="addrSuggestions"></div>
+          </div>
+          <div class="suggest-hint" id="suggestHint" style="display:none">נמצאו כמה כתובות מתאימות — בחרו את הנכונה מהרשימה או מהסמנים הצהובים במפה.</div>
+          <label for="f-folder">תיקייה (עיר / אזור)</label>
+          <select id="f-folder">
+            <option value="">— בלי תיקייה —</option>
+            <option value="__new__">+ תיקייה חדשה...</option>
+          </select>
+          <input type="text" id="f-folder-new" placeholder="שם התיקייה החדשה (למשל: ראשון לציון, צפון)" style="display:none; margin-top:6px">
+          <label for="f-notes">הערות</label>
+          <textarea id="f-notes" placeholder="הערות חופשיות..."></textarea>
+          <button class="primary" id="addBtn">+ הוסף לקוח</button>
+          <div class="error-msg" id="formError"></div>
+          </div>
+        </section>
+
+        <section class="panel" id="searchPanel">
+          <h2><span class="dot" style="background:var(--gold)"></span> חיפוש</h2>
+          <div class="search-box">
+            <input type="text" id="searchBox" placeholder="חפש לפי שם, כתובת או טלפון...">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5B6B6A" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <div id="searchResults" style="margin-top:8px"></div>
+        </section>
+
+        <section class="panel" id="foldersPanel">
+          <h2><span class="dot" style="background:var(--rust)"></span> תיקיות</h2>
+          <div class="row2">
+            <div><input type="text" id="newFolderInput" placeholder="שם תיקייה חדשה (למשל: צפון, ראשון לציון)"></div>
+            <div style="flex:0 0 auto"><input type="color" id="newFolderColor" class="folder-color-input" value="#A85C32" title="צבע לתיקייה"></div>
+            <div style="flex:0 0 auto"><button class="primary" id="addFolderBtn" style="margin-top:0;width:auto;padding:9px 14px">+ הוסף</button></div>
+          </div>
+          <div id="folderList" style="margin-top:10px"></div>
+          <div id="grandInvoiceSummary"></div>
+        </section>
+
+        <section class="panel" id="clustersPanel">
+          <h2><span class="dot" style="background:var(--gold)"></span> רגישות קיבוץ</h2>
+          <div class="slider-row">
+            <input type="range" id="thresholdSlider" min="0.1" max="40" step="0.1" value="12">
+            <div class="slider-val" id="thresholdVal">12 ק"מ</div>
+          </div>
+          <h2 style="margin-top:14px"><span class="dot" style="background:var(--plum)"></span> אזורים / אשכולות</h2>
+          <div id="clusterList"></div>
+        </section>
+
+      </div>
+    </div>
+
+    <div class="map-wrap">
+      <div id="map"></div>
+    </div>
+  </div>
+
+  <footer class="note">
+    הנתונים כאן נשמרים <b>בעננים</b> ומסונכרנים בין כל המכשירים/דפדפנים שנכנסים לקישור הזה עם המפתח הזה.
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  // animated starfield on the fixed background canvas - independent of the rest of the app
+  (function initStarfield(){
+    const canvas = document.getElementById('starfield');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let meteors = [];
+    const SPEED = 0.0022; // how fast stars approach - gentle drift, not a dizzying warp
+
+    // paused by default if the user asked for reduced motion, or previously chose to
+    // pause it themselves (remembered locally, per-browser - this is just a display
+    // preference, not business data, so plain localStorage is fine here)
+    let paused = localStorage.getItem('bgAnimPaused') === '1'
+      || window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let loopRunning = false;
+
+    function resize(){
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+
+    function makeStar(){
+      return {
+        x: Math.random() * 2 - 1,   // -1..1, centered
+        y: Math.random() * 2 - 1,
+        z: Math.random() * 0.9 + 0.1, // depth: 1 = far, ~0 = close
+        r: Math.random() * 0.8 + 0.6,
+        twinklePhase: Math.random() * Math.PI * 2,
+        twinkleSpeed: 0.5 + Math.random() * 1.2,
+        tint: Math.random() // 0..1, used to pick a slightly warm/cool white
+      };
+    }
+
+    function createStars(){
+      const count = Math.floor((canvas.width * canvas.height) / 4200);
+      stars = [];
+      for(let i=0;i<count;i++) stars.push(makeStar());
+    }
+
+    function spawnMeteor(){
+      const angle = Math.random() * Math.PI * 2;
+      const startDist = Math.max(canvas.width, canvas.height) * 0.15;
+      const cx = canvas.width / 2, cy = canvas.height / 2;
+      meteors.push({
+        x: cx + Math.cos(angle) * startDist * (Math.random()*0.4),
+        y: cy + Math.sin(angle) * startDist * (Math.random()*0.4),
+        vx: Math.cos(angle) * (7 + Math.random()*5),
+        vy: Math.sin(angle) * (7 + Math.random()*5),
+        life: 0,
+        maxLife: 40 + Math.random() * 20
+      });
+    }
+
+    resize();
+    createStars();
+    window.addEventListener('resize', ()=>{ resize(); createStars(); });
+
+    let meteorTimer = 0;
+
+    function frame(t){
+      if(paused){ loopRunning = false; return; } // stop scheduling entirely while paused
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cx = canvas.width / 2, cy = canvas.height / 2;
+      const scale = Math.max(canvas.width, canvas.height) * 0.55;
+
+      stars.forEach(s=>{
+        // previous projected position (for a short directional streak)
+        const prevK = 1 / s.z;
+        const prevPx = cx + s.x * prevK * scale * 0.35;
+        const prevPy = cy + s.y * prevK * scale * 0.35;
+
+        s.z -= SPEED;
+        if(s.z <= 0.02){ Object.assign(s, makeStar()); s.z = 1; }
+
+        const k = 1 / s.z;
+        const px = cx + s.x * k * scale * 0.35;
+        const py = cy + s.y * k * scale * 0.35;
+
+        if(px < -50 || px > canvas.width+50 || py < -50 || py > canvas.height+50){
+          Object.assign(s, makeStar());
+          return;
+        }
+
+        const depthAlpha = Math.min(1, (1 - s.z) * 1.3 + 0.1);
+        const twinkle = 0.55 + 0.45 * Math.sin(t * 0.001 * s.twinkleSpeed + s.twinklePhase);
+        const alpha = Math.max(0, depthAlpha * twinkle);
+        const size = Math.max(0.4, (1 - s.z) * s.r * 2.2);
+
+        const warmth = s.tint;
+        const color = `rgba(${220 + warmth*20},${225 + warmth*10},255,${alpha.toFixed(3)})`;
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = size;
+        ctx.beginPath();
+        ctx.moveTo(prevPx, prevPy);
+        ctx.lineTo(px, py);
+        ctx.stroke();
+      });
+
+      // meteors: occasional fast bright streaks shooting outward from near the center
+      meteorTimer++;
+      if(meteorTimer > 140 + Math.random()*160){
+        spawnMeteor();
+        meteorTimer = 0;
+      }
+      meteors = meteors.filter(m => m.life < m.maxLife);
+      meteors.forEach(m=>{
+        const prevX = m.x, prevY = m.y;
+        m.x += m.vx;
+        m.y += m.vy;
+        m.life++;
+        const fade = 1 - (m.life / m.maxLife);
+        ctx.strokeStyle = `rgba(255,250,230,${Math.max(0,fade).toFixed(3)})`;
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+        ctx.lineTo(prevX - m.vx*4, prevY - m.vy*4);
+        ctx.stroke();
+      });
+
+      requestAnimationFrame(frame);
+    }
+
+    function updateToggleButton(){
+      const btn = document.getElementById('animToggleBtn');
+      if(btn) btn.textContent = paused ? '✨ רקע (כבוי)' : '✨ רקע';
+    }
+    function startLoop(){
+      if(loopRunning) return;
+      loopRunning = true;
+      requestAnimationFrame(frame);
+    }
+    function applyPausedState(){
+      document.body.classList.toggle('bg-anim-paused', paused);
+      updateToggleButton();
+      if(!paused) startLoop();
+      else ctx.clearRect(0, 0, canvas.width, canvas.height); // clear immediately instead of waiting for a frame that won't come
+    }
+    applyPausedState();
+    if(!paused) startLoop();
+
+    const toggleBtn = document.getElementById('animToggleBtn');
+    if(toggleBtn){
+      toggleBtn.addEventListener('click', ()=>{
+        paused = !paused;
+        localStorage.setItem('bgAnimPaused', paused ? '1' : '0');
+        applyPausedState();
+      });
+    }
+  })();
+
+  const PALETTE = ["#1E7A73","#C79A2E","#A85C32","#6B4C7A","#3E5C76","#5C7A3A","#9C3B2E","#7A5C1E"];
+
+  // cross-device storage via Supabase - all clients/folders/etc. are saved as JSON
+  // blobs in a single key/value table (app_storage), so this works the same on any
+  // device/browser that opens this file, instead of being stuck to one browser.
+  const sb = supabase.createClient(
+    'https://zplrfidxpetgtenhenlk.supabase.co',
+    'sb_publishable_cR4JjUiuuxMGJ3Ke2FWBuQ_dcG25pvN'
+  );
+
+  const STORAGE_KEY = "clients_data";
+  const FOLDERS_KEY = "folders_list";
+  const CLUSTER_NAMES_KEY = "cluster_names_map";
+  const CLUSTER_ORDER_KEY = "cluster_order_map";
+
+  let clients = [];
+  let folders = []; // manually-created folder names, e.g. "ראשון לציון" or "צפון"
+  let clusterNames = {}; // custom overrides for automatic cluster names, keyed by dominant-city/geo key
+  let clusterOrder = {}; // manual up/down ordering of addresses within a cluster, keyed the same way
+  let threshold = 12;
+  let clusters = []; // array of {members:[clientIdx...], color, name}
+  let clusterOfClient = {}; // client.id -> cluster index
+
+  const map = L.map('map', { zoomControl:true }).setView([31.6, 34.9], 8);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    maxZoom:19
+  }).addTo(map);
+  const markersLayer = L.layerGroup().addTo(map);
+  const candidatesLayer = L.layerGroup().addTo(map);
+  const folderRouteLayer = L.layerGroup().addTo(map);
+  let selectedFolderForRoute = null; // which folder's route line is currently shown on the map
+  const roadRouteCache = {}; // folder name -> {fingerprint, coords:[[lat,lon]...], legs:[{km,min}...], totalKm, totalMin}
+
+  function routeFingerprint(orderedMembers){
+    return orderedMembers.map(c => c.id).join('|');
+  }
+
+  // asks OSRM's public routing service for the real road-following path (and real
+  // per-leg + total distance/duration) between an ordered list of stops. This is a
+  // free public demo server (no API key), so results are cached per folder and only
+  // re-fetched when the actual stop order/composition changes.
+  async function fetchRoadRoute(orderedMembers){
+    const coordsParam = orderedMembers.map(c => `${c.lon},${c.lat}`).join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coordsParam}?overview=full&geometries=geojson`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('OSRM request failed');
+    const data = await res.json();
+    if(data.code !== 'Ok' || !data.routes || !data.routes.length) throw new Error('No route found');
+    const route = data.routes[0];
+    const coords = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+    // use the real road distance (accurate), but compute time ourselves at a
+    // conservative city speed - OSRM's own duration is based on speed limits and
+    // doesn't account for real traffic/congestion.
+    const legs = route.legs.map(l => {
+      const km = l.distance/1000;
+      return { km, min: Math.max(1, Math.round((km / AVG_SPEED_KMH) * 60)) };
+    });
+    const totalKm = route.distance/1000;
+    return {
+      coords, legs,
+      totalKm,
+      totalMin: Math.max(1, Math.round((totalKm / AVG_SPEED_KMH) * 60))
+    };
+  }
+
+  async function ensureRoadRouteFor(cache, cacheKey, orderedMembers){
+    const fp = routeFingerprint(orderedMembers);
+    const cached = cache[cacheKey];
+    if(cached && cached.fingerprint === fp) return cached;
+    if(orderedMembers.length < 2) return null;
+    const result = await fetchRoadRoute(orderedMembers);
+    const entry = { fingerprint: fp, ...result };
+    cache[cacheKey] = entry;
+    return entry;
+  }
+
+  async function ensureRoadRoute(folder, orderedMembers){
+    return ensureRoadRouteFor(roadRouteCache, folder.name, orderedMembers);
+  }
+
+  const clusterRoadRouteCache = {}; // cluster.key -> {fingerprint, coords, legs, totalKm, totalMin} - same shape as roadRouteCache
+  async function ensureClusterRoadRoute(cl, orderedMembers){
+    return ensureRoadRouteFor(clusterRoadRouteCache, cl.key, orderedMembers);
+  }
+
+  function renderFolderRoute(){
+    folderRouteLayer.clearLayers();
+    if(!selectedFolderForRoute) return;
+    const folder = folders.find(f => f.name === selectedFolderForRoute);
+    const members = clients.filter(c => (c.folder||"") === selectedFolderForRoute && !c.skipRoute && !c.handled);
+    if(members.length < 2 || !folder) return;
+    const ordered = getOrderedFolderMembers(folder, members);
+    const lineColor = folder.color || null;
+    const fp = routeFingerprint(ordered);
+    const cached = roadRouteCache[folder.name];
+
+    if(cached && cached.fingerprint === fp){
+      // real road-following geometry already known for this exact stop order
+      drawGlowPolyline(cached.coords, folderRouteLayer, lineColor);
+      return;
+    }
+
+    // draw the straight-line fallback immediately so something shows without delay,
+    // then swap it for the real road path as soon as it arrives
+    const straightLatLngs = ordered.map(c => [c.lat, c.lon]);
+    drawGlowPolyline(straightLatLngs, folderRouteLayer, lineColor);
+
+    ensureRoadRoute(folder, ordered).then(()=>{
+      // only redraw if this folder's route is still the one being shown, and the
+      // stop order hasn't changed again while we were waiting on the network
+      if(selectedFolderForRoute === folder.name){
+        renderFolderRoute();
+        renderFolders();
+      }
+    }).catch(()=>{ /* keep the straight-line fallback silently if the road route can't be fetched */ });
+  }
+
+  let selectedGeo = null;      // geo the user explicitly picked from suggestions
+  let pendingClientData = null; // {name, phone, notes, folder, address} while resolving an ambiguous address
+  let suggestDebounceTimer = null;
+  const openFolderNames = new Set();  // which folders are currently expanded (persists across re-renders)
+  const openClusterNames = new Set(); // same, for the automatic proximity clusters
+  const openClientCards = new Set();  // which individual client cards are expanded (by client id)
+  const routeModeKeys = new Set();    // clusters currently showing an efficient travel-route order
+
+  function toggleFolderOpen(name){
+    if(openFolderNames.has(name)) openFolderNames.delete(name);
+    else openFolderNames.add(name);
+  }
+  function toggleClusterOpen(name){
+    if(openClusterNames.has(name)) openClusterNames.delete(name);
+    else openClusterNames.add(name);
+  }
+  function toggleRouteMode(key){
+    if(routeModeKeys.has(key)) routeModeKeys.delete(key);
+    else routeModeKeys.add(key);
+  }
+
+  const ROUTE_LINE_COLOR = '#3bd332';
+
+  // draws a thin, crisp line with a soft glow around it - a few stacked polylines of
+  // increasing width and decreasing opacity underneath a sharp 1px line on top
+  function drawGlowPolyline(latlngs, layerArr, color){
+    const lineColor = color || ROUTE_LINE_COLOR;
+    const glowSteps = [
+      { weight: 10, opacity: 0.10 },
+      { weight: 6,  opacity: 0.18 },
+      { weight: 3,  opacity: 0.35 },
+      { weight: 1,  opacity: 1 }
+    ];
+    glowSteps.forEach(step=>{
+      const line = L.polyline(latlngs, { color: lineColor, weight: step.weight, opacity: step.opacity });
+      line.addTo(layerArr);
+    });
+  }
+
+  function haversine(lat1,lon1,lat2,lon2){
+    const R=6371;
+    const dLat=(lat2-lat1)*Math.PI/180;
+    const dLon=(lon2-lon1)*Math.PI/180;
+    const a=Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+  }
+
+  // rough estimate only: straight-line ("as the crow flies") distance and an assumed
+  // average driving speed - not real driving directions/traffic, since that would need
+  // a routing service and API key we don't have here.
+  const AVG_SPEED_KMH = 20; // conservative urban speed, since the routing service doesn't account for traffic/congestion
+  const STOP_SERVICE_MINUTES = 30; // time spent handling the client at each stop, added on top of driving time
+
+  // formats a duration given in minutes as hours+minutes once it's an hour or more
+  // (e.g. 138 -> "2 שעות ו-18 דק'"), otherwise just as minutes.
+  function formatDuration(totalMinutes){
+    const mins = Math.round(totalMinutes);
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    if(h === 0) return `${m} דק׳`;
+    const hoursPart = h === 1 ? 'שעה' : `${h} שעות`;
+    return m === 0 ? hoursPart : `${hoursPart} ו-${m} דק׳`;
+  }
+  function estimateLeg(c1, c2){
+    const km = haversine(c1.lat, c1.lon, c2.lat, c2.lon);
+    const minutes = Math.max(1, Math.round((km / AVG_SPEED_KMH) * 60));
+    return { km, minutes };
+  }
+
+  function buildLegConnector(c1, c2, realLeg){
+    const km = realLeg ? realLeg.km : estimateLeg(c1, c2).km;
+    const minutes = realLeg ? realLeg.min : estimateLeg(c1, c2).minutes;
+    const el = document.createElement('div');
+    el.className = 'leg-connector';
+    const tooltip = realLeg
+      ? "מרחק אמיתי על פי הכביש (מקור: OSRM), זמן מחושב לפי 20 קמ״ש בגלל עומסים"
+      : `הערכה בקו אווירי ובמהירות ממוצעת של ${AVG_SPEED_KMH} קמ״ש - לא זמן נסיעה מדויק (בלי תנועה/כבישים בפועל)`;
+    el.innerHTML = `
+      <span class="leg-line"></span>
+      <span class="leg-info" title="${tooltip}">🚗 ${km.toFixed(1)} ק״מ · כ-${formatDuration(minutes)} נסיעה${realLeg ? '' : ' (הערכה)'}</span>
+      <span class="leg-line"></span>
+    `;
+    return el;
+  }
+
+  // orders a cluster's members into an efficient visiting route using a nearest-neighbor
+  // heuristic (starts from the northernmost address, then always jumps to the closest
+  // unvisited one). Not a perfect shortest-route solver, but gives a sensible, low-zigzag
+  // driving order without needing heavy computation.
+  function nearestNeighborOrder(memberIndices){
+    if(memberIndices.length <= 2) return memberIndices.slice();
+    const remaining = memberIndices.slice();
+    // start from the northernmost point (highest latitude)
+    let startPos = 0;
+    for(let i=1;i<remaining.length;i++){
+      if(clients[remaining[i]].lat > clients[remaining[startPos]].lat) startPos = i;
+    }
+    const order = [remaining.splice(startPos,1)[0]];
+    while(remaining.length){
+      const cur = clients[order[order.length-1]];
+      let bestIdx = 0, bestDist = Infinity;
+      for(let i=0;i<remaining.length;i++){
+        const cand = clients[remaining[i]];
+        const d = haversine(cur.lat, cur.lon, cand.lat, cand.lon);
+        if(d < bestDist){ bestDist = d; bestIdx = i; }
+      }
+      order.push(remaining.splice(bestIdx,1)[0]);
+    }
+    return order;
+  }
+
+  // shared helpers: read/write a single key's JSON blob in the app_storage table
+  async function sbGet(key){
+    const { data, error } = await sb.from('app_storage').select('value').eq('key', key).maybeSingle();
+    if(error) throw error;
+    return data ? data.value : null;
+  }
+  async function sbSet(key, value){
+    const { error } = await sb.from('app_storage').upsert({ key, value });
+    if(error) throw error;
+  }
+
+  async function loadData(){
+    try{
+      const raw = await sbGet(STORAGE_KEY);
+      clients = raw ? JSON.parse(raw) : [];
+    }catch(e){
+      clients = [];
+    }
+  }
+
+  async function saveData(){
+    try{
+      await sbSet(STORAGE_KEY, JSON.stringify(clients));
+    }catch(e){
+      console.error("שגיאת שמירה", e);
+    }
+  }
+
+  const HANDLED_DURATION_MS = 12 * 60 * 60 * 1000; // 12 hours
+
+  // reverts any client's "handled" flag once 12 hours have passed since it was set -
+  // returns true if anything changed (so the caller knows whether to save)
+  function expireHandledStatuses(){
+    let changed = false;
+    clients.forEach(c=>{
+      if(c.handled && c.handledAt && (Date.now() - c.handledAt) > HANDLED_DURATION_MS){
+        c.handled = false;
+        c.handledAt = null;
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
+  function localDateString(d){
+    const dt = d || new Date();
+    const y = dt.getFullYear();
+    const m = String(dt.getMonth()+1).padStart(2,'0');
+    const day = String(dt.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function colorForName(name){
+    let hash = 0;
+    for(let i=0;i<name.length;i++){ hash = (hash*31 + name.charCodeAt(i)) >>> 0; }
+    return PALETTE[hash % PALETTE.length];
+  }
+
+  async function loadFolders(){
+    try{
+      const raw = await sbGet(FOLDERS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      // migrate older versions that stored plain folder-name strings
+      folders = parsed.map(f => typeof f === 'string' ? { name: f, color: colorForName(f) } : f);
+    }catch(e){
+      folders = [];
+    }
+  }
+
+  async function saveFolders(){
+    try{
+      await sbSet(FOLDERS_KEY, JSON.stringify(folders));
+    }catch(e){
+      console.error("שגיאת שמירה", e);
+    }
+  }
+
+  async function loadClusterNames(){
+    try{
+      const raw = await sbGet(CLUSTER_NAMES_KEY);
+      clusterNames = raw ? JSON.parse(raw) : {};
+    }catch(e){
+      clusterNames = {};
+    }
+  }
+
+  async function saveClusterNames(){
+    try{
+      await sbSet(CLUSTER_NAMES_KEY, JSON.stringify(clusterNames));
+    }catch(e){
+      console.error("שגיאת שמירה", e);
+    }
+  }
+
+  async function loadClusterOrder(){
+    try{
+      const raw = await sbGet(CLUSTER_ORDER_KEY);
+      clusterOrder = raw ? JSON.parse(raw) : {};
+    }catch(e){
+      clusterOrder = {};
+    }
+  }
+
+  async function saveClusterOrder(){
+    try{
+      await sbSet(CLUSTER_ORDER_KEY, JSON.stringify(clusterOrder));
+    }catch(e){
+      console.error("שגיאת שמירה", e);
+    }
+  }
+
+  // returns member indices ordered by any saved manual order for this cluster (ids not yet
+  // in the saved order are appended at the end in their natural order)
+  // combines a saved manual order (if any) with a nearest-neighbor placement for any
+  // points not yet in that saved order - so new additions are automatically slotted in
+  // by shortest distance, while previously-arranged points keep the order you chose.
+  // points: [{id, lat, lon}, ...], savedIds: [id, ...] or null/empty for a fresh start.
+  function computeOrderedIds(points, savedIds){
+    const byId = {};
+    points.forEach(p => { byId[p.id] = p; });
+    const allIds = points.map(p => p.id);
+    const prefix = (savedIds || []).filter(id => allIds.includes(id));
+    let remaining = allIds.filter(id => !prefix.includes(id));
+    const order = prefix.slice();
+
+    if(order.length === 0 && remaining.length){
+      let startIdx = 0;
+      for(let i=1;i<remaining.length;i++){
+        if(byId[remaining[i]].lat > byId[remaining[startIdx]].lat) startIdx = i;
+      }
+      order.push(remaining.splice(startIdx,1)[0]);
+    }
+    while(remaining.length){
+      const cur = byId[order[order.length-1]];
+      let bestIdx = 0, bestDist = Infinity;
+      for(let i=0;i<remaining.length;i++){
+        const cand = byId[remaining[i]];
+        const d = haversine(cur.lat, cur.lon, cand.lat, cand.lon);
+        if(d < bestDist){ bestDist = d; bestIdx = i; }
+      }
+      order.push(remaining.splice(bestIdx,1)[0]);
+    }
+    return order;
+  }
+
+  // if every one of these members belongs to the same single (non-empty) folder,
+  // returns that folder - so the cluster can defer its ordering to it, keeping
+  // edits made from either the cluster view or the folder view in sync.
+  function dominantFolderFor(memberIndices){
+    const folderNames = new Set(memberIndices.map(i => clients[i].folder || ""));
+    if(folderNames.size !== 1) return null;
+    const onlyName = [...folderNames][0];
+    if(!onlyName) return null;
+    return folders.find(f => f.name === onlyName) || null;
+  }
+
+  function getOrderedClusterMembers(cl, memberIndices){
+    const folder = dominantFolderFor(memberIndices);
+    if(folder){
+      const memberClients = memberIndices.map(i => clients[i]);
+      const ordered = getOrderedFolderMembers(folder, memberClients);
+      return ordered.map(c => memberIndices.find(i => clients[i].id === c.id));
+    }
+    const points = memberIndices.map(i => ({ id: clients[i].id, lat: clients[i].lat, lon: clients[i].lon }));
+    const fullIds = computeOrderedIds(points, clusterOrder[cl.key]);
+    return fullIds.map(id => memberIndices.find(i => clients[i].id === id));
+  }
+
+  function moveClusterMember(cl, memberIndices, clientId, dir, skippedIndices){
+    const ordered = getOrderedClusterMembers(cl, memberIndices);
+    const idx = ordered.findIndex(i => clients[i].id === clientId);
+    const swapIdx = idx + dir;
+    if(idx < 0 || swapIdx < 0 || swapIdx >= ordered.length) return;
+    [ordered[idx], ordered[swapIdx]] = [ordered[swapIdx], ordered[idx]];
+    const folder = dominantFolderFor(memberIndices);
+    if(folder){
+      folder.order = ordered.map(i => clients[i].id).concat((skippedIndices||[]).map(i => clients[i].id));
+      saveFolders();
+    } else {
+      clusterOrder[cl.key] = ordered.map(i => clients[i].id);
+      saveClusterOrder();
+    }
+    renderAll();
+  }
+
+  function moveClusterMemberToPosition(cl, memberIndices, clientId, newPos, skippedIndices){
+    const ordered = getOrderedClusterMembers(cl, memberIndices);
+    const curIdx = ordered.findIndex(i => clients[i].id === clientId);
+    if(curIdx < 0) return;
+    const targetIdx = Math.min(Math.max(1, newPos), ordered.length) - 1;
+    if(targetIdx === curIdx) return;
+    const [item] = ordered.splice(curIdx, 1);
+    ordered.splice(targetIdx, 0, item);
+    const folder = dominantFolderFor(memberIndices);
+    if(folder){
+      folder.order = ordered.map(i => clients[i].id).concat((skippedIndices||[]).map(i => clients[i].id));
+      saveFolders();
+    } else {
+      clusterOrder[cl.key] = ordered.map(i => clients[i].id);
+      saveClusterOrder();
+    }
+    renderAll();
+  }
+
+  // same idea, but for a manually-created folder (order is stored directly on the folder object)
+  function getOrderedFolderMembers(folder, members){
+    const points = members.map(c => ({ id: c.id, lat: c.lat, lon: c.lon }));
+    const fullIds = computeOrderedIds(points, folder.order);
+    return fullIds.map(id => members.find(c => c.id === id));
+  }
+
+  function moveFolderMember(folder, members, clientId, dir, skippedMembers){
+    const ordered = getOrderedFolderMembers(folder, members);
+    const idx = ordered.findIndex(c => c.id === clientId);
+    const swapIdx = idx + dir;
+    if(idx < 0 || swapIdx < 0 || swapIdx >= ordered.length) return;
+    [ordered[idx], ordered[swapIdx]] = [ordered[swapIdx], ordered[idx]];
+    folder.order = ordered.map(c => c.id).concat((skippedMembers||[]).map(c => c.id));
+    saveFolders();
+    renderAll();
+  }
+
+  function moveFolderMemberToPosition(folder, members, clientId, newPos, skippedMembers){
+    const ordered = getOrderedFolderMembers(folder, members);
+    const curIdx = ordered.findIndex(c => c.id === clientId);
+    if(curIdx < 0) return;
+    const targetIdx = Math.min(Math.max(1, newPos), ordered.length) - 1;
+    if(targetIdx === curIdx) return;
+    const [item] = ordered.splice(curIdx, 1);
+    ordered.splice(targetIdx, 0, item);
+    folder.order = ordered.map(c => c.id).concat((skippedMembers||[]).map(c => c.id));
+    saveFolders();
+    renderAll();
+  }
+
+  // returns the card element that the dragged card should be placed BEFORE,
+  // based on the mouse's vertical position within the container (null = place last)
+  function getDragAfterElement(container, y, selector){
+    const els = [...container.querySelectorAll((selector || '.client-card') + ':not(.dragging)')];
+    return els.reduce((closest, child)=>{
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if(offset < 0 && offset > closest.offset) return { offset, element: child };
+      return closest;
+    }, { offset: -Infinity }).element;
+  }
+
+  // lets the user drag a whole folder group (.cluster-group) up/down within the
+  // folder list; on drop, reorders the `folders` array to match the new DOM order
+  function wireFolderDragReorder(listEl){
+    listEl.addEventListener('dragover', (e)=>{
+      const draggingEl = listEl.querySelector('.cluster-group.dragging');
+      if(!draggingEl) return;
+      e.preventDefault();
+      const afterEl = getDragAfterElement(listEl, e.clientY, '.cluster-group');
+      if(afterEl == null) listEl.appendChild(draggingEl);
+      else listEl.insertBefore(draggingEl, afterEl);
+    });
+    listEl.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      const orderedNames = [...listEl.querySelectorAll('.cluster-group[data-folder-name]')].map(el => el.dataset.folderName);
+      folders.sort((a,b) => orderedNames.indexOf(a.name) - orderedNames.indexOf(b.name));
+      saveFolders();
+      renderFolders();
+    });
+  }
+
+  // lets the user drag a .client-card up/down within `bodyEl` with the mouse;
+  // on drop, reads the resulting DOM order and hands the list of client IDs to persistFn
+  function wireDragReorder(bodyEl, persistFn){
+    bodyEl.addEventListener('dragover', (e)=>{
+      const draggingEl = bodyEl.querySelector('.client-card.dragging');
+      if(!draggingEl) return;
+      e.preventDefault();
+      const afterEl = getDragAfterElement(bodyEl, e.clientY);
+      if(afterEl == null) bodyEl.appendChild(draggingEl);
+      else bodyEl.insertBefore(draggingEl, afterEl);
+    });
+    bodyEl.addEventListener('drop', (e)=>{
+      e.preventDefault();
+      const ids = [...bodyEl.querySelectorAll('.client-card')].map(el => el.dataset.clientId);
+      persistFn(ids);
+    });
+  }
+
+  function renameCluster(key, newName){
+    const clean = (newName || "").trim();
+    if(clean) clusterNames[key] = clean;
+    else delete clusterNames[key]; // empty name = revert to the automatic name
+    saveClusterNames();
+    renderAll();
+  }
+
+  function ensureFolder(name, color){
+    const clean = (name || "").trim();
+    if(!clean) return "";
+    let existing = folders.find(f=>f.name === clean);
+    if(!existing){
+      folders.push({ name: clean, color: color || colorForName(clean) });
+      saveFolders();
+    } else if(color && existing.color !== color){
+      existing.color = color;
+      saveFolders();
+    }
+    return clean;
+  }
+
+  // renames a folder, and updates every place that references it by name: the
+  // clients assigned to it, the road-route cache, and the currently-open route view.
+  function renameFolder(folder, newName){
+    const clean = (newName || "").trim();
+    if(!clean || clean === folder.name) return;
+    if(folders.some(f => f !== folder && f.name === clean)){
+      alert(`כבר קיימת תיקייה בשם "${clean}" - בחרו שם אחר.`);
+      return;
+    }
+    const oldName = folder.name;
+    clients.forEach(c=>{
+      if((c.folder||"") === oldName) c.folder = clean;
+    });
+    if(roadRouteCache[oldName]){
+      roadRouteCache[clean] = roadRouteCache[oldName];
+      delete roadRouteCache[oldName];
+    }
+    if(selectedFolderForRoute === oldName) selectedFolderForRoute = clean;
+    if(openFolderNames.has(oldName)){ openFolderNames.delete(oldName); openFolderNames.add(clean); }
+    folder.name = clean;
+    saveFolders();
+    saveData();
+    renderAll();
+  }
+
+  function populateFolderSelect(){
+    const sel = document.getElementById('f-folder');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— בלי תיקייה —</option>' +
+      folders.map(f=>`<option value="${escapeHtml(f.name)}">${escapeHtml(f.name)}</option>`).join('') +
+      '<option value="__new__">+ תיקייה חדשה...</option>';
+    // keep the current selection if it still exists as an option
+    if([...sel.options].some(o=>o.value === current)) sel.value = current;
+  }
+
+  // Nominatim's public server only tolerates roughly 1 request/second - this queue
+  // guarantees a safe gap between calls no matter how fast the user types or clicks,
+  // so the app never gets silently rate-limited/blocked.
+  let lastRequestAt = 0;
+  let requestQueue = Promise.resolve();
+  const MIN_GAP_MS = 1100;
+  function scheduleRequest(fn){
+    const runNext = requestQueue.then(async ()=>{
+      const wait = Math.max(0, MIN_GAP_MS - (Date.now() - lastRequestAt));
+      if(wait > 0) await new Promise(r=>setTimeout(r, wait));
+      lastRequestAt = Date.now();
+      return fn();
+    });
+    // keep the queue alive even if this particular call throws
+    requestQueue = runNext.catch(()=>{});
+    return runNext;
+  }
+
+  function toGeoItem(item){
+    const addr = item.address || {};
+    const city = addr.city || addr.town || addr.village || addr.municipality || addr.county
+              || addr.hamlet || addr.suburb || addr.city_district || addr.region || addr.state || "";
+    const road = addr.road || addr.pedestrian || addr.residential || addr.living_street
+              || addr.unclassified || addr.footway || "";
+    const house = addr.house_number || "";
+    let label = [ [road, house].filter(Boolean).join(" "), city ].filter(Boolean).join(", ");
+    if(!label) label = item.display_name;
+    return { lat: parseFloat(item.lat), lon: parseFloat(item.lon), city, road, house, display_name: item.display_name, label };
+  }
+
+  async function nominatimSearch(params){
+    return scheduleRequest(async ()=>{
+      const qs = new URLSearchParams(params);
+      const url = "https://nominatim.openstreetmap.org/search?" + qs.toString();
+      const res = await fetch(url, { headers: { "Accept-Language":"he" } });
+      if(!res.ok) throw new Error("geocode failed (" + res.status + ")");
+      return res.json();
+    });
+  }
+
+  async function geocodeMulti(address, limit){
+    const raw = await nominatimSearch({ format:'json', addressdetails:'1', countrycodes:'il', limit:String(limit), q: address });
+    return raw.map(toGeoItem);
+  }
+
+  // same street/road can appear many times (once per building) - keep only one entry per
+  // exact road+house-number combination, so a specific address a user searched for isn't
+  // silently replaced by a different building on the same street.
+  function dedupeStreets(results){
+    const seen = new Set();
+    const out = [];
+    for(const r of results){
+      const key = (r.road || r.label).trim() + "|" + (r.house || "") + "|" + r.city;
+      if(!seen.has(key)){ seen.add(key); out.push(r); }
+    }
+    return out;
+  }
+
+  // filter out results whose actual city doesn't match what the user typed, so a
+  // street from a neighboring city doesn't slip in just because the text was similar.
+  function normalizeCityText(s){
+    return (s || "").replace(/["'׳״\-]/g, "").replace(/\s+/g, "").toLowerCase();
+  }
+  function filterByCity(results, cityParam){
+    const target = normalizeCityText(cityParam);
+    if(!target) return results;
+    return results.filter(r=>{
+      const rc = normalizeCityText(r.city);
+      return rc && (rc.includes(target) || target.includes(rc));
+    });
+  }
+
+  // resolves street/number/city fields into candidates. Combines street+city into one
+  // natural-language query (the way a person would search it) - this is a single Nominatim
+  // request per lookup, kept simple and fast so we stay well within its usage limits.
+  async function geocodeFields(streetParam, cityParam, displayLimit){
+    const rawLimit = 30;
+    if(cityParam){
+      const queryText = (streetParam ? streetParam + ", " : "") + cityParam + ", ישראל";
+      const raw = await geocodeMulti(queryText, rawLimit);
+      const filtered = filterByCity(dedupeStreets(raw), cityParam);
+      return filtered.slice(0, displayLimit);
+    }
+    if(streetParam){
+      const results = await geocodeMulti(streetParam + ", ישראל", rawLimit);
+      return dedupeStreets(results).slice(0, displayLimit);
+    }
+    return [];
+  }
+
+  function computeClusters(){
+    const pts = clients.map((c,i)=>({i, lat:c.lat, lon:c.lon}));
+    const visited = new Array(pts.length).fill(false);
+    const groups = [];
+    for(let i=0;i<pts.length;i++){
+      if(visited[i]) continue;
+      const stack=[i]; visited[i]=true; const members=[i];
+      while(stack.length){
+        const cur = stack.pop();
+        for(let j=0;j<pts.length;j++){
+          if(!visited[j] && haversine(pts[cur].lat,pts[cur].lon,pts[j].lat,pts[j].lon) <= threshold){
+            visited[j]=true; stack.push(j); members.push(j);
+          }
+        }
+      }
+      groups.push(members);
+    }
+    // sort clusters by size desc, then build names/colors
+    groups.sort((a,b)=>b.length-a.length);
+    clusters = groups.map((members, idx)=>{
+      const cityCounts = {};
+      members.forEach(m=>{
+        const c = clients[m].city || "";
+        if(c) cityCounts[c] = (cityCounts[c]||0)+1;
+      });
+      let dominantCity = "";
+      let best = 0;
+      Object.entries(cityCounts).forEach(([c,count])=>{
+        if(count>best){ best=count; dominantCity = c; }
+      });
+      const defaultName = dominantCity ? (members.length>1 ? ("אזור " + dominantCity) : dominantCity) : ("אזור " + (idx+1));
+      // the custom-name key is the exact set of client IDs in this cluster (order-independent).
+      // this means a rename sticks to precisely the addresses you renamed - if the cluster later
+      // splits, the new key for each half differs, so your custom name stays only on the half
+      // that still has that exact membership, and never jumps onto the other half.
+      const key = members.map(m=>clients[m].id).slice().sort().join(",");
+      const name = clusterNames[key] || defaultName;
+      return { members, color: PALETTE[idx % PALETTE.length], name, key, defaultName };
+    });
+    clusterOfClient = {};
+    clusters.forEach((cl, idx)=>{
+      cl.members.forEach(m=>{ clusterOfClient[clients[m].id] = idx; });
+    });
+
+    // drop custom names whose exact membership no longer matches any current cluster
+    // (e.g. after a split) - keeps storage tidy and avoids reviving stale overrides
+    const validKeys = new Set(clusters.map(cl=>cl.key));
+    let prunedAny = false;
+    Object.keys(clusterNames).forEach(k=>{
+      if(!validKeys.has(k)){ delete clusterNames[k]; prunedAny = true; }
+    });
+    if(prunedAny) saveClusterNames();
+
+    let prunedOrderAny = false;
+    Object.keys(clusterOrder).forEach(k=>{
+      if(!validKeys.has(k)){ delete clusterOrder[k]; prunedOrderAny = true; }
+    });
+    if(prunedOrderAny) saveClusterOrder();
+  }
+
+  function pinIcon(color, label){
+    const svg = `<svg width="30" height="40" viewBox="0 0 30 40" xmlns="http://www.w3.org/2000/svg">
+      <path d="M15 0C6.72 0 0 6.72 0 15c0 11.25 15 25 15 25s15-13.75 15-25C30 6.72 23.28 0 15 0z" fill="${color}" stroke="#ffffff" stroke-width="1.5"/>
+      <circle cx="15" cy="15" r="7.5" fill="#ffffff"/>
+      <text x="15" y="19.2" text-anchor="middle" font-size="10" font-weight="700" font-family="Arial, sans-serif" fill="${color}">${label}</text>
+    </svg>`;
+    return L.divIcon({
+      html: svg, className: '', iconSize:[30,40], iconAnchor:[15,40], popupAnchor:[0,-34]
+    });
+  }
+
+  function renderMap(){
+    markersLayer.clearLayers();
+    const bounds = [];
+
+    // folder order/position always applies to a pin (if the client has a folder),
+    // regardless of whether that folder's 🧭 is currently toggled on - this keeps the
+    // map consistent with whatever order you've set up in the folder, at all times.
+    const folderPositionByClientId = {};
+    folders.forEach(folder=>{
+      const folderMembers = clients.filter(c => (c.folder||"") === folder.name && !c.skipRoute && !c.handled);
+      if(!folderMembers.length) return;
+      const ordered = getOrderedFolderMembers(folder, folderMembers);
+      ordered.forEach((c, idx)=>{
+        folderPositionByClientId[c.id] = { position: idx+1, color: folder.color };
+      });
+    });
+
+    clusters.forEach((cl, cIdx)=>{
+      const inRouteMode = routeModeKeys.has(cl.key);
+      const orderedMembers = getOrderedClusterMembers(cl, cl.members);
+      const routeLatLngs = [];
+      const routeMemberObjects = [];
+      const routeFolderColors = [];
+      let visiblePosIdx = 0;
+      orderedMembers.forEach((m)=>{
+        const c = clients[m];
+        const assignedFolder = c.folder ? folders.find(f => f.name === c.folder) : null;
+        if(assignedFolder && assignedFolder.mapVisible === false) return; // whole folder hidden from the map for now
+        if(c.handled) return; // marked handled - off the map for 12 hours, then reverts automatically
+        bounds.push([c.lat, c.lon]);
+        const folderInfo = folderPositionByClientId[c.id];
+        let label, pinColor;
+        if(c.skipRoute){
+          label = '⏸';
+          pinColor = '#8a8a8a';
+        } else {
+          label = (!inRouteMode && folderInfo) ? folderInfo.position : visiblePosIdx+1;
+          visiblePosIdx++;
+          pinColor = assignedFolder ? assignedFolder.color : cl.color;
+        }
+        const marker = L.marker([c.lat, c.lon], { icon: pinIcon(pinColor, label) });
+        marker.__clientId = c.id;
+        marker.bindPopup(
+          `<div style="min-width:180px">
+            <div style="font-weight:700;margin-bottom:2px">${c.business ? escapeHtml(c.business) : escapeHtml(c.name)}</div>
+            ${c.name ? `<div style="font-size:.72rem;color:#8a8f93;margin-bottom:4px">שם לחשבונית: ${escapeHtml(c.name)}</div>` : ""}
+            ${c.contact ? `<div style="font-size:.72rem;color:#8a8f93;margin-bottom:4px">איש קשר: ${escapeHtml(c.contact)}</div>` : ""}
+            <div style="font-size:.8rem;color:#5B6B6A">${escapeHtml(c.address)}</div>
+            ${c.phone ? `<div style="font-size:.8rem;color:#3E5C76;margin-top:2px">${escapeHtml(c.phone)}</div>` : ""}
+            ${c.notes ? `<div style="font-size:.78rem;margin-top:4px">${escapeHtml(c.notes)}</div>` : ""}
+            <div style="margin-top:8px;display:flex;gap:6px">
+              <button onclick="window.__deleteClient('${c.id}')" style="font-size:.72rem;border:1px solid #ddd;border-radius:6px;padding:3px 8px;cursor:pointer;color:#9C3B2E;background:#fff">מחק</button>
+            </div>
+          </div>`
+        );
+        marker.addTo(markersLayer);
+        if(inRouteMode && !c.skipRoute && !c.handled){
+          routeLatLngs.push([c.lat, c.lon]);
+          routeMemberObjects.push(c);
+          routeFolderColors.push(assignedFolder ? assignedFolder.color : null);
+        }
+      });
+      if(inRouteMode && routeLatLngs.length > 1){
+        // if every address on this route belongs to the same folder, use that folder's
+        // color for the line too - otherwise (mixed/no folders) keep the default green
+        const uniqueFolderColors = new Set(routeFolderColors);
+        const routeColor = (uniqueFolderColors.size === 1 && !uniqueFolderColors.has(null))
+          ? routeFolderColors[0]
+          : null;
+
+        const fp = routeFingerprint(routeMemberObjects);
+        const cachedRoad = clusterRoadRouteCache[cl.key];
+        if(cachedRoad && cachedRoad.fingerprint === fp){
+          // real road-following geometry already known for this exact stop order
+          drawGlowPolyline(cachedRoad.coords, markersLayer, routeColor);
+        } else {
+          // draw the straight-line fallback immediately, then swap it for the real
+          // road path as soon as it arrives
+          drawGlowPolyline(routeLatLngs, markersLayer, routeColor);
+          ensureClusterRoadRoute(cl, routeMemberObjects).then(()=>{
+            if(routeModeKeys.has(cl.key)){
+              renderMap();
+              renderSidebar();
+            }
+          }).catch(()=>{ /* keep the straight-line fallback silently if the road route can't be fetched */ });
+        }
+      }
+    });
+
+    return bounds;
+  }
+
+  function escapeHtml(s){
+    return (s||"").replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // frames the map on a set of [lat, lon] points - centers+zooms for a single point,
+  // or fits the bounding box (with pixel padding) for multiple points.
+  function fitOrCenter(points, zoomIfSingle, padding){
+    if(!points || !points.length) return;
+    if(points.length === 1){
+      map.setView(points[0], zoomIfSingle || 14);
+      return;
+    }
+    map.fitBounds(points, { padding: [padding == null ? 40 : padding, padding == null ? 40 : padding] });
+  }
+
+  function matchesSearch(c, q){
+    if(!q) return true;
+    return (c.business||"").toLowerCase().includes(q) ||
+           (c.name||"").toLowerCase().includes(q) ||
+           (c.contact||"").toLowerCase().includes(q) ||
+           (c.address||"").toLowerCase().includes(q) ||
+           (c.phone||"").toLowerCase().includes(q);
+  }
+
+  let editingClientId = null; // which client (if any) is currently shown in inline-edit mode
+
+  const PRODUCT_CATALOG = [
+    { title: "סמאש ג׳רקי", items: ["סמאש קלאסי","סמאש ים תיכוני","סמאש מעושן","סמאש ברבקיו","סמאש פיקנטי","סמאש מקורמל"] },
+    { title: "בילטונג", items: ["בילטונג קלאסי","בילטונג ים תיכוני","בילטונג מעושן","בילטונג ברבקיו","בילטונג פיקנטי","בילטונג מקורמל","בילטונג פיקניה"] },
+    { title: "ביף ג׳רקי", items: ["ביף ג׳רקי קלאסי","ביף ג׳רקי ים תיכוני","ביף ג׳רקי מעושן","ביף ג׳רקי ברבקיו","ביף ג׳רקי פיקנטי","ביף ג׳רקי מקורמל"] }
+  ];
+
+  let orderModalEditingId = null; // which past order (if any) is being edited right now
+
+  function closeOrderModal(){
+    const overlay = document.getElementById('orderModalOverlay');
+    if(overlay) overlay.remove();
+    orderModalEditingId = null;
+  }
+
+  function openOrderModal(c){
+    orderModalEditingId = null;
+    closeOrderModal();
+    const unitPrice = parseFloat(c.price) || 0;
+
+    const overlay = document.createElement('div');
+    overlay.id = 'orderModalOverlay';
+    overlay.className = 'order-modal-overlay';
+    overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeOrderModal(); });
+
+    const modal = document.createElement('div');
+    modal.className = 'order-modal';
+    overlay.appendChild(modal);
+
+    function itemKey(name){ return name.replace(/[^א-תa-zA-Z0-9]/g,'_'); }
+
+    function renderForm(prefillItems, prefillNoOrder, prefillReason){
+      const prefillMap = {};
+      (prefillItems || []).forEach(it => { prefillMap[it.name] = it.qty; });
+
+      modal.innerHTML = `
+        <div class="order-modal-header">
+          <h3>${c.business ? escapeHtml(c.business) : escapeHtml(c.name)} — הזמנה</h3>
+          <button class="order-modal-close" title="סגור">✕</button>
+        </div>
+        <div class="order-modal-body">
+          ${PRODUCT_CATALOG.map(cat => {
+            const hasPrefill = cat.items.some(name => prefillMap[name]);
+            return `
+            <div class="order-cat">
+              <div class="order-cat-title" data-open="${hasPrefill ? '1' : '0'}">
+                <span class="order-cat-chevron">${hasPrefill ? '▾' : '▸'}</span> ${escapeHtml(cat.title)}
+              </div>
+              <div class="order-cat-items" style="display:${hasPrefill ? 'block' : 'none'}">
+                ${cat.items.map(name => {
+                  const key = itemKey(name);
+                  const qty = prefillMap[name] || '';
+                  return `
+                    <div class="order-item-row">
+                      <label class="order-item-check">
+                        <input type="checkbox" data-item="${escapeHtml(name)}" class="order-item-checkbox" id="oi_${key}" ${qty ? 'checked' : ''}>
+                        ${escapeHtml(name)}
+                      </label>
+                      <span class="order-item-qty-label">כמות:</span>
+                      <input type="number" min="0" step="1" class="order-item-qty" data-item="${escapeHtml(name)}" value="${qty}">
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;}).join('')}
+          <div class="no-order-row">
+            <label>
+              <input type="checkbox" class="no-order-checkbox" ${prefillNoOrder ? 'checked' : ''}>
+              לא בוצעה הזמנה (ביקור בלי הזמנה - יישמר סכום 0 לתאריך הזה)
+            </label>
+            <div class="no-order-reason-wrap" style="display:${prefillNoOrder ? 'block' : 'none'}">
+              <label class="no-order-reason-label">מה הסיבה שלא בוצעה הזמנה?</label>
+              <input type="text" class="no-order-reason" placeholder="למשל: הלקוח לא היה זמין, אין מלאי אצל הלקוח..." value="${escapeHtml(prefillReason||'')}">
+            </div>
+          </div>
+          <div class="order-total-row">
+            סה״כ (לפי ₪${unitPrice.toFixed(2)} ליחידה): <b class="order-total-amount">₪0.00</b>
+          </div>
+          <button class="order-save-btn">💾 שמור הזמנה${orderModalEditingId ? ' (עדכון)' : ''}</button>
+        </div>
+        <div class="order-history">
+          <div class="order-history-title">היסטוריית הזמנות</div>
+          <div class="order-history-list"></div>
+        </div>
+      `;
+
+      modal.querySelector('.order-modal-close').addEventListener('click', closeOrderModal);
+
+      modal.querySelectorAll('.order-cat-title').forEach(titleEl=>{
+        titleEl.addEventListener('click', ()=>{
+          const itemsEl = titleEl.nextElementSibling;
+          const chevron = titleEl.querySelector('.order-cat-chevron');
+          const isOpen = itemsEl.style.display !== 'none';
+          itemsEl.style.display = isOpen ? 'none' : 'block';
+          chevron.textContent = isOpen ? '▸' : '▾';
+        });
+      });
+
+      const noOrderCheckbox = modal.querySelector('.no-order-checkbox');
+      const noOrderReasonWrap = modal.querySelector('.no-order-reason-wrap');
+      const catInputs = modal.querySelectorAll('.order-cat input');
+      if(prefillNoOrder) catInputs.forEach(el=>{ el.disabled = true; });
+      noOrderCheckbox.addEventListener('change', ()=>{
+        catInputs.forEach(el=>{ el.disabled = noOrderCheckbox.checked; });
+        noOrderReasonWrap.style.display = noOrderCheckbox.checked ? 'block' : 'none';
+        recalcTotal();
+      });
+
+      function recalcTotal(){
+        if(noOrderCheckbox.checked){
+          modal.querySelector('.order-total-amount').textContent = `₪0.00`;
+          return;
+        }
+        let total = 0;
+        modal.querySelectorAll('.order-item-checkbox').forEach(cb=>{
+          if(cb.checked){
+            const qtyInput = modal.querySelector(`.order-item-qty[data-item="${CSS.escape(cb.dataset.item)}"]`);
+            const qty = parseFloat(qtyInput.value) || 0;
+            total += qty * unitPrice;
+          }
+        });
+        modal.querySelector('.order-total-amount').textContent = `₪${total.toFixed(2)}`;
+      }
+      modal.querySelectorAll('.order-item-checkbox, .order-item-qty').forEach(el=>{
+        el.addEventListener('input', recalcTotal);
+        el.addEventListener('change', recalcTotal);
+      });
+      recalcTotal();
+
+      modal.querySelector('.order-save-btn').addEventListener('click', ()=>{
+        const noOrder = noOrderCheckbox.checked;
+        let items = [];
+        let noOrderReason = "";
+        if(!noOrder){
+          modal.querySelectorAll('.order-item-checkbox').forEach(cb=>{
+            if(cb.checked){
+              const qtyInput = modal.querySelector(`.order-item-qty[data-item="${CSS.escape(cb.dataset.item)}"]`);
+              const qty = parseFloat(qtyInput.value) || 0;
+              if(qty > 0) items.push({ name: cb.dataset.item, qty });
+            }
+          });
+          if(items.length === 0){
+            alert('יש לבחור לפחות מוצר אחד עם כמות גדולה מ-0, או לסמן "לא בוצעה הזמנה".');
+            return;
+          }
+        } else {
+          noOrderReason = modal.querySelector('.no-order-reason').value.trim();
+          if(!noOrderReason){
+            alert('יש לרשום את הסיבה שלא בוצעה הזמנה.');
+            return;
+          }
+        }
+        const total = noOrder ? 0 : items.reduce((sum,it)=> sum + it.qty * unitPrice, 0);
+        c.orders = c.orders || [];
+        if(orderModalEditingId){
+          const existing = c.orders.find(o => o.id === orderModalEditingId);
+          if(existing){
+            existing.items = items;
+            existing.total = total;
+            existing.date = localDateString();
+            existing.noOrder = noOrder;
+            existing.noOrderReason = noOrderReason;
+          }
+        } else {
+          c.orders.push({
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+            date: localDateString(),
+            items, total, noOrder, noOrderReason
+          });
+        }
+        // the order's total becomes this client's "last invoice amount" too, dated today
+        c.lastInvoice = total.toFixed(2);
+        c.lastInvoiceDate = localDateString();
+        saveData();
+        orderModalEditingId = null;
+        renderForm(null);
+        renderHistory();
+        renderAll();
+      });
+
+      renderHistory();
+    }
+
+    function renderHistory(){
+      const listEl = modal.querySelector('.order-history-list');
+      const orders = (c.orders || []).slice().sort((a,b)=> b.date.localeCompare(a.date));
+      if(orders.length === 0){
+        listEl.innerHTML = `<div class="empty" style="padding:6px 2px">אין עדיין הזמנות שמורות ללקוח הזה.</div>`;
+        return;
+      }
+      listEl.innerHTML = orders.map(o => `
+        <div class="order-history-row" data-order-id="${o.id}">
+          <div class="order-history-info">
+            <div class="order-history-date">${o.date}</div>
+            <div class="order-history-items">${o.noOrder ? `<i>לא בוצעה הזמנה${o.noOrderReason ? ` - ${escapeHtml(o.noOrderReason)}` : ''}</i>` : o.items.map(it=>`${escapeHtml(it.name)} ×${it.qty}`).join(', ')}</div>
+          </div>
+          <div class="order-history-total">₪${o.total.toFixed(2)}</div>
+          <div class="order-history-actions">
+            <button class="order-edit-btn" data-order-id="${o.id}" title="עריכה">✎</button>
+            <button class="order-del-btn" data-order-id="${o.id}" title="מחיקה">🗑</button>
+          </div>
+        </div>
+      `).join('');
+
+      listEl.querySelectorAll('.order-edit-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          const order = (c.orders||[]).find(o => o.id === btn.dataset.orderId);
+          if(!order) return;
+          orderModalEditingId = order.id;
+          renderForm(order.items, order.noOrder, order.noOrderReason);
+        });
+      });
+      listEl.querySelectorAll('.order-del-btn').forEach(btn=>{
+        btn.addEventListener('click', ()=>{
+          if(!confirm('למחוק את ההזמנה הזו? לא ניתן לשחזר.')) return;
+          c.orders = (c.orders||[]).filter(o => o.id !== btn.dataset.orderId);
+          saveData();
+          renderHistory();
+        });
+      });
+    }
+
+    renderForm(null);
+    document.body.appendChild(overlay);
+  }
+
+
+  // splits a stored address label like "הרצל 12, תל אביב" back into a street+number
+  // part and a city part, so the edit form can be pre-filled with them separately.
+  function splitAddressForEdit(c){
+    const addr = c.address || '';
+    const idx = addr.lastIndexOf(',');
+    let streetParam = idx >= 0 ? addr.slice(0, idx).trim() : addr.trim();
+    const cityFromAddr = idx >= 0 ? addr.slice(idx+1).trim() : '';
+    // if we know the house number separately, strip it back out of the street text so
+    // editing shows just the street name again (matching how adding a new address works)
+    if(c.houseNumber && streetParam.endsWith(c.houseNumber)){
+      streetParam = streetParam.slice(0, streetParam.length - c.houseNumber.length).trim();
+    }
+    return { streetParam, city: c.city || cityFromAddr };
+  }
+
+  function buildClientEditCard(c){
+    const card = document.createElement('div');
+    card.className = 'client-card editing';
+    card.dataset.clientId = c.id;
+    const { streetParam: origStreetParam, city: origCity } = splitAddressForEdit(c);
+    card.innerHTML = `
+      <label>שם העסק <span style="color:var(--gold)">*חובה</span></label>
+      <input type="text" class="edit-business" value="${escapeHtml(c.business||'')}">
+      <label>שם על גבי החשבונית</label>
+      <input type="text" class="edit-name" value="${escapeHtml(c.name||'')}">
+      <label>שם איש הקשר</label>
+      <input type="text" class="edit-contact" value="${escapeHtml(c.contact||'')}">
+      <label>טלפון</label>
+      <input type="tel" class="edit-phone" value="${escapeHtml(c.phone||'')}">
+      <label>מחיר ליחידה</label>
+      <input type="number" class="edit-price" value="${escapeHtml(c.price||'')}" step="0.01" min="0">
+      <label>עיר</label>
+      <input type="text" class="edit-city" value="${escapeHtml(origCity)}">
+      <label>רחוב</label>
+      <input type="text" class="edit-street" value="${escapeHtml(origStreetParam)}">
+      <label>מספר (לתצוגה בלבד - לא משפיע על המיקום במפה)</label>
+      <input type="text" class="edit-housenum" value="${escapeHtml(c.houseNumber||'')}">
+      <label>הערות</label>
+      <textarea class="edit-notes">${escapeHtml(c.notes||'')}</textarea>
+      <div class="edit-error" style="display:none;color:#e08b7d;font-size:.78rem;margin-top:4px"></div>
+      <div class="edit-addr-suggestions" style="display:none;margin-top:6px"></div>
+      <div class="cactions">
+        <button class="save-edit">💾 שמור</button>
+        <button class="cancel-edit">ביטול</button>
+      </div>
+    `;
+    card.addEventListener('click', e=>e.stopPropagation());
+    card.querySelector('.cancel-edit').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      editingClientId = null;
+      renderAll();
+    });
+
+    function applyNonAddressFields(){
+      c.business = card.querySelector('.edit-business').value.trim();
+      c.name = card.querySelector('.edit-name').value.trim();
+      c.contact = card.querySelector('.edit-contact').value.trim();
+      c.phone = card.querySelector('.edit-phone').value.trim();
+      c.price = card.querySelector('.edit-price').value.trim();
+      c.notes = card.querySelector('.edit-notes').value.trim();
+    }
+
+    function finishSave(){
+      editingClientId = null;
+      saveData();
+      renderAll();
+    }
+
+    function showAddrOptions(results, newHouseNumber){
+      const box = card.querySelector('.edit-addr-suggestions');
+      box.innerHTML = results.map((r, i) =>
+        `<button type="button" class="edit-addr-option" data-i="${i}" style="display:block;width:100%;text-align:right;margin-bottom:4px;font-size:.78rem;padding:6px 8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:6px;cursor:pointer">${escapeHtml(r.label)}</button>`
+      ).join('');
+      box.style.display = 'block';
+      box.querySelectorAll('.edit-addr-option').forEach(btn=>{
+        btn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          const r = results[parseInt(btn.dataset.i, 10)];
+          applyNonAddressFields();
+          c.houseNumber = newHouseNumber;
+          c.address = insertHouseNumber(r.label, newHouseNumber); c.lat = r.lat; c.lon = r.lon; c.city = r.city;
+          finishSave();
+        });
+      });
+    }
+
+    card.querySelector('.save-edit').addEventListener('click', async (e)=>{
+      e.stopPropagation();
+      const business = card.querySelector('.edit-business').value.trim();
+      const errEl = card.querySelector('.edit-error');
+      errEl.style.display = 'none';
+      card.querySelector('.edit-addr-suggestions').style.display = 'none';
+      if(!business){
+        errEl.textContent = "שם העסק הוא שדה חובה.";
+        errEl.style.display = 'block';
+        return;
+      }
+      const newStreetParam = card.querySelector('.edit-street').value.trim();
+      const newCity = card.querySelector('.edit-city').value.trim();
+      const newHouseNumber = card.querySelector('.edit-housenum').value.trim();
+      const addressChanged = (newStreetParam !== origStreetParam) || (newCity !== origCity);
+
+      if(!addressChanged){
+        // only the house number (or nothing address-related) may have changed - that's
+        // just a display detail and never needs a network lookup or changes the pin
+        applyNonAddressFields();
+        c.houseNumber = newHouseNumber;
+        c.address = insertHouseNumber(buildAddressLabel(origStreetParam, origCity) || c.address, newHouseNumber);
+        finishSave();
+        return;
+      }
+
+      if(!newStreetParam && !newCity){
+        errEl.textContent = "יש למלא רחוב או עיר.";
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const saveBtn = card.querySelector('.save-edit');
+      saveBtn.disabled = true;
+      saveBtn.textContent = "מאתר כתובת...";
+      try{
+        const results = await geocodeFields(newStreetParam, newCity, 8);
+        if(results.length === 0){
+          errEl.textContent = "לא נמצאה כתובת מתאימה - בדקו את הכתיב של הרחוב והעיר.";
+          errEl.style.display = 'block';
+        } else if(results.length === 1){
+          applyNonAddressFields();
+          c.houseNumber = newHouseNumber;
+          c.address = insertHouseNumber(results[0].label, newHouseNumber); c.lat = results[0].lat; c.lon = results[0].lon; c.city = results[0].city;
+          finishSave();
+        } else {
+          errEl.textContent = "נמצאו כמה כתובות מתאימות - בחרו את הנכונה מהרשימה:";
+          errEl.style.display = 'block';
+          showAddrOptions(results, newHouseNumber);
+        }
+      }catch(err){
+        errEl.textContent = "שגיאה באיתור הכתובת. בדקו את החיבור לאינטרנט ונסו שוב.";
+        errEl.style.display = 'block';
+      }finally{
+        saveBtn.disabled = false;
+        saveBtn.textContent = "💾 שמור";
+      }
+    });
+    return card;
+  }
+
+  function buildClientCard(c, routeNumber, moveHandlers, showSkipToggle, isTempContext){
+    if(editingClientId === c.id) return buildClientEditCard(c);
+    const card = document.createElement('div');
+    card.className = 'client-card' + (c.skipRoute ? ' skipped-today' : '') + (c.handled ? ' handled' : '');
+    card.dataset.clientId = c.id;
+    if(moveHandlers){
+      card.draggable = true;
+      card.addEventListener('dragstart', (e)=>{ e.stopPropagation(); card.classList.add('dragging'); });
+      card.addEventListener('dragend', (e)=>{ e.stopPropagation(); card.classList.remove('dragging'); });
+    }
+    const stopColor = c.stopColor || colorForName(c.id);
+    const isCardOpen = openClientCards.has(c.id);
+    card.innerHTML = `
+      <div class="card-summary-row">
+        <div class="card-summary-right">
+          ${c.callBefore ? `<span class="call-before-dot" title="להתקשר לפני ההגעה"></span>` : ""}
+          ${routeNumber ? `<input type="color" class="stop-color-input" value="${stopColor}" title="בחירת צבע לכתובת הזו - כדי להבדיל בין רחובות שונים">` : ""}
+          <a href="javascript:void(0)" class="cname-link" title="לחצו לצפייה/הוספה של הזמנה">${c.business ? escapeHtml(c.business) : escapeHtml(c.name)}</a>
+        </div>
+        <div class="card-summary-left">
+          <div class="handled-toggle-wrap" title="${c.handled ? 'טופל - יחזור אוטומטית ללא טופל בעוד 12 שעות' : 'סמן כטופל'}">
+            <label class="handled-switch">
+              <input type="checkbox" class="handled-checkbox" ${c.handled ? 'checked' : ''}>
+              <span class="handled-slider"></span>
+            </label>
+            <span class="handled-label">${c.handled ? 'טופל' : 'לא טופל'}</span>
+          </div>
+          ${routeNumber ? `
+            <div class="pos-number-badge">
+              ${moveHandlers
+                ? `<input type="number" class="pos-input" min="1" max="${moveHandlers.total}" value="${routeNumber}" title="הקלידו מספר מיקום ולחצו Enter כדי להעביר את הכתובת לשם">`
+                : `<span>${routeNumber}</span>`}
+            </div>
+          ` : ""}
+          <span class="card-chevron">${isCardOpen ? '▾' : '▸'}</span>
+        </div>
+      </div>
+      ${c.skipRoute ? `<div class="skip-badge">⏸ לא במסלול היום</div>` : ""}
+      <div class="card-details" style="display:${isCardOpen ? 'block' : 'none'}">
+        ${c.name ? `<div class="cbillname">שם לחשבונית: ${escapeHtml(c.name)}</div>` : ""}
+        ${c.contact ? `<div class="cbillname">איש קשר: ${escapeHtml(c.contact)}</div>` : ""}
+        <div class="caddr">${escapeHtml(c.address)}</div>
+        ${c.phone ? `<div class="cphone">${escapeHtml(c.phone)}</div>` : ""}
+        ${c.price ? `<div class="cphone">מחיר ליחידה: ₪${escapeHtml(c.price)}</div>` : ""}
+        ${c.notes ? `<div class="cnotes">📝 ${escapeHtml(c.notes)}</div>` : ""}
+        ${showSkipToggle ? `
+          <div class="invoice-divider"></div>
+          <div class="invoice-field">
+            <label>סכום חשבונית אחרונה</label>
+            <input type="number" class="last-invoice-input" value="${c.lastInvoice||''}" placeholder="₪0" step="0.01" min="0">
+          </div>
+        ` : ""}
+        <label style="margin:8px 0 2px;font-size:.68rem">תיקייה ראשית</label>
+        <select class="move-select"></select>
+        ${isTempContext ? `
+          <div class="temp-folder-badge">🔁 זמני היום — שייך גם ל"${escapeHtml(c.folder||'—')}"</div>
+        ` : `
+          <label style="margin:8px 0 2px;font-size:.68rem">העברה זמנית ליום/תיקייה נוספת</label>
+          <select class="temp-folder-select"></select>
+        `}
+        <div class="cactions">
+          ${moveHandlers ? `
+            <button class="move-up" title="הזז מעלה" ${moveHandlers.isFirst ? 'disabled' : ''}>▲</button>
+            <button class="move-down" title="הזז מטה" ${moveHandlers.isLast ? 'disabled' : ''}>▼</button>
+          ` : ""}
+          ${showSkipToggle ? `<button class="toggle-skip" title="${c.skipRoute ? 'הכלל שוב במסלול' : 'דלג על הכתובת הזו היום, בלי למחוק אותה'}">${c.skipRoute ? '▶ כלול היום' : '⏸ דלג היום'}</button>` : ""}
+          <button class="toggle-call-before ${c.callBefore ? 'active' : ''}" title="${c.callBefore ? 'בטל תזכורת התקשרות' : 'סמן שצריך להתקשר לפני ההגעה'}">📞 להתקשר לפני</button>
+          <button class="edit-client" title="עריכת פרטי הלקוח">✎ ערוך</button>
+          <button class="focus">מקם על המפה</button>
+          <button class="del">מחק</button>
+        </div>
+      </div>
+    `;
+    card.addEventListener('click', (e)=>{
+      if(e.target.closest('.card-details') || e.target.closest('.cname-link') || e.target.closest('.handled-toggle-wrap') || e.target.closest('.stop-color-input')) return;
+      if(openClientCards.has(c.id)) openClientCards.delete(c.id);
+      else openClientCards.add(c.id);
+      renderAll();
+    });
+    const cnameLink = card.querySelector('.cname-link');
+    cnameLink.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openOrderModal(c);
+    });
+    const callBeforeBtn = card.querySelector('.toggle-call-before');
+    callBeforeBtn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      c.callBefore = !c.callBefore;
+      saveData();
+      renderAll();
+    });
+    const handledCheckbox = card.querySelector('.handled-checkbox');
+    handledCheckbox.addEventListener('click', e=>e.stopPropagation());
+    handledCheckbox.addEventListener('change', (e)=>{
+      c.handled = e.target.checked;
+      c.handledAt = c.handled ? Date.now() : null;
+      saveData();
+      // let the knob's slide/color transition play out first - a renderAll() right away
+      // would rebuild the DOM before the animation gets a chance to show
+      setTimeout(renderAll, 220);
+    });
+    const invoiceInput = card.querySelector('.last-invoice-input');
+    if(invoiceInput){
+      invoiceInput.addEventListener('click', e=>e.stopPropagation());
+      invoiceInput.addEventListener('change', (e)=>{
+        c.lastInvoice = e.target.value.trim();
+        c.lastInvoiceDate = c.lastInvoice ? localDateString() : "";
+        saveData();
+        renderAll();
+      });
+    }
+    const skipBtn = card.querySelector('.toggle-skip');
+    if(skipBtn){
+      skipBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        c.skipRoute = !c.skipRoute;
+        saveData();
+        renderAll();
+      });
+    }
+    const colorInput = card.querySelector('.stop-color-input');
+    if(colorInput){
+      colorInput.addEventListener('click', e=>e.stopPropagation());
+      colorInput.addEventListener('change', (e)=>{
+        c.stopColor = e.target.value;
+        saveData();
+        renderAll();
+      });
+    }
+    const moveSel = card.querySelector('.move-select');
+    moveSel.innerHTML = '<option value="">— בלי תיקייה —</option>' +
+      folders.map(f=>`<option value="${escapeHtml(f.name)}">${escapeHtml(f.name)}</option>`).join('');
+    moveSel.value = c.folder || '';
+    moveSel.addEventListener('click', e=>e.stopPropagation());
+    moveSel.addEventListener('change', (e)=>{
+      c.folder = e.target.value;
+      saveData();
+      renderAll();
+    });
+    if(isTempContext){
+      const removeTempBtn = document.createElement('button');
+      removeTempBtn.className = 'remove-temp-btn';
+      removeTempBtn.textContent = '✕ הסר מהיום הזה';
+      removeTempBtn.title = 'הסרה מהתיקייה הזמנית הזו - הכתובת תישאר בתיקייה הראשית שלה';
+      card.querySelector('.temp-folder-badge').appendChild(removeTempBtn);
+      removeTempBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        c.tempFolder = "";
+        saveData();
+        renderAll();
+      });
+    } else {
+      const tempSel = card.querySelector('.temp-folder-select');
+      tempSel.innerHTML = '<option value="">— אין —</option>' +
+        folders.filter(f=>f.name !== (c.folder||'')).map(f=>`<option value="${escapeHtml(f.name)}">${escapeHtml(f.name)}</option>`).join('');
+      tempSel.value = c.tempFolder || '';
+      tempSel.addEventListener('click', e=>e.stopPropagation());
+      tempSel.addEventListener('change', (e)=>{
+        c.tempFolder = e.target.value;
+        saveData();
+        renderAll();
+      });
+    }
+    if(moveHandlers){
+      const upBtn = card.querySelector('.move-up');
+      const downBtn = card.querySelector('.move-down');
+      upBtn.addEventListener('click', (e)=>{ e.stopPropagation(); moveHandlers.up(); });
+      downBtn.addEventListener('click', (e)=>{ e.stopPropagation(); moveHandlers.down(); });
+      const posInput = card.querySelector('.pos-input');
+      if(posInput){
+        posInput.addEventListener('click', e=>e.stopPropagation());
+        posInput.addEventListener('mousedown', e=>e.stopPropagation());
+        posInput.addEventListener('keydown', (e)=>{
+          e.stopPropagation();
+          if(e.key === 'Enter'){ e.target.blur(); }
+        });
+        posInput.addEventListener('change', (e)=>{
+          const val = parseInt(e.target.value, 10);
+          if(!isNaN(val)) moveHandlers.moveTo(val);
+        });
+      }
+    }
+    card.querySelector('.edit-client').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      editingClientId = c.id;
+      renderAll();
+    });
+    card.querySelector('.focus').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      map.setView([c.lat, c.lon], 15);
+      markersLayer.eachLayer(mk=>{
+        const ll = mk.getLatLng();
+        if(Math.abs(ll.lat-c.lat)<1e-6 && Math.abs(ll.lng-c.lon)<1e-6){ mk.openPopup(); }
+      });
+    });
+    card.querySelector('.del').addEventListener('click', (e)=>{
+      e.stopPropagation();
+      deleteClient(c.id);
+    });
+    return card;
+  }
+
+  function startClusterRename(headEl, cl){
+    const nameEl = headEl.querySelector('.name');
+    const current = cl.name;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = current;
+    input.className = 'cluster-rename-input';
+    nameEl.replaceWith(input);
+    input.focus();
+    input.select();
+
+    let done = false;
+    function commit(){
+      if(done) return;
+      done = true;
+      renameCluster(cl.key, input.value);
+    }
+    input.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){ commit(); }
+      if(e.key === 'Escape'){ done = true; renderAll(); }
+    });
+    input.addEventListener('blur', commit);
+    input.addEventListener('click', e=>e.stopPropagation());
+  }
+
+  function startFolderRename(headEl, folder){
+    const nameEl = headEl.querySelector('.name');
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = folder.name;
+    input.className = 'cluster-rename-input';
+    nameEl.replaceWith(input);
+    input.focus();
+    input.select();
+
+    let done = false;
+    function commit(){
+      if(done) return;
+      done = true;
+      renameFolder(folder, input.value);
+    }
+    input.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter'){ commit(); }
+      if(e.key === 'Escape'){ done = true; renderAll(); }
+    });
+    input.addEventListener('blur', commit);
+    input.addEventListener('click', e=>e.stopPropagation());
+  }
+
+  function renderSidebar(){
+    const listEl = document.getElementById('clusterList');
+    listEl.innerHTML = "";
+
+    if(clients.length === 0){
+      listEl.innerHTML = `<div class="empty">אין עדיין לקוחות. הוסיפו כתובת ראשונה כדי לראות אזורים.</div>`;
+      return;
+    }
+
+    let anyVisible = false;
+
+    clusters.forEach((cl, cIdx)=>{
+      const filteredMembers = cl.members;
+      if(filteredMembers.length === 0) return;
+      anyVisible = true;
+
+      const isCustomName = !!clusterNames[cl.key];
+      const inRouteMode = routeModeKeys.has(cl.key);
+
+      const group = document.createElement('div');
+      group.className = 'cluster-group';
+
+      const head = document.createElement('div');
+      head.className = 'cluster-head';
+      head.innerHTML = `
+        <div class="cluster-swatch" style="background:${cl.color}"></div>
+        <div class="name" title="${isCustomName ? 'שם מותאם אישית' : ''}">${escapeHtml(cl.name)}</div>
+        <div class="count">${filteredMembers.length}</div>
+        <button class="route-toggle ${inRouteMode ? 'active' : ''}" title="סידור הכתובות לפי מסלול נסיעה יעיל">🧭</button>
+        <button class="rename-cluster" title="שינוי שם האזור">✎</button>
+        ${isCustomName ? '<button class="reset-cluster-name" title="חזרה לשם האוטומטי">↺</button>' : ''}
+      `;
+      head.addEventListener('click', (e)=>{
+        if(e.target.closest('.rename-cluster') || e.target.closest('.reset-cluster-name') || e.target.closest('.route-toggle')) return;
+        toggleClusterOpen(cl.key);
+        body.style.display = openClusterNames.has(cl.key) ? 'block' : 'none';
+        const bounds = filteredMembers.map(m=>[clients[m].lat, clients[m].lon]);
+        fitOrCenter(bounds, 14, 40);
+      });
+      head.querySelector('.rename-cluster').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        startClusterRename(head, cl);
+      });
+      head.querySelector('.route-toggle').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        toggleRouteMode(cl.key);
+        openClusterNames.add(cl.key); // open the group so the order is visible right away
+        renderAll();
+      });
+      const resetBtn = head.querySelector('.reset-cluster-name');
+      if(resetBtn){
+        resetBtn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          renameCluster(cl.key, "");
+        });
+      }
+
+      const body = document.createElement('div');
+      body.className = 'cluster-body cluster-region-body';
+      body.style.display = openClusterNames.has(cl.key) ? 'block' : 'none';
+      const activeMembers = filteredMembers.filter(m => !clients[m].skipRoute);
+      const skippedMembers = filteredMembers.filter(m => clients[m].skipRoute);
+      const orderedMembers = getOrderedClusterMembers(cl, activeMembers); // full list, for display/position
+      const calcMembers = orderedMembers.filter(m => !clients[m].handled); // for route distance/time only
+      const calcPosOf = {};
+      calcMembers.forEach((m, i)=>{ calcPosOf[clients[m].id] = i; });
+      const cachedClusterRoad = clusterRoadRouteCache[cl.key];
+      const clusterRoadMatches = cachedClusterRoad && cachedClusterRoad.fingerprint === routeFingerprint(calcMembers.map(m=>clients[m]));
+
+      if(inRouteMode && calcMembers.length > 1){
+        let totalKm, totalDriveMin, isReal;
+        if(clusterRoadMatches){
+          totalKm = cachedClusterRoad.totalKm; totalDriveMin = cachedClusterRoad.totalMin; isReal = true;
+        } else {
+          totalKm = 0; totalDriveMin = 0; isReal = false;
+          for(let i=0; i<calcMembers.length-1; i++){
+            const leg = estimateLeg(clients[calcMembers[i]], clients[calcMembers[i+1]]);
+            totalKm += leg.km;
+            totalDriveMin += leg.minutes;
+          }
+        }
+        const totalServiceMin = calcMembers.length * STOP_SERVICE_MINUTES;
+        const totalMin = totalDriveMin + totalServiceMin;
+        const summary = document.createElement('div');
+        summary.className = 'route-summary';
+        summary.title = (isReal
+          ? "מרחק אמיתי על פי הכביש (מקור: OSRM), זמן מחושב לפי 20 קמ״ש בגלל עומסים"
+          : "מאתר את המסלול בפועל על פי הכביש... (מציג הערכה בקו אווירי בינתיים)")
+          + ` + ${STOP_SERVICE_MINUTES} דק׳ טיפול בכל כתובת (${calcMembers.length} כתובות)`;
+        const excludedCount = (skippedMembers.length) + (orderedMembers.length - calcMembers.length);
+        summary.innerHTML = `🚗 סה״כ מסלול: <b>${totalKm.toFixed(1)} ק״מ</b> · ${formatDuration(totalDriveMin)} נסיעה + ${formatDuration(totalServiceMin)} טיפול (${calcMembers.length}×${STOP_SERVICE_MINUTES} דק׳) = <b>${formatDuration(totalMin)}</b>${isReal ? '' : ' <span style="opacity:.7">(הערכה, מאתר מסלול מדויק...)</span>'}${excludedCount ? ` <span style="opacity:.7">· ${excludedCount} כתובות מדולגות/טופלו, לא נכללות</span>` : ''}`;
+        body.appendChild(summary);
+      }
+
+      const activeListEl = document.createElement('div');
+      body.appendChild(activeListEl);
+
+      orderedMembers.forEach((m, idx)=>{
+        const moveHandlers = {
+          isFirst: idx === 0,
+          isLast: idx === orderedMembers.length - 1,
+          total: orderedMembers.length,
+          up: () => moveClusterMember(cl, activeMembers, clients[m].id, -1, skippedMembers),
+          down: () => moveClusterMember(cl, activeMembers, clients[m].id, 1, skippedMembers),
+          moveTo: (pos) => moveClusterMemberToPosition(cl, activeMembers, clients[m].id, pos, skippedMembers)
+        };
+        const cardEl = buildClientCard(clients[m], idx+1, moveHandlers, true);
+        if(idx % 2 === 1) cardEl.classList.add('card-alt');
+        activeListEl.appendChild(cardEl);
+        if(idx < orderedMembers.length - 1){
+          const curClient = clients[m], nextClient = clients[orderedMembers[idx+1]];
+          if(!curClient.handled && !nextClient.handled){
+            const curCalcPos = calcPosOf[curClient.id];
+            const realLeg = (clusterRoadMatches && cachedClusterRoad.legs[curCalcPos]) ? cachedClusterRoad.legs[curCalcPos] : null;
+            activeListEl.appendChild(buildLegConnector(curClient, nextClient, realLeg));
+          }
+        }
+      });
+
+      if(skippedMembers.length){
+        const skipHeader = document.createElement('div');
+        skipHeader.style.cssText = 'font-size:.72rem;color:rgba(255,255,255,.5);margin:10px 4px 4px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.18)';
+        skipHeader.textContent = `⏸ לא במסלול היום (${skippedMembers.length})`;
+        body.appendChild(skipHeader);
+        skippedMembers.forEach(m=>{
+          body.appendChild(buildClientCard(clients[m], null, null, true));
+        });
+      }
+
+      wireDragReorder(activeListEl, (ids)=>{
+        const folder = dominantFolderFor(filteredMembers);
+        if(folder){
+          folder.order = ids.concat(skippedMembers.map(m => clients[m].id));
+          saveFolders();
+        } else {
+          clusterOrder[cl.key] = ids;
+          saveClusterOrder();
+        }
+        renderAll();
+      });
+
+      group.appendChild(head);
+      group.appendChild(body);
+      listEl.appendChild(group);
+    });
+
+    if(!anyVisible){
+      listEl.innerHTML = `<div class="empty">לא נמצאו לקוחות התואמים לחיפוש.</div>`;
+    }
+  }
+
+  let grandSummaryDate = null; // remembers the chosen date across re-renders
+
+  function renderGrandInvoiceSummary(){
+    const container = document.getElementById('grandInvoiceSummary');
+    if(clients.length === 0){ container.innerHTML = ""; return; }
+    if(!grandSummaryDate) grandSummaryDate = localDateString();
+    container.innerHTML = `
+      <div class="invoice-summary grand" style="margin-top:12px">
+        <input type="date" class="grand-invoice-date" value="${grandSummaryDate}">
+        <div class="invoice-summary-total">סה״כ כל התיקיות: <b>₪0</b></div>
+      </div>
+      <button class="reset-invoices-btn" title="מאפס לכולם, לא ניתן לשחזר">🗑 אפס את כל הסכומים ל-0</button>
+    `;
+    const dateInput = container.querySelector('.grand-invoice-date');
+    const totalEl = container.querySelector('.invoice-summary-total b');
+    dateInput.addEventListener('click', e=>e.stopPropagation());
+    function refresh(){
+      grandSummaryDate = dateInput.value;
+      const total = clients.reduce((sum, c)=>{
+        if(c.lastInvoiceDate === grandSummaryDate){
+          const val = parseFloat(c.lastInvoice);
+          if(!isNaN(val)) return sum + val;
+        }
+        return sum;
+      }, 0);
+      totalEl.textContent = `₪${total.toFixed(2)}`;
+    }
+    dateInput.addEventListener('change', refresh);
+    refresh();
+
+    container.querySelector('.reset-invoices-btn').addEventListener('click', ()=>{
+      const ok = confirm("לאפס את סכום החשבונית האחרונה של כל הלקוחות ל-0? לא ניתן לשחזר את זה.");
+      if(!ok) return;
+      clients.forEach(c=>{ c.lastInvoice = ""; c.lastInvoiceDate = ""; });
+      saveData();
+      renderAll();
+    });
+  }
+
+  function renderSearchResults(){
+    const box = document.getElementById('searchResults');
+    const q = document.getElementById('searchBox').value.trim().toLowerCase();
+    box.innerHTML = "";
+    if(!q) return;
+    const matches = clients.filter(c => matchesSearch(c, q));
+    if(matches.length === 0){
+      box.innerHTML = `<div class="empty" style="padding:8px 4px">לא נמצאו כתובות מתאימות.</div>`;
+      return;
+    }
+    matches.forEach(c=>{
+      box.appendChild(buildClientCard(c, null, null, true));
+    });
+  }
+
+  function renderFolders(){
+    const listEl = document.getElementById('folderList');
+    listEl.innerHTML = "";
+
+    if(folders.length === 0 && clients.length === 0){
+      listEl.innerHTML = `<div class="empty">אין עדיין תיקיות. הוסיפו תיקייה (למשל שם עיר או אזור) ואז שבצו כתובות אליה.</div>`;
+      return;
+    }
+
+    let anyVisible = false;
+
+    folders.forEach(folder=>{
+      const name = folder.name;
+      const members = clients.filter(c=> (c.folder||"") === name || c.tempFolder === name);
+      const routeActive = selectedFolderForRoute === name;
+      const group = document.createElement('div');
+      group.className = 'cluster-group';
+      group.draggable = true;
+      group.dataset.folderName = name;
+      group.addEventListener('dragstart', ()=>{ group.classList.add('dragging'); });
+      group.addEventListener('dragend', ()=>{ group.classList.remove('dragging'); });
+
+      const head = document.createElement('div');
+      head.className = 'cluster-head';
+      const mapVisible = folder.mapVisible !== false; // default true for folders created before this feature
+      head.innerHTML = `
+        <input type="color" class="folder-swatch" value="${folder.color}" title="שינוי צבע התיקייה">
+        <div class="name">📁 ${escapeHtml(name)}</div>
+        <div class="count">${members.length}</div>
+        <button class="map-visibility-toggle ${mapVisible ? '' : 'off'}" title="${mapVisible ? 'הסתר את כל התיקייה מהמפה (למשל אם היום לא רלוונטית)' : 'הצג שוב את התיקייה על המפה'}">${mapVisible ? '👁' : '🚫'}</button>
+        <button class="route-toggle ${routeActive ? 'active' : ''}" title="הצג/הסתר מסלול נסיעה על המפה">🧭</button>
+        <button class="rename-folder" title="שינוי שם התיקייה">✎</button>
+        <button class="folder-del" title="מחיקת תיקייה (הכתובות לא יימחקו)">✕</button>
+      `;
+      const swatchInput = head.querySelector('.folder-swatch');
+      swatchInput.addEventListener('click', e=> e.stopPropagation());
+      swatchInput.addEventListener('change', (e)=>{
+        folder.color = e.target.value;
+        saveFolders();
+        renderAll();
+      });
+      head.addEventListener('click', (e)=>{
+        if(e.target.closest('.folder-del') || e.target.closest('.folder-swatch') || e.target.closest('.route-toggle') || e.target.closest('.rename-folder') || e.target.closest('.map-visibility-toggle')) return;
+        toggleFolderOpen(name);
+        body.style.display = openFolderNames.has(name) ? 'block' : 'none';
+        if(members.length){
+          const bounds = members.map(c=>[c.lat, c.lon]);
+          fitOrCenter(bounds, 14, 40);
+        }
+      });
+      head.querySelector('.map-visibility-toggle').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        folder.mapVisible = !mapVisible;
+        if(!folder.mapVisible && selectedFolderForRoute === name) selectedFolderForRoute = null;
+        saveFolders();
+        renderAll();
+      });
+      head.querySelector('.route-toggle').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        selectedFolderForRoute = routeActive ? null : name;
+        openFolderNames.add(name); // open the group so the numbering is visible right away
+        renderAll();
+      });
+      head.querySelector('.rename-folder').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        startFolderRename(head, folder);
+      });
+      head.querySelector('.folder-del').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        deleteFolder(name);
+      });
+
+      const body = document.createElement('div');
+      body.className = 'cluster-body';
+      body.style.display = openFolderNames.has(name) ? 'block' : 'none';
+      if(members.length === 0){
+        body.innerHTML = `<div class="empty" style="padding:10px 4px">אין עדיין כתובות בתיקייה הזו. השתמשו בתפריט "העברה לתיקייה" בכרטיס של כל לקוח.</div>`;
+      } else {
+        const activeMembers = members.filter(c => !c.skipRoute);
+        const skippedMembers = members.filter(c => c.skipRoute);
+
+        // ordering (numbers + ▲▼ + drag) is always available, whether or not 🧭 is on -
+        // 🧭 only decides whether the connecting route line is drawn on the map
+        const orderedMembers = getOrderedFolderMembers(folder, activeMembers); // full list, for display/position
+        const calcMembers = orderedMembers.filter(c => !c.handled); // for route distance/time only
+        const cachedRoad = roadRouteCache[folder.name];
+        const roadMatches = cachedRoad && cachedRoad.fingerprint === routeFingerprint(calcMembers);
+
+        if(routeActive && calcMembers.length > 1){
+          let totalKm, totalDriveMin, isReal;
+          if(roadMatches){
+            totalKm = cachedRoad.totalKm; totalDriveMin = cachedRoad.totalMin; isReal = true;
+          } else {
+            totalKm = 0; totalDriveMin = 0; isReal = false;
+            for(let i=0; i<calcMembers.length-1; i++){
+              const leg = estimateLeg(calcMembers[i], calcMembers[i+1]);
+              totalKm += leg.km;
+              totalDriveMin += leg.minutes;
+            }
+          }
+          const totalServiceMin = calcMembers.length * STOP_SERVICE_MINUTES;
+          const totalMin = totalDriveMin + totalServiceMin;
+          const summary = document.createElement('div');
+          summary.className = 'route-summary';
+          summary.title = (isReal
+            ? "מרחק אמיתי על פי הכביש (מקור: OSRM), זמן מחושב לפי 20 קמ״ש בגלל עומסים"
+            : "מאתר את המסלול בפועל על פי הכביש... (מציג הערכה בקו אווירי בינתיים)")
+            + ` + ${STOP_SERVICE_MINUTES} דק׳ טיפול בכל כתובת (${calcMembers.length} כתובות)`;
+          const excludedCount = skippedMembers.length + (orderedMembers.length - calcMembers.length);
+          summary.innerHTML = `🚗 סה״כ מסלול: <b>${totalKm.toFixed(1)} ק״מ</b> · ${formatDuration(totalDriveMin)} נסיעה + ${formatDuration(totalServiceMin)} טיפול (${calcMembers.length}×${STOP_SERVICE_MINUTES} דק׳) = <b>${formatDuration(totalMin)}</b>${isReal ? '' : ' <span style="opacity:.7">(הערכה, מאתר מסלול מדויק...)</span>'}${excludedCount ? ` <span style="opacity:.7">· ${excludedCount} כתובות מדולגות/טופלו, לא נכללות</span>` : ''}`;
+          body.appendChild(summary);
+        }
+
+        const activeListEl = document.createElement('div');
+        body.appendChild(activeListEl);
+
+        orderedMembers.forEach((c, idx)=>{
+          const moveHandlers = {
+            isFirst: idx === 0,
+            isLast: idx === orderedMembers.length - 1,
+            total: orderedMembers.length,
+            up: () => moveFolderMember(folder, activeMembers, c.id, -1, skippedMembers),
+            down: () => moveFolderMember(folder, activeMembers, c.id, 1, skippedMembers),
+            moveTo: (pos) => moveFolderMemberToPosition(folder, activeMembers, c.id, pos, skippedMembers)
+          };
+          const cardEl = buildClientCard(c, idx+1, moveHandlers, true, (c.folder||"") !== name && c.tempFolder === name);
+          if(idx % 2 === 1) cardEl.classList.add('card-alt');
+          if(routeActive && !c.handled){
+            const serviceTag = document.createElement('div');
+            serviceTag.className = 'service-time-tag';
+            serviceTag.textContent = `⏱️ ${STOP_SERVICE_MINUTES} דק׳ טיפול בכתובת זו`;
+            cardEl.appendChild(serviceTag);
+          }
+          activeListEl.appendChild(cardEl);
+          if(idx < orderedMembers.length - 1){
+            const nextC = orderedMembers[idx+1];
+            if(!c.handled && !nextC.handled){
+              const curCalcPos = calcMembers.indexOf(c);
+              const realLeg = (roadMatches && cachedRoad.legs[curCalcPos]) ? cachedRoad.legs[curCalcPos] : null;
+              activeListEl.appendChild(buildLegConnector(c, nextC, realLeg));
+            }
+          }
+        });
+        wireDragReorder(activeListEl, (ids)=>{
+          folder.order = ids.concat(skippedMembers.map(c => c.id));
+          saveFolders();
+          renderFolders();
+          renderFolderRoute();
+        });
+
+        if(skippedMembers.length){
+          const skipHeader = document.createElement('div');
+          skipHeader.style.cssText = 'font-size:.72rem;color:rgba(255,255,255,.5);margin:10px 4px 4px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.18)';
+          skipHeader.textContent = `⏸ לא במסלול היום (${skippedMembers.length})`;
+          body.appendChild(skipHeader);
+          skippedMembers.forEach(c=>{
+            body.appendChild(buildClientCard(c, null, null, true, (c.folder||"") !== name && c.tempFolder === name));
+          });
+        }
+
+        // total of all "last invoice" amounts entered for a chosen day, across every
+        // client in this folder (active and skipped alike)
+        const invoiceSummary = document.createElement('div');
+        invoiceSummary.className = 'invoice-summary';
+        const today = localDateString();
+        invoiceSummary.innerHTML = `
+          <input type="date" class="invoice-summary-date" value="${today}">
+          <div class="invoice-summary-total">סה״כ חשבוניות: <b>₪0</b></div>
+        `;
+        const summaryDateInput = invoiceSummary.querySelector('.invoice-summary-date');
+        const summaryTotalEl = invoiceSummary.querySelector('.invoice-summary-total b');
+        function refreshInvoiceSummary(){
+          const chosenDate = summaryDateInput.value;
+          const total = members.reduce((sum, m)=>{
+            if(m.lastInvoiceDate === chosenDate){
+              const val = parseFloat(m.lastInvoice);
+              if(!isNaN(val)) return sum + val;
+            }
+            return sum;
+          }, 0);
+          summaryTotalEl.textContent = `₪${total.toFixed(2)}`;
+        }
+        summaryDateInput.addEventListener('click', e=>e.stopPropagation());
+        summaryDateInput.addEventListener('change', refreshInvoiceSummary);
+        refreshInvoiceSummary();
+        body.appendChild(invoiceSummary);
+      }
+
+      group.appendChild(head);
+      group.appendChild(body);
+      listEl.appendChild(group);
+      if(members.length) anyVisible = true;
+    });
+
+    // unassigned bucket
+    const unassigned = clients.filter(c=> !(c.folder||""));
+    if(unassigned.length){
+      anyVisible = true;
+      const UNASSIGNED_KEY = "__unassigned__";
+      const group = document.createElement('div');
+      group.className = 'cluster-group';
+      const head = document.createElement('div');
+      head.className = 'cluster-head';
+      head.innerHTML = `
+        <div class="cluster-swatch" style="background:var(--muted)"></div>
+        <div class="name">בלי תיקייה</div>
+        <div class="count">${unassigned.length}</div>
+      `;
+      const body = document.createElement('div');
+      body.className = 'cluster-body';
+      body.style.display = openFolderNames.has(UNASSIGNED_KEY) ? 'block' : 'none';
+      head.addEventListener('click', ()=>{
+        toggleFolderOpen(UNASSIGNED_KEY);
+        body.style.display = openFolderNames.has(UNASSIGNED_KEY) ? 'block' : 'none';
+        const bounds = unassigned.map(c=>[c.lat, c.lon]);
+        fitOrCenter(bounds, 14, 40);
+      });
+      unassigned.forEach(c=> body.appendChild(buildClientCard(c)));
+      group.appendChild(head);
+      group.appendChild(body);
+      listEl.appendChild(group);
+    }
+
+    if(!anyVisible && folders.length === 0){
+      listEl.innerHTML = `<div class="empty">אין עדיין תיקיות. הוסיפו תיקייה (למשל שם עיר או אזור) ואז שבצו כתובות אליה.</div>`;
+    }
+  }
+
+  function renderAll(){
+    if(expireHandledStatuses()) saveData();
+    computeClusters();
+    const bounds = renderMap();
+    renderSidebar();
+    renderFolders();
+    renderGrandInvoiceSummary();
+    renderSearchResults();
+    populateFolderSelect();
+    renderFolderRoute();
+    return bounds;
+  }
+
+  function candidateIcon(num){
+    const color = '#C79A2E';
+    const svg = `<svg width="26" height="34" viewBox="0 0 26 34" xmlns="http://www.w3.org/2000/svg">
+      <path d="M13 0C5.82 0 0 5.82 0 13c0 9.75 13 21 13 21s13-11.25 13-21C26 5.82 20.18 0 13 0z" fill="${color}" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="2,2"/>
+      <circle cx="13" cy="13" r="6.5" fill="#ffffff"/>
+      <text x="13" y="16.8" text-anchor="middle" font-size="9" font-weight="700" font-family="Arial, sans-serif" fill="#12242C">${num}</text>
+    </svg>`;
+    return L.divIcon({
+      html: svg, className:'', iconSize:[26,34], iconAnchor:[13,34], popupAnchor:[0,-30]
+    });
+  }
+
+  function clearSuggestions(){
+    document.getElementById('addrSuggestions').classList.remove('open');
+    document.getElementById('addrSuggestions').innerHTML = "";
+    document.getElementById('suggestHint').style.display = 'none';
+    candidatesLayer.clearLayers();
+  }
+
+  function showSuggestions(results, isAmbiguousAdd){
+    const box = document.getElementById('addrSuggestions');
+    box.innerHTML = "";
+    candidatesLayer.clearLayers();
+    const bounds = [];
+
+    results.forEach((item, idx)=>{
+      const num = idx+1;
+      const row = document.createElement('div');
+      row.className = 'suggestion-item';
+      row.innerHTML = `<div class="num">${num}</div>
+        <div class="txt"><div class="main">${escapeHtml(item.label)}</div><div class="sub">${escapeHtml(item.display_name)}</div></div>`;
+      row.addEventListener('click', ()=> selectSuggestion(item));
+      box.appendChild(row);
+
+      const marker = L.marker([item.lat, item.lon], { icon: candidateIcon(num) });
+      marker.on('click', ()=> selectSuggestion(item));
+      marker.addTo(candidatesLayer);
+      bounds.push([item.lat, item.lon]);
+    });
+
+    box.classList.add('open');
+    document.getElementById('suggestHint').style.display = isAmbiguousAdd ? 'block' : 'none';
+    fitOrCenter(bounds, 15, 60);
+  }
+
+  function currentAddressQuery(){
+    const streetParam = document.getElementById('f-street').value.trim();
+    const city = document.getElementById('f-city').value.trim();
+    return { street: streetParam, city, streetParam, query: [ streetParam, city ].filter(Boolean).join(", ") };
+  }
+
+  // inserts a house number (display-only, never sent to the geocoder) right after the
+  // street portion of an already-resolved address label, e.g. "הרצל, נהריה" + "12" -> "הרצל 12, נהריה"
+  function insertHouseNumber(address, houseNumber){
+    const num = (houseNumber || "").trim();
+    if(!num) return address;
+    const idx = address.indexOf(",");
+    if(idx === -1) return `${address} ${num}`;
+    return `${address.slice(0, idx)} ${num}${address.slice(idx)}`;
+  }
+
+  function buildAddressLabel(streetParam, city){
+    return [ streetParam, city ].filter(Boolean).join(", ");
+  }
+
+  function selectSuggestion(item){
+    // write the corrected combined street+number back into the single field
+    if(item.road || item.house) document.getElementById('f-street').value = [item.road, item.house].filter(Boolean).join(" ");
+    if(item.city) document.getElementById('f-city').value = item.city;
+    clearSuggestions();
+
+    if(pendingClientData){
+      // finishing an add that was ambiguous
+      const data = pendingClientData;
+      pendingClientData = null;
+      finalizeAdd({ business:data.business, name:data.name, contact:data.contact, phone:data.phone, price:data.price, notes:data.notes, folder:data.folder, houseNumber:data.houseNumber, address:insertHouseNumber(item.label, data.houseNumber), lat:item.lat, lon:item.lon, city:item.city });
+    } else {
+      // just narrowing down the address while composing the form
+      selectedGeo = item;
+    }
+  }
+
+  function finalizeAdd(data){
+    clients.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
+      business: data.business || "", name: data.name, contact: data.contact || "", phone: data.phone || "", price: data.price || "", houseNumber: data.houseNumber || "", address: data.address, notes: data.notes || "",
+      folder: data.folder || "", lat: data.lat, lon: data.lon, city: data.city || ""
+    });
+    saveData();
+    renderAll();
+    document.getElementById('f-business').value = '';
+    document.getElementById('f-name').value = '';
+    document.getElementById('f-contact').value = '';
+    document.getElementById('f-phone').value = '';
+    document.getElementById('f-price').value = '';
+    document.getElementById('f-street').value = '';
+    document.getElementById('f-housenum').value = '';
+    document.getElementById('f-city').value = '';
+    document.getElementById('f-notes').value = '';
+    document.getElementById('f-folder').value = '';
+    document.getElementById('f-folder-new').style.display = 'none';
+    document.getElementById('f-folder-new').value = '';
+    selectedGeo = null;
+  }
+
+  function debounce(fn, ms){
+    return (...args)=>{
+      clearTimeout(suggestDebounceTimer);
+      suggestDebounceTimer = setTimeout(()=>fn(...args), ms);
+    };
+  }
+
+  const debouncedTypeahead = debounce(async ()=>{
+    const { streetParam, city } = currentAddressQuery();
+    if(!streetParam && !city){ clearSuggestions(); return; }
+    try{
+      const results = await geocodeFields(streetParam, city, 15);
+      if(results.length){ showSuggestions(results, false); }
+      else { clearSuggestions(); }
+    }catch(e){ /* silent fail for live typeahead */ }
+  }, 350);
+
+  ['f-street','f-city'].forEach(id=>{
+    document.getElementById(id).addEventListener('input', ()=>{
+      selectedGeo = null;
+      debouncedTypeahead();
+    });
+  });
+
+  document.addEventListener('click', (e)=>{
+    const wrap = document.querySelector('.addr-field-wrap');
+    if(wrap && !wrap.contains(e.target)){ clearSuggestions(); }
+  });
+
+  window.__deleteClient = function(id){ deleteClient(id); };
+
+  function deleteClient(id){
+    clients = clients.filter(c=>c.id !== id);
+    saveData();
+    renderAll();
+  }
+
+  function deleteFolder(name){
+    folders = folders.filter(f=>f.name !== name);
+    clients.forEach(c=>{ if((c.folder||"") === name) c.folder = ""; });
+    openFolderNames.delete(name);
+    if(selectedFolderForRoute === name) selectedFolderForRoute = null;
+    saveFolders();
+    saveData();
+    renderAll();
+  }
+
+  document.getElementById('f-folder').addEventListener('change', (e)=>{
+    const newInput = document.getElementById('f-folder-new');
+    if(e.target.value === '__new__'){
+      newInput.style.display = 'block';
+      newInput.focus();
+    } else {
+      newInput.style.display = 'none';
+      newInput.value = '';
+    }
+  });
+
+  document.getElementById('addFolderBtn').addEventListener('click', ()=>{
+    const input = document.getElementById('newFolderInput');
+    const colorInput = document.getElementById('newFolderColor');
+    const name = input.value.trim();
+    if(!name) return;
+    ensureFolder(name, colorInput.value);
+    input.value = '';
+    colorInput.value = colorForName(name + Math.random());
+    renderAll();
+  });
+
+  document.getElementById('newFolderInput').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){ document.getElementById('addFolderBtn').click(); }
+  });
+
+  function formatThreshold(km){
+    return km < 1 ? Math.round(km*1000) + ' מ׳' : (Math.round(km*10)/10) + ' ק"מ';
+  }
+
+  document.getElementById('addClientHeader').addEventListener('click', ()=>{
+    const bodyEl = document.getElementById('addClientBody');
+    const chevron = document.getElementById('addClientChevron');
+    const isOpen = bodyEl.style.display !== 'none';
+    bodyEl.style.display = isOpen ? 'none' : 'block';
+    chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+  });
+
+  document.getElementById('thresholdSlider').addEventListener('input', (e)=>{
+    threshold = parseFloat(e.target.value);
+    document.getElementById('thresholdVal').textContent = formatThreshold(threshold);
+    renderAll();
+  });
+
+  document.getElementById('searchBox').addEventListener('input', renderSearchResults);
+
+  document.getElementById('fitAllBtn').addEventListener('click', ()=>{
+    if(clients.length===0) return;
+    const bounds = clients.map(c=>[c.lat,c.lon]);
+    fitOrCenter(bounds, 14, 40);
+  });
+
+  document.getElementById('refreshBtn').addEventListener('click', async ()=>{
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder()]);
+    renderAll();
+  });
+
+  document.getElementById('addBtn').addEventListener('click', async ()=>{
+    const businessEl = document.getElementById('f-business');
+    const nameEl = document.getElementById('f-name');
+    const contactEl = document.getElementById('f-contact');
+    const phoneEl = document.getElementById('f-phone');
+    const priceEl = document.getElementById('f-price');
+    const streetEl = document.getElementById('f-street');
+    const houseNumEl = document.getElementById('f-housenum');
+    const cityEl = document.getElementById('f-city');
+    const notesEl = document.getElementById('f-notes');
+    const folderSel = document.getElementById('f-folder');
+    const folderNewEl = document.getElementById('f-folder-new');
+    const errEl = document.getElementById('formError');
+    const btn = document.getElementById('addBtn');
+
+    errEl.style.display = 'none';
+    const business = businessEl.value.trim();
+    const name = nameEl.value.trim();
+    const contact = contactEl.value.trim();
+    const price = priceEl.value.trim();
+    const houseNumber = houseNumEl.value.trim();
+    const { street, city, streetParam } = currentAddressQuery();
+
+    if(!business){
+      errEl.textContent = "שם העסק הוא שדה חובה - זה מה שיעזור לנהג למצוא את המקום בלי לחפש.";
+      errEl.style.display = 'block';
+      businessEl.focus();
+      return;
+    }
+    if(!name || (!street && !city)){
+      errEl.textContent = "יש למלא שם, וגם רחוב או עיר, לפני ההוספה.";
+      errEl.style.display = 'block';
+      return;
+    }
+
+    // resolve the folder: an existing one from the dropdown, or a brand-new one typed in
+    let folder = folderSel.value;
+    if(folder === '__new__'){
+      folder = ensureFolder(folderNewEl.value);
+    }
+
+    // if the user already picked an exact suggestion, use it directly - no need to re-geocode
+    if(selectedGeo){
+      finalizeAdd({ business, name, contact, phone: phoneEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(selectedGeo.label, houseNumber), lat: selectedGeo.lat, lon: selectedGeo.lon, city: selectedGeo.city });
+      clearSuggestions();
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "מאתר כתובת...";
+
+    try{
+      const results = await geocodeFields(streetParam, city, 10);
+
+      if(results.length === 0){
+        errEl.textContent = "לא הצלחנו לאתר את הכתובת. בדקו את הכתיב של הרחוב והעיר - למשל אם התכוונתם ל\"הרא\"ה\" ולא \"הרואה\".";
+        errEl.style.display = 'block';
+        return;
+      }
+
+      if(results.length === 1){
+        clearSuggestions();
+        finalizeAdd({ business, name, contact, phone: phoneEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(results[0].label, houseNumber), lat: results[0].lat, lon: results[0].lon, city: results[0].city });
+        return;
+      }
+
+      // several possible matches - let the user pick the right one from the list / map
+      pendingClientData = { business, name, contact, phone: phoneEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber };
+      showSuggestions(results, true);
+    }catch(e){
+      errEl.textContent = "שגיאה באיתור הכתובת. בדקו את החיבור לאינטרנט ונסו שוב.";
+      errEl.style.display = 'block';
+    }finally{
+      btn.disabled = false;
+      btn.textContent = "+ הוסף לקוח";
+    }
+  });
+
+  wireFolderDragReorder(document.getElementById('folderList'));
+
+  setInterval(()=>{
+    if(expireHandledStatuses()){ saveData(); renderAll(); }
+  }, 5 * 60 * 1000); // check every 5 minutes
+
+  (async function init(){
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder()]);
+    const bounds = renderAll();
+    if(clients.length){
+      try{ fitOrCenter(bounds, 14, 40); }catch(e){}
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
