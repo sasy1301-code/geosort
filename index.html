@@ -341,22 +341,6 @@
     background:#36ff36; box-shadow:0 0 6px rgba(54,255,54,.9);
     animation:callBeforeBlink 1.1s ease-in-out infinite;
   }
-  .cactions .toggle-call-before{
-    background:transparent; border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.75);
-    border-radius:6px; padding:4px 8px; font-size:.72rem; cursor:pointer;
-  }
-  .cactions .toggle-call-before:hover{ background:rgba(255,255,255,.1); }
-  .cactions .toggle-call-before.active{
-    background:rgba(255,59,59,.18); border-color:#ff3b3b; color:#ff8a8a;
-  }
-  .cactions .toggle-collect-payment{
-    background:transparent; border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.75);
-    border-radius:6px; padding:4px 8px; font-size:.72rem; cursor:pointer;
-  }
-  .cactions .toggle-collect-payment:hover{ background:rgba(255,255,255,.1); }
-  .cactions .toggle-collect-payment.active{
-    background:rgba(54,255,54,.18); border-color:#36ff36; color:#9dffa0;
-  }
   .client-card[draggable="true"]{ cursor:grab; }
   .client-card.dragging{ opacity:.35; border-color:var(--gold); }
   .cluster-body{ transition:background .15s ease; }
@@ -491,6 +475,7 @@
   }
   .client-card .whatsapp-btn{
     display:inline-block; width:25px; height:25px; cursor:pointer; flex:0 0 auto;
+    position:relative; top:-8px;
   }
   .client-card .whatsapp-btn svg{ display:block; width:25px; height:25px; }
   .client-card .caddr{ font-size:.82rem; color:#fff; margin-top:3px; }
@@ -550,7 +535,15 @@
     padding:2px 6px; font-size:.68rem; cursor:pointer; flex:0 0 auto;
   }
   .remove-temp-btn:hover{ background:rgba(255,255,255,.15); }
-  .client-card .cactions{ display:flex; gap:6px; margin-top:6px; }
+  .client-card .cactions{ display:flex; gap:5px; margin-top:6px; align-items:center; }
+  .client-card .cactions .icon-circle-btn{
+    display:flex; align-items:center; justify-content:center;
+    flex:1 1 0; width:0; aspect-ratio:1/1; border-radius:50%; background:#fff; border:1px solid #999;
+    cursor:pointer; padding:0; min-width:0;
+  }
+  .client-card .cactions .icon-circle-btn svg{ display:block; width:60%; height:60%; }
+  .client-card .cactions .icon-circle-btn.active{ background:#fff7d6; box-shadow:0 0 0 2px rgba(255,255,255,.5) inset; }
+  .client-card .cactions .icon-circle-btn.toggle-skip.active{ opacity:.55; }
   .client-card .cactions button{
     font-size:.72rem; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); color:#fff; border-radius:6px;
     padding:3px 8px; cursor:pointer;
@@ -1680,6 +1673,22 @@
 
   const WHATSAPP_ICON_SVG = `<svg width="25" height="25" viewBox="0 0 30.667 30.667" xmlns="http://www.w3.org/2000/svg"><path fill="#73dd5c" d="M30.667,14.939c0,8.25-6.74,14.938-15.056,14.938c-2.639,0-5.118-0.675-7.276-1.857L0,30.667l2.717-8.017c-1.37-2.25-2.159-4.892-2.159-7.712C0.559,6.688,7.297,0,15.613,0C23.928,0.002,30.667,6.689,30.667,14.939z M15.61,2.382c-6.979,0-12.656,5.634-12.656,12.56c0,2.748,0.896,5.292,2.411,7.362l-1.58,4.663l4.862-1.545c2,1.312,4.393,2.076,6.963,2.076c6.979,0,12.658-5.633,12.658-12.559C28.27,8.016,22.59,2.382,15.61,2.382z M23.214,18.38c-0.094-0.151-0.34-0.243-0.708-0.427c-0.367-0.184-2.184-1.069-2.521-1.189c-0.34-0.123-0.586-0.185-0.832,0.182c-0.243,0.367-0.951,1.191-1.168,1.437c-0.215,0.245-0.43,0.276-0.799,0.095c-0.369-0.186-1.559-0.57-2.969-1.817c-1.097-0.972-1.838-2.169-2.052-2.536c-0.217-0.366-0.022-0.564,0.161-0.746c0.165-0.165,0.369-0.428,0.554-0.643c0.185-0.213,0.246-0.364,0.369-0.609c0.121-0.245,0.06-0.458-0.031-0.643c-0.092-0.184-0.829-1.984-1.138-2.717c-0.307-0.732-0.614-0.611-0.83-0.611c-0.215,0-0.461-0.03-0.707-0.03S9.897,8.215,9.56,8.582s-1.291,1.252-1.291,3.054c0,1.804,1.321,3.543,1.506,3.787c0.186,0.243,2.554,4.062,6.305,5.528c3.753,1.465,3.753,0.976,4.429,0.914c0.678-0.062,2.184-0.885,2.49-1.739C23.307,19.268,23.307,18.533,23.214,18.38z"/></svg>`;
 
+  // action-button icons (matching the reference sketch): each is a simple line/solid
+  // icon in its own theme color, used inside a small white circle with a matching border
+  const ACTION_ICONS = {
+    skip: { color:'#0448F7', svg:`<svg viewBox="0 0 24 24" width="18" height="18"><polygon points="4,4 12,12 4,20" fill="#0448F7"/><polygon points="11,4 19,12 11,20" fill="#0448F7"/><rect x="20" y="4" width="2.4" height="16" rx="1.2" fill="#0448F7"/></svg>` },
+    call: { color:'#0ABE63', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0ABE63" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C11.6 21 3 12.4 3 2c0-.6.4-1 1-1h3.2c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8z"/><path d="M15 7c1 .3 1.7 1 2 2"/><path d="M15 3.5c2 .4 3.5 1.9 4 3.9"/></svg>` },
+    wallet: { color:'#5F1BD6', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5F1BD6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h11l3 3v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M17.5 12H20a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2.5a2 2 0 0 1 0-4z"/></svg>` },
+    edit: { color:'#FD8C02', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FD8C02" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11a2 2 0 0 0 0-3l-1-1a2 2 0 0 0-3 0L4 15l-1 5z"/><path d="M14 6l3 3"/></svg>` },
+    pin: { color:'#F21C23', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#F21C23" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.5 7-12a7 7 0 0 0-14 0c0 4.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>` },
+    trash: { color:'#E80402', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#E80402" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>` }
+  };
+
+  function iconCircleBtn(iconKey, extraClass, title){
+    const icon = ACTION_ICONS[iconKey];
+    return `<button class="icon-circle-btn ${extraClass||''}" style="border-color:${icon.color}" title="${escapeHtml(title||'')}">${icon.svg}</button>`;
+  }
+
   function escapeHtml(s){
     return (s||"").replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
@@ -2219,12 +2228,12 @@
           <select class="temp-folder-select"></select>
         `}
         <div class="cactions">
-          ${showSkipToggle ? `<button class="toggle-skip" title="${c.skipRoute ? 'הכלל שוב במסלול' : 'דלג על הכתובת הזו היום, בלי למחוק אותה'}">${c.skipRoute ? '▶ כלול היום' : '⏸ דלג היום'}</button>` : ""}
-          <button class="toggle-call-before ${c.callBefore ? 'active' : ''}" title="${c.callBefore ? 'בטל תזכורת התקשרות' : 'סמן שצריך להתקשר לפני ההגעה'}">📞 להתקשר לפני</button>
-          <button class="toggle-collect-payment ${c.collectPayment ? 'active' : ''}" title="${c.collectPayment ? 'בטל תזכורת גביה' : 'סמן שצריך לגבות תשלום'}">💰 לגבות תשלום</button>
-          <button class="edit-client" title="עריכת פרטי הלקוח">✎ ערוך</button>
-          <button class="focus">מקם על המפה</button>
-          <button class="del">מחק</button>
+          ${showSkipToggle ? iconCircleBtn('skip', 'toggle-skip' + (c.skipRoute ? ' active' : ''), c.skipRoute ? 'הכלל שוב במסלול' : 'דלג על הכתובת הזו היום') : ""}
+          ${iconCircleBtn('call', 'toggle-call-before' + (c.callBefore ? ' active' : ''), c.callBefore ? 'בטל תזכורת התקשרות' : 'להתקשר לפני')}
+          ${iconCircleBtn('wallet', 'toggle-collect-payment' + (c.collectPayment ? ' active' : ''), c.collectPayment ? 'בטל תזכורת גביה' : 'לגבות תשלום')}
+          ${iconCircleBtn('edit', 'edit-client', 'עריכת פרטי הלקוח')}
+          ${iconCircleBtn('pin', 'focus', 'מקם על המפה')}
+          ${iconCircleBtn('trash', 'del', 'מחק')}
         </div>
       </div>
     `;
