@@ -470,14 +470,16 @@
   }
   .inventory-name{ color:#fff; display:flex; align-items:center; gap:6px; }
   .stock-row{
-    display:flex; align-items:center; gap:10px;
+    display:flex; align-items:center; flex-wrap:nowrap; gap:10px;
     padding:8px 0; font-size:.85rem; border-bottom:1px dashed rgba(255,255,255,.12);
   }
   .stock-name{ color:#fff; display:flex; align-items:center; gap:6px; flex:1 1 auto; min-width:0; }
-  .stock-remaining{ color:rgba(255,255,255,.75); white-space:nowrap; flex:0 0 auto; }
+  .stock-name-block{ display:flex; gap:5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .stock-remaining{ color:rgba(255,255,255,.75); white-space:nowrap; flex:0 0 auto; display:flex; gap:5px; }
   .stock-remaining b{ color:#3bd332; font-size:.95rem; }
-  .stock-complete-label{ color:rgba(255,255,255,.6); font-size:.78rem; flex:0 0 auto; }
-  .stock-complete-num{ color:#3bd332; font-weight:700; font-size:1.05rem; flex:0 0 auto; min-width:22px; text-align:center; }
+  .stock-complete-block{ display:flex; align-items:center; gap:5px; flex:0 0 auto; white-space:nowrap; }
+  .stock-complete-label{ color:rgba(255,255,255,.6); font-size:.78rem; }
+  .stock-complete-num{ color:#3bd332; font-weight:700; font-size:1.05rem; min-width:22px; text-align:center; }
   .stock-reset-one{
     background:transparent; border:none; color:#fff; font-size:.78rem; cursor:pointer; flex:0 0 auto; padding:2px 4px;
   }
@@ -628,6 +630,15 @@
     .hamburger-btn{ right:8px; top:10px; bottom:auto; transform:none; width:34px; height:34px; font-size:.95rem; }
     .hamburger-menu{ top:44px; right:8px; }
     section.panel{ margin-bottom:10px; }
+    .stock-row{ gap:0; font-size:.72rem; align-items:flex-start; justify-content:space-between; }
+    .stock-name{ flex:0 0 auto; flex-direction:column; align-items:center; text-align:center; }
+    .stock-name-block{ flex-direction:column; align-items:center; text-align:center; white-space:normal; gap:0; }
+    .stock-remaining{ flex:0 0 auto; flex-direction:column; align-items:center; text-align:center; gap:0; font-size:.72rem; }
+    .stock-remaining b{ font-size:.8rem; }
+    .stock-complete-block{ flex:0 0 auto; flex-direction:column; align-items:center; text-align:center; gap:0; }
+    .stock-complete-label{ font-size:.68rem; }
+    .stock-complete-num{ font-size:.9rem; min-width:16px; }
+    .stock-reset-one{ font-size:.68rem; padding:2px; flex:0 0 auto; }
   }
 </style>
 </head>
@@ -1831,9 +1842,9 @@
   let editingClientId = null; // which client (if any) is currently shown in inline-edit mode
 
   const PRODUCT_CATALOG = [
-    { title: "סמאש ג׳רקי", items: ["סמאש קלאסי","סמאש ים תיכוני","סמאש מעושן","סמאש ברבקיו","סמאש פיקנטי","סמאש מקורמל"] },
-    { title: "בילטונג", items: ["בילטונג קלאסי","בילטונג ים תיכוני","בילטונג מעושן","בילטונג ברבקיו","בילטונג פיקנטי","בילטונג מקורמל","בילטונג פיקניה"] },
-    { title: "ביף ג׳רקי", items: ["ביף ג׳רקי קלאסי","ביף ג׳רקי ים תיכוני","ביף ג׳רקי מעושן","ביף ג׳רקי ברבקיו","ביף ג׳רקי פיקנטי","ביף ג׳רקי מקורמל"] }
+    { title: "סמאש ג׳רקי", prefix: "סמאש", items: ["סמאש קלאסי","סמאש ים תיכוני","סמאש מעושן","סמאש ברבקיו","סמאש פיקנטי","סמאש מקורמל"] },
+    { title: "בילטונג", prefix: "בילטונג", items: ["בילטונג קלאסי","בילטונג ים תיכוני","בילטונג מעושן","בילטונג ברבקיו","בילטונג פיקנטי","בילטונג מקורמל","בילטונג פיקניה"] },
+    { title: "ביף ג׳רקי", prefix: "ביף ג׳רקי", items: ["ביף ג׳רקי קלאסי","ביף ג׳רקי ים תיכוני","ביף ג׳רקי מעושן","ביף ג׳רקי ברבקיו","ביף ג׳רקי פיקנטי","ביף ג׳רקי מקורמל"] }
   ];
 
   let orderModalEditingId = null; // which past order (if any) is being edited right now
@@ -1898,15 +1909,24 @@
               const usedSinceReset = Math.max(0, (orderedToday[name] || 0) - (baselineForDate[name] || 0));
               const remaining = VEHICLE_STOCK_PER_PRODUCT - usedSinceReset;
               const isLow = remaining <= VEHICLE_STOCK_LOW_THRESHOLD;
+              const variant = name.startsWith(cat.prefix + " ") ? name.slice(cat.prefix.length + 1) : name;
               return `
                 <div class="stock-row">
                   <div class="stock-name">
                     ${isLow ? `<span class="stock-low-dot" title="המלאי ברכב עומד להיגמר"></span>` : ""}
-                    מוצר: "${escapeHtml(name)}"
+                    <span class="stock-name-block">
+                      <span class="stock-name-prefix">${escapeHtml(cat.prefix)}</span>
+                      <span class="stock-name-variant">${escapeHtml(variant)}</span>
+                    </span>
                   </div>
-                  <div class="stock-remaining">מלאי נותר ברכב: <b class="${isLow ? 'stock-low-text' : ''}">${remaining}</b> מתוך ${VEHICLE_STOCK_PER_PRODUCT}</div>
-                  <div class="stock-complete-label">להשלים</div>
-                  <div class="stock-complete-num">${usedSinceReset}</div>
+                  <div class="stock-remaining">
+                    <span class="stock-remaining-label">מלאי נותר ברכב:</span>
+                    <span class="stock-remaining-value"><b class="${isLow ? 'stock-low-text' : ''}">${remaining}</b> מתוך ${VEHICLE_STOCK_PER_PRODUCT}</span>
+                  </div>
+                  <div class="stock-complete-block">
+                    <div class="stock-complete-label">להשלים</div>
+                    <div class="stock-complete-num">${usedSinceReset}</div>
+                  </div>
                   <button class="stock-reset-one" data-name="${escapeHtml(name)}">אפס</button>
                 </div>
               `;
@@ -2017,7 +2037,7 @@
           <div class="order-cat-items" style="display:none">
             ${cat.items.map(name => `
               <div class="inventory-row">
-                <div class="inventory-name">מוצר: "${escapeHtml(name)}"</div>
+                <div class="inventory-name">${escapeHtml(name)}</div>
                 <div class="inventory-qty">כמות הזמנות כללית: <b>${totals[name] || 0}</b></div>
               </div>
             `).join('')}
