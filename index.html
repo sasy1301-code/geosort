@@ -598,11 +598,11 @@
     .sidebar{ width:100%; flex:0 0 auto; height:44vh; border-left:none; border-top:none; order:2; }
     .map-wrap{ order:1; height:auto; flex:1 1 auto; }
     .header-logo{ height:36px; }
-    header{ height:118px; }
-    header .actions{ left:8px; top:auto; bottom:10px; transform:none; gap:4px; max-width:calc(100% - 60px); overflow-x:auto; }
+    header{ height:64px; }
+    header .actions{ left:8px; top:10px; bottom:auto; transform:none; gap:4px; max-width:calc(100% - 60px); overflow-x:auto; }
     header button.ghost{ padding:5px 7px; font-size:.68rem; white-space:nowrap; }
-    .hamburger-btn{ right:8px; top:auto; bottom:8px; transform:none; width:34px; height:34px; font-size:.95rem; }
-    .hamburger-menu{ top:118px; right:8px; }
+    .hamburger-btn{ right:8px; top:10px; bottom:auto; transform:none; width:34px; height:34px; font-size:.95rem; }
+    .hamburger-menu{ top:64px; right:8px; }
   }
 </style>
 </head>
@@ -1122,7 +1122,28 @@
 
   async function saveData(){
     try{
+      // fetch the current server state first and merge in any clients that exist
+      // there but not locally (e.g. added from another device since this page was
+      // loaded) - this prevents a device with stale/older data from silently
+      // wiping out newer additions made elsewhere. local edits still win for any
+      // id that exists in both places.
+      let serverClients = [];
+      try{
+        const raw = await sbGet(STORAGE_KEY);
+        serverClients = raw ? JSON.parse(raw) : [];
+      }catch(e){ /* if the fetch fails, just proceed with local data only */ }
+
+      const localIds = new Set(clients.map(c => c.id));
+      let recovered = 0;
+      serverClients.forEach(serverC=>{
+        if(!localIds.has(serverC.id)){
+          clients.push(serverC);
+          recovered++;
+        }
+      });
+
       await sbSet(STORAGE_KEY, JSON.stringify(clients));
+      if(recovered > 0) renderAll(); // reflect anything recovered from another device
     }catch(e){
       console.error("שגיאת שמירה", e);
     }
@@ -1171,7 +1192,24 @@
 
   async function saveFolders(){
     try{
+      let serverFolders = [];
+      try{
+        const raw = await sbGet(FOLDERS_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        serverFolders = parsed.map(f => typeof f === 'string' ? { name: f, color: colorForName(f) } : f);
+      }catch(e){ /* if the fetch fails, just proceed with local data only */ }
+
+      const localNames = new Set(folders.map(f => f.name));
+      let recovered = 0;
+      serverFolders.forEach(serverF=>{
+        if(!localNames.has(serverF.name)){
+          folders.push(serverF);
+          recovered++;
+        }
+      });
+
       await sbSet(FOLDERS_KEY, JSON.stringify(folders));
+      if(recovered > 0) renderAll();
     }catch(e){
       console.error("שגיאת שמירה", e);
     }
