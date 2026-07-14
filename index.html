@@ -81,6 +81,22 @@
     position:absolute; left:22px; top:50%; transform:translateY(-50%);
     display:flex; gap:10px; z-index:2;
   }
+  .hamburger-btn{
+    position:absolute; right:22px; top:50%; transform:translateY(-50%); z-index:2;
+    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.3); color:#fff;
+    font-size:1.1rem; width:40px; height:40px; border-radius:8px; cursor:pointer;
+  }
+  .hamburger-btn:hover{ background:rgba(255,255,255,.18); }
+  .hamburger-menu{
+    position:fixed; right:22px; top:76px; z-index:5000;
+    background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:10px;
+    box-shadow:0 8px 24px rgba(0,0,0,.4); min-width:160px; padding:6px; overflow:hidden;
+  }
+  .hamburger-menu-item{
+    display:block; width:100%; text-align:right; background:transparent; border:none; color:#fff;
+    font-size:.88rem; padding:9px 12px; border-radius:6px; cursor:pointer;
+  }
+  .hamburger-menu-item:hover{ background:rgba(255,255,255,.1); }
   header button.ghost{
     background:transparent; border:1px solid rgba(245,241,231,.35); color:var(--paper-2);
     padding:7px 12px; border-radius:8px; font-size:.82rem; cursor:pointer;
@@ -448,6 +464,13 @@
   .order-history{
     padding:14px 20px; border-top:1px solid rgba(255,255,255,.15); background:rgba(0,0,0,.15);
   }
+  .inventory-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:6px 0; font-size:.85rem; border-bottom:1px dashed rgba(255,255,255,.12);
+  }
+  .inventory-name{ color:#fff; }
+  .inventory-qty{ color:rgba(255,255,255,.75); white-space:nowrap; }
+  .inventory-qty b{ color:#3bd332; font-size:.95rem; }
   .order-history-title{
     font-weight:700; font-size:.85rem; margin-bottom:8px; cursor:pointer;
     display:flex; align-items:center; gap:6px; user-select:none;
@@ -542,7 +565,9 @@
     cursor:pointer; padding:0; min-width:0;
   }
   .client-card .cactions .icon-circle-btn svg{ display:block; width:60%; height:60%; }
-  .client-card .cactions .icon-circle-btn.active{ background:#fff7d6; box-shadow:0 0 0 2px rgba(255,255,255,.5) inset; }
+  .client-card .cactions .icon-circle-btn.active{
+    box-shadow: 0 0 8px 3px var(--icon-color, #fff), 0 0 0 1px var(--icon-color, #fff) inset;
+  }
   .client-card .cactions .icon-circle-btn.toggle-skip.active{ opacity:.55; }
   .client-card .cactions button{
     font-size:.72rem; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); color:#fff; border-radius:6px;
@@ -586,7 +611,11 @@
       <button class="ghost" id="fitAllBtn" title="הצג את כל הלקוחות במפה">⤢ הצג הכל</button>
       <button class="ghost" id="animToggleBtn" title="עצירה/הפעלה של אנימציית הרקע (חוסך סוללה/ביצועים)">✨ רקע</button>
     </div>
+    <button class="hamburger-btn" id="hamburgerBtn" title="תפריט">☰</button>
   </header>
+  <div class="hamburger-menu" id="hamburgerMenu" style="display:none">
+    <button class="hamburger-menu-item" id="inventoryMenuItem">📦 מלאי</button>
+  </div>
 
   <div class="main">
     <div class="sidebar">
@@ -1686,7 +1715,7 @@
 
   function iconCircleBtn(iconKey, extraClass, title){
     const icon = ACTION_ICONS[iconKey];
-    return `<button class="icon-circle-btn ${extraClass||''}" style="border-color:${icon.color}" title="${escapeHtml(title||'')}">${icon.svg}</button>`;
+    return `<button class="icon-circle-btn ${extraClass||''}" style="border-color:${icon.color};--icon-color:${icon.color}" title="${escapeHtml(title||'')}">${icon.svg}</button>`;
   }
 
   function escapeHtml(s){
@@ -1722,6 +1751,89 @@
   ];
 
   let orderModalEditingId = null; // which past order (if any) is being edited right now
+
+  function closeInventoryModal(){
+    const overlay = document.getElementById('inventoryModalOverlay');
+    if(overlay) overlay.remove();
+  }
+
+  function openInventoryModal(){
+    closeInventoryModal();
+    const today = localDateString();
+
+    const overlay = document.createElement('div');
+    overlay.id = 'inventoryModalOverlay';
+    overlay.className = 'order-modal-overlay';
+    overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeInventoryModal(); });
+
+    const modal = document.createElement('div');
+    modal.className = 'order-modal';
+    overlay.appendChild(modal);
+
+    modal.innerHTML = `
+      <div class="order-modal-header">
+        <h3>📦 מלאי - סך הזמנות למוצר</h3>
+        <button class="order-modal-close" title="סגור">✕</button>
+      </div>
+      <div class="order-modal-body">
+        <div class="invoice-summary-range" style="justify-content:center;margin-bottom:14px">
+          <input type="date" class="inventory-from" value="${today}">
+          <span class="invoice-range-sep">עד</span>
+          <input type="date" class="inventory-to" value="${today}">
+        </div>
+        <div class="inventory-list"></div>
+      </div>
+    `;
+
+    modal.querySelector('.order-modal-close').addEventListener('click', closeInventoryModal);
+
+    const fromInput = modal.querySelector('.inventory-from');
+    const toInput = modal.querySelector('.inventory-to');
+    const listEl = modal.querySelector('.inventory-list');
+
+    function refreshInventory(){
+      const fromDate = fromInput.value;
+      const toDate = toInput.value;
+      const totals = {}; // product name -> total qty
+      clients.forEach(c=>{
+        (c.orders || []).forEach(o=>{
+          if(o.date >= fromDate && o.date <= toDate && !o.noOrder){
+            (o.items || []).forEach(it=>{
+              totals[it.name] = (totals[it.name] || 0) + (it.qty || 0);
+            });
+          }
+        });
+      });
+      listEl.innerHTML = PRODUCT_CATALOG.map(cat => `
+        <div class="order-cat">
+          <div class="order-cat-title" data-open="1"><span class="order-cat-chevron">▾</span> ${escapeHtml(cat.title)}</div>
+          <div class="order-cat-items">
+            ${cat.items.map(name => `
+              <div class="inventory-row">
+                <div class="inventory-name">מוצר: "${escapeHtml(name)}"</div>
+                <div class="inventory-qty">כמות הזמנות כללית: <b>${totals[name] || 0}</b></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+      listEl.querySelectorAll('.order-cat-title').forEach(titleEl=>{
+        titleEl.addEventListener('click', ()=>{
+          const itemsEl = titleEl.nextElementSibling;
+          const chevron = titleEl.querySelector('.order-cat-chevron');
+          const isOpen = itemsEl.style.display !== 'none';
+          itemsEl.style.display = isOpen ? 'none' : 'block';
+          chevron.textContent = isOpen ? '▸' : '▾';
+        });
+      });
+    }
+
+    fromInput.addEventListener('change', refreshInventory);
+    toInput.addEventListener('change', refreshInventory);
+    refreshInventory();
+
+    document.body.appendChild(overlay);
+  }
 
   function closeOrderModal(){
     const overlay = document.getElementById('orderModalOverlay');
@@ -3207,6 +3319,22 @@
   });
 
   wireFolderDragReorder(document.getElementById('folderList'));
+
+  document.getElementById('hamburgerBtn').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const menu = document.getElementById('hamburgerMenu');
+    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  });
+  document.getElementById('inventoryMenuItem').addEventListener('click', ()=>{
+    document.getElementById('hamburgerMenu').style.display = 'none';
+    openInventoryModal();
+  });
+  document.addEventListener('click', (e)=>{
+    const menu = document.getElementById('hamburgerMenu');
+    if(menu.style.display !== 'none' && !menu.contains(e.target) && e.target.id !== 'hamburgerBtn'){
+      menu.style.display = 'none';
+    }
+  });
 
   setInterval(()=>{
     if(expireHandledStatuses()){ saveData(); renderAll(); }
