@@ -464,6 +464,9 @@
   .order-history{
     padding:14px 20px; border-top:1px solid rgba(255,255,255,.15); background:rgba(0,0,0,.15);
   }
+  .vehicle-stock-hint{
+    font-size:.75rem; color:rgba(255,255,255,.6); text-align:center; margin-bottom:14px; line-height:1.5;
+  }
   .inventory-row{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
     padding:6px 0; font-size:.85rem; border-bottom:1px dashed rgba(255,255,255,.12);
@@ -925,7 +928,7 @@
   const CLUSTER_ORDER_KEY = "cluster_order_map";
 
   let clients = [];
-  let vehicleStockBaseline = { date: '', baselines: {} }; // per-product qty snapshot at last manual reset, for the given date
+  let vehicleStockBaseline = { baselines: {} }; // per-product cumulative-qty snapshot as of the last manual "אפס" reset - the stock never resets automatically by date
   let folders = []; // manually-created folder names, e.g. "ראשון לציון" or "צפון"
   let clusterNames = {}; // custom overrides for automatic cluster names, keyed by dominant-city/geo key
   let clusterOrder = {}; // manual up/down ordering of addresses within a cluster, keyed the same way
@@ -1859,7 +1862,6 @@
 
   function openVehicleStockModal(){
     closeVehicleStockModal();
-    const today = localDateString();
 
     const overlay = document.createElement('div');
     overlay.id = 'vehicleStockModalOverlay';
@@ -1876,37 +1878,40 @@
         <button class="order-modal-close" title="סגור">✕</button>
       </div>
       <div class="order-modal-body">
-        <div class="invoice-summary-range" style="justify-content:center;margin-bottom:14px">
-          <input type="date" class="vehicle-stock-date" value="${today}">
-        </div>
+        <div class="vehicle-stock-hint">המלאי רץ ברציפות ולא מתאפס לבד בכל יום - הוא יורד לפי כל הזמנה, עד שתלחצו "אפס" כשממלאים מחדש</div>
         <div class="inventory-list"></div>
       </div>
     `;
 
     modal.querySelector('.order-modal-close').addEventListener('click', closeVehicleStockModal);
 
-    const dateInput = modal.querySelector('.vehicle-stock-date');
     const listEl = modal.querySelector('.inventory-list');
 
-    function refreshVehicleStock(){
-      const chosenDate = dateInput.value;
-      const orderedToday = {}; // product name -> qty ordered that day
+    // total ever ordered for a product, across every client and every date (not
+    // scoped to "today" - the running stock level depends on all-time history,
+    // offset by whatever the last manual reset captured)
+    function getCumulativeOrderedQty(name){
+      let total = 0;
       clients.forEach(c=>{
         (c.orders || []).forEach(o=>{
-          if(o.date === chosenDate && !o.noOrder){
+          if(!o.noOrder){
             (o.items || []).forEach(it=>{
-              orderedToday[it.name] = (orderedToday[it.name] || 0) + (it.qty || 0);
+              if(it.name === name) total += (it.qty || 0);
             });
           }
         });
       });
-      const baselineForDate = (vehicleStockBaseline.date === chosenDate) ? vehicleStockBaseline.baselines : {};
+      return total;
+    }
+
+    function refreshVehicleStock(){
       listEl.innerHTML = PRODUCT_CATALOG.map(cat => `
         <div class="order-cat">
           <div class="order-cat-title" data-open="0"><span class="order-cat-chevron">▸</span> ${escapeHtml(cat.title)}</div>
           <div class="order-cat-items" style="display:none">
             ${cat.items.map(name => {
-              const usedSinceReset = Math.max(0, (orderedToday[name] || 0) - (baselineForDate[name] || 0));
+              const cumulative = getCumulativeOrderedQty(name);
+              const usedSinceReset = Math.max(0, cumulative - (vehicleStockBaseline.baselines[name] || 0));
               const remaining = VEHICLE_STOCK_PER_PRODUCT - usedSinceReset;
               const isLow = remaining <= VEHICLE_STOCK_LOW_THRESHOLD;
               const variant = name.startsWith(cat.prefix + " ") ? name.slice(cat.prefix.length + 1) : name;
@@ -1940,10 +1945,7 @@
         btn.addEventListener('click', (e)=>{
           e.stopPropagation();
           const name = btn.dataset.name;
-          if(vehicleStockBaseline.date !== chosenDate){
-            vehicleStockBaseline = { date: chosenDate, baselines: {} };
-          }
-          vehicleStockBaseline.baselines[name] = orderedToday[name] || 0;
+          vehicleStockBaseline.baselines[name] = getCumulativeOrderedQty(name);
           saveVehicleStockBaseline();
           refreshVehicleStock();
         });
@@ -1954,10 +1956,10 @@
         const newBaselines = {};
         PRODUCT_CATALOG.forEach(cat=>{
           cat.items.forEach(name=>{
-            newBaselines[name] = orderedToday[name] || 0;
+            newBaselines[name] = getCumulativeOrderedQty(name);
           });
         });
-        vehicleStockBaseline = { date: chosenDate, baselines: newBaselines };
+        vehicleStockBaseline = { baselines: newBaselines };
         saveVehicleStockBaseline();
         refreshVehicleStock();
       });
@@ -1972,7 +1974,6 @@
       });
     }
 
-    dateInput.addEventListener('change', refreshVehicleStock);
     refreshVehicleStock();
 
     document.body.appendChild(overlay);
