@@ -163,7 +163,7 @@
   }
   section.panel h2 .dot{ width:9px;height:9px;border-radius:50%;background:var(--teal); }
   label{ display:block; font-size:.76rem; color:rgba(255,255,255,.62); margin:8px 0 4px; }
-  input[type=text], input[type=tel], input[type=number], input[type=date]{
+  input[type=text], input[type=tel], input[type=number], input[type=date], input[type=email]{
     width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:7px;
     font-size:.9rem; background:#fff; color:#021236; font-family:inherit;
   }
@@ -591,11 +591,13 @@
   .client-card .cactions .icon-circle-btn{
     display:flex; align-items:center; justify-content:center;
     flex:1 1 0; width:0; aspect-ratio:1/1; border-radius:50%; background:#fff; border:1px solid #999;
-    cursor:pointer; padding:0; min-width:0;
+    cursor:pointer; padding:0; min-width:0; transition:background .1s ease, color .1s ease;
+    color:var(--icon-color, #333);
   }
   .client-card .cactions .icon-circle-btn svg{ display:block; width:60%; height:60%; }
+  .client-card .cactions .icon-circle-btn:active,
   .client-card .cactions .icon-circle-btn.active{
-    box-shadow: 0 0 8px 3px var(--icon-color, #fff), 0 0 0 1px var(--icon-color, #fff) inset;
+    background:var(--icon-color, #333); color:#fff;
   }
   .client-card .cactions .icon-circle-btn.toggle-skip.active{ opacity:.55; }
   .client-card .cactions button{
@@ -688,6 +690,8 @@
               <input type="number" id="f-price" placeholder="₪0" step="0.01" min="0">
             </div>
           </div>
+          <label for="f-email">אימייל</label>
+          <input type="email" id="f-email" placeholder="לדוגמה: info@business.co.il">
           <label>כתובת</label>
           <div class="addr-field-wrap">
             <input type="text" id="f-city" placeholder="עיר" autocomplete="off">
@@ -1805,12 +1809,12 @@
   // action-button icons (matching the reference sketch): each is a simple line/solid
   // icon in its own theme color, used inside a small white circle with a matching border
   const ACTION_ICONS = {
-    skip: { color:'#0448F7', svg:`<svg viewBox="0 0 24 24" width="18" height="18"><polygon points="4,4 12,12 4,20" fill="#0448F7"/><polygon points="11,4 19,12 11,20" fill="#0448F7"/><rect x="20" y="4" width="2.4" height="16" rx="1.2" fill="#0448F7"/></svg>` },
-    call: { color:'#0ABE63', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#0ABE63" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C11.6 21 3 12.4 3 2c0-.6.4-1 1-1h3.2c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8z"/><path d="M15 7c1 .3 1.7 1 2 2"/><path d="M15 3.5c2 .4 3.5 1.9 4 3.9"/></svg>` },
-    wallet: { color:'#5F1BD6', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#5F1BD6" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h11l3 3v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M17.5 12H20a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2.5a2 2 0 0 1 0-4z"/></svg>` },
-    edit: { color:'#FD8C02', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#FD8C02" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11a2 2 0 0 0 0-3l-1-1a2 2 0 0 0-3 0L4 15l-1 5z"/><path d="M14 6l3 3"/></svg>` },
-    pin: { color:'#F21C23', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#F21C23" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.5 7-12a7 7 0 0 0-14 0c0 4.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>` },
-    trash: { color:'#E80402', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#E80402" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>` }
+    skip: { color:'#0448F7', svg:`<svg viewBox="0 0 24 24" width="18" height="18"><polygon points="4,4 12,12 4,20" fill="currentColor"/><polygon points="11,4 19,12 11,20" fill="currentColor"/><rect x="20" y="4" width="2.4" height="16" rx="1.2" fill="currentColor"/></svg>` },
+    call: { color:'#0ABE63', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C11.6 21 3 12.4 3 2c0-.6.4-1 1-1h3.2c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1L6.6 10.8z"/><path d="M15 7c1 .3 1.7 1 2 2"/><path d="M15 3.5c2 .4 3.5 1.9 4 3.9"/></svg>` },
+    wallet: { color:'#5F1BD6', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h11l3 3v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M17.5 12H20a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-2.5a2 2 0 0 1 0-4z"/></svg>` },
+    edit: { color:'#FD8C02', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11a2 2 0 0 0 0-3l-1-1a2 2 0 0 0-3 0L4 15l-1 5z"/><path d="M14 6l3 3"/></svg>` },
+    pin: { color:'#F21C23', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-7.5 7-12a7 7 0 0 0-14 0c0 4.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.3"/></svg>` },
+    trash: { color:'#E80402', svg:`<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M6 7l1 13a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-13"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>` }
   };
 
   function iconCircleBtn(iconKey, extraClass, title){
@@ -2321,6 +2325,8 @@
       <input type="text" class="edit-contact" value="${escapeHtml(c.contact||'')}">
       <label>טלפון</label>
       <input type="tel" class="edit-phone" value="${escapeHtml(c.phone||'')}">
+      <label>אימייל</label>
+      <input type="email" class="edit-email" value="${escapeHtml(c.email||'')}">
       <label>מחיר ליחידה</label>
       <input type="number" class="edit-price" value="${escapeHtml(c.price||'')}" step="0.01" min="0">
       <label>עיר</label>
@@ -2399,6 +2405,7 @@
       c.name = card.querySelector('.edit-name').value.trim();
       c.contact = card.querySelector('.edit-contact').value.trim();
       c.phone = card.querySelector('.edit-phone').value.trim();
+      c.email = card.querySelector('.edit-email').value.trim();
       c.price = card.querySelector('.edit-price').value.trim();
       c.notes = card.querySelector('.edit-notes').value.trim();
     }
@@ -2533,6 +2540,7 @@
         <div class="caddr-group">
           <div class="caddr">כתובת: ${escapeHtml(c.address)}</div>
           ${c.phone ? `<div class="cphone">טלפון: <a href="tel:${escapeHtml(telHref(c.phone))}" class="phone-link" title="חייג ללקוח">${escapeHtml(c.phone)}</a></div>` : ""}
+          ${c.email ? `<div class="cphone">אימייל: <a href="mailto:${escapeHtml(c.email)}" class="phone-link" title="שליחת מייל ללקוח">${escapeHtml(c.email)}</a></div>` : ""}
         </div>
         ${(c.price || c.phone) ? `
           <div class="cprice-row">
@@ -3336,7 +3344,7 @@
       // finishing an add that was ambiguous
       const data = pendingClientData;
       pendingClientData = null;
-      finalizeAdd({ business:data.business, name:data.name, contact:data.contact, phone:data.phone, price:data.price, notes:data.notes, folder:data.folder, houseNumber:data.houseNumber, address:insertHouseNumber(item.label, data.houseNumber), lat:item.lat, lon:item.lon, city:item.city });
+      finalizeAdd({ business:data.business, name:data.name, contact:data.contact, phone:data.phone, email:data.email, price:data.price, notes:data.notes, folder:data.folder, houseNumber:data.houseNumber, address:insertHouseNumber(item.label, data.houseNumber), lat:item.lat, lon:item.lon, city:item.city });
     } else {
       // just narrowing down the address while composing the form
       selectedGeo = item;
@@ -3346,7 +3354,7 @@
   function finalizeAdd(data){
     clients.push({
       id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
-      business: data.business || "", name: data.name, contact: data.contact || "", phone: data.phone || "", price: data.price || "", houseNumber: data.houseNumber || "", address: data.address, notes: data.notes || "",
+      business: data.business || "", name: data.name, contact: data.contact || "", phone: data.phone || "", email: data.email || "", price: data.price || "", houseNumber: data.houseNumber || "", address: data.address, notes: data.notes || "",
       folder: data.folder || "", lat: data.lat, lon: data.lon, city: data.city || ""
     });
     saveData();
@@ -3355,6 +3363,7 @@
     document.getElementById('f-name').value = '';
     document.getElementById('f-contact').value = '';
     document.getElementById('f-phone').value = '';
+    document.getElementById('f-email').value = '';
     document.getElementById('f-price').value = '';
     document.getElementById('f-street').value = '';
     document.getElementById('f-housenum').value = '';
@@ -3475,6 +3484,7 @@
     const nameEl = document.getElementById('f-name');
     const contactEl = document.getElementById('f-contact');
     const phoneEl = document.getElementById('f-phone');
+    const emailEl = document.getElementById('f-email');
     const priceEl = document.getElementById('f-price');
     const streetEl = document.getElementById('f-street');
     const houseNumEl = document.getElementById('f-housenum');
@@ -3513,7 +3523,7 @@
 
     // if the user already picked an exact suggestion, use it directly - no need to re-geocode
     if(selectedGeo){
-      finalizeAdd({ business, name, contact, phone: phoneEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(selectedGeo.label, houseNumber), lat: selectedGeo.lat, lon: selectedGeo.lon, city: selectedGeo.city });
+      finalizeAdd({ business, name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(selectedGeo.label, houseNumber), lat: selectedGeo.lat, lon: selectedGeo.lon, city: selectedGeo.city });
       clearSuggestions();
       return;
     }
@@ -3532,12 +3542,12 @@
 
       if(results.length === 1){
         clearSuggestions();
-        finalizeAdd({ business, name, contact, phone: phoneEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(results[0].label, houseNumber), lat: results[0].lat, lon: results[0].lon, city: results[0].city });
+        finalizeAdd({ business, name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(results[0].label, houseNumber), lat: results[0].lat, lon: results[0].lon, city: results[0].city });
         return;
       }
 
       // several possible matches - let the user pick the right one from the list / map
-      pendingClientData = { business, name, contact, phone: phoneEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber };
+      pendingClientData = { business, name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber };
       showSuggestions(results, true);
     }catch(e){
       errEl.textContent = "שגיאה באיתור הכתובת. בדקו את החיבור לאינטרנט ונסו שוב.";
