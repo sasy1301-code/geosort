@@ -534,6 +534,22 @@
     display:inline-block; width:25px; height:25px; cursor:pointer; flex:0 0 auto;
     position:relative; top:-8px;
   }
+  .client-card .share-card-row{ text-align:left; margin-top:8px; position:relative; }
+  .client-card .share-card-btn{
+    display:inline-flex; align-items:center; justify-content:center; width:25px; height:25px;
+    background:transparent; border:none; padding:0; cursor:pointer;
+  }
+  .client-card .share-card-btn svg{ display:block; }
+  .share-choice-menu{
+    position:absolute; left:0; top:28px; z-index:20; background:#111e63;
+    border:1px solid rgba(255,255,255,.3); border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.4);
+    min-width:150px; padding:4px; text-align:right;
+  }
+  .share-choice-menu button{
+    display:block; width:100%; background:transparent; border:none; color:#fff; text-align:right;
+    font-size:.8rem; padding:8px 10px; border-radius:6px; cursor:pointer;
+  }
+  .share-choice-menu button:hover{ background:rgba(255,255,255,.1); }
   .client-card .whatsapp-btn svg{ display:block; width:25px; height:25px; }
   .client-card .caddr{ font-size:.82rem; color:#fff; margin-top:3px; }
   .client-card .cphone{ font-size:.82rem; color:#fff; margin-top:3px; }
@@ -684,6 +700,8 @@
           <input type="text" id="f-name" placeholder="לדוגמה: דוד כהן / חברת ABC בע״מ">
           <label for="f-business">שם העסק (מה שרשום על השלט / הכניסה) <span style="color:var(--gold)">*חובה</span></label>
           <input type="text" id="f-business" placeholder="לדוגמה: מספרת שי, פיצה רומא...">
+          <label for="f-businessid">ח.פ/ת.ז</label>
+          <input type="text" id="f-businessid" placeholder="מספר ח.פ או ת.ז">
           <label for="f-contact">שם איש הקשר</label>
           <input type="text" id="f-contact" placeholder="לדוגמה: משה, מנהל המקום">
           <div class="row2">
@@ -1172,7 +1190,14 @@
     }
   }
 
-  async function saveData(){
+  let saveDataQueue = Promise.resolve(); // serializes saves so they can never race/interleave
+
+  function saveData(){
+    saveDataQueue = saveDataQueue.then(() => doSaveData()).catch(()=>{});
+    return saveDataQueue;
+  }
+
+  async function doSaveData(){
     try{
       // fetch the current server state first and merge it into what we're about to
       // save - this prevents a device with stale/older data from silently wiping
@@ -1218,7 +1243,7 @@
         // is a stale/blank local copy overwriting a real value entered elsewhere,
         // so guard against exactly that: if this device has nothing here but the
         // server does, keep the server's value instead of blanking it out
-        ['notes','phone','email','contact','price'].forEach(field=>{
+        ['notes','phone','email','contact','price','lastInvoice','lastInvoiceDate'].forEach(field=>{
           if(!localC[field] && serverC[field]){
             localC[field] = serverC[field];
             changed = true;
@@ -1852,6 +1877,23 @@
 
   const WHATSAPP_ICON_SVG = `<svg width="25" height="25" viewBox="0 0 30.667 30.667" xmlns="http://www.w3.org/2000/svg"><path fill="#73dd5c" d="M30.667,14.939c0,8.25-6.74,14.938-15.056,14.938c-2.639,0-5.118-0.675-7.276-1.857L0,30.667l2.717-8.017c-1.37-2.25-2.159-4.892-2.159-7.712C0.559,6.688,7.297,0,15.613,0C23.928,0.002,30.667,6.689,30.667,14.939z M15.61,2.382c-6.979,0-12.656,5.634-12.656,12.56c0,2.748,0.896,5.292,2.411,7.362l-1.58,4.663l4.862-1.545c2,1.312,4.393,2.076,6.963,2.076c6.979,0,12.658-5.633,12.658-12.559C28.27,8.016,22.59,2.382,15.61,2.382z M23.214,18.38c-0.094-0.151-0.34-0.243-0.708-0.427c-0.367-0.184-2.184-1.069-2.521-1.189c-0.34-0.123-0.586-0.185-0.832,0.182c-0.243,0.367-0.951,1.191-1.168,1.437c-0.215,0.245-0.43,0.276-0.799,0.095c-0.369-0.186-1.559-0.57-2.969-1.817c-1.097-0.972-1.838-2.169-2.052-2.536c-0.217-0.366-0.022-0.564,0.161-0.746c0.165-0.165,0.369-0.428,0.554-0.643c0.185-0.213,0.246-0.364,0.369-0.609c0.121-0.245,0.06-0.458-0.031-0.643c-0.092-0.184-0.829-1.984-1.138-2.717c-0.307-0.732-0.614-0.611-0.83-0.611c-0.215,0-0.461-0.03-0.707-0.03S9.897,8.215,9.56,8.582s-1.291,1.252-1.291,3.054c0,1.804,1.321,3.543,1.506,3.787c0.186,0.243,2.554,4.062,6.305,5.528c3.753,1.465,3.753,0.976,4.429,0.914c0.678-0.062,2.184-0.885,2.49-1.739C23.307,19.268,23.307,18.533,23.214,18.38z"/></svg>`;
 
+  const SHARE_ICON_SVG = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9fc3ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="19" r="2.8"/><line x1="8.4" y1="10.7" x2="15.6" y2="6.3"/><line x1="8.4" y1="13.3" x2="15.6" y2="17.7"/></svg>`;
+
+  // builds a plain-text summary of a client's card, for sharing via WhatsApp/email
+  function buildClientShareText(c){
+    const lines = [];
+    lines.push(c.business ? `עסק: ${c.business}` : '');
+    if(c.businessId) lines.push(`ח.פ/ת.ז: ${c.businessId}`);
+    if(c.name) lines.push(`שם לחשבונית: ${c.name}`);
+    if(c.contact) lines.push(`איש קשר: ${c.contact}`);
+    lines.push(`כתובת: ${c.address || ''}`);
+    if(c.phone) lines.push(`טלפון: ${c.phone}`);
+    if(c.email) lines.push(`אימייל: ${c.email}`);
+    if(c.price) lines.push(`מחיר ליחידה: ₪${c.price}`);
+    if(c.notes) lines.push(`הערות: ${c.notes}`);
+    return lines.filter(Boolean).join('\n');
+  }
+
   // action-button icons (matching the reference sketch): each is a simple line/solid
   // icon in its own theme color, used inside a small white circle with a matching border
   const ACTION_ICONS = {
@@ -2387,6 +2429,8 @@
     card.innerHTML = `
       <label>שם העסק <span style="color:var(--gold)">*חובה</span></label>
       <input type="text" class="edit-business" value="${escapeHtml(c.business||'')}">
+      <label>ח.פ/ת.ז</label>
+      <input type="text" class="edit-businessid" value="${escapeHtml(c.businessId||'')}">
       <label>שם על גבי החשבונית</label>
       <input type="text" class="edit-name" value="${escapeHtml(c.name||'')}">
       <label>שם איש הקשר</label>
@@ -2470,6 +2514,7 @@
 
     function applyNonAddressFields(){
       c.business = card.querySelector('.edit-business').value.trim();
+      c.businessId = card.querySelector('.edit-businessid').value.trim();
       c.name = card.querySelector('.edit-name').value.trim();
       c.contact = card.querySelector('.edit-contact').value.trim();
       c.phone = card.querySelector('.edit-phone').value.trim();
@@ -2603,12 +2648,16 @@
       </div>
       ${c.skipRoute ? `<div class="skip-badge">⏸ לא במסלול היום</div>` : ""}
       <div class="card-details" style="display:${isCardOpen ? 'block' : 'none'}">
+        ${c.businessId ? `<div class="cbillname">ח.פ/ת.ז: ${escapeHtml(c.businessId)}</div>` : ""}
         ${c.name ? `<div class="cbillname">שם לחשבונית: ${escapeHtml(c.name)}</div>` : ""}
         ${c.contact ? `<div class="cbillname">איש קשר: ${escapeHtml(c.contact)}</div>` : ""}
         <div class="caddr-group">
           <div class="caddr">כתובת: ${escapeHtml(c.address)}</div>
           ${c.phone ? `<div class="cphone">טלפון: <a href="tel:${escapeHtml(telHref(c.phone))}" class="phone-link" title="חייג ללקוח">${escapeHtml(c.phone)}</a></div>` : ""}
           ${c.email ? `<div class="cphone">אימייל: <a href="mailto:${escapeHtml(c.email)}" class="phone-link" title="שליחת מייל ללקוח">${escapeHtml(c.email)}</a></div>` : ""}
+        </div>
+        <div class="share-card-row">
+          <button type="button" class="share-card-btn" title="שליחת פרטי הכרטיס">${SHARE_ICON_SVG}</button>
         </div>
         ${(c.price || c.phone) ? `
           <div class="cprice-row">
@@ -2666,6 +2715,23 @@
       e.stopPropagation();
       openOrderModal(c);
     });
+    const shareCardBtn = card.querySelector('.share-card-btn');
+    if(shareCardBtn){
+      shareCardBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        try{
+          const link = `${window.location.origin}${window.location.pathname}?client=${encodeURIComponent(c.id)}`;
+          const label = c.business || c.name || 'לקוח';
+          const shareText = `כרטיס לקוח - ${label}\n${link}`;
+          // open WhatsApp's contact picker with the link pre-filled as text and no
+          // fixed phone number, so the user picks who to send it to themselves
+          window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+        }catch(err){
+          console.error('share card error', err);
+          alert('שגיאה בשיתוף הכרטיס: ' + err.message);
+        }
+      });
+    }
     const callBeforeBtn = card.querySelector('.toggle-call-before');
     callBeforeBtn.addEventListener('click', (e)=>{
       e.stopPropagation();
@@ -3412,7 +3478,7 @@
       // finishing an add that was ambiguous
       const data = pendingClientData;
       pendingClientData = null;
-      finalizeAdd({ business:data.business, name:data.name, contact:data.contact, phone:data.phone, email:data.email, price:data.price, notes:data.notes, folder:data.folder, houseNumber:data.houseNumber, address:insertHouseNumber(item.label, data.houseNumber), lat:item.lat, lon:item.lon, city:item.city });
+      finalizeAdd({ business:data.business, businessId:data.businessId, name:data.name, contact:data.contact, phone:data.phone, email:data.email, price:data.price, notes:data.notes, folder:data.folder, houseNumber:data.houseNumber, address:insertHouseNumber(item.label, data.houseNumber), lat:item.lat, lon:item.lon, city:item.city });
     } else {
       // just narrowing down the address while composing the form
       selectedGeo = item;
@@ -3422,12 +3488,13 @@
   function finalizeAdd(data){
     clients.push({
       id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
-      business: data.business || "", name: data.name, contact: data.contact || "", phone: data.phone || "", email: data.email || "", price: data.price || "", houseNumber: data.houseNumber || "", address: data.address, notes: data.notes || "",
+      business: data.business || "", businessId: data.businessId || "", name: data.name, contact: data.contact || "", phone: data.phone || "", email: data.email || "", price: data.price || "", houseNumber: data.houseNumber || "", address: data.address, notes: data.notes || "",
       folder: data.folder || "", lat: data.lat, lon: data.lon, city: data.city || ""
     });
     saveData();
     renderAll();
     document.getElementById('f-business').value = '';
+    document.getElementById('f-businessid').value = '';
     document.getElementById('f-name').value = '';
     document.getElementById('f-contact').value = '';
     document.getElementById('f-phone').value = '';
@@ -3549,6 +3616,7 @@
 
   document.getElementById('addBtn').addEventListener('click', async ()=>{
     const businessEl = document.getElementById('f-business');
+    const businessIdEl = document.getElementById('f-businessid');
     const nameEl = document.getElementById('f-name');
     const contactEl = document.getElementById('f-contact');
     const phoneEl = document.getElementById('f-phone');
@@ -3591,7 +3659,7 @@
 
     // if the user already picked an exact suggestion, use it directly - no need to re-geocode
     if(selectedGeo){
-      finalizeAdd({ business, name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(selectedGeo.label, houseNumber), lat: selectedGeo.lat, lon: selectedGeo.lon, city: selectedGeo.city });
+      finalizeAdd({ business, businessId: businessIdEl.value.trim(), name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(selectedGeo.label, houseNumber), lat: selectedGeo.lat, lon: selectedGeo.lon, city: selectedGeo.city });
       clearSuggestions();
       return;
     }
@@ -3610,12 +3678,12 @@
 
       if(results.length === 1){
         clearSuggestions();
-        finalizeAdd({ business, name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(results[0].label, houseNumber), lat: results[0].lat, lon: results[0].lon, city: results[0].city });
+        finalizeAdd({ business, businessId: businessIdEl.value.trim(), name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(results[0].label, houseNumber), lat: results[0].lat, lon: results[0].lon, city: results[0].city });
         return;
       }
 
       // several possible matches - let the user pick the right one from the list / map
-      pendingClientData = { business, name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber };
+      pendingClientData = { business, businessId: businessIdEl.value.trim(), name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber };
       showSuggestions(results, true);
     }catch(e){
       errEl.textContent = "שגיאה באיתור הכתובת. בדקו את החיבור לאינטרנט ונסו שוב.";
@@ -3657,6 +3725,11 @@
       menu.style.display = 'none';
     }
   });
+  document.addEventListener('click', (e)=>{
+    document.querySelectorAll('.share-choice-menu').forEach(m=>{
+      if(!m.contains(e.target) && !e.target.closest('.share-card-btn')) m.remove();
+    });
+  });
 
   setInterval(()=>{
     if(expireHandledStatuses()){ saveData(); renderAll(); }
@@ -3668,7 +3741,31 @@
     if(clients.length){
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
     }
+    openDeepLinkedClientIfAny();
   })();
+
+  // if the URL contains ?client=<id>, jump straight to that client: open its
+  // folder, expand its card, and open the order-history popup automatically -
+  // this is what the "share card" links point to
+  function openDeepLinkedClientIfAny(){
+    const params = new URLSearchParams(window.location.search);
+    const clientId = params.get('client');
+    if(!clientId) return;
+    const c = clients.find(cl => cl.id === clientId);
+    if(!c){
+      alert('הלקוח שהקישור מצביע אליו לא נמצא (אולי נמחק).');
+      return;
+    }
+    if(c.folder) openFolderNames.add(c.folder);
+    if(c.tempFolder) openFolderNames.add(c.tempFolder);
+    openClientCards.add(c.id);
+    renderAll();
+    setTimeout(()=>{
+      const cardEl = document.querySelector(`.client-card[data-client-id="${CSS.escape(c.id)}"]`);
+      if(cardEl) cardEl.scrollIntoView({ behavior:'smooth', block:'center' });
+      openOrderModal(c);
+    }, 300);
+  }
 
 })();
 </script>
