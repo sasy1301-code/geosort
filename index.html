@@ -932,7 +932,7 @@
   const CLUSTER_ORDER_KEY = "cluster_order_map";
 
   let clients = [];
-  let vehicleStockBaseline = { baselines: {} }; // per-product cumulative-qty snapshot as of the last manual "אפס" reset - the stock never resets automatically by date
+  let vehicleStockBaseline = { anchors: {} }; // per-product: { qty: <stock level set at this point>, cumulative: <cumulative orders total at that moment> } - lets the driver set any starting quantity, not just 50
   let folders = []; // manually-created folder names, e.g. "ראשון לציון" or "צפון"
   let clusterNames = {}; // custom overrides for automatic cluster names, keyed by dominant-city/geo key
   let clusterOrder = {}; // manual up/down ordering of addresses within a cluster, keyed the same way
@@ -1168,28 +1168,60 @@
 
   async function saveData(){
     try{
-      // fetch the current server state first and merge in any clients that exist
-      // there but not locally (e.g. added from another device since this page was
-      // loaded) - this prevents a device with stale/older data from silently
-      // wiping out newer additions made elsewhere. local edits still win for any
-      // id that exists in both places.
+      // fetch the current server state first and merge it into what we're about to
+      // save - this prevents a device with stale/older data from silently wiping
+      // out newer changes made elsewhere (whether that's a whole client that's
+      // missing locally, or just a new order/update added to a client that exists
+      // on both sides but whose local copy hasn't seen that addition yet).
       let serverClients = [];
       try{
         const raw = await sbGet(STORAGE_KEY);
         serverClients = raw ? JSON.parse(raw) : [];
       }catch(e){ /* if the fetch fails, just proceed with local data only */ }
 
-      const localIds = new Set(clients.map(c => c.id));
-      let recovered = 0;
+      const localById = new Map(clients.map(c => [c.id, c]));
+      let changed = false;
+
       serverClients.forEach(serverC=>{
-        if(!localIds.has(serverC.id)){
+        const localC = localById.get(serverC.id);
+        if(!localC){
+          // entire client missing locally (e.g. added on another device) - recover it
           clients.push(serverC);
-          recovered++;
+          changed = true;
+          return;
         }
+        // client exists on both sides - merge its order history and update log by
+        // id, so an entry added elsewhere isn't lost just because this device's
+        // copy of the client predates it
+        if(Array.isArray(serverC.orders) && serverC.orders.length){
+          localC.orders = localC.orders || [];
+          const localOrderIds = new Set(localC.orders.map(o => o.id));
+          serverC.orders.forEach(o=>{
+            if(!localOrderIds.has(o.id)){ localC.orders.push(o); changed = true; }
+          });
+        }
+        if(Array.isArray(serverC.updates) && serverC.updates.length){
+          localC.updates = localC.updates || [];
+          const localUpdateIds = new Set(localC.updates.map(u => u.id));
+          serverC.updates.forEach(u=>{
+            if(!localUpdateIds.has(u.id)){ localC.updates.push(u); changed = true; }
+          });
+        }
+        // for simple text fields there's no reliable way to know which side is
+        // "more recent" without timestamps - but the single most common accident
+        // is a stale/blank local copy overwriting a real value entered elsewhere,
+        // so guard against exactly that: if this device has nothing here but the
+        // server does, keep the server's value instead of blanking it out
+        ['notes','phone','email','contact','price'].forEach(field=>{
+          if(!localC[field] && serverC[field]){
+            localC[field] = serverC[field];
+            changed = true;
+          }
+        });
       });
 
       await sbSet(STORAGE_KEY, JSON.stringify(clients));
-      if(recovered > 0) renderAll(); // reflect anything recovered from another device
+      if(changed) renderAll(); // reflect anything recovered/merged from another device
     }catch(e){
       console.error("שגיאת שמירה", e);
     }
@@ -1882,7 +1914,7 @@
         <button class="order-modal-close" title="סגור">✕</button>
       </div>
       <div class="order-modal-body">
-        <div class="vehicle-stock-hint">המלאי רץ ברציפות ולא מתאפס לבד בכל יום - הוא יורד לפי כל הזמנה, עד שתלחצו "אפס" כשממלאים מחדש</div>
+        <div class="vehicle-stock-hint">המלאי רץ ברציפות ולא מתאפס לבד בכל יום - הוא יורד לפי כל הזמנה. לחצו "✎ קבע כמות" ליד מוצר כדי לרשום כמה יש בפועל ברכב כרגע</div>
         <div class="inventory-list"></div>
       </div>
     `;
@@ -1893,7 +1925,7 @@
 
     // total ever ordered for a product, across every client and every date (not
     // scoped to "today" - the running stock level depends on all-time history,
-    // offset by whatever the last manual reset captured)
+    // offset by whatever the last manually-set quantity captured)
     function getCumulativeOrderedQty(name){
       let total = 0;
       clients.forEach(c=>{
@@ -1908,15 +1940,29 @@
       return total;
     }
 
+    // remaining stock for a product = the quantity set at its last anchor, minus
+    // whatever has been ordered since that anchor was set. if no anchor was ever
+    // set, default to a starting quantity of 50 counted from the very beginning
+    function getRemaining(name){
+      const cumulative = getCumulativeOrderedQty(name);
+      const anchor = vehicleStockBaseline.anchors[name] || { qty: 50, cumulative: 0 };
+      const usedSinceAnchor = Math.max(0, cumulative - anchor.cumulative);
+      return { remaining: anchor.qty - usedSinceAnchor, usedSinceAnchor, anchorQty: anchor.qty };
+    }
+
+    function setProductQuantity(name, newQty){
+      vehicleStockBaseline.anchors[name] = { qty: newQty, cumulative: getCumulativeOrderedQty(name) };
+      saveVehicleStockBaseline();
+      refreshVehicleStock();
+    }
+
     function refreshVehicleStock(){
       listEl.innerHTML = PRODUCT_CATALOG.map(cat => `
         <div class="order-cat">
           <div class="order-cat-title" data-open="0"><span class="order-cat-chevron">▸</span> ${escapeHtml(cat.title)}</div>
           <div class="order-cat-items" style="display:none">
             ${cat.items.map(name => {
-              const cumulative = getCumulativeOrderedQty(name);
-              const usedSinceReset = Math.max(0, cumulative - (vehicleStockBaseline.baselines[name] || 0));
-              const remaining = VEHICLE_STOCK_PER_PRODUCT - usedSinceReset;
+              const { remaining, usedSinceAnchor, anchorQty } = getRemaining(name);
               const isLow = remaining <= VEHICLE_STOCK_LOW_THRESHOLD;
               const variant = name.startsWith(cat.prefix + " ") ? name.slice(cat.prefix.length + 1) : name;
               return `
@@ -1930,40 +1976,41 @@
                   </div>
                   <div class="stock-remaining">
                     <span class="stock-remaining-label">מלאי נותר ברכב:</span>
-                    <span class="stock-remaining-value"><b class="${isLow ? 'stock-low-text' : ''}">${remaining}</b> מתוך ${VEHICLE_STOCK_PER_PRODUCT}</span>
+                    <span class="stock-remaining-value"><b class="${isLow ? 'stock-low-text' : ''}">${remaining}</b> מתוך ${anchorQty}</span>
                   </div>
                   <div class="stock-complete-block">
-                    <div class="stock-complete-label">להשלים</div>
-                    <div class="stock-complete-num">${usedSinceReset}</div>
+                    <div class="stock-complete-label">ירד</div>
+                    <div class="stock-complete-num">${usedSinceAnchor}</div>
                   </div>
-                  <button class="stock-reset-one" data-name="${escapeHtml(name)}">אפס</button>
+                  <button class="stock-reset-one" data-name="${escapeHtml(name)}">✎ קבע כמות</button>
                 </div>
               `;
             }).join('')}
           </div>
         </div>
       `).join('') + `
-        <button class="reset-invoices-btn vehicle-stock-reset-btn">🔄 אפס את כל המוצרים ל-50</button>
+        <button class="reset-invoices-btn vehicle-stock-reset-btn">🔄 קבע 50 לכל המוצרים</button>
       `;
       listEl.querySelectorAll('.stock-reset-one').forEach(btn=>{
         btn.addEventListener('click', (e)=>{
           e.stopPropagation();
           const name = btn.dataset.name;
-          vehicleStockBaseline.baselines[name] = getCumulativeOrderedQty(name);
-          saveVehicleStockBaseline();
-          refreshVehicleStock();
+          const current = getRemaining(name).remaining;
+          const input = prompt(`כמה יחידות יש בפועל ברכב עכשיו מ"${name}"?`, current);
+          if(input === null) return; // cancelled
+          const qty = parseInt(input, 10);
+          if(isNaN(qty) || qty < 0){ alert('יש להזין מספר תקין (0 ומעלה).'); return; }
+          setProductQuantity(name, qty);
         });
       });
       listEl.querySelector('.vehicle-stock-reset-btn').addEventListener('click', ()=>{
-        const ok = confirm("לאפס את כל המוצרים ל-50 יחידות? זה יסמן שהרכב מולא מחדש עכשיו.");
+        const ok = confirm("לקבוע 50 יחידות לכל המוצרים? זה יסמן שהרכב מולא מחדש עכשיו.");
         if(!ok) return;
-        const newBaselines = {};
         PRODUCT_CATALOG.forEach(cat=>{
           cat.items.forEach(name=>{
-            newBaselines[name] = getCumulativeOrderedQty(name);
+            vehicleStockBaseline.anchors[name] = { qty: 50, cumulative: getCumulativeOrderedQty(name) };
           });
         });
-        vehicleStockBaseline = { baselines: newBaselines };
         saveVehicleStockBaseline();
         refreshVehicleStock();
       });
