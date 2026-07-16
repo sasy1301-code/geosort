@@ -480,6 +480,11 @@
   .stock-name-block{ display:flex; gap:5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .stock-remaining{ color:rgba(255,255,255,.75); white-space:nowrap; flex:0 0 auto; display:flex; gap:5px; }
   .stock-remaining b{ color:#3bd332; font-size:.95rem; }
+  input.stock-qty-input{
+    width:70px; padding:3px 4px; font-size:.85rem; font-weight:700; color:#3bd332 !important;
+    text-align:center; display:inline-block; margin:0 3px;
+  }
+  input.stock-qty-input.stock-low-text{ color:#ff8a8a !important; }
   .stock-complete-block{ display:flex; align-items:center; gap:5px; flex:0 0 auto; white-space:nowrap; }
   .stock-complete-label{ color:rgba(255,255,255,.6); font-size:.78rem; }
   .stock-complete-num{ color:#3bd332; font-weight:700; font-size:1.05rem; min-width:22px; text-align:center; }
@@ -640,6 +645,7 @@
     .stock-name-block{ flex-direction:column; align-items:center; text-align:center; white-space:normal; gap:0; }
     .stock-remaining{ flex:0 0 auto; flex-direction:column; align-items:center; text-align:center; gap:0; font-size:.72rem; }
     .stock-remaining b{ font-size:.8rem; }
+    input.stock-qty-input{ width:70px; font-size:.75rem; padding:2px 4px; }
     .stock-complete-block{ flex:0 0 auto; flex-direction:column; align-items:center; text-align:center; gap:0; }
     .stock-complete-label{ font-size:.68rem; }
     .stock-complete-num{ font-size:.9rem; min-width:16px; }
@@ -1914,7 +1920,7 @@
         <button class="order-modal-close" title="סגור">✕</button>
       </div>
       <div class="order-modal-body">
-        <div class="vehicle-stock-hint">המלאי רץ ברציפות ולא מתאפס לבד בכל יום - הוא יורד לפי כל הזמנה. לחצו "✎ קבע כמות" ליד מוצר כדי לרשום כמה יש בפועל ברכב כרגע</div>
+        <div class="vehicle-stock-hint">המלאי רץ ברציפות ולא מתאפס לבד בכל יום - הוא יורד לפי כל הזמנה. אפשר לגעת במספר "מלאי נותר ברכב" ליד כל מוצר ולהקליד את הכמות שיש בפועל</div>
         <div class="inventory-list"></div>
       </div>
     `;
@@ -1976,13 +1982,15 @@
                   </div>
                   <div class="stock-remaining">
                     <span class="stock-remaining-label">מלאי נותר ברכב:</span>
-                    <span class="stock-remaining-value"><b class="${isLow ? 'stock-low-text' : ''}">${remaining}</b> מתוך ${anchorQty}</span>
+                    <span class="stock-remaining-value">
+                      <input type="number" class="stock-qty-input ${isLow ? 'stock-low-text' : ''}" data-name="${escapeHtml(name)}" value="${remaining}" min="0" title="הקלידו את הכמות שיש בפועל ברכב ולחצו Enter">
+                      מתוך ${anchorQty}
+                    </span>
                   </div>
                   <div class="stock-complete-block">
                     <div class="stock-complete-label">ירד</div>
                     <div class="stock-complete-num">${usedSinceAnchor}</div>
                   </div>
-                  <button class="stock-reset-one" data-name="${escapeHtml(name)}">✎ קבע כמות</button>
                 </div>
               `;
             }).join('')}
@@ -1991,17 +1999,20 @@
       `).join('') + `
         <button class="reset-invoices-btn vehicle-stock-reset-btn">🔄 קבע 50 לכל המוצרים</button>
       `;
-      listEl.querySelectorAll('.stock-reset-one').forEach(btn=>{
-        btn.addEventListener('click', (e)=>{
-          e.stopPropagation();
-          const name = btn.dataset.name;
-          const current = getRemaining(name).remaining;
-          const input = prompt(`כמה יחידות יש בפועל ברכב עכשיו מ"${name}"?`, current);
-          if(input === null) return; // cancelled
-          const qty = parseInt(input, 10);
-          if(isNaN(qty) || qty < 0){ alert('יש להזין מספר תקין (0 ומעלה).'); return; }
+      listEl.querySelectorAll('.stock-qty-input').forEach(input=>{
+        input.addEventListener('click', e=>e.stopPropagation());
+        input.addEventListener('mousedown', e=>e.stopPropagation());
+        function commit(){
+          const name = input.dataset.name;
+          const qty = parseInt(input.value, 10);
+          if(isNaN(qty) || qty < 0) return; // ignore invalid input, leave as-is
           setProductQuantity(name, qty);
+        }
+        input.addEventListener('keydown', (e)=>{
+          e.stopPropagation();
+          if(e.key === 'Enter'){ e.preventDefault(); input.blur(); commit(); }
         });
+        input.addEventListener('blur', commit);
       });
       listEl.querySelector('.vehicle-stock-reset-btn').addEventListener('click', ()=>{
         const ok = confirm("לקבוע 50 יחידות לכל המוצרים? זה יסמן שהרכב מולא מחדש עכשיו.");
