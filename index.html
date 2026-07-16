@@ -528,16 +528,17 @@
   .client-card .caddr-group{ margin-top:10px; }
   .client-card .cprice-row{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
-    margin-top:18px; margin-bottom:-4px;
+    margin-top:10px; margin-bottom:-4px;
   }
   .client-card .whatsapp-btn{
     display:inline-block; width:25px; height:25px; cursor:pointer; flex:0 0 auto;
     position:relative; top:-8px;
   }
-  .client-card .share-card-row{ text-align:left; margin-top:8px; position:relative; }
+  .client-card .share-card-row{ height:0; overflow:visible; position:relative; }
   .client-card .share-card-btn{
     display:inline-flex; align-items:center; justify-content:center; width:25px; height:25px;
     background:transparent; border:none; padding:0; cursor:pointer;
+    position:absolute; left:0; bottom:6px;
   }
   .client-card .share-card-btn svg{ display:block; }
   .share-choice-menu{
