@@ -1302,7 +1302,15 @@
   async function loadVehicleStockBaseline(){
     try{
       const raw = await sbGet(VEHICLE_STOCK_BASELINE_KEY);
-      if(raw) vehicleStockBaseline = JSON.parse(raw);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        // guard against older saved formats from earlier versions of this feature
+        // (which used a different shape) - fall back to a safe empty state rather
+        // than crashing when a field this version expects isn't present
+        vehicleStockBaseline = {
+          anchors: (parsed && parsed.anchors && typeof parsed.anchors === 'object') ? parsed.anchors : {}
+        };
+      }
     }catch(e){ /* no baseline saved yet, or fetch failed - just use the default */ }
   }
 
@@ -1951,12 +1959,14 @@
     // set, default to a starting quantity of 50 counted from the very beginning
     function getRemaining(name){
       const cumulative = getCumulativeOrderedQty(name);
-      const anchor = vehicleStockBaseline.anchors[name] || { qty: 50, cumulative: 0 };
+      const anchors = vehicleStockBaseline && vehicleStockBaseline.anchors ? vehicleStockBaseline.anchors : {};
+      const anchor = anchors[name] || { qty: 50, cumulative: 0 };
       const usedSinceAnchor = Math.max(0, cumulative - anchor.cumulative);
       return { remaining: anchor.qty - usedSinceAnchor, usedSinceAnchor, anchorQty: anchor.qty };
     }
 
     function setProductQuantity(name, newQty){
+      if(!vehicleStockBaseline || !vehicleStockBaseline.anchors) vehicleStockBaseline = { anchors: {} };
       vehicleStockBaseline.anchors[name] = { qty: newQty, cumulative: getCumulativeOrderedQty(name) };
       saveVehicleStockBaseline();
       refreshVehicleStock();
@@ -3625,11 +3635,21 @@
   });
   document.getElementById('inventoryMenuItem').addEventListener('click', ()=>{
     document.getElementById('hamburgerMenu').style.display = 'none';
-    openInventoryModal();
+    try{
+      openInventoryModal();
+    }catch(err){
+      console.error('inventory modal error', err);
+      alert('שגיאה בפתיחת מלאי: ' + err.message);
+    }
   });
   document.getElementById('vehicleStockMenuItem').addEventListener('click', ()=>{
     document.getElementById('hamburgerMenu').style.display = 'none';
-    openVehicleStockModal();
+    try{
+      openVehicleStockModal();
+    }catch(err){
+      console.error('vehicle stock modal error', err);
+      alert('שגיאה בפתיחת מלאי ברכב: ' + err.message);
+    }
   });
   document.addEventListener('click', (e)=>{
     const menu = document.getElementById('hamburgerMenu');
