@@ -3763,7 +3763,6 @@
     setTimeout(()=>{
       const cardEl = document.querySelector(`.client-card[data-client-id="${CSS.escape(c.id)}"]`);
       if(cardEl) cardEl.scrollIntoView({ behavior:'smooth', block:'center' });
-      openOrderModal(c);
     }, 300);
   }
 
