@@ -528,7 +528,7 @@
   .client-card .caddr-group{ margin-top:10px; }
   .client-card .cprice-row{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
-    margin-top:10px; margin-bottom:-4px;
+    margin-top:18px; margin-bottom:-4px;
   }
   .client-card .whatsapp-btn{
     display:inline-block; width:25px; height:25px; cursor:pointer; flex:0 0 auto;
@@ -693,9 +693,9 @@
         <section class="panel" id="addClientPanel">
           <h2 id="addClientHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px">
             <span class="dot"></span> הוספת לקוח
-            <span id="addClientChevron" style="margin-right:auto;font-size:.8rem;transition:transform .15s ease">▾</span>
+            <span id="addClientChevron" style="margin-right:auto;font-size:.8rem;transition:transform .15s ease;transform:rotate(-90deg)">▾</span>
           </h2>
-          <div id="addClientBody">
+          <div id="addClientBody" style="display:none">
           <label for="f-name">שם על גבי החשבונית</label>
           <input type="text" id="f-name" placeholder="לדוגמה: דוד כהן / חברת ABC בע״מ">
           <label for="f-business">שם העסק (מה שרשום על השלט / הכניסה) <span style="color:var(--gold)">*חובה</span></label>
