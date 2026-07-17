@@ -1009,6 +1009,8 @@
   let clusters = []; // array of {members:[clientIdx...], color, name}
   let clusterOfClient = {}; // client.id -> cluster index
 
+  const MAPTILER_API_KEY = "vnrCeomTIFdgFvRfPVMC";
+
   const map = L.map('map', { zoomControl:true }).setView([31.6, 34.9], 8);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '&copy; OpenStreetMap &copy; CARTO',
@@ -1661,8 +1663,6 @@
     // keep the current selection if it still exists as an option
     if([...sel.options].some(o=>o.value === current)) sel.value = current;
   }
-
-  const MAPTILER_API_KEY = "vnrCeomTIFdgFvRfPVMC";
 
   function toGeoItem(feature){
     const placeTypes = feature.place_type || [];
