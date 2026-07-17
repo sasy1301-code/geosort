@@ -1709,8 +1709,9 @@
   }
 
   async function maptilerSearch(query, limit){
+    const clampedLimit = Math.max(1, Math.min(10, limit || 10)); // MapTiler rejects anything outside 1-10 with a 400
     return scheduleRequest(async ()=>{
-      const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${MAPTILER_API_KEY}&country=il&language=he&limit=${limit}`;
+      const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${MAPTILER_API_KEY}&country=il&language=he&limit=${clampedLimit}`;
       const res = await fetch(url);
       if(!res.ok) throw new Error("geocode failed (" + res.status + ")");
       return res.json();
@@ -1755,7 +1756,7 @@
   // natural-language query (the way a person would search it) - this is a single Nominatim
   // request per lookup, kept simple and fast so we stay well within its usage limits.
   async function geocodeFields(streetParam, cityParam, displayLimit){
-    const rawLimit = 30;
+    const rawLimit = 10; // MapTiler's hard max is 10 - a higher value gets rejected with 400
     if(cityParam){
       const queryText = (streetParam ? streetParam + ", " : "") + cityParam + ", ישראל";
       const raw = await geocodeMulti(queryText, rawLimit);
