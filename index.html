@@ -1673,10 +1673,17 @@
     // the most specific administrative level available
     let city = "";
     const context = feature.context || [];
-    const cityPriority = ['municipality','place','locality','region','subregion','county'];
+    const cityPriority = ['municipality','place','locality','region','subregion','county','joint_municipality','municipal_district','neighbourhood'];
     for(const pref of cityPriority){
       const match = context.find(ctx => (ctx.id||"").startsWith(pref + "."));
       if(match){ city = match.text || ""; break; }
+    }
+    // fallback if the context hierarchy didn't yield a city: place_name is
+    // typically "street number, city, country" - the second-to-last segment
+    // is usually the city when nothing else is available
+    if(!city && feature.place_name){
+      const parts = feature.place_name.split(",").map(p=>p.trim()).filter(Boolean);
+      if(parts.length >= 2) city = parts[parts.length - 2];
     }
     let label = [ [road, house].filter(Boolean).join(" "), city ].filter(Boolean).join(", ");
     if(!label) label = feature.place_name || feature.text || "";
@@ -1739,7 +1746,8 @@
     if(!target) return results;
     return results.filter(r=>{
       const rc = normalizeCityText(r.city);
-      return rc && (rc.includes(target) || target.includes(rc));
+      if(!rc) return true; // couldn't extract a city for this result - don't punish it for that
+      return rc.includes(target) || target.includes(rc);
     });
   }
 
@@ -3718,7 +3726,11 @@
       const results = await geocodeFields(streetParam, city, 15);
       if(results.length){ showSuggestions(results, false); }
       else { clearSuggestions(); }
-    }catch(e){ /* silent fail for live typeahead */ }
+    }catch(e){
+      console.error('geocoding error', e);
+      const box = document.getElementById('addrSuggestions');
+      if(box) box.innerHTML = `<div style="color:#ff8a8a;font-size:.78rem;padding:6px 8px">שגיאה באיתור כתובת: ${e.message}</div>`;
+    }
   }, 350);
 
   ['f-street','f-city'].forEach(id=>{
