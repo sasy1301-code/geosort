@@ -408,6 +408,21 @@
     position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:2000;
     display:flex; align-items:center; justify-content:center; padding:20px;
   }
+  .photo-modal-overlay{
+    position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:2100;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .photo-modal-box{ position:relative; max-width:90vw; max-height:90vh; }
+  .photo-modal-img{
+    display:block; max-width:90vw; max-height:90vh; border-radius:10px;
+    box-shadow:0 10px 40px rgba(0,0,0,.6);
+  }
+  .photo-modal-close{
+    position:absolute; top:-14px; left:-14px; width:34px; height:34px; border-radius:50%;
+    background:#111e63; color:#fff; border:1px solid rgba(255,255,255,.5); font-size:1rem;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .photo-modal-close:hover{ background:#1c2f8a; }
   .order-modal{
     background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:12px;
     width:100%; max-width:640px; max-height:88vh; overflow-y:auto; color:#fff;
@@ -2164,6 +2179,27 @@
     document.body.appendChild(overlay);
   }
 
+  function closePhotoModal(){
+    const overlay = document.getElementById('photoModalOverlay');
+    if(overlay) overlay.remove();
+  }
+
+  function openPhotoModal(photoDataUrl){
+    closePhotoModal();
+    const overlay = document.createElement('div');
+    overlay.id = 'photoModalOverlay';
+    overlay.className = 'photo-modal-overlay';
+    overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closePhotoModal(); });
+    overlay.innerHTML = `
+      <div class="photo-modal-box">
+        <button type="button" class="photo-modal-close" title="סגור">✕</button>
+        <img src="${photoDataUrl}" class="photo-modal-img" alt="תמונת המקום">
+      </div>
+    `;
+    overlay.querySelector('.photo-modal-close').addEventListener('click', closePhotoModal);
+    document.body.appendChild(overlay);
+  }
+
   function closeInventoryModal(){
     const overlay = document.getElementById('inventoryModalOverlay');
     if(overlay) overlay.remove();
@@ -2814,7 +2850,7 @@
     if(photoThumb){
       photoThumb.addEventListener('click', (e)=>{
         e.stopPropagation();
-        window.open(c.photo, '_blank');
+        openPhotoModal(c.photo);
       });
     }
     const photoDeleteBtn = card.querySelector('.place-photo-delete');
@@ -2828,22 +2864,18 @@
         renderAll();
       });
     }
-    const shareCardBtn = card.querySelector('.share-card-btn');
-    if(shareCardBtn){
-      shareCardBtn.addEventListener('click', (e)=>{
-        e.stopPropagation();
-        try{
-          const link = `${window.location.origin}${window.location.pathname}?client=${encodeURIComponent(c.id)}`;
-          const label = c.business || c.name || 'לקוח';
-          const shareText = `כרטיס לקוח - ${label}\n${link}`;
-          // open WhatsApp's contact picker with the link pre-filled as text and no
-          // fixed phone number, so the user picks who to send it to themselves
-          window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
-        }catch(err){
-          console.error('share card error', err);
-          alert('שגיאה בשיתוף הכרטיס: ' + err.message);
-        }
-      });
+    function shareClientCard(){
+      try{
+        const link = `${window.location.origin}${window.location.pathname}?client=${encodeURIComponent(c.id)}`;
+        const label = c.business || c.name || 'לקוח';
+        const shareText = `כרטיס לקוח - ${label}\n${link}`;
+        // open WhatsApp's contact picker with the link pre-filled as text and no
+        // fixed phone number, so the user picks who to send it to themselves
+        window.open(`https://wa.me/?text=${encodeURIComponent(shareText)}`, '_blank');
+      }catch(err){
+        console.error('share card error', err);
+        alert('שגיאה בשיתוף הכרטיס: ' + err.message);
+      }
     }
     const moreOptionsBtn = card.querySelector('.more-options-btn');
     if(moreOptionsBtn){
@@ -2860,7 +2892,7 @@
         menu.addEventListener('click', e2=>e2.stopPropagation());
         menu.querySelector('.more-opt-share').addEventListener('click', ()=>{
           menu.remove();
-          if(shareCardBtn) shareCardBtn.click();
+          shareClientCard();
         });
         menu.querySelector('.more-opt-photo').addEventListener('click', ()=>{
           menu.remove();
