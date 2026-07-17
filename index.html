@@ -542,10 +542,19 @@
   }
   .client-card .share-card-btn svg{ display:block; }
   .client-card .photo-card-row{ height:0; overflow:visible; position:relative; }
+  .client-card .place-photo-wrap{
+    position:absolute; left:0; bottom:32px; width:38px; height:38px;
+  }
   .client-card .place-photo-thumb{
-    position:absolute; left:0; bottom:32px; width:38px; height:38px; object-fit:cover;
+    display:block; width:38px; height:38px; object-fit:cover;
     border-radius:6px; border:1px solid rgba(255,255,255,.4); cursor:pointer;
   }
+  .client-card .place-photo-delete{
+    position:absolute; top:-7px; right:-7px; width:18px; height:18px; border-radius:50%;
+    background:#e03b3b; color:#fff; border:1px solid rgba(255,255,255,.6); font-size:.62rem;
+    line-height:1; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;
+  }
+  .client-card .place-photo-delete:hover{ background:#ff5252; }
   .share-choice-menu{
     position:absolute; left:0; top:28px; z-index:20; background:#111e63;
     border:1px solid rgba(255,255,255,.3); border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.4);
@@ -2719,7 +2728,12 @@
           ${c.email ? `<div class="cphone">אימייל: <a href="mailto:${escapeHtml(c.email)}" class="phone-link" title="שליחת מייל ללקוח">${escapeHtml(c.email)}</a></div>` : ""}
         </div>
         <div class="photo-card-row">
-          ${c.photo ? `<img src="${escapeHtml(c.photo)}" class="place-photo-thumb" alt="תמונת המקום" title="לחצו להחלפת התמונה">` : ""}
+          ${c.photo ? `
+            <div class="place-photo-wrap">
+              <img src="${escapeHtml(c.photo)}" class="place-photo-thumb" alt="תמונת המקום" title="לחצו לצפייה בתמונה">
+              <button type="button" class="place-photo-delete" title="מחיקת התמונה">✕</button>
+            </div>
+          ` : ""}
           <input type="file" accept="image/*" capture="environment" class="photo-upload-input" style="display:none">
         </div>
         ${(c.price || c.phone) ? `
@@ -2800,7 +2814,18 @@
     if(photoThumb){
       photoThumb.addEventListener('click', (e)=>{
         e.stopPropagation();
-        photoUploadInput.click();
+        window.open(c.photo, '_blank');
+      });
+    }
+    const photoDeleteBtn = card.querySelector('.place-photo-delete');
+    if(photoDeleteBtn){
+      photoDeleteBtn.addEventListener('click', (e)=>{
+        e.stopPropagation();
+        const ok = confirm('למחוק את תמונת המקום?');
+        if(!ok) return;
+        c.photo = '';
+        saveData();
+        renderAll();
       });
     }
     const shareCardBtn = card.querySelector('.share-card-btn');
@@ -3721,7 +3746,9 @@
   });
 
   document.getElementById('searchBox').addEventListener('input', renderSearchResults);
-  document.getElementById('folderSearchBox').addEventListener('input', renderFolders);
+  document.getElementById('folderSearchBox').addEventListener('input', ()=>{ setTimeout(renderFolders, 0); });
+  document.getElementById('folderSearchBox').addEventListener('keyup', ()=>{ setTimeout(renderFolders, 0); });
+  document.getElementById('folderSearchBox').addEventListener('change', renderFolders);
 
   document.getElementById('fitAllBtn').addEventListener('click', ()=>{
     if(clients.length===0) return;
