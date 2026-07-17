@@ -1662,12 +1662,33 @@
     if([...sel.options].some(o=>o.value === current)) sel.value = current;
   }
 
-  // Nominatim's public server only tolerates roughly 1 request/second - this queue
-  // guarantees a safe gap between calls no matter how fast the user types or clicks,
-  // so the app never gets silently rate-limited/blocked.
+  const MAPTILER_API_KEY = "vnrCeomTIFdgFvRfPVMC";
+
+  function toGeoItem(feature){
+    const placeTypes = feature.place_type || [];
+    const isAddressOrRoad = placeTypes.includes('address') || placeTypes.includes('road');
+    const road = isAddressOrRoad ? (feature.text || "") : "";
+    const house = feature.address || "";
+    // find the city/place name from the feature's context hierarchy, preferring
+    // the most specific administrative level available
+    let city = "";
+    const context = feature.context || [];
+    const cityPriority = ['municipality','place','locality','region','subregion','county'];
+    for(const pref of cityPriority){
+      const match = context.find(ctx => (ctx.id||"").startsWith(pref + "."));
+      if(match){ city = match.text || ""; break; }
+    }
+    let label = [ [road, house].filter(Boolean).join(" "), city ].filter(Boolean).join(", ");
+    if(!label) label = feature.place_name || feature.text || "";
+    const center = feature.center || [null, null];
+    return { lat: center[1], lon: center[0], city, road, house, display_name: feature.place_name, label };
+  }
+
+  // MapTiler's free tier allows far more throughput than Nominatim's 1/sec public
+  // limit, but we still keep a small queue+gap as a courteous, simple safety net.
   let lastRequestAt = 0;
   let requestQueue = Promise.resolve();
-  const MIN_GAP_MS = 1100;
+  const MIN_GAP_MS = 150;
   function scheduleRequest(fn){
     const runNext = requestQueue.then(async ()=>{
       const wait = Math.max(0, MIN_GAP_MS - (Date.now() - lastRequestAt));
@@ -1680,31 +1701,19 @@
     return runNext;
   }
 
-  function toGeoItem(item){
-    const addr = item.address || {};
-    const city = addr.city || addr.town || addr.village || addr.municipality || addr.county
-              || addr.hamlet || addr.suburb || addr.city_district || addr.region || addr.state || "";
-    const road = addr.road || addr.pedestrian || addr.residential || addr.living_street
-              || addr.unclassified || addr.footway || "";
-    const house = addr.house_number || "";
-    let label = [ [road, house].filter(Boolean).join(" "), city ].filter(Boolean).join(", ");
-    if(!label) label = item.display_name;
-    return { lat: parseFloat(item.lat), lon: parseFloat(item.lon), city, road, house, display_name: item.display_name, label };
-  }
-
-  async function nominatimSearch(params){
+  async function maptilerSearch(query, limit){
     return scheduleRequest(async ()=>{
-      const qs = new URLSearchParams(params);
-      const url = "https://nominatim.openstreetmap.org/search?" + qs.toString();
-      const res = await fetch(url, { headers: { "Accept-Language":"he" } });
+      const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(query)}.json?key=${MAPTILER_API_KEY}&country=il&language=he&limit=${limit}`;
+      const res = await fetch(url);
       if(!res.ok) throw new Error("geocode failed (" + res.status + ")");
       return res.json();
     });
   }
 
   async function geocodeMulti(address, limit){
-    const raw = await nominatimSearch({ format:'json', addressdetails:'1', countrycodes:'il', limit:String(limit), q: address });
-    return raw.map(toGeoItem);
+    const data = await maptilerSearch(address, limit);
+    const features = (data && data.features) || [];
+    return features.map(toGeoItem);
   }
 
   // same street/road can appear many times (once per building) - keep only one entry per
