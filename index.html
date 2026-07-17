@@ -1236,6 +1236,10 @@
   }
 
   let saveDataQueue = Promise.resolve(); // serializes saves so they can never race/interleave
+  // ids the user has just deleted on this device - the merge-safe save below must
+  // never "recover" these back from the server, or a delete would look like it
+  // silently undoes itself a moment later
+  const recentlyDeletedClientIds = new Set();
 
   function saveData(){
     saveDataQueue = saveDataQueue.then(() => doSaveData()).catch(()=>{});
@@ -1261,6 +1265,7 @@
       serverClients.forEach(serverC=>{
         const localC = localById.get(serverC.id);
         if(!localC){
+          if(recentlyDeletedClientIds.has(serverC.id)) return; // just deleted here - don't resurrect it
           // entire client missing locally (e.g. added on another device) - recover it
           clients.push(serverC);
           changed = true;
@@ -3019,6 +3024,8 @@
     });
     card.querySelector('.del').addEventListener('click', (e)=>{
       e.stopPropagation();
+      const ok = confirm(`למחוק את "${c.business || c.name || 'הלקוח'}"? לא ניתן לשחזר את זה.`);
+      if(!ok) return;
       deleteClient(c.id);
     });
     return card;
@@ -3720,6 +3727,7 @@
   window.__deleteClient = function(id){ deleteClient(id); };
 
   function deleteClient(id){
+    recentlyDeletedClientIds.add(id);
     clients = clients.filter(c=>c.id !== id);
     saveData();
     renderAll();
