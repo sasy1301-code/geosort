@@ -2005,10 +2005,12 @@
   // the full folder name can fail to match even though a shorter prefix matches
   function normalizeSearchText(s){
     return (s || "")
-      .replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069]/g, "")
-      .replace(/\s+/g, " ")
-      .trim()
-      .toLowerCase();
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]/gu, ""); // keep only letters/digits (any script) - strips
+                                        // spaces, punctuation, and any invisible/bidi/
+                                        // control characters, so formatting differences
+                                        // (like "11 | אשדוד" vs however it's really stored)
+                                        // can never break a search that should obviously match
   }
 
   function matchesSearch(c, q){
