@@ -762,7 +762,7 @@
             <input type="text" id="f-city" placeholder="עיר" autocomplete="off">
             <div class="row2" style="margin-top:8px">
               <div style="flex:2"><input type="text" id="f-street" placeholder="רחוב" autocomplete="off"></div>
-              <div style="flex:1"><input type="text" id="f-housenum" placeholder="מספר" autocomplete="off" title="לתצוגה בלבד - לא משפיע על איתור המיקום במפה"></div>
+              <div style="flex:1"><input type="text" id="f-housenum" placeholder="מספר" autocomplete="off" title="משפיע על איתור המיקום המדויק במפה"></div>
             </div>
             <div class="suggestions" id="addrSuggestions"></div>
           </div>
@@ -2577,7 +2577,7 @@
       <input type="text" class="edit-city" value="${escapeHtml(origCity)}">
       <label>רחוב</label>
       <input type="text" class="edit-street" value="${escapeHtml(origStreetParam)}">
-      <label>מספר (לתצוגה בלבד - לא משפיע על המיקום במפה)</label>
+      <label>מספר (משפיע על מיקום הכתובת במפה)</label>
       <input type="text" class="edit-housenum" value="${escapeHtml(c.houseNumber||'')}">
       <label>הערות</label>
       <textarea class="edit-notes">${escapeHtml(c.notes||'')}</textarea>
@@ -2693,14 +2693,12 @@
       const newStreetParam = card.querySelector('.edit-street').value.trim();
       const newCity = card.querySelector('.edit-city').value.trim();
       const newHouseNumber = card.querySelector('.edit-housenum').value.trim();
-      const addressChanged = (newStreetParam !== origStreetParam) || (newCity !== origCity);
+      const origHouseNumber = c.houseNumber || "";
+      const addressChanged = (newStreetParam !== origStreetParam) || (newCity !== origCity) || (newHouseNumber !== origHouseNumber);
 
       if(!addressChanged){
-        // only the house number (or nothing address-related) may have changed - that's
-        // just a display detail and never needs a network lookup or changes the pin
+        // literally nothing address-related changed - no need for a network lookup
         applyNonAddressFields();
-        c.houseNumber = newHouseNumber;
-        c.address = insertHouseNumber(buildAddressLabel(origStreetParam, origCity) || c.address, newHouseNumber);
         finishSave();
         return;
       }
@@ -2711,11 +2709,12 @@
         return;
       }
 
+      const searchStreetParam = [newStreetParam, newHouseNumber].filter(Boolean).join(" ");
       const saveBtn = card.querySelector('.save-edit');
       saveBtn.disabled = true;
       saveBtn.textContent = "מאתר כתובת...";
       try{
-        const results = await geocodeFields(newStreetParam, newCity, 8);
+        const results = await geocodeFields(searchStreetParam, newCity, 8);
         if(results.length === 0){
           errEl.textContent = "לא נמצאה כתובת מתאימה - בדקו את הכתיב של הרחוב והעיר.";
           errEl.style.display = 'block';
@@ -3652,8 +3651,10 @@
   }
 
   function currentAddressQuery(){
-    const streetParam = document.getElementById('f-street').value.trim();
+    const street = document.getElementById('f-street').value.trim();
+    const houseNumber = document.getElementById('f-housenum').value.trim();
     const city = document.getElementById('f-city').value.trim();
+    const streetParam = [street, houseNumber].filter(Boolean).join(" ");
     return { street: streetParam, city, streetParam, query: [ streetParam, city ].filter(Boolean).join(", ") };
   }
 
@@ -3662,6 +3663,7 @@
   function insertHouseNumber(address, houseNumber){
     const num = (houseNumber || "").trim();
     if(!num) return address;
+    if(address.includes(num)) return address; // geocoder already found and included this number - don't duplicate it
     const idx = address.indexOf(",");
     if(idx === -1) return `${address} ${num}`;
     return `${address.slice(0, idx)} ${num}${address.slice(idx)}`;
