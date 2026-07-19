@@ -1673,12 +1673,18 @@
   function toGeoItem(feature){
     const placeTypes = feature.place_type || [];
     const isAddressOrRoad = placeTypes.includes('address') || placeTypes.includes('road');
-    const road = isAddressOrRoad ? (feature.text || "") : "";
+    let road = isAddressOrRoad ? (feature.text || "") : "";
     const house = feature.address || "";
     // find the city/place name from the feature's context hierarchy, preferring
     // the most specific administrative level available
     let city = "";
     const context = feature.context || [];
+    if(!road){
+      // this isn't an address/road feature itself (e.g. it's a business/POI) -
+      // the street it's on is usually one level up in the context hierarchy
+      const streetMatch = context.find(ctx => (ctx.id||"").startsWith("street."));
+      if(streetMatch) road = streetMatch.text || "";
+    }
     const cityPriority = ['municipality','place','locality','region','subregion','county','joint_municipality','municipal_district','neighbourhood'];
     for(const pref of cityPriority){
       const match = context.find(ctx => (ctx.id||"").startsWith(pref + "."));
@@ -1690,6 +1696,10 @@
     if(!city && feature.place_name){
       const parts = feature.place_name.split(",").map(p=>p.trim()).filter(Boolean);
       if(parts.length >= 2) city = parts[parts.length - 2];
+    }
+    if(!road && feature.place_name){
+      const parts = feature.place_name.split(",").map(p=>p.trim()).filter(Boolean);
+      if(parts.length >= 3) road = parts[parts.length - 3];
     }
     let label = [ [road, house].filter(Boolean).join(" "), city ].filter(Boolean).join(", ");
     if(!label) label = feature.place_name || feature.text || "";
@@ -1724,6 +1734,8 @@
     });
   }
 
+  // searches specifically for a business/point-of-interest by name, instead of a
+  // plain street address - used by the "find address by business name" lookup
   async function geocodeMulti(address, limit){
     const data = await maptilerSearch(address, limit);
     const features = (data && data.features) || [];
