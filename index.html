@@ -1454,15 +1454,21 @@
       }
       order.push(remaining.splice(startIdx,1)[0]);
     }
+    // each remaining (new) member gets inserted right next to whichever existing
+    // member in the order it's geographically closest to - rather than always
+    // tacking new addresses onto the very end regardless of where they actually are
     while(remaining.length){
-      const cur = byId[order[order.length-1]];
-      let bestIdx = 0, bestDist = Infinity;
-      for(let i=0;i<remaining.length;i++){
-        const cand = byId[remaining[i]];
-        const d = haversine(cur.lat, cur.lon, cand.lat, cand.lon);
-        if(d < bestDist){ bestDist = d; bestIdx = i; }
+      let bestRemIdx = 0, bestOrderIdx = 0, bestDist = Infinity;
+      for(let ri=0; ri<remaining.length; ri++){
+        const cand = byId[remaining[ri]];
+        for(let oi=0; oi<order.length; oi++){
+          const existing = byId[order[oi]];
+          const d = haversine(existing.lat, existing.lon, cand.lat, cand.lon);
+          if(d < bestDist){ bestDist = d; bestRemIdx = ri; bestOrderIdx = oi; }
+        }
       }
-      order.push(remaining.splice(bestIdx,1)[0]);
+      const chosenId = remaining.splice(bestRemIdx, 1)[0];
+      order.splice(bestOrderIdx + 1, 0, chosenId); // right after its closest match
     }
     return order;
   }
