@@ -338,6 +338,8 @@
   .cluster-region-body .client-card.card-alt{ background:#330d46; }
   .cluster-region-body .client-card.card-alt:hover{ background:#451160; }
   .client-card.skipped-today{ background:#4a4a4a !important; opacity:.75; }
+  .client-card.client-inactive{ background:#7a1f1f !important; }
+  .client-card.client-inactive:hover{ background:#8a2626 !important; }
   .client-card.skipped-today:hover{ background:#565656 !important; }
   .skip-badge{
     display:inline-block; font-size:.68rem; font-weight:700; color:#fff; background:rgba(255,255,255,.18);
@@ -1533,6 +1535,15 @@
   }
 
   // same idea, but for a manually-created folder (order is stored directly on the folder object)
+  // moves inactive clients to the end of an already-ordered list, preserving
+  // relative order within each group - works whether the list holds client
+  // objects (folders) or member indices (clusters), via the isInactive callback
+  function sinkInactiveToEnd(list, isInactiveFn){
+    const active = list.filter(item => !isInactiveFn(item));
+    const inactive = list.filter(item => isInactiveFn(item));
+    return active.concat(inactive);
+  }
+
   function getOrderedFolderMembers(folder, members){
     const points = members.map(c => ({ id: c.id, lat: c.lat, lon: c.lon }));
     const fullIds = computeOrderedIds(points, folder.order);
@@ -2763,7 +2774,7 @@
   function buildClientCard(c, routeNumber, moveHandlers, showSkipToggle, isTempContext){
     if(editingClientId === c.id) return buildClientEditCard(c);
     const card = document.createElement('div');
-    card.className = 'client-card' + (c.skipRoute ? ' skipped-today' : '') + (c.handled ? ' handled' : '');
+    card.className = 'client-card' + (c.skipRoute ? ' skipped-today' : '') + (c.handled ? ' handled' : '') + (c.inactive ? ' client-inactive' : '');
     card.dataset.clientId = c.id;
     if(moveHandlers){
       card.draggable = true;
@@ -2933,6 +2944,7 @@
         menu.innerHTML = `
           <button type="button" class="more-opt-share">${SHARE_ICON_SVG} שיתוף כרטיס לקוח</button>
           <button type="button" class="more-opt-photo">${PHOTO_ICON_SVG} צילום תמונה</button>
+          <button type="button" class="more-opt-inactive">${c.inactive ? '🟢 החזר לפעיל' : '🔴 לקוח לא פעיל'}</button>
         `;
         menu.addEventListener('click', e2=>e2.stopPropagation());
         menu.querySelector('.more-opt-share').addEventListener('click', ()=>{
@@ -2942,6 +2954,12 @@
         menu.querySelector('.more-opt-photo').addEventListener('click', ()=>{
           menu.remove();
           if(photoUploadInput) photoUploadInput.click();
+        });
+        menu.querySelector('.more-opt-inactive').addEventListener('click', ()=>{
+          menu.remove();
+          c.inactive = !c.inactive;
+          saveData();
+          renderAll();
         });
         moreOptionsBtn.parentElement.appendChild(menu);
       });
@@ -3180,7 +3198,7 @@
       body.style.display = openClusterNames.has(cl.key) ? 'block' : 'none';
       const activeMembers = filteredMembers.filter(m => !clients[m].skipRoute);
       const skippedMembers = filteredMembers.filter(m => clients[m].skipRoute);
-      const orderedMembers = getOrderedClusterMembers(cl, activeMembers); // full list, for display/position
+      const orderedMembers = sinkInactiveToEnd(getOrderedClusterMembers(cl, activeMembers), i => clients[i].inactive); // full list, for display/position
       const calcMembers = orderedMembers.filter(m => !clients[m].handled); // for route distance/time only
       const calcPosOf = {};
       calcMembers.forEach((m, i)=>{ calcPosOf[clients[m].id] = i; });
@@ -3443,7 +3461,7 @@
 
         // ordering (numbers + ▲▼ + drag) is always available, whether or not 🧭 is on -
         // 🧭 only decides whether the connecting route line is drawn on the map
-        const orderedMembers = getOrderedFolderMembers(folder, activeMembers); // full list, for display/position
+        const orderedMembers = sinkInactiveToEnd(getOrderedFolderMembers(folder, activeMembers), c => c.inactive); // full list, for display/position
         const calcMembers = orderedMembers.filter(c => !c.handled); // for route distance/time only
         const cachedRoad = roadRouteCache[folder.name];
         const roadMatches = cachedRoad && cachedRoad.fingerprint === routeFingerprint(calcMembers);
