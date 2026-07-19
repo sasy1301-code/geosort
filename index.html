@@ -2601,6 +2601,9 @@
       </div>
     `;
     card.addEventListener('click', e=>e.stopPropagation());
+    card.querySelector('.edit-street').addEventListener('blur', ()=>{
+      splitTrailingHouseNumber(card.querySelector('.edit-street'), card.querySelector('.edit-housenum'));
+    });
 
     function renderEditUpdates(){
       const listEl = card.querySelector('.edit-updates-list');
@@ -3666,6 +3669,17 @@
 
   // inserts a house number (display-only, never sent to the geocoder) right after the
   // street portion of an already-resolved address label, e.g. "הרצל, נהריה" + "12" -> "הרצל 12, נהריה"
+  // if someone typed the house number as part of the street text (e.g. "הרצל 12"),
+  // pull the trailing number out so it lands in the dedicated number field instead
+  function splitTrailingHouseNumber(streetEl, houseNumEl){
+    const match = streetEl.value.trim().match(/^(.*?)\s+(\d+[א-ת]?(?:\/\d+)?)$/);
+    if(!match) return;
+    const [, streetOnly, number] = match;
+    if(!streetOnly) return; // don't split if there'd be nothing left as the street name
+    streetEl.value = streetOnly;
+    if(!houseNumEl.value.trim()) houseNumEl.value = number; // don't clobber a number already typed there
+  }
+
   function insertHouseNumber(address, houseNumber){
     const num = (houseNumber || "").trim();
     if(!num) return address;
@@ -3747,6 +3761,9 @@
       selectedGeo = null;
       debouncedTypeahead();
     });
+  });
+  document.getElementById('f-street').addEventListener('blur', ()=>{
+    splitTrailingHouseNumber(document.getElementById('f-street'), document.getElementById('f-housenum'));
   });
 
   document.addEventListener('click', (e)=>{
