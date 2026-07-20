@@ -468,6 +468,11 @@
   .no-order-reason-label{ font-size:.76rem; color:rgba(255,255,255,.6); margin:0 0 4px; display:block; }
   .no-order-reason{ font-size:.82rem; }
   .no-order-row input{ width:auto; flex:0 0 auto; }
+  .order-discount-row{
+    margin-top:10px; display:flex; align-items:center; justify-content:center; gap:8px;
+    font-size:.85rem;
+  }
+  .order-discount-row input{ width:80px; text-align:center; }
   .order-total-row{
     margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,.2);
     font-size:.88rem; text-align:center;
@@ -2362,7 +2367,7 @@
 
     function itemKey(name){ return name.replace(/[^א-תa-zA-Z0-9]/g,'_'); }
 
-    function renderForm(prefillItems, prefillNoOrder, prefillReason){
+    function renderForm(prefillItems, prefillNoOrder, prefillReason, prefillDiscount){
       const prefillMap = {};
       (prefillItems || []).forEach(it => { prefillMap[it.name] = it.qty; });
 
@@ -2407,6 +2412,10 @@
               <input type="text" class="no-order-reason" placeholder="למשל: הלקוח לא היה זמין, אין מלאי אצל הלקוח..." value="${escapeHtml(prefillReason||'')}">
             </div>
           </div>
+          <div class="order-discount-row">
+            <label>הנחה (%)</label>
+            <input type="number" min="0" max="100" step="0.1" class="order-discount-input" value="${escapeHtml((prefillDiscount !== undefined && prefillDiscount !== null) ? prefillDiscount : (c.discountPercent || ''))}" placeholder="0">
+          </div>
           <div class="order-total-row">
             סה״כ (לפי ₪${unitPrice.toFixed(2)} ליחידה): <b class="order-total-amount">₪0.00</b>
           </div>
@@ -2448,21 +2457,25 @@
         recalcTotal();
       });
 
+      const discountInput = modal.querySelector('.order-discount-input');
       function recalcTotal(){
         if(noOrderCheckbox.checked){
           modal.querySelector('.order-total-amount').textContent = `₪0.00`;
           return;
         }
-        let total = 0;
+        let subtotal = 0;
         modal.querySelectorAll('.order-item-checkbox').forEach(cb=>{
           if(cb.checked){
             const qtyInput = modal.querySelector(`.order-item-qty[data-item="${CSS.escape(cb.dataset.item)}"]`);
             const qty = parseFloat(qtyInput.value) || 0;
-            total += qty * unitPrice;
+            subtotal += qty * unitPrice;
           }
         });
+        const discountPct = Math.min(100, Math.max(0, parseFloat(discountInput.value) || 0));
+        const total = subtotal * (1 - discountPct / 100);
         modal.querySelector('.order-total-amount').textContent = `₪${total.toFixed(2)}`;
       }
+      discountInput.addEventListener('input', recalcTotal);
       modal.querySelectorAll('.order-item-checkbox, .order-item-qty').forEach(el=>{
         el.addEventListener('input', recalcTotal);
         el.addEventListener('change', recalcTotal);
@@ -2492,13 +2505,17 @@
             return;
           }
         }
-        const total = noOrder ? 0 : items.reduce((sum,it)=> sum + it.qty * unitPrice, 0);
+        const discountPct = Math.min(100, Math.max(0, parseFloat(modal.querySelector('.order-discount-input').value) || 0));
+        const subtotal = noOrder ? 0 : items.reduce((sum,it)=> sum + it.qty * unitPrice, 0);
+        const total = subtotal * (1 - discountPct / 100);
+        c.discountPercent = discountPct || "";
         c.orders = c.orders || [];
         if(orderModalEditingId){
           const existing = c.orders.find(o => o.id === orderModalEditingId);
           if(existing){
             existing.items = items;
             existing.total = total;
+            existing.discountPercent = discountPct;
             existing.date = localDateString();
             existing.noOrder = noOrder;
             existing.noOrderReason = noOrderReason;
@@ -2507,7 +2524,7 @@
           c.orders.push({
             id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
             date: localDateString(),
-            items, total, noOrder, noOrderReason
+            items, total, discountPercent: discountPct, noOrder, noOrderReason
           });
         }
         // the order's total becomes this client's "last invoice amount" too, dated today
@@ -2534,7 +2551,7 @@
         <div class="order-history-row" data-order-id="${o.id}">
           <div class="order-history-info">
             <div class="order-history-date">${o.date}</div>
-            <div class="order-history-items">${o.noOrder ? `<i>לא בוצעה הזמנה${o.noOrderReason ? ` - ${escapeHtml(o.noOrderReason)}` : ''}</i>` : o.items.map(it=>`${escapeHtml(it.name)} ×${it.qty}`).join(', ')}</div>
+            <div class="order-history-items">${o.noOrder ? `<i>לא בוצעה הזמנה${o.noOrderReason ? ` - ${escapeHtml(o.noOrderReason)}` : ''}</i>` : o.items.map(it=>`${escapeHtml(it.name)} ×${it.qty}`).join(', ')}${o.discountPercent ? ` <span style="color:var(--gold)">(הנחה ${o.discountPercent}%)</span>` : ''}</div>
           </div>
           <div class="order-history-total">₪${o.total.toFixed(2)}</div>
           <div class="order-history-actions">
@@ -2549,7 +2566,7 @@
           const order = (c.orders||[]).find(o => o.id === btn.dataset.orderId);
           if(!order) return;
           orderModalEditingId = order.id;
-          renderForm(order.items, order.noOrder, order.noOrderReason);
+          renderForm(order.items, order.noOrder, order.noOrderReason, order.discountPercent);
         });
       });
       listEl.querySelectorAll('.order-del-btn').forEach(btn=>{
