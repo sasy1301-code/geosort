@@ -1446,6 +1446,43 @@
   // points not yet in that saved order - so new additions are automatically slotted in
   // by shortest distance, while previously-arranged points keep the order you chose.
   // points: [{id, lat, lon}, ...], savedIds: [id, ...] or null/empty for a fresh start.
+  // 2-opt local search: repeatedly looks for a pair of legs in the route whose
+  // "crossing" can be undone by reversing the segment between them, whenever
+  // that shortens the total distance. This is a standard, fast way to turn a
+  // decent nearest-neighbor route into a genuinely efficient one, without the
+  // cost of solving the full traveling-salesman problem exactly.
+  function twoOptImprove(order, byId, maxIterations){
+    const n = order.length;
+    if(n < 4) return order; // nothing meaningful to improve with fewer than 4 stops
+    const limit = maxIterations || 2000;
+    let iterations = 0;
+    let improved = true;
+    while(improved && iterations < limit){
+      improved = false;
+      for(let i=0; i<n-2; i++){
+        const a = byId[order[i]], b = byId[order[i+1]];
+        for(let j=i+2; j<n-1; j++){
+          const cPt = byId[order[j]], d = byId[order[j+1]];
+          const before = haversine(a.lat,a.lon,b.lat,b.lon) + haversine(cPt.lat,cPt.lon,d.lat,d.lon);
+          const after = haversine(a.lat,a.lon,cPt.lat,cPt.lon) + haversine(b.lat,b.lon,d.lat,d.lon);
+          iterations++;
+          if(after + 1e-9 < before){
+            let left = i+1, right = j;
+            while(left < right){
+              const tmp = order[left]; order[left] = order[right]; order[right] = tmp;
+              left++; right--;
+            }
+            improved = true;
+            break; // recompute a/b for the new order[i+1] before continuing
+          }
+          if(iterations >= limit) break;
+        }
+        if(improved || iterations >= limit) break;
+      }
+    }
+    return order;
+  }
+
   function computeOrderedIds(points, savedIds){
     const byId = {};
     points.forEach(p => { byId[p.id] = p; });
@@ -1477,6 +1514,11 @@
       const chosenId = remaining.splice(bestRemIdx, 1)[0];
       order.splice(bestOrderIdx + 1, 0, chosenId); // right after its closest match
     }
+    // final pass: 2-opt local search over the whole route, swapping pairs of legs
+    // whenever doing so shortens the total distance - this is what actually pushes
+    // a nearest-neighbor route toward the genuinely most efficient overall order,
+    // rather than just "reasonable" neighbor-by-neighbor placement
+    twoOptImprove(order, byId);
     return order;
   }
 
