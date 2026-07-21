@@ -196,6 +196,20 @@
     padding:8px 10px; font-size:.8rem; margin-top:10px; display:none;
   }
   .addr-field-wrap{ position:relative; }
+  .biz-lookup-row{ margin-top:6px; }
+  #bizLookupBtn{
+    width:100%; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.3); color:#fff;
+    padding:7px 10px; border-radius:8px; font-size:.8rem; cursor:pointer;
+  }
+  #bizLookupBtn:hover{ background:rgba(255,255,255,.18); }
+  #bizLookupBtn:disabled{ opacity:.6; cursor:default; }
+  .biz-lookup-suggestions{ margin-top:6px; }
+  .biz-lookup-suggestions .suggestion-item{
+    padding:9px 10px; font-size:.82rem; cursor:pointer; border:1px solid rgba(255,255,255,.18);
+    border-radius:8px; margin-bottom:6px; display:flex; gap:8px; align-items:flex-start; color:#fff;
+    background:#021236;
+  }
+  .biz-lookup-suggestions .suggestion-item:hover{ background:#0a2568; }
   .suggestions{
     position:absolute; top:100%; right:0; left:0; z-index:500;
     background:#021236; border:1px solid rgba(255,255,255,.18); border-radius:8px;
@@ -732,6 +746,7 @@
   <div class="hamburger-menu" id="hamburgerMenu" style="display:none">
     <button class="hamburger-menu-item" id="inventoryMenuItem">📦 מלאי</button>
     <button class="hamburger-menu-item" id="vehicleStockMenuItem">🚚 מלאי ברכב</button>
+    <button class="hamburger-menu-item" id="dedupeOrdersMenuItem">🧹 ניקוי הזמנות כפולות</button>
   </div>
 
   <div class="main">
@@ -748,6 +763,10 @@
           <input type="text" id="f-name" placeholder="לדוגמה: דוד כהן / חברת ABC בע״מ">
           <label for="f-business">שם העסק (מה שרשום על השלט / הכניסה) <span style="color:var(--gold)">*חובה</span></label>
           <input type="text" id="f-business" placeholder="לדוגמה: מספרת שי, פיצה רומא...">
+          <div class="biz-lookup-row">
+            <button type="button" id="bizLookupBtn">🔍 מצא כתובת לפי שם העסק</button>
+          </div>
+          <div class="biz-lookup-suggestions" id="bizLookupSuggestions"></div>
           <label for="f-businessid">ח.פ/ת.ז</label>
           <input type="text" id="f-businessid" placeholder="מספר ח.פ או ת.ז">
           <label for="f-contact">שם איש הקשר</label>
@@ -1249,6 +1268,11 @@
   // never "recover" these back from the server, or a delete would look like it
   // silently undoes itself a moment later
   const recentlyDeletedClientIds = new Set();
+  // same idea, but for individual order records (e.g. removed via the duplicate-
+  // orders cleanup, or the 🗑 button in order history) - without this, the merge
+  // logic below would "recover" a just-deleted order back from the server
+  const recentlyDeletedOrderIds = new Set();
+  const recentlyDeletedUpdateIds = new Set();
 
   function saveData(){
     saveDataQueue = saveDataQueue.then(() => doSaveData()).catch(()=>{});
@@ -1287,6 +1311,7 @@
           localC.orders = localC.orders || [];
           const localOrderIds = new Set(localC.orders.map(o => o.id));
           serverC.orders.forEach(o=>{
+            if(recentlyDeletedOrderIds.has(o.id)) return; // just deleted here - don't resurrect it
             if(!localOrderIds.has(o.id)){ localC.orders.push(o); changed = true; }
           });
         }
@@ -1294,6 +1319,7 @@
           localC.updates = localC.updates || [];
           const localUpdateIds = new Set(localC.updates.map(u => u.id));
           serverC.updates.forEach(u=>{
+            if(recentlyDeletedUpdateIds.has(u.id)) return; // just deleted here - don't resurrect it
             if(!localUpdateIds.has(u.id)){ localC.updates.push(u); changed = true; }
           });
         }
@@ -1794,6 +1820,20 @@
 
   // searches specifically for a business/point-of-interest by name, instead of a
   // plain street address - used by the "find address by business name" lookup
+  // searches for a business by name (no type restriction, unlike a pure address
+  // search this relies on MapTiler's own relevance ranking to surface the business)
+  async function geocodeBusinessName(name, limit){
+    const clampedLimit = Math.max(1, Math.min(10, limit || 8));
+    return scheduleRequest(async ()=>{
+      const url = `https://api.maptiler.com/geocoding/${encodeURIComponent(name)}.json?key=${MAPTILER_API_KEY}&country=il&language=he&limit=${clampedLimit}`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error("geocode failed (" + res.status + ")");
+      const data = await res.json();
+      const features = (data && data.features) || [];
+      return features.map(toGeoItem);
+    });
+  }
+
   async function geocodeMulti(address, limit){
     const data = await maptilerSearch(address, limit);
     const features = (data && data.features) || [];
@@ -2084,7 +2124,7 @@
   }
 
   function escapeHtml(s){
-    return (s||"").replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    return String(s ?? "").replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
   }
 
   // frames the map on a set of [lat, lon] points - centers+zooms for a single point,
@@ -2524,7 +2564,9 @@
       });
       recalcTotal();
 
-      modal.querySelector('.order-save-btn').addEventListener('click', ()=>{
+      modal.querySelector('.order-save-btn').addEventListener('click', (e)=>{
+        const saveBtn = e.currentTarget;
+        if(saveBtn.disabled) return; // guards against a rapid double-click creating a duplicate order
         const noOrder = noOrderCheckbox.checked;
         let items = [];
         let noOrderReason = "";
@@ -2547,6 +2589,7 @@
             return;
           }
         }
+        saveBtn.disabled = true;
         const discountPct = Math.min(100, Math.max(0, parseFloat(modal.querySelector('.order-discount-input').value) || 0));
         const subtotal = noOrder ? 0 : items.reduce((sum,it)=> sum + it.qty * unitPrice, 0);
         const total = subtotal * (1 - discountPct / 100);
@@ -2593,7 +2636,7 @@
         <div class="order-history-row" data-order-id="${o.id}">
           <div class="order-history-info">
             <div class="order-history-date">${o.date}</div>
-            <div class="order-history-items">${o.noOrder ? `<i>לא בוצעה הזמנה${o.noOrderReason ? ` - ${escapeHtml(o.noOrderReason)}` : ''}</i>` : o.items.map(it=>`${escapeHtml(it.name)} ×${it.qty}`).join(', ')}${o.discountPercent ? ` <span style="color:var(--gold)">(הנחה ${o.discountPercent}%)</span>` : ''}</div>
+            <div class="order-history-items">${o.noOrder ? `<i>לא בוצעה הזמנה${o.noOrderReason ? ` - ${escapeHtml(o.noOrderReason)}` : ''}</i>` : (o.items || []).map(it=>`${escapeHtml(it.name||'')} ×${it.qty||0}`).join(', ')}${o.discountPercent ? ` <span style="color:var(--gold)">(הנחה ${o.discountPercent}%)</span>` : ''}</div>
           </div>
           <div class="order-history-total">₪${o.total.toFixed(2)}</div>
           <div class="order-history-actions">
@@ -2614,6 +2657,7 @@
       listEl.querySelectorAll('.order-del-btn').forEach(btn=>{
         btn.addEventListener('click', ()=>{
           if(!confirm('למחוק את ההזמנה הזו? לא ניתן לשחזר.')) return;
+          recentlyDeletedOrderIds.add(btn.dataset.orderId); // guard against the merge-safe save resurrecting it
           c.orders = (c.orders||[]).filter(o => o.id !== btn.dataset.orderId);
           saveData();
           renderHistory();
@@ -2704,6 +2748,7 @@
       listEl.querySelectorAll('.edit-update-del').forEach(btn=>{
         btn.addEventListener('click', (e)=>{
           e.stopPropagation();
+          recentlyDeletedUpdateIds.add(btn.dataset.updateId); // guard against the merge-safe save resurrecting it
           c.updates = (c.updates || []).filter(u => u.id !== btn.dataset.updateId);
           saveData();
           renderEditUpdates();
@@ -2942,7 +2987,12 @@
     const cnameLink = card.querySelector('.cname-link');
     cnameLink.addEventListener('click', (e)=>{
       e.stopPropagation();
-      openOrderModal(c);
+      try{
+        openOrderModal(c);
+      }catch(err){
+        console.error('order modal error for client', c.id, c.business, err);
+        alert('שגיאה בפתיחת הזמנות עבור "' + (c.business || c.name || '') + '": ' + err.message);
+      }
     });
     const photoUploadInput = card.querySelector('.photo-upload-input');
     const photoThumb = card.querySelector('.place-photo-thumb');
@@ -3862,6 +3912,64 @@
 
   window.__deleteClient = function(id){ deleteClient(id); };
 
+  // builds a signature for an order so that accidental duplicates (created e.g.
+  // by a double-click on "save") can be detected: same date, same total, same
+  // items (regardless of order), same no-order status
+  function orderSignature(o){
+    const itemsPart = (o.items || [])
+      .map(it => `${it.name}:${it.qty}`)
+      .sort()
+      .join('|');
+    return `${o.date}__${(o.total||0).toFixed(2)}__${o.noOrder ? 1 : 0}__${itemsPart}`;
+  }
+
+  function cleanupDuplicateOrders(){
+    let totalRemoved = 0;
+    let clientsAffected = 0;
+    const preview = [];
+    clients.forEach(c=>{
+      if(!c.orders || c.orders.length < 2) return;
+      const seen = new Set();
+      const kept = [];
+      let removedHere = 0;
+      c.orders.forEach(o=>{
+        const sig = orderSignature(o);
+        if(seen.has(sig)){
+          removedHere++;
+          recentlyDeletedOrderIds.add(o.id); // guard against the merge-safe save resurrecting it
+        } else {
+          seen.add(sig);
+          kept.push(o);
+        }
+      });
+      if(removedHere > 0){
+        preview.push(`${c.business || c.name || c.id}: ${removedHere} כפילויות`);
+        c.orders = kept;
+        totalRemoved += removedHere;
+        clientsAffected++;
+      }
+    });
+
+    if(totalRemoved === 0){
+      alert('לא נמצאו הזמנות כפולות.');
+      return;
+    }
+
+    const ok = confirm(
+      `נמצאו ${totalRemoved} הזמנות כפולות ב-${clientsAffected} לקוחות:\n\n` +
+      preview.join('\n') +
+      `\n\nלמחוק את הכפילויות ולהשאיר רק הזמנה אחת מכל אחת? לא ניתן לשחזר את זה.`
+    );
+    if(!ok){
+      // user backed out - reload the untouched data instead of saving the trimmed version
+      loadData().then(renderAll);
+      return;
+    }
+    saveData();
+    renderAll();
+    alert(`נמחקו ${totalRemoved} הזמנות כפולות בהצלחה.`);
+  }
+
   function deleteClient(id){
     recentlyDeletedClientIds.add(id);
     clients = clients.filter(c=>c.id !== id);
@@ -3937,6 +4045,53 @@
   document.getElementById('refreshBtn').addEventListener('click', async ()=>{
     await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline()]);
     renderAll();
+  });
+
+  document.getElementById('bizLookupBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('bizLookupBtn');
+    const box = document.getElementById('bizLookupSuggestions');
+    const name = document.getElementById('f-business').value.trim();
+    const cityHint = document.getElementById('f-city').value.trim();
+    box.innerHTML = '';
+    if(!name){
+      alert('קודם יש להזין שם עסק בשדה למעלה.');
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'מחפש...';
+    try{
+      const query = cityHint ? `${name}, ${cityHint}` : name;
+      const results = await geocodeBusinessName(query, 8);
+      if(results.length === 0){
+        box.innerHTML = `<div style="color:rgba(255,255,255,.6);font-size:.78rem;padding:6px 2px">לא נמצא עסק בשם הזה. אפשר להזין את הכתובת ידנית למטה.</div>`;
+      } else {
+        function applyBizResult(r){
+          document.getElementById('f-city').value = r.city || '';
+          document.getElementById('f-street').value = r.road || '';
+          document.getElementById('f-housenum').value = r.house || '';
+          splitTrailingHouseNumber(document.getElementById('f-street'), document.getElementById('f-housenum'));
+          selectedGeo = r;
+          box.innerHTML = '';
+        }
+        if(results.length === 1){
+          applyBizResult(results[0]);
+        } else {
+          box.innerHTML = results.map((r,i) => `
+            <div class="suggestion-item" data-i="${i}">
+              <div class="txt"><div class="main">${escapeHtml(r.display_name || r.label)}</div></div>
+            </div>
+          `).join('');
+          box.querySelectorAll('.suggestion-item').forEach(el=>{
+            el.addEventListener('click', ()=> applyBizResult(results[parseInt(el.dataset.i,10)]));
+          });
+        }
+      }
+    }catch(err){
+      box.innerHTML = `<div style="color:#ff8a8a;font-size:.78rem;padding:6px 2px">שגיאה באיתור העסק: ${err.message}</div>`;
+    }finally{
+      btn.disabled = false;
+      btn.textContent = '🔍 מצא כתובת לפי שם העסק';
+    }
   });
 
   document.getElementById('addBtn').addEventListener('click', async ()=>{
@@ -4042,6 +4197,15 @@
     }catch(err){
       console.error('vehicle stock modal error', err);
       alert('שגיאה בפתיחת מלאי ברכב: ' + err.message);
+    }
+  });
+  document.getElementById('dedupeOrdersMenuItem').addEventListener('click', ()=>{
+    document.getElementById('hamburgerMenu').style.display = 'none';
+    try{
+      cleanupDuplicateOrders();
+    }catch(err){
+      console.error('dedupe orders error', err);
+      alert('שגיאה בניקוי הזמנות כפולות: ' + err.message);
     }
   });
   document.addEventListener('click', (e)=>{
