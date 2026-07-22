@@ -578,6 +578,12 @@
   }
   .client-card .share-card-btn svg{ display:block; }
   .client-card .photo-card-row{ height:0; overflow:visible; position:relative; }
+  .client-card .whatsapp-preset-row{ height:0; overflow:visible; position:relative; }
+  .client-card .whatsapp-preset-btn{
+    display:inline-flex; align-items:center; justify-content:center; width:25px; height:25px;
+    position:absolute; left:0; bottom:2px; cursor:pointer;
+  }
+  .client-card .whatsapp-preset-btn svg{ display:block; width:25px; height:25px; }
   .client-card .place-photo-wrap{
     position:absolute; left:0; bottom:32px; width:38px; height:38px;
   }
@@ -801,6 +807,8 @@
           <input type="text" id="f-folder-new" placeholder="שם התיקייה החדשה (למשל: ראשון לציון, צפון)" style="display:none; margin-top:6px">
           <label for="f-notes">הערות</label>
           <textarea id="f-notes" placeholder="הערות חופשיות..."></textarea>
+          <label for="f-whatsapp-msg">הודעת וואטסאפ מוכנה מראש</label>
+          <textarea id="f-whatsapp-msg" placeholder="הודעה שתישלח בלחיצה על אייקון הוואטסאפ הירוק">הסוכן נמצא היום באיזורך ויגיע במהלך היום, תודה רבה קיטו פרימיום. המשך יום טוב.</textarea>
           <button class="primary" id="addBtn">+ הוסף לקוח</button>
           <div class="error-msg" id="formError"></div>
           </div>
@@ -2061,6 +2069,10 @@
 
   const WHATSAPP_ICON_SVG = `<svg width="25" height="25" viewBox="0 0 30.667 30.667" xmlns="http://www.w3.org/2000/svg"><path fill="#73dd5c" d="M30.667,14.939c0,8.25-6.74,14.938-15.056,14.938c-2.639,0-5.118-0.675-7.276-1.857L0,30.667l2.717-8.017c-1.37-2.25-2.159-4.892-2.159-7.712C0.559,6.688,7.297,0,15.613,0C23.928,0.002,30.667,6.689,30.667,14.939z M15.61,2.382c-6.979,0-12.656,5.634-12.656,12.56c0,2.748,0.896,5.292,2.411,7.362l-1.58,4.663l4.862-1.545c2,1.312,4.393,2.076,6.963,2.076c6.979,0,12.658-5.633,12.658-12.559C28.27,8.016,22.59,2.382,15.61,2.382z M23.214,18.38c-0.094-0.151-0.34-0.243-0.708-0.427c-0.367-0.184-2.184-1.069-2.521-1.189c-0.34-0.123-0.586-0.185-0.832,0.182c-0.243,0.367-0.951,1.191-1.168,1.437c-0.215,0.245-0.43,0.276-0.799,0.095c-0.369-0.186-1.559-0.57-2.969-1.817c-1.097-0.972-1.838-2.169-2.052-2.536c-0.217-0.366-0.022-0.564,0.161-0.746c0.165-0.165,0.369-0.428,0.554-0.643c0.185-0.213,0.246-0.364,0.369-0.609c0.121-0.245,0.06-0.458-0.031-0.643c-0.092-0.184-0.829-1.984-1.138-2.717c-0.307-0.732-0.614-0.611-0.83-0.611c-0.215,0-0.461-0.03-0.707-0.03S9.897,8.215,9.56,8.582s-1.291,1.252-1.291,3.054c0,1.804,1.321,3.543,1.506,3.787c0.186,0.243,2.554,4.062,6.305,5.528c3.753,1.465,3.753,0.976,4.429,0.914c0.678-0.062,2.184-0.885,2.49-1.739C23.307,19.268,23.307,18.533,23.214,18.38z"/></svg>`;
 
+  // WhatsApp-with-plus icon (uploaded by the user) for the preset-message button,
+  // visually distinguishing it from the regular WhatsApp icon
+  const WHATSAPP_PRESET_ICON_SVG = `<svg width="25" height="25" viewBox="0 0 452.8 461.7" xmlns="http://www.w3.org/2000/svg" fill="#73dd5c"><path d="M183.2,198.9c2.8-3.3,3.8-5.6,5.7-9.4,1.9-3.8.9-7.1-.5-9.9-1.4-2.8-12.7-30.5-17.4-41.8-4.6-11-9.2-9.5-12.7-9.7-3.3-.2-7-.2-10.8-.2s-9.9,1.4-15,7.1c-5.2,5.6-19.7,19.3-19.7,47s20.2,54.5,23,58.3,39.7,60.7,96.2,85.1c13.4,5.8,23.9,9.3,32.1,11.9,13.5,4.3,25.8,3.7,35.5,2.2,10.8-1.6,33.3-13.6,38-26.8,4.7-13.2,4.7-24.5,3.3-26.8-1.4-2.4-5.2-3.8-10.8-6.6-5.6-2.8-33.3-16.5-38.5-18.3-5.2-1.9-8.9-2.8-12.7,2.8-3.8,5.6-14.5,18.3-17.8,22.1-3.3,3.8-6.6,4.2-12.2,1.4-5.6-2.8-23.8-8.8-45.3-28-16.7-14.9-28.1-33.4-31.3-39-3.3-5.6-.3-8.7,2.5-11.5,2.5-2.5,5.6-6.6,8.5-9.9Z"/><path d="M436.6,148c-8.9,9.8-19.7,17.8-31.9,23.4,6.6,19.3,10.1,39.9,10.1,60.9,0,103.4-84.1,187.4-187.4,187.4h0c-33.6,0-66.6-9-95.4-26.1l-6.8-4.1-70.9,18.6,18.9-69.2-4.5-7.1c-18.8-29.8-28.7-64.3-28.6-99.7,0-103.3,84.1-187.4,187.5-187.4s30.9,1.9,45.7,5.6c4.5-12.7,11.6-24.1,20.6-33.7-21.2-6.5-43.6-9.9-66.4-9.9C103.1,6.7,2,107.8,1.9,232.1c0,39.7,10.4,78.5,30.1,112.7L0,461.7l119.5-31.4c32.9,18,70,27.4,107.7,27.5h0c124.3,0,225.4-101.1,225.5-225.5,0-29.4-5.6-57.9-16.2-84.3Z"/><path d="M281.1,83.3c0,46,37.3,83.3,83.3,83.3s24.7-2.8,35.5-7.9c12.1-5.7,22.5-14.2,30.6-24.7,10.8-14,17.2-31.6,17.2-50.7,0-46-37.3-83.3-83.3-83.3-21.6,0-41.2,8.2-56,21.6-9.7,8.8-17.4,20-22.1,32.5-3.4,9.1-5.3,18.9-5.3,29.2ZM336.6,76.4h20.8v-20.8c0-2.3,1.1-4.3,2.8-5.6,1.2-.9,2.6-1.4,4.1-1.4,3.8,0,6.9,3.1,6.9,6.9v20.8h20.8c3.8,0,6.9,3.1,6.9,6.9s-.1,1.6-.4,2.3c-.9,2.7-3.5,4.7-6.6,4.7h-20.8v20.8c0,.3,0,.7,0,1-.5,3.4-3.4,6-6.9,6s-6.9-3.1-6.9-6.9v-20.8h-20.8c-3.8,0-6.9-3.1-6.9-6.9s1.4-4.8,3.4-6c1-.6,2.2-1,3.5-1Z"/></svg>`;
+
   const SHARE_ICON_SVG = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9fc3ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="19" r="2.8"/><line x1="8.4" y1="10.7" x2="15.6" y2="6.3"/><line x1="8.4" y1="13.3" x2="15.6" y2="17.7"/></svg>`;
 
   const PHOTO_ICON_SVG = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e0c46a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 0 1 2-2h1.2l1-1.6A1.5 1.5 0 0 1 9.5 3.5h5a1.5 1.5 0 0 1 1.3.9L17 6.5v.03A2 2 0 0 1 18.8 6H20a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8z"/><path d="M4 8V6.5A1.5 1.5 0 0 1 5.5 5H7"/><circle cx="12" cy="13" r="3.6"/></svg>`;
@@ -2713,6 +2725,8 @@
       <input type="text" class="edit-housenum" value="${escapeHtml(c.houseNumber||'')}">
       <label>הערות</label>
       <textarea class="edit-notes">${escapeHtml(c.notes||'')}</textarea>
+      <label>הודעת וואטסאפ מוכנה מראש</label>
+      <textarea class="edit-whatsapp-msg">${escapeHtml(c.whatsappMessage||'')}</textarea>
       <label>עדכונים</label>
       <div class="edit-updates-list"></div>
       <div class="edit-update-add-row">
@@ -2789,6 +2803,7 @@
       c.email = card.querySelector('.edit-email').value.trim();
       c.price = card.querySelector('.edit-price').value.trim();
       c.notes = card.querySelector('.edit-notes').value.trim();
+      c.whatsappMessage = card.querySelector('.edit-whatsapp-msg').value.trim();
     }
 
     function finishSave(){
@@ -2932,6 +2947,11 @@
           ` : ""}
           <input type="file" accept="image/*" class="photo-upload-input" style="display:none">
         </div>
+        ${c.phone ? `
+          <div class="whatsapp-preset-row">
+            <a href="${escapeHtml(waHref(c.phone))}${c.whatsappMessage ? `?text=${encodeURIComponent(c.whatsappMessage)}` : ''}" target="_blank" class="whatsapp-preset-btn" title="שליחת הודעת וואטסאפ מוכנה מראש">${WHATSAPP_PRESET_ICON_SVG}</a>
+          </div>
+        ` : ""}
         ${(c.price || c.phone) ? `
           <div class="cprice-row">
             ${c.price ? `<div class="cprice">מחיר ליחידה: ₪${escapeHtml(c.price)}</div>` : `<div></div>`}
@@ -3842,7 +3862,7 @@
       // finishing an add that was ambiguous
       const data = pendingClientData;
       pendingClientData = null;
-      finalizeAdd({ business:data.business, businessId:data.businessId, name:data.name, contact:data.contact, phone:data.phone, email:data.email, price:data.price, notes:data.notes, folder:data.folder, houseNumber:data.houseNumber, address:insertHouseNumber(item.label, data.houseNumber), lat:item.lat, lon:item.lon, city:item.city });
+      finalizeAdd({ business:data.business, businessId:data.businessId, name:data.name, contact:data.contact, phone:data.phone, email:data.email, price:data.price, notes:data.notes, whatsappMessage:data.whatsappMessage, folder:data.folder, houseNumber:data.houseNumber, address:insertHouseNumber(item.label, data.houseNumber), lat:item.lat, lon:item.lon, city:item.city });
     } else {
       // just narrowing down the address while composing the form
       selectedGeo = item;
@@ -3852,7 +3872,7 @@
   function finalizeAdd(data){
     clients.push({
       id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
-      business: data.business || "", businessId: data.businessId || "", name: data.name, contact: data.contact || "", phone: data.phone || "", email: data.email || "", price: data.price || "", houseNumber: data.houseNumber || "", address: data.address, notes: data.notes || "",
+      business: data.business || "", businessId: data.businessId || "", name: data.name, contact: data.contact || "", phone: data.phone || "", email: data.email || "", price: data.price || "", houseNumber: data.houseNumber || "", address: data.address, notes: data.notes || "", whatsappMessage: data.whatsappMessage || "",
       folder: data.folder || "", lat: data.lat, lon: data.lon, city: data.city || ""
     });
     saveData();
@@ -4106,6 +4126,7 @@
     const houseNumEl = document.getElementById('f-housenum');
     const cityEl = document.getElementById('f-city');
     const notesEl = document.getElementById('f-notes');
+    const whatsappMsgEl = document.getElementById('f-whatsapp-msg');
     const folderSel = document.getElementById('f-folder');
     const folderNewEl = document.getElementById('f-folder-new');
     const errEl = document.getElementById('formError');
@@ -4139,7 +4160,7 @@
 
     // if the user already picked an exact suggestion, use it directly - no need to re-geocode
     if(selectedGeo){
-      finalizeAdd({ business, businessId: businessIdEl.value.trim(), name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(selectedGeo.label, houseNumber), lat: selectedGeo.lat, lon: selectedGeo.lon, city: selectedGeo.city });
+      finalizeAdd({ business, businessId: businessIdEl.value.trim(), name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), whatsappMessage: whatsappMsgEl.value.trim(), folder, houseNumber, address: insertHouseNumber(selectedGeo.label, houseNumber), lat: selectedGeo.lat, lon: selectedGeo.lon, city: selectedGeo.city });
       clearSuggestions();
       return;
     }
@@ -4158,12 +4179,12 @@
 
       if(results.length === 1){
         clearSuggestions();
-        finalizeAdd({ business, businessId: businessIdEl.value.trim(), name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber, address: insertHouseNumber(results[0].label, houseNumber), lat: results[0].lat, lon: results[0].lon, city: results[0].city });
+        finalizeAdd({ business, businessId: businessIdEl.value.trim(), name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), whatsappMessage: whatsappMsgEl.value.trim(), folder, houseNumber, address: insertHouseNumber(results[0].label, houseNumber), lat: results[0].lat, lon: results[0].lon, city: results[0].city });
         return;
       }
 
       // several possible matches - let the user pick the right one from the list / map
-      pendingClientData = { business, businessId: businessIdEl.value.trim(), name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), folder, houseNumber };
+      pendingClientData = { business, businessId: businessIdEl.value.trim(), name, contact, phone: phoneEl.value.trim(), email: emailEl.value.trim(), price, notes: notesEl.value.trim(), whatsappMessage: whatsappMsgEl.value.trim(), folder, houseNumber };
       showSuggestions(results, true);
     }catch(e){
       errEl.textContent = "שגיאה באיתור הכתובת. בדקו את החיבור לאינטרנט ונסו שוב.";
