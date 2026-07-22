@@ -4292,8 +4292,30 @@
     if(expireHandledStatuses()){ saveData(); renderAll(); }
   }, 5 * 60 * 1000); // check every 5 minutes
 
+  const DEFAULT_WHATSAPP_MESSAGE = `היי,
+בוקר טוב!
+היום אנחנו באזורכם ונעבור אליכם במהלך היום.
+המשך יום טוב,
+קיטו פרימיום 🥩`;
+
+  // one-time fill-in: any existing client that doesn't have a preset WhatsApp
+  // message yet gets the current default, so this doesn't have to be entered
+  // one by one - new clients already get it automatically via the add-client form
+  function backfillDefaultWhatsappMessages(){
+    let changed = false;
+    clients.forEach(c=>{
+      if(!c.whatsappMessage){
+        c.whatsappMessage = DEFAULT_WHATSAPP_MESSAGE;
+        changed = true;
+      }
+    });
+    if(changed) saveData();
+    return changed;
+  }
+
   (async function init(){
     await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline()]);
+    backfillDefaultWhatsappMessages();
     const bounds = renderAll();
     if(clients.length){
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
