@@ -1058,6 +1058,7 @@
   const candidatesLayer = L.layerGroup().addTo(map);
   const folderRouteLayer = L.layerGroup().addTo(map);
   let selectedFolderForRoute = null; // which folder's route line is currently shown on the map
+  let unassignedMapVisible = true; // same idea as folder.mapVisible, but for clients with no folder at all
   const roadRouteCache = {}; // folder name -> {fingerprint, coords:[[lat,lon]...], legs:[{km,min}...], totalKm, totalMin}
 
   function routeFingerprint(orderedMembers){
@@ -1115,6 +1116,16 @@
   function renderFolderRoute(){
     folderRouteLayer.clearLayers();
     if(!selectedFolderForRoute) return;
+    if(selectedFolderForRoute === "__unassigned__"){
+      const members = clients.filter(c => !(c.folder||"") && !c.skipRoute && !c.handled);
+      if(members.length < 2) return;
+      const points = members.map(c => ({ id:c.id, lat:c.lat, lon:c.lon }));
+      const orderedIds = computeOrderedIds(points, []);
+      const ordered = orderedIds.map(id => members.find(c => c.id === id));
+      const straightLatLngs = ordered.map(c => [c.lat, c.lon]);
+      drawGlowPolyline(straightLatLngs, folderRouteLayer, null);
+      return;
+    }
     const folder = folders.find(f => f.name === selectedFolderForRoute);
     const members = clients.filter(c => (c.folder||"") === selectedFolderForRoute && !c.skipRoute && !c.handled);
     if(members.length < 2 || !folder) return;
@@ -1997,6 +2008,7 @@
         const c = clients[m];
         const assignedFolder = c.folder ? folders.find(f => f.name === c.folder) : null;
         if(assignedFolder && assignedFolder.mapVisible === false) return; // whole folder hidden from the map for now
+        if(!c.folder && !unassignedMapVisible) return; // "בלי תיקייה" bucket hidden from the map for now
         if(c.handled) return; // marked handled - off the map for 12 hours, then reverts automatically
         bounds.push([c.lat, c.lon]);
         const folderInfo = folderPositionByClientId[c.id];
@@ -3733,6 +3745,7 @@
     if(unassigned.length){
       anyVisible = true;
       const UNASSIGNED_KEY = "__unassigned__";
+      const unassignedRouteActive = selectedFolderForRoute === UNASSIGNED_KEY;
       const group = document.createElement('div');
       group.className = 'cluster-group';
       const head = document.createElement('div');
@@ -3741,15 +3754,40 @@
         <div class="cluster-swatch" style="background:var(--muted)"></div>
         <div class="name">בלי תיקייה</div>
         <div class="count">${unassigned.length}</div>
+        <button class="map-visibility-toggle ${unassignedMapVisible ? '' : 'off'}" title="${unassignedMapVisible ? 'הסתר את הקבוצה הזו מהמפה' : 'הצג שוב את הקבוצה הזו על המפה'}">${unassignedMapVisible ? '👁' : '🚫'}</button>
+        <button class="route-toggle ${unassignedRouteActive ? 'active' : ''}" title="הצג/הסתר מסלול נסיעה על המפה">🧭</button>
+        <button class="rename-folder" title="לקבוצה הזו אין שם לשנות - היא אוספת אוטומטית כל לקוח בלי תיקייה">✎</button>
+        <button class="folder-del" title="אי אפשר למחוק את הקבוצה הזו - היא לא תיקייה אמיתית, רק שייכו כל לקוח לתיקייה כדי שהוא ייעלם ממנה">✕</button>
       `;
       const body = document.createElement('div');
       body.className = 'cluster-body';
       body.style.display = openFolderNames.has(UNASSIGNED_KEY) ? 'block' : 'none';
-      head.addEventListener('click', ()=>{
+      head.addEventListener('click', (e)=>{
+        if(e.target.closest('.folder-del') || e.target.closest('.route-toggle') || e.target.closest('.rename-folder') || e.target.closest('.map-visibility-toggle')) return;
         toggleFolderOpen(UNASSIGNED_KEY);
         body.style.display = openFolderNames.has(UNASSIGNED_KEY) ? 'block' : 'none';
         const bounds = unassigned.map(c=>[c.lat, c.lon]);
         fitOrCenter(bounds, 14, 40);
+      });
+      head.querySelector('.map-visibility-toggle').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        unassignedMapVisible = !unassignedMapVisible;
+        if(!unassignedMapVisible && selectedFolderForRoute === UNASSIGNED_KEY) selectedFolderForRoute = null;
+        renderAll();
+      });
+      head.querySelector('.route-toggle').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        selectedFolderForRoute = unassignedRouteActive ? null : UNASSIGNED_KEY;
+        openFolderNames.add(UNASSIGNED_KEY);
+        renderAll();
+      });
+      head.querySelector('.rename-folder').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        alert('לקבוצה הזו אין שם לשנות - היא אוספת אוטומטית כל לקוח שאין לו תיקייה.');
+      });
+      head.querySelector('.folder-del').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        alert('אי אפשר למחוק את הקבוצה הזו - היא לא תיקייה אמיתית. שייכו כל לקוח לתיקייה דרך עריכת הכרטיס שלו, וכשלא יישאר אף לקוח בלי תיקייה, הקבוצה תיעלם מהתצוגה.');
       });
       unassigned.forEach(c=> body.appendChild(buildClientCard(c)));
       group.appendChild(head);
