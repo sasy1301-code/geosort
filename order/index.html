@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>הזנת הזמנה - קיטו פרימיום</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; min-height:100vh; background:linear-gradient(160deg,#0a1440,#111e63 60%,#1c2f8a);
+    font-family:'Google Sans','Roboto',-apple-system,"Segoe UI","Noto Sans Hebrew",Arial,sans-serif;
+    color:#fff; display:flex; align-items:flex-start; justify-content:center; padding:24px 14px;
+  }
+  .wrap{ width:100%; max-width:480px; }
+  h1{ font-size:1.3rem; text-align:center; margin:6px 0 20px; }
+  .card{
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18); border-radius:14px;
+    padding:20px; margin-bottom:16px;
+  }
+  label{ display:block; font-size:.85rem; margin:10px 0 4px; color:rgba(255,255,255,.85); }
+  input[type=text], input[type=tel], input[type=number]{
+    width:100%; padding:11px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.3);
+    background:#fff; color:#021236; font-size:1rem; font-family:inherit;
+  }
+  button{ font-family:inherit; cursor:pointer; border:none; border-radius:10px; font-weight:600; }
+  .primary-btn{ width:100%; background:#0448F7; color:#fff; padding:13px; font-size:1rem; margin-top:16px; }
+  .primary-btn:hover{ background:#1c5cff; }
+  .primary-btn:disabled{ opacity:.6; cursor:default; }
+  .error-msg{ color:#ff8a8a; font-size:.85rem; margin-top:10px; text-align:center; min-height:1.2em; }
+  .hint{ font-size:.78rem; color:rgba(255,255,255,.6); text-align:center; margin-top:8px; }
+  .greeting{ text-align:center; font-size:1.05rem; margin-bottom:4px; }
+  .greeting b{ color:#e0c46a; }
+  .order-cat{ margin-bottom:6px; }
+  .order-cat-title{
+    display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:600; padding:8px 4px;
+    color:#e0c46a; user-select:none;
+  }
+  .order-cat-chevron{ transition:transform .15s ease; display:inline-block; }
+  .order-cat-title.open .order-cat-chevron{ transform:rotate(90deg); }
+  .order-cat-items{ padding:0 4px; }
+  .order-item-row{
+    display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid rgba(255,255,255,.1);
+  }
+  .order-item-row label{ flex:1; margin:0; font-size:.85rem; color:#fff; }
+  .order-item-row input[type=checkbox]{ width:18px; height:18px; flex:0 0 auto; }
+  .order-item-row input[type=number]{ width:64px; text-align:center; padding:6px; }
+  .total-row{
+    margin-top:14px; padding-top:12px; border-top:1px dashed rgba(255,255,255,.25);
+    text-align:center; font-size:.95rem;
+  }
+  .total-row b{ color:#3bd332; }
+  .no-order-row{
+    display:flex; align-items:center; gap:8px; padding:10px 4px; border-top:1px dashed rgba(255,255,255,.2);
+    margin-top:10px; font-size:.85rem;
+  }
+  textarea{
+    width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,.3);
+    background:#fff; color:#021236; font-family:inherit; font-size:.9rem; resize:vertical; min-height:50px;
+    margin-top:6px;
+  }
+  .thankyou{ text-align:center; padding:30px 10px; }
+  .thankyou .big{ font-size:2.4rem; margin-bottom:10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🥩 קיטו פרימיום — הזנת הזמנה</h1>
+
+  <div class="card" id="loginCard">
+    <label for="phoneInput">מספר טלפון</label>
+    <input type="tel" id="phoneInput" placeholder="לדוגמה: 0501234567" autocomplete="tel" inputmode="tel">
+    <button class="primary-btn" id="loginBtn">כניסה</button>
+    <div class="error-msg" id="loginError"></div>
+    <div class="hint">מספר הטלפון משמש לזיהוי הכרטיס שלכם במערכת - אין צורך בסיסמה נפרדת.</div>
+  </div>
+
+  <div class="card" id="orderCard" style="display:none">
+    <div class="greeting">שלום, <b id="clientNameDisplay"></b></div>
+    <div id="catalogList"></div>
+
+    <div class="no-order-row">
+      <input type="checkbox" id="noOrderCheckbox">
+      <label for="noOrderCheckbox" style="margin:0">לא רוצה לבצע הזמנה היום</label>
+    </div>
+    <div id="noOrderReasonWrap" style="display:none">
+      <label for="noOrderReason">סיבה (לא חובה)</label>
+      <textarea id="noOrderReason" placeholder="למשל: יש עדיין מלאי מההזמנה הקודמת..."></textarea>
+    </div>
+
+    <div class="total-row" id="totalRow">
+      סה״כ (לפי ₪<span id="unitPriceDisplay">0</span> ליחידה): <b id="totalAmount">₪0.00</b>
+    </div>
+
+    <button class="primary-btn" id="submitOrderBtn">💾 שליחת הזמנה</button>
+    <div class="error-msg" id="orderError"></div>
+  </div>
+
+  <div class="card thankyou" id="thankyouCard" style="display:none">
+    <div class="big">✅</div>
+    <div>ההזמנה נפתחה בוואטסאפ!</div>
+    <div class="hint">נא לשלוח את ההודעה שנפתחה כדי להשלים את שליחת ההזמנה.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+
+  const SUPABASE_URL = "https://zplrfidxpetgtenhenlk.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_cR4JjUiuuxMGJ3Ke2FWBuQ_dcG25pvN";
+  const STORAGE_KEY = "clients_data";
+  const OWNER_WHATSAPP = "972523617178";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const PRODUCT_CATALOG = [
+    { title: "סמאש ג׳רקי", prefix: "סמאש", items: ["סמאש קלאסי","סמאש ים תיכוני","סמאש מעושן","סמאש ברבקיו","סמאש פיקנטי","סמאש מקורמל"] },
+    { title: "בילטונג", prefix: "בילטונג", items: ["בילטונג קלאסי","בילטונג ים תיכוני","בילטונג מעושן","בילטונג ברבקיו","בילטונג פיקנטי","בילטונג מקורמל","בילטונג פיקניה"] },
+    { title: "ביף ג׳רקי", prefix: "ביף ג׳רקי", items: ["ביף ג׳רקי קלאסי","ביף ג׳רקי ים תיכוני","ביף ג׳רקי מעושן","ביף ג׳רקי ברבקיו","ביף ג׳רקי פיקנטי","ביף ג׳רקי מקורמל"] }
+  ];
+
+  function escapeHtml(s){
+    return String(s ?? "").replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  function normalizePhone(phone){
+    let digits = (phone || "").replace(/\D/g, "");
+    if(digits.startsWith("972")) digits = "0" + digits.slice(3);
+    if(!digits.startsWith("0") && digits.length === 9) digits = "0" + digits;
+    return digits;
+  }
+
+  async function findClientByPhone(enteredPhone){
+    const { data, error } = await supabase.from('app_storage').select('value').eq('key', STORAGE_KEY).maybeSingle();
+    if(error || !data) return null;
+    let clients = [];
+    try{ clients = JSON.parse(data.value) || []; }catch(e){ return null; }
+    return clients.find(c => normalizePhone(c.phone) === enteredPhone) || null;
+  }
+
+  let currentClient = null;
+
+  const loginBtn = document.getElementById('loginBtn');
+  const phoneInput = document.getElementById('phoneInput');
+  const loginError = document.getElementById('loginError');
+
+  loginBtn.addEventListener('click', async ()=>{
+    const entered = normalizePhone(phoneInput.value);
+    loginError.textContent = '';
+    if(!entered){
+      loginError.textContent = 'יש להזין מספר טלפון תקין.';
+      return;
+    }
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'מתחבר...';
+    try{
+      const match = await findClientByPhone(entered);
+      if(!match){
+        loginError.textContent = 'לא נמצא כרטיס עם מספר הטלפון הזה. בדקו את המספר ונסו שוב.';
+        return;
+      }
+      currentClient = match;
+      showOrderForm(match);
+    }catch(err){
+      loginError.textContent = 'שגיאה בהתחברות: ' + err.message;
+    }finally{
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'כניסה';
+    }
+  });
+  phoneInput.addEventListener('keydown', e=>{ if(e.key === 'Enter') loginBtn.click(); });
+
+  function showOrderForm(c){
+    document.getElementById('loginCard').style.display = 'none';
+    document.getElementById('orderCard').style.display = 'block';
+    document.getElementById('clientNameDisplay').textContent = c.business || c.name || 'לקוח יקר';
+    const unitPrice = parseFloat(c.price) || 0;
+    document.getElementById('unitPriceDisplay').textContent = unitPrice.toFixed(2);
+    document.getElementById('totalAmount').textContent = '₪0.00';
+
+    const listEl = document.getElementById('catalogList');
+    listEl.innerHTML = PRODUCT_CATALOG.map((cat, ci) => `
+      <div class="order-cat">
+        <div class="order-cat-title" data-cat="${ci}"><span class="order-cat-chevron">▸</span> ${escapeHtml(cat.title)}</div>
+        <div class="order-cat-items" data-cat-items="${ci}" style="display:none">
+          ${cat.items.map(name => `
+            <div class="order-item-row">
+              <input type="checkbox" class="item-checkbox" data-item="${escapeHtml(name)}">
+              <label>${escapeHtml(name.startsWith(cat.prefix + " ") ? name.slice(cat.prefix.length + 1) : name)}</label>
+              <input type="number" class="item-qty" data-item="${escapeHtml(name)}" min="0" value="1" style="display:none">
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('.order-cat-title').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const items = listEl.querySelector(`.order-cat-items[data-cat-items="${el.dataset.cat}"]`);
+        const isOpen = items.style.display !== 'none';
+        items.style.display = isOpen ? 'none' : 'block';
+        el.classList.toggle('open', !isOpen);
+      });
+    });
+
+    function recalcTotal(){
+      let total = 0;
+      listEl.querySelectorAll('.item-checkbox').forEach(cb=>{
+        if(cb.checked){
+          const qtyInput = listEl.querySelector(`.item-qty[data-item="${CSS.escape(cb.dataset.item)}"]`);
+          total += (parseFloat(qtyInput.value) || 0) * unitPrice;
+        }
+      });
+      document.getElementById('totalAmount').textContent = `₪${total.toFixed(2)}`;
+    }
+    listEl.querySelectorAll('.item-checkbox').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const qtyInput = listEl.querySelector(`.item-qty[data-item="${CSS.escape(cb.dataset.item)}"]`);
+        qtyInput.style.display = cb.checked ? 'block' : 'none';
+        recalcTotal();
+      });
+    });
+    listEl.querySelectorAll('.item-qty').forEach(inp=>{
+      inp.addEventListener('input', recalcTotal);
+    });
+
+    const noOrderCheckbox = document.getElementById('noOrderCheckbox');
+    const noOrderReasonWrap = document.getElementById('noOrderReasonWrap');
+    const totalRow = document.getElementById('totalRow');
+    noOrderCheckbox.addEventListener('change', ()=>{
+      const checked = noOrderCheckbox.checked;
+      noOrderReasonWrap.style.display = checked ? 'block' : 'none';
+      listEl.style.opacity = checked ? '.4' : '1';
+      listEl.style.pointerEvents = checked ? 'none' : 'auto';
+      totalRow.style.display = checked ? 'none' : 'block';
+    });
+
+    document.getElementById('submitOrderBtn').addEventListener('click', ()=>{
+      const errEl = document.getElementById('orderError');
+      errEl.textContent = '';
+      const noOrder = noOrderCheckbox.checked;
+      let items = [];
+      let noOrderReason = '';
+
+      if(noOrder){
+        noOrderReason = document.getElementById('noOrderReason').value.trim();
+      } else {
+        listEl.querySelectorAll('.item-checkbox').forEach(cb=>{
+          if(cb.checked){
+            const qtyInput = listEl.querySelector(`.item-qty[data-item="${CSS.escape(cb.dataset.item)}"]`);
+            const qty = parseFloat(qtyInput.value) || 0;
+            if(qty > 0) items.push({ name: cb.dataset.item, qty });
+          }
+        });
+        if(items.length === 0){
+          errEl.textContent = 'יש לבחור לפחות מוצר אחד עם כמות גדולה מ-0, או לסמן "לא רוצה לבצע הזמנה".';
+          return;
+        }
+      }
+
+      const total = noOrder ? 0 : items.reduce((sum,it)=> sum + it.qty * unitPrice, 0);
+      const clientLabel = c.business || c.name || 'לקוח';
+      let messageLines = [`הזמנה חדשה מ: ${clientLabel}`, `טלפון: ${c.phone || ''}`, ''];
+      if(noOrder){
+        messageLines.push('לא בוצעה הזמנה היום' + (noOrderReason ? ` - סיבה: ${noOrderReason}` : ''));
+      } else {
+        messageLines.push('מוצרים:');
+        items.forEach(it => messageLines.push(`- ${it.name} ×${it.qty}`));
+        messageLines.push('', `סה״כ: ₪${total.toFixed(2)}`);
+      }
+      const waText = messageLines.join('\n');
+      window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(waText)}`, '_blank');
+      document.getElementById('orderCard').style.display = 'none';
+      document.getElementById('thankyouCard').style.display = 'block';
+    });
+  }
+})();
+</script>
+</body>
+</html>
