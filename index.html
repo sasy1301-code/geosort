@@ -31,11 +31,12 @@
   html,body{margin:0;padding:0;height:100%;}
   body{
     font-family:'Google Sans', 'Roboto', -apple-system, "Segoe UI", "Noto Sans Hebrew", Arial, sans-serif;
-    background:#050b1c;
+    background:#e8e9ee;
     color:var(--text);
     overflow:hidden;
   }
   #bgImage{
+    display:none;
     position:fixed; inset:-15%; z-index:-1; pointer-events:none;
     background:
       radial-gradient(circle at 50% 50%, rgba(0,0,0,.7) 0%, rgba(0,0,0,.35) 30%, transparent 60%),
@@ -56,7 +57,7 @@
     100%{ background-position:80% 20%; transform:scale(1.1); }
   }
   #starfield{
-    position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; display:block;
+    position:fixed; inset:0; width:100%; height:100%; z-index:0; pointer-events:none; display:none;
   }
   .app{
     height:100vh;
@@ -84,10 +85,11 @@
   }
   .hamburger-btn{
     position:absolute; right:22px; top:50%; transform:translateY(-50%); z-index:2;
-    background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.3); color:#fff;
-    font-size:1.1rem; width:40px; height:40px; border-radius:8px; cursor:pointer;
+    background:transparent; border:none; color:#0f1a2e;
+    width:40px; height:40px; border-radius:8px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
   }
-  .hamburger-btn:hover{ background:rgba(255,255,255,.18); }
+  .hamburger-btn:hover{ background:rgba(15,26,46,.08); }
   .hamburger-menu{
     position:fixed; right:22px; top:76px; z-index:5000;
     background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:10px;
@@ -99,7 +101,7 @@
   }
   .hamburger-menu-item:hover{ background:rgba(255,255,255,.1); }
   header button.ghost, header a.ghost{
-    background:transparent; border:1px solid rgba(245,241,231,.35); color:var(--paper-2);
+    background:transparent; border:1px solid rgba(245,241,231,.35); color:#0f1a2e;
     padding:7px 12px; border-radius:8px; font-size:.95rem; font-family:inherit; font-weight:400; cursor:pointer;
   }
   header button.ghost:hover, header a.ghost:hover{ background:rgba(245,241,231,.12); }
@@ -123,14 +125,19 @@
     overflow-y:auto;
     padding:16px 16px 90px;
     scrollbar-width:thin;
-    scrollbar-color:#1c3fd6 transparent;
+    scrollbar-color:#0277fb transparent;
   }
-  .sidebar .scroll::-webkit-scrollbar{ width:2px; }
+  .sidebar .scroll::-webkit-scrollbar{ width:0.5px; }
   .sidebar .scroll::-webkit-scrollbar-track{ background:transparent; }
   .sidebar .scroll::-webkit-scrollbar-thumb{
-    background:#1c3fd6; border-radius:6px;
+    background:#0277fb; border-radius:6px;
   }
-  .sidebar .scroll::-webkit-scrollbar-thumb:hover{ background:#2a52e6; }
+  .sidebar .scroll::-webkit-scrollbar-thumb:hover{ background:#0261cc; }
+  .animated-collapse{
+    overflow:hidden; max-height:0; opacity:0;
+    transition: max-height .65s cubic-bezier(.4,0,.2,1), opacity .55s ease;
+  }
+  .animated-collapse.is-open{ opacity:1; }
   section.panel{
     background:#021236;
     color:#fff;
@@ -138,22 +145,18 @@
     border-radius:var(--radius);
     padding:14px;
     margin-bottom:14px;
+    box-shadow:0 8px 24px rgba(15,26,46,.12), 0 2px 6px rgba(15,26,46,.08);
   }
   #addClientPanel{
     position:relative;
-    background-image:
-      radial-gradient(circle at 88% 92%, rgba(178,45,214,.65) 0%, rgba(178,45,214,0) 42%),
-      linear-gradient(135deg, #1c3fd6 0%, #0c1c72 30%, #030716 60%, #04061a 100%);
-    background-size: cover, cover;
-    background-position: center, center;
+    background:#0f1a2e;
     border:1px solid rgba(140,160,255,.35);
-    box-shadow: inset 0 0 16px rgba(120,150,255,.2), 0 0 18px rgba(178,45,214,.15);
   }
-  #foldersPanel{ background:#1c3fd6; }
-  #addFolderBtn{ background:#021236; }
+  #foldersPanel{ background:#007aff; }
+  #addFolderBtn{ background:#021236; border:1px solid transparent; box-sizing:border-box; }
   #addFolderBtn:hover{ background:#04205e; }
-  #searchPanel{ background:#1c3fd6; }
-  #clustersPanel{ background:#62167f; }
+  #searchPanel{ background:linear-gradient(180deg, #5d03ef 0%, #007aff 100%); }
+  #clustersPanel{ background:#5d03ef; }
   section.panel h2{
     font-size:.95rem;
     margin:0 0 10px;
@@ -192,6 +195,8 @@
   }
   button.primary:disabled{ opacity:.55; cursor:default; }
   button.primary:hover:not(:disabled){ background:#1533ad; }
+  #addBtn{ background:#007aff; }
+  #addBtn:hover:not(:disabled){ background:#0066d6; }
   .error-msg{
     background:#F7E7E2; color:var(--danger); border:1px solid #E3B4A5; border-radius:7px;
     padding:8px 10px; font-size:.8rem; margin-top:10px; display:none;
@@ -239,14 +244,20 @@
   input[type=range]{
     flex:1; -webkit-appearance:none; appearance:none; background:transparent; cursor:pointer;
   }
-  input[type=range]::-webkit-slider-runnable-track{ height:6px; border-radius:4px; background:#fff; }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:6px; border-radius:4px;
+    background: linear-gradient(to left, #ffa90d 0%, #ffa90d var(--fill-pct, 30%), #fff var(--fill-pct, 30%), #fff 100%);
+  }
   input[type=range]::-webkit-slider-thumb{
     -webkit-appearance:none; width:16px; height:16px; border-radius:50%;
-    background:#1c3fd6; border:2px solid #fff; margin-top:-5px; cursor:pointer;
+    background:#ffa90d; border:2px solid #fff; margin-top:-5px; cursor:pointer;
   }
-  input[type=range]::-moz-range-track{ height:6px; border-radius:4px; background:#fff; }
+  input[type=range]::-moz-range-track{
+    height:6px; border-radius:4px;
+    background: linear-gradient(to left, #ffa90d 0%, #ffa90d var(--fill-pct, 30%), #fff var(--fill-pct, 30%), #fff 100%);
+  }
   input[type=range]::-moz-range-thumb{
-    width:16px; height:16px; border-radius:50%; background:#1c3fd6; border:2px solid #fff; cursor:pointer;
+    width:16px; height:16px; border-radius:50%; background:#ffa90d; border:2px solid #fff; cursor:pointer;
   }
   .slider-val{ font-size:.78rem; color:rgba(255,255,255,.6); min-width:52px; text-align:left; }
 
@@ -413,7 +424,7 @@
   .handled-checkbox:checked + .handled-slider::before{ transform:translateY(-50%) translateX(14px); background:#73dd5c; }
   .handled-label{ display:inline-block; font-size:.7rem; color:#fff; white-space:nowrap; flex:0 0 auto; width:40px; text-align:right; }
   .pos-number-badge input.pos-input:focus{ outline:2px solid var(--gold); }
-  .client-card .card-chevron{ font-size:.7rem; color:#fff; flex:0 0 auto; }
+  .client-card .card-chevron{ color:#fff; flex:0 0 auto; display:inline-block; transition:transform .15s ease; }
   .client-card .card-details{ cursor:default; margin-top:8px; }
   .client-card .cname-link{
     color:#fff;
@@ -460,7 +471,7 @@
     display:flex; align-items:center; gap:6px; user-select:none;
   }
   .order-cat-title:hover{ color:#e0b84a; }
-  .order-cat-chevron{ font-size:.75rem; display:inline-block; width:12px; }
+  .order-cat-chevron{ display:inline-block; width:12px; transition:transform .15s ease; }
   .order-cat-items{ padding-right:2px; }
   .order-item-row{
     display:grid; grid-template-columns:1fr auto 100px; align-items:center; gap:10px;
@@ -545,7 +556,7 @@
     font-weight:700; font-size:.85rem; margin-bottom:8px; cursor:pointer;
     display:flex; align-items:center; gap:6px; user-select:none;
   }
-  .order-history-chevron{ font-size:.75rem; display:inline-block; width:12px; }
+  .order-history-chevron{ display:inline-block; width:12px; transition:transform .15s ease; }
   .order-history-row{
     display:flex; align-items:center; gap:8px; padding:8px; margin-bottom:6px;
     background:rgba(255,255,255,.06); border-radius:8px;
@@ -724,7 +735,7 @@
     header{ height:44px; }
     header .actions{ left:8px; top:10px; bottom:auto; transform:none; gap:3px; max-width:calc(100% - 60px); overflow-x:auto; }
     header button.ghost, header a.ghost{ padding:4px 6px; font-size:.79rem; font-family:inherit; font-weight:400; white-space:nowrap; }
-    .hamburger-btn{ right:8px; top:10px; bottom:auto; transform:none; width:34px; height:34px; font-size:.95rem; }
+    .hamburger-btn{ right:8px; top:10px; bottom:auto; transform:none; width:34px; height:34px; }
     .hamburger-menu{ top:44px; right:8px; }
     section.panel{ margin-bottom:10px; }
     .stock-row{ gap:0; font-size:.72rem; align-items:flex-start; justify-content:space-between; }
@@ -750,7 +761,7 @@
       <button class="ghost" id="fitAllBtn" title="הצג את כל הלקוחות במפה">⤢ הצג הכל</button>
       <button class="ghost" id="animToggleBtn" title="עצירה/הפעלה של אנימציית הרקע (חוסך סוללה/ביצועים)">✨ רקע</button>
     </div>
-    <button class="hamburger-btn" id="hamburgerBtn" title="תפריט">☰</button>
+    <button class="hamburger-btn" id="hamburgerBtn" title="תפריט"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect y="11" width="24" height="2" rx="1"/><rect y="4" width="24" height="2" rx="1"/><rect y="18" width="24" height="2" rx="1"/></svg></button>
   </header>
   <div class="hamburger-menu" id="hamburgerMenu" style="display:none">
     <a class="hamburger-menu-item" href="./order/" target="_blank" style="text-decoration:none; box-sizing:border-box;">🛒 כניסת לקוחות</a>
@@ -765,10 +776,10 @@
 
         <section class="panel" id="addClientPanel">
           <h2 id="addClientHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px">
-            <span class="dot"></span> הוספת לקוח
-            <span id="addClientChevron" style="margin-right:auto;font-size:1.3rem;transition:transform .15s ease;transform:rotate(-90deg)">▾</span>
+            <span class="dot" style="background:#0277fb;position:relative;top:5px"></span> <span style="position:relative;top:5px">הוספת לקוח</span>
+            <span id="addClientChevron" style="margin-right:auto;color:#0277fb;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
           </h2>
-          <div id="addClientBody" style="display:none">
+          <div id="addClientBody" class="animated-collapse">
           <label for="f-name">שם על גבי החשבונית</label>
           <input type="text" id="f-name" placeholder="לדוגמה: דוד כהן / חברת ABC בע״מ">
           <label for="f-business">שם העסק (מה שרשום על השלט / הכניסה) <span style="color:var(--gold)">*חובה</span></label>
@@ -835,7 +846,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </section>
 
         <section class="panel" id="searchPanel">
-          <h2><span class="dot" style="background:var(--gold)"></span> חיפוש</h2>
+          <h2><span class="dot" style="background:#ffa90d"></span> חיפוש</h2>
           <div class="search-box">
             <input type="text" id="searchBox" placeholder="חפש לפי שם, כתובת או טלפון...">
             <svg viewBox="0 0 24 24" fill="none" stroke="#5B6B6A" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -849,15 +860,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
         <section class="panel" id="foldersPanel">
           <h2 id="foldersHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px">
-            <span class="dot" style="background:var(--rust)"></span> תיקיות
-            <span id="foldersChevron" style="margin-right:auto;font-size:.8rem;transition:transform .15s ease;transform:rotate(-90deg)">▾</span>
+            <span class="dot" style="background:#ffa90d"></span> תיקיות
+            <span id="foldersChevron" style="margin-right:auto;display:inline-block;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
           </h2>
           <div class="row2">
             <div><input type="text" id="newFolderInput" placeholder="שם תיקייה חדשה (למשל: צפון, ראשון לציון)"></div>
             <div style="flex:0 0 auto"><input type="color" id="newFolderColor" class="folder-color-input" value="#A85C32" title="צבע לתיקייה"></div>
             <div style="flex:0 0 auto"><button class="primary" id="addFolderBtn" style="margin-top:0;width:auto;padding:9px 14px">+ הוסף</button></div>
           </div>
-          <div id="foldersListBody" style="display:none">
+          <div id="foldersListBody" class="animated-collapse">
           <div id="folderList" style="margin-top:10px"></div>
           <div id="grandInvoiceSummary"></div>
           </div>
@@ -865,15 +876,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
         <section class="panel" id="clustersPanel">
           <h2 id="clustersHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px">
-            <span class="dot" style="background:var(--gold)"></span> רגישות קיבוץ
-            <span id="clustersChevron" style="margin-right:auto;font-size:.8rem;transition:transform .15s ease;transform:rotate(-90deg)">▾</span>
+            <span class="dot" style="background:#ffa90d"></span> רגישות קיבוץ
+            <span id="clustersChevron" style="margin-right:auto;display:inline-block;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
           </h2>
           <div class="slider-row">
             <input type="range" id="thresholdSlider" min="0.1" max="40" step="0.1" value="12">
             <div class="slider-val" id="thresholdVal">12 ק"מ</div>
           </div>
-          <h2 style="margin-top:14px"><span class="dot" style="background:var(--plum)"></span> אזורים / אשכולות</h2>
-          <div id="clusterListBody" style="display:none">
+          <h2 style="margin-top:14px"><span class="dot" style="background:#ffa90d"></span> אזורים / אשכולות</h2>
+          <div id="clusterListBody" class="animated-collapse">
           <div id="clusterList"></div>
           </div>
         </section>
@@ -1708,6 +1719,33 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }, { offset: -Infinity }).element;
   }
 
+  // FLIP technique: measures each child's position before a DOM mutation,
+  // performs the mutation, then animates from the old position to the new one -
+  // used so cards visibly glide into place during drag-reorder instead of jumping
+  function animateReorder(container, mutationFn){
+    const cards = [...container.children];
+    const firstRects = new Map();
+    cards.forEach(el => firstRects.set(el, el.getBoundingClientRect()));
+
+    mutationFn();
+
+    cards.forEach(el => {
+      const first = firstRects.get(el);
+      if(!first) return;
+      const last = el.getBoundingClientRect();
+      const dx = first.left - last.left;
+      const dy = first.top - last.top;
+      if(Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5){
+        el.style.transition = 'none';
+        el.style.transform = `translate(${dx}px, ${dy}px)`;
+        requestAnimationFrame(()=>{
+          el.style.transition = 'transform .28s cubic-bezier(.4,0,.2,1)';
+          el.style.transform = '';
+        });
+      }
+    });
+  }
+
   // lets the user drag a whole folder group (.cluster-group) up/down within the
   // folder list; on drop, reorders the `folders` array to match the new DOM order
   function wireFolderDragReorder(listEl){
@@ -1716,8 +1754,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(!draggingEl) return;
       e.preventDefault();
       const afterEl = getDragAfterElement(listEl, e.clientY, '.cluster-group');
-      if(afterEl == null) listEl.appendChild(draggingEl);
-      else listEl.insertBefore(draggingEl, afterEl);
+      const alreadyInPlace = afterEl == null ? listEl.lastElementChild === draggingEl : afterEl.previousElementSibling === draggingEl;
+      if(alreadyInPlace) return;
+      animateReorder(listEl, ()=>{
+        if(afterEl == null) listEl.appendChild(draggingEl);
+        else listEl.insertBefore(draggingEl, afterEl);
+      });
     });
     listEl.addEventListener('drop', (e)=>{
       e.preventDefault();
@@ -1736,8 +1778,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(!draggingEl) return;
       e.preventDefault();
       const afterEl = getDragAfterElement(bodyEl, e.clientY);
-      if(afterEl == null) bodyEl.appendChild(draggingEl);
-      else bodyEl.insertBefore(draggingEl, afterEl);
+      const alreadyInPlace = afterEl == null ? bodyEl.lastElementChild === draggingEl : afterEl.previousElementSibling === draggingEl;
+      if(alreadyInPlace) return;
+      animateReorder(bodyEl, ()=>{
+        if(afterEl == null) bodyEl.appendChild(draggingEl);
+        else bodyEl.insertBefore(draggingEl, afterEl);
+      });
     });
     bodyEl.addEventListener('drop', (e)=>{
       e.preventDefault();
@@ -2124,6 +2170,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   const DELETE_ICON_SVG = `<svg width="22" height="22" viewBox="-21.3 -5.0 172.1 172.1" fill="#e92a2e"><path d="M98.9,162.1H32.2c-11,.3-17.7-9.3-18.4-19.4l-5.6-96.6C3.4,45.2-.1,41.6,0,36.7v-9.1c.2-6,5.7-8.8,10.8-8.8h26.4c-1.9-8.8,2-18.8,11-18.8h32.4c9.1,0,13,10.2,11.1,18.8h28.5c7.4.3,9.4,7.4,9.4,13.3s-.9,12.5-8.6,14.2l-6.8,100.7c-.5,6.9-8.2,15.1-15.4,15.1h.2ZM84.2,10.8c0-1.7-4-3.7-5.9-3.7l-30.1.6c-4.2,0-5.2,8.9-2.6,11.1h39l-.5-8.2v.2ZM7.4,26.5v12h114.8v-12H7.4ZM31.9,154.5h65.7c4.8-1.1,9.4-4.8,9.7-10.2l6.3-98.2H16.5l.3,8,.9,22.2,3.7,64.3c.3,5.9,2.6,13.7,10.5,13.7v.2Z"/><path d="M68.5,135.4c-.8,2-2.8,3.7-4,3.4-2-.6-3.4-2.3-3.5-4.3v-69.9c.8-1.2,2.8-2.6,4-2.6s2.9,1.7,3.5,2.8c0,0,0,70.6,0,70.6Z"/><path d="M45.8,133c.2,3.1-1.5,5.4-3.7,5.4s-4.3-2.5-3.7-4.9l-2-68.8c.8-1.1,2.8-2.5,3.9-2.6s3.1,1.4,3.7,2.5l2,68.5h-.2Z"/><path d="M90.8,133c0,2.8-.9,4.8-3.4,5.6s-4.3-2-4.3-4.2l2.2-67.2c0-2.6.6-4.5,2.8-4.9s4.9,1.2,4.8,4l-2.2,66.8h.2Z"/></svg>`;
 
+  // reusable chevron icon (uploaded design) - always drawn pointing right, then
+  // rotated via CSS transform to point down when "open" (replaces the old
+  // ▸/▾ glyph-swap pattern with a proper icon + rotation instead)
+  const CHEVRON_ICON_SVG = `<svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg>`;
+
   // circular status dot for the "inactive client" toggle - red when clicking it
   // will mark the client inactive, green when clicking it will restore them
   function statusCircleIconSvg(color){
@@ -2310,7 +2361,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     function refreshVehicleStock(){
       listEl.innerHTML = PRODUCT_CATALOG.map(cat => `
         <div class="order-cat">
-          <div class="order-cat-title" data-open="0"><span class="order-cat-chevron">▸</span> ${escapeHtml(cat.title)}</div>
+          <div class="order-cat-title" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(cat.title)}</div>
           <div class="order-cat-items" style="display:none">
             ${cat.items.map(name => {
               const { remaining, usedSinceAnchor, anchorQty } = getRemaining(name);
@@ -2376,7 +2427,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           const chevron = titleEl.querySelector('.order-cat-chevron');
           const isOpen = itemsEl.style.display !== 'none';
           itemsEl.style.display = isOpen ? 'none' : 'block';
-          chevron.textContent = isOpen ? '▸' : '▾';
+          chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
         });
       });
     }
@@ -2462,7 +2513,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const grandTotal = Object.values(totals).reduce((sum, v) => sum + v, 0);
       listEl.innerHTML = PRODUCT_CATALOG.map(cat => `
         <div class="order-cat">
-          <div class="order-cat-title" data-open="0"><span class="order-cat-chevron">▸</span> ${escapeHtml(cat.title)}</div>
+          <div class="order-cat-title" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(cat.title)}</div>
           <div class="order-cat-items" style="display:none">
             ${cat.items.map(name => `
               <div class="inventory-row">
@@ -2481,7 +2532,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           const chevron = titleEl.querySelector('.order-cat-chevron');
           const isOpen = itemsEl.style.display !== 'none';
           itemsEl.style.display = isOpen ? 'none' : 'block';
-          chevron.textContent = isOpen ? '▸' : '▾';
+          chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
         });
       });
     }
@@ -2530,7 +2581,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             return `
             <div class="order-cat">
               <div class="order-cat-title" data-open="${hasPrefill ? '1' : '0'}">
-                <span class="order-cat-chevron">${hasPrefill ? '▾' : '▸'}</span> ${escapeHtml(cat.title)}
+                <span class="order-cat-chevron" style="transform:rotate(${hasPrefill ? 90 : 0}deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(cat.title)}
               </div>
               <div class="order-cat-items" style="display:${hasPrefill ? 'block' : 'none'}">
                 ${cat.items.map(name => {
@@ -2570,7 +2621,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <button class="order-save-btn">💾 שמור הזמנה${orderModalEditingId ? ' (עדכון)' : ''}</button>
         </div>
         <div class="order-history">
-          <div class="order-history-title"><span class="order-history-chevron">▸</span> היסטוריית הזמנות</div>
+          <div class="order-history-title"><span class="order-history-chevron" style="transform:rotate(0deg)">${CHEVRON_ICON_SVG}</span> היסטוריית הזמנות</div>
           <div class="order-history-list" style="display:none"></div>
         </div>
       `;
@@ -2583,7 +2634,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           const chevron = titleEl.querySelector('.order-cat-chevron');
           const isOpen = itemsEl.style.display !== 'none';
           itemsEl.style.display = isOpen ? 'none' : 'block';
-          chevron.textContent = isOpen ? '▸' : '▾';
+          chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
         });
       });
 
@@ -2592,7 +2643,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const chevron = modal.querySelector('.order-history-chevron');
         const isOpen = listEl.style.display !== 'none';
         listEl.style.display = isOpen ? 'none' : 'block';
-        chevron.textContent = isOpen ? '▸' : '▾';
+        chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
       });
 
       const noOrderCheckbox = modal.querySelector('.no-order-checkbox');
@@ -2979,11 +3030,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
                 : `<span>${routeNumber}</span>`}
             </div>
           ` : ""}
-          <span class="card-chevron">${isCardOpen ? '▾' : '▸'}</span>
+          <span class="card-chevron" style="transform:rotate(${isCardOpen ? 90 : 0}deg)">${CHEVRON_ICON_SVG}</span>
         </div>
       </div>
       ${c.skipRoute ? `<div class="skip-badge">⏸ לא במסלול היום</div>` : ""}
-      <div class="card-details" style="display:${isCardOpen ? 'block' : 'none'}">
+      <div class="card-details animated-collapse${isCardOpen ? ' is-open' : ''}" style="${isCardOpen ? 'max-height:none' : ''}">
         ${c.businessId ? `<div class="cbillname">ח.פ/ת.ז: ${escapeHtml(c.businessId)}</div>` : ""}
         ${c.name ? `<div class="cbillname">שם לחשבונית: ${escapeHtml(c.name)}</div>` : ""}
         ${c.contact ? `<div class="cbillname">איש קשר: ${escapeHtml(c.contact)}</div>` : ""}
@@ -3056,7 +3107,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(e.target.closest('.card-details') || e.target.closest('.handled-toggle-wrap') || e.target.closest('.stop-color-input')) return;
       if(openClientCards.has(c.id)) openClientCards.delete(c.id);
       else openClientCards.add(c.id);
-      renderAll();
+      toggleAnimatedCollapse(card.querySelector('.card-details'), card.querySelector('.card-chevron'));
     });
     const photoUploadInput = card.querySelector('.photo-upload-input');
     const photoThumb = card.querySelector('.place-photo-thumb');
@@ -3605,7 +3656,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       head.addEventListener('click', (e)=>{
         if(e.target.closest('.folder-del') || e.target.closest('.folder-swatch') || e.target.closest('.route-toggle') || e.target.closest('.rename-folder') || e.target.closest('.map-visibility-toggle')) return;
         toggleFolderOpen(name);
-        body.style.display = openFolderNames.has(name) ? 'block' : 'none';
+        toggleAnimatedCollapse(body, null);
         if(members.length){
           const bounds = members.map(c=>[c.lat, c.lon]);
           fitOrCenter(bounds, 14, 40);
@@ -3634,8 +3685,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       });
 
       const body = document.createElement('div');
-      body.className = 'cluster-body';
-      body.style.display = openFolderNames.has(name) ? 'block' : 'none';
+      body.className = 'cluster-body animated-collapse';
+      if(openFolderNames.has(name)){
+        body.classList.add('is-open');
+        body.style.maxHeight = 'none'; // reflecting existing state on render, not an animated user action
+      }
       if(members.length === 0){
         body.innerHTML = `<div class="empty" style="padding:10px 4px">אין עדיין כתובות בתיקייה הזו. השתמשו בתפריט "העברה לתיקייה" בכרטיס של כל לקוח.</div>`;
       } else {
@@ -3798,12 +3852,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <button class="folder-del" title="אי אפשר למחוק את הקבוצה הזו - היא לא תיקייה אמיתית, רק שייכו כל לקוח לתיקייה כדי שהוא ייעלם ממנה">✕</button>
       `;
       const body = document.createElement('div');
-      body.className = 'cluster-body';
-      body.style.display = openFolderNames.has(UNASSIGNED_KEY) ? 'block' : 'none';
+      body.className = 'cluster-body animated-collapse';
+      if(openFolderNames.has(UNASSIGNED_KEY)){
+        body.classList.add('is-open');
+        body.style.maxHeight = 'none';
+      }
       head.addEventListener('click', (e)=>{
         if(e.target.closest('.folder-del') || e.target.closest('.route-toggle') || e.target.closest('.rename-folder') || e.target.closest('.map-visibility-toggle')) return;
         toggleFolderOpen(UNASSIGNED_KEY);
-        body.style.display = openFolderNames.has(UNASSIGNED_KEY) ? 'block' : 'none';
+        toggleAnimatedCollapse(body, null);
         const bounds = unassigned.map(c=>[c.lat, c.lon]);
         fitOrCenter(bounds, 14, 40);
       });
@@ -4117,36 +4174,64 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     return km < 1 ? Math.round(km*1000) + ' מ׳' : (Math.round(km*10)/10) + ' ק"מ';
   }
 
+  // smoothly animates a collapsible section open/closed via max-height, instead
+  // of abruptly toggling display:none/block - measures actual content height so
+  // it works correctly regardless of how much content is inside
+  function toggleAnimatedCollapse(bodyEl, chevronEl){
+    const isOpen = bodyEl.classList.contains('is-open');
+    if(isOpen){
+      // closing: lock in the current height first, then animate down to 0
+      bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+      requestAnimationFrame(()=>{
+        bodyEl.classList.remove('is-open');
+        requestAnimationFrame(()=>{ bodyEl.style.maxHeight = '0px'; });
+      });
+      if(chevronEl) chevronEl.style.transform = 'rotate(0deg)';
+    } else {
+      // opening: animate up to the measured content height, then release the
+      // constraint to 'none' so later content changes aren't accidentally clipped
+      bodyEl.classList.add('is-open');
+      const targetHeight = bodyEl.scrollHeight;
+      bodyEl.style.maxHeight = targetHeight + 'px';
+      if(chevronEl) chevronEl.style.transform = 'rotate(90deg)';
+      const onEnd = (e)=>{
+        if(e.propertyName === 'max-height' && bodyEl.classList.contains('is-open')){
+          bodyEl.style.maxHeight = 'none';
+        }
+        bodyEl.removeEventListener('transitionend', onEnd);
+      };
+      bodyEl.addEventListener('transitionend', onEnd);
+    }
+  }
+
   document.getElementById('addClientHeader').addEventListener('click', ()=>{
-    const bodyEl = document.getElementById('addClientBody');
-    const chevron = document.getElementById('addClientChevron');
-    const isOpen = bodyEl.style.display !== 'none';
-    bodyEl.style.display = isOpen ? 'none' : 'block';
-    chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+    toggleAnimatedCollapse(document.getElementById('addClientBody'), document.getElementById('addClientChevron'));
   });
 
-
   document.getElementById('foldersHeader').addEventListener('click', ()=>{
-    const bodyEl = document.getElementById('foldersListBody');
-    const chevron = document.getElementById('foldersChevron');
-    const isOpen = bodyEl.style.display !== 'none';
-    bodyEl.style.display = isOpen ? 'none' : 'block';
-    chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+    toggleAnimatedCollapse(document.getElementById('foldersListBody'), document.getElementById('foldersChevron'));
   });
 
   document.getElementById('clustersHeader').addEventListener('click', ()=>{
-    const bodyEl = document.getElementById('clusterListBody');
-    const chevron = document.getElementById('clustersChevron');
-    const isOpen = bodyEl.style.display !== 'none';
-    bodyEl.style.display = isOpen ? 'none' : 'block';
-    chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+    toggleAnimatedCollapse(document.getElementById('clusterListBody'), document.getElementById('clustersChevron'));
   });
+
+
+
+
+  function updateSliderFill(el){
+    const min = parseFloat(el.min), max = parseFloat(el.max), val = parseFloat(el.value);
+    const pct = ((val - min) / (max - min)) * 100;
+    el.style.setProperty('--fill-pct', pct + '%');
+  }
 
   document.getElementById('thresholdSlider').addEventListener('input', (e)=>{
     threshold = parseFloat(e.target.value);
     document.getElementById('thresholdVal').textContent = formatThreshold(threshold);
+    updateSliderFill(e.target);
     renderAll();
   });
+  updateSliderFill(document.getElementById('thresholdSlider'));
 
   document.getElementById('searchBox').addEventListener('input', renderSearchResults);
   document.getElementById('folderSearchBox').addEventListener('input', ()=>{ setTimeout(renderFolders, 0); });
@@ -4442,7 +4527,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const bounds = renderAll();
     // belt-and-suspenders: force every folder/cluster body closed on first load,
     // no matter what caused it to render open
-    document.querySelectorAll('#folderList .cluster-body').forEach(b => { b.style.display = 'none'; });
+    document.querySelectorAll('#folderList .cluster-body').forEach(b => { b.classList.remove('is-open'); b.style.maxHeight = '0px'; });
     if(clients.length){
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
     }
