@@ -6,7 +6,7 @@
 <title>מרכז לקוחות — ישראל</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 <style>
   :root{
@@ -29,7 +29,7 @@
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;height:100%;}
   body{
-    font-family:'Roboto', -apple-system, "Segoe UI", "Noto Sans Hebrew", Arial, sans-serif;
+    font-family:'Google Sans', 'Roboto', -apple-system, "Segoe UI", "Noto Sans Hebrew", Arial, sans-serif;
     background:#050b1c;
     color:var(--text);
     overflow:hidden;
@@ -156,7 +156,7 @@
   section.panel h2{
     font-size:.95rem;
     margin:0 0 10px;
-    font-family:'Roboto', -apple-system, "Segoe UI", "Noto Sans Hebrew", Arial, sans-serif;
+    font-family:'Google Sans', 'Roboto', -apple-system, "Segoe UI", "Noto Sans Hebrew", Arial, sans-serif;
     font-weight:600;
     color:#fff;
     display:flex; align-items:center; gap:8px;
@@ -814,7 +814,10 @@
 בוקר טוב!
 היום אנחנו באזורכם ונעבור אליכם במהלך היום.
 המשך יום טוב,
-קיטו פרימיום 🥩</textarea>
+קיטו פרימיום 🥩
+
+לקטלוג המוצרים לחצו על הקישור:
+https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=sharing</textarea>
           <button class="primary" id="addBtn">+ הוסף לקוח</button>
           <div class="error-msg" id="formError"></div>
           </div>
@@ -4303,11 +4306,40 @@
     if(expireHandledStatuses()){ saveData(); renderAll(); }
   }, 5 * 60 * 1000); // check every 5 minutes
 
-  const DEFAULT_WHATSAPP_MESSAGE = `היי,
+  const OLD_DEFAULT_WHATSAPP_MESSAGE_0 = `הסוכן נמצא היום באיזורך ויגיע במהלך היום, תודה רבה קיטו פרימיום. המשך יום טוב.`;
+
+  const OLD_DEFAULT_WHATSAPP_MESSAGE = `היי,
 בוקר טוב!
 היום אנחנו באזורכם ונעבור אליכם במהלך היום.
 המשך יום טוב,
 קיטו פרימיום 🥩`;
+
+  const OLD_DEFAULT_WHATSAPP_MESSAGE_2 = `היי,
+בוקר טוב!
+היום אנחנו באזורכם ונעבור אליכם במהלך היום.
+המשך יום טוב,
+קיטו פרימיום 🥩
+
+לקטלוג המוצרים לחצו על הקישור:
+https://drive.google.com/drive/u/0/folders/1XP0rRE1Dv0-JEEjuNOYzIEuWR3ZCUuPF`;
+
+  const OLD_DEFAULT_WHATSAPP_MESSAGE_3 = `היי,
+בוקר טוב!
+היום אנחנו באזורכם ונעבור אליכם במהלך היום.
+המשך יום טוב,
+קיטו פרימיום 🥩
+
+לקטלוג המוצרים לחצו על הקישור:
+https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=drivesdk`;
+
+  const DEFAULT_WHATSAPP_MESSAGE = `היי,
+בוקר טוב!
+היום אנחנו באזורכם ונעבור אליכם במהלך היום.
+המשך יום טוב,
+קיטו פרימיום 🥩
+
+לקטלוג המוצרים לחצו על הקישור:
+https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=sharing`;
 
   // one-time fill-in: any existing client that doesn't have a preset WhatsApp
   // message yet gets the current default, so this doesn't have to be entered
@@ -4315,7 +4347,7 @@
   function backfillDefaultWhatsappMessages(){
     let changed = false;
     clients.forEach(c=>{
-      if(!c.whatsappMessage){
+      if(!c.whatsappMessage || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_0 || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_2 || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_3){
         c.whatsappMessage = DEFAULT_WHATSAPP_MESSAGE;
         changed = true;
       }
