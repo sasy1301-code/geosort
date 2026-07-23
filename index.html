@@ -816,6 +816,15 @@
 היום אנחנו באזורכם ונעבור אליכם במהלך היום.
 המשך יום טוב,
 קיטו פרימיום 🥩
+____________________________________
+
+🔥 מבצע חדש מבית KITO 🔥
+🥩 1+1 על ביף ג׳רקי מעושן!
+המבצע מתקיים בגיבוי מלא שלנו, כדי לעזור לכם למשוך לקוחות, להגדיל מכירות ולחשוף יותר אנשים למוצר.
+עד לתאריך 15.8, או עד גמר מלאי של 5,000 שקיות, אתם יכולים להציע ללקוחות שלכם מבצע שווה במיוחד:
+כל לקוח שרוכש שקית ביף ג׳רקי מעושן מקבל שקית נוספת במתנה, בהתאם לתנאי המבצע ועד גמר המלאי.
+לפרטים ולהצטרפות למבצע, שלחו לנו הודעה.
+____________________________________
 
 לקטלוג המוצרים לחצו על הקישור:
 https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=sharing</textarea>
@@ -838,24 +847,34 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </section>
 
         <section class="panel" id="foldersPanel">
-          <h2><span class="dot" style="background:var(--rust)"></span> תיקיות</h2>
+          <h2 id="foldersHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px">
+            <span class="dot" style="background:var(--rust)"></span> תיקיות
+            <span id="foldersChevron" style="margin-right:auto;font-size:.8rem;transition:transform .15s ease;transform:rotate(-90deg)">▾</span>
+          </h2>
           <div class="row2">
             <div><input type="text" id="newFolderInput" placeholder="שם תיקייה חדשה (למשל: צפון, ראשון לציון)"></div>
             <div style="flex:0 0 auto"><input type="color" id="newFolderColor" class="folder-color-input" value="#A85C32" title="צבע לתיקייה"></div>
             <div style="flex:0 0 auto"><button class="primary" id="addFolderBtn" style="margin-top:0;width:auto;padding:9px 14px">+ הוסף</button></div>
           </div>
+          <div id="foldersListBody" style="display:none">
           <div id="folderList" style="margin-top:10px"></div>
           <div id="grandInvoiceSummary"></div>
+          </div>
         </section>
 
         <section class="panel" id="clustersPanel">
-          <h2><span class="dot" style="background:var(--gold)"></span> רגישות קיבוץ</h2>
+          <h2 id="clustersHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px">
+            <span class="dot" style="background:var(--gold)"></span> רגישות קיבוץ
+            <span id="clustersChevron" style="margin-right:auto;font-size:.8rem;transition:transform .15s ease;transform:rotate(-90deg)">▾</span>
+          </h2>
           <div class="slider-row">
             <input type="range" id="thresholdSlider" min="0.1" max="40" step="0.1" value="12">
             <div class="slider-val" id="thresholdVal">12 ק"מ</div>
           </div>
           <h2 style="margin-top:14px"><span class="dot" style="background:var(--plum)"></span> אזורים / אשכולות</h2>
+          <div id="clusterListBody" style="display:none">
           <div id="clusterList"></div>
+          </div>
         </section>
 
       </div>
@@ -4105,6 +4124,23 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
   });
 
+
+  document.getElementById('foldersHeader').addEventListener('click', ()=>{
+    const bodyEl = document.getElementById('foldersListBody');
+    const chevron = document.getElementById('foldersChevron');
+    const isOpen = bodyEl.style.display !== 'none';
+    bodyEl.style.display = isOpen ? 'none' : 'block';
+    chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+  });
+
+  document.getElementById('clustersHeader').addEventListener('click', ()=>{
+    const bodyEl = document.getElementById('clusterListBody');
+    const chevron = document.getElementById('clustersChevron');
+    const isOpen = bodyEl.style.display !== 'none';
+    bodyEl.style.display = isOpen ? 'none' : 'block';
+    chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+  });
+
   document.getElementById('thresholdSlider').addEventListener('input', (e)=>{
     threshold = parseFloat(e.target.value);
     document.getElementById('thresholdVal').textContent = formatThreshold(threshold);
@@ -4336,11 +4372,48 @@ https://drive.google.com/drive/u/0/folders/1XP0rRE1Dv0-JEEjuNOYzIEuWR3ZCUuPF`;
 לקטלוג המוצרים לחצו על הקישור:
 https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=drivesdk`;
 
+  const OLD_DEFAULT_WHATSAPP_MESSAGE_4 = `היי,
+בוקר טוב!
+היום אנחנו באזורכם ונעבור אליכם במהלך היום.
+המשך יום טוב,
+קיטו פרימיום 🥩
+
+לקטלוג המוצרים לחצו על הקישור:
+https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=sharing`;
+
+  const OLD_DEFAULT_WHATSAPP_MESSAGE_5 = `היי,
+בוקר טוב!
+היום אנחנו באזורכם ונעבור אליכם במהלך היום.
+המשך יום טוב,
+קיטו פרימיום 🥩
+____________________________________
+
+🔥 מבצע חדש מבית KITO 🔥
+🥩 1+1 על ביף ג׳רקי מעושן!
+המבצע מתקיים בגיבוי מלא שלנו, כדי לעזור לכם למשוך לקוחות, להגדיל מכירות ולחשוף יותר אנשים למוצר.
+עד לתאריך 15.8, או עד גמר מלאי של 5,000 שקיות, אתם יכולים להציע ללקוחות שלכם מבצע שווה במיוחד:
+כל לקוח שרוכש שקית ביף ג׳רקי מעושן מקבל שקית נוספת במתנה, בהתאם לתנאי המבצע ועד גמר המלאי.
+לפרטים ולהצטרפות למבצע, שלחו לנו הודעה.
+
+____________________________________
+
+לקטלוג המוצרים לחצו על הקישור:
+https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=sharing`;
+
   const DEFAULT_WHATSAPP_MESSAGE = `היי,
 בוקר טוב!
 היום אנחנו באזורכם ונעבור אליכם במהלך היום.
 המשך יום טוב,
 קיטו פרימיום 🥩
+____________________________________
+
+🔥 מבצע חדש מבית KITO 🔥
+🥩 1+1 על ביף ג׳רקי מעושן!
+המבצע מתקיים בגיבוי מלא שלנו, כדי לעזור לכם למשוך לקוחות, להגדיל מכירות ולחשוף יותר אנשים למוצר.
+עד לתאריך 15.8, או עד גמר מלאי של 5,000 שקיות, אתם יכולים להציע ללקוחות שלכם מבצע שווה במיוחד:
+כל לקוח שרוכש שקית ביף ג׳רקי מעושן מקבל שקית נוספת במתנה, בהתאם לתנאי המבצע ועד גמר המלאי.
+לפרטים ולהצטרפות למבצע, שלחו לנו הודעה.
+____________________________________
 
 לקטלוג המוצרים לחצו על הקישור:
 https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=sharing`;
@@ -4351,7 +4424,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function backfillDefaultWhatsappMessages(){
     let changed = false;
     clients.forEach(c=>{
-      if(!c.whatsappMessage || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_0 || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_2 || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_3){
+      if(!c.whatsappMessage || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_0 || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_2 || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_3 || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_4 || c.whatsappMessage === OLD_DEFAULT_WHATSAPP_MESSAGE_5){
         c.whatsappMessage = DEFAULT_WHATSAPP_MESSAGE;
         changed = true;
       }
@@ -4363,7 +4436,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   (async function init(){
     await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline()]);
     backfillDefaultWhatsappMessages();
+    openFolderNames.clear();
+    openClusterNames.clear();
     const bounds = renderAll();
+    // belt-and-suspenders: force every folder/cluster body closed on first load,
+    // no matter what caused it to render open
+    document.querySelectorAll('#folderList .cluster-body').forEach(b => { b.style.display = 'none'; });
     if(clients.length){
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
     }
