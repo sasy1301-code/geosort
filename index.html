@@ -97,17 +97,63 @@
     font-size:.88rem; padding:9px 12px; border-radius:6px; cursor:pointer;
   }
   .hamburger-menu-item:hover{ background:rgba(255,255,255,.1); }
-  header button.ghost{
+  header button.ghost, header a.ghost{
     background:transparent; border:1px solid rgba(245,241,231,.35); color:var(--paper-2);
     padding:7px 12px; border-radius:8px; font-size:.82rem; cursor:pointer;
   }
-  header button.ghost:hover{ background:rgba(245,241,231,.12); }
+  header button.ghost:hover, header a.ghost:hover{ background:rgba(245,241,231,.12); }
 
   .main{
     flex:1 1 auto;
     display:flex;
     min-height:0;
   }
+  .customer-order-view{
+    flex:1 1 auto; overflow-y:auto; padding:24px 14px;
+  }
+  .customer-order-wrap{ width:100%; max-width:480px; margin:0 auto; }
+  .cust-card{
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.18); border-radius:14px;
+    padding:20px; margin-bottom:16px; color:#fff;
+  }
+  .cust-card label{ display:block; font-size:.85rem; margin:10px 0 4px; color:rgba(255,255,255,.85); }
+  .cust-card input[type=text], .cust-card input[type=tel], .cust-card input[type=number]{
+    width:100%; padding:11px 12px; border-radius:8px; border:1px solid rgba(255,255,255,.3);
+    background:#fff; color:#021236; font-size:1rem; font-family:inherit;
+  }
+  .cust-card .primary{ width:100%; margin-top:16px; padding:13px; font-size:1rem; }
+  .cust-hint{ font-size:.78rem; color:rgba(255,255,255,.6); text-align:center; margin-top:8px; }
+  .cust-greeting{ text-align:center; font-size:1.05rem; margin-bottom:4px; }
+  .cust-greeting b{ color:var(--gold); }
+  .cust-order-cat{ margin-bottom:6px; }
+  .cust-order-cat-title{
+    display:flex; align-items:center; gap:6px; cursor:pointer; font-weight:600; padding:8px 4px;
+    color:var(--gold); user-select:none;
+  }
+  .cust-order-cat-chevron{ transition:transform .15s ease; display:inline-block; }
+  .cust-order-cat-title.open .cust-order-cat-chevron{ transform:rotate(90deg); }
+  .cust-order-item-row{
+    display:flex; align-items:center; gap:10px; padding:8px 4px; border-bottom:1px solid rgba(255,255,255,.1);
+  }
+  .cust-order-item-row label{ flex:1; margin:0; font-size:.85rem; color:#fff; }
+  .cust-order-item-row input[type=checkbox]{ width:18px; height:18px; flex:0 0 auto; }
+  .cust-order-item-row input[type=number]{ width:64px; text-align:center; padding:6px; }
+  .cust-total-row{
+    margin-top:14px; padding-top:12px; border-top:1px dashed rgba(255,255,255,.25);
+    text-align:center; font-size:.95rem;
+  }
+  .cust-total-row b{ color:#3bd332; }
+  .cust-no-order-row{
+    display:flex; align-items:center; gap:8px; padding:10px 4px; border-top:1px dashed rgba(255,255,255,.2);
+    margin-top:10px; font-size:.85rem;
+  }
+  .cust-card textarea{
+    width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,.3);
+    background:#fff; color:#021236; font-family:inherit; font-size:.9rem; resize:vertical; min-height:50px;
+    margin-top:6px;
+  }
+  .cust-thankyou{ text-align:center; padding:30px 10px; }
+  .cust-thankyou-big{ font-size:2.4rem; margin-bottom:10px; }
   .sidebar{
     width:400px;
     flex:0 0 400px;
@@ -722,7 +768,7 @@
     .header-logo{ height:36px; }
     header{ height:44px; }
     header .actions{ left:8px; top:10px; bottom:auto; transform:none; gap:4px; max-width:calc(100% - 60px); overflow-x:auto; }
-    header button.ghost{ padding:5px 7px; font-size:.68rem; white-space:nowrap; }
+    header button.ghost, header a.ghost{ padding:5px 7px; font-size:.68rem; white-space:nowrap; }
     .hamburger-btn{ right:8px; top:10px; bottom:auto; transform:none; width:34px; height:34px; font-size:.95rem; }
     .hamburger-menu{ top:44px; right:8px; }
     section.panel{ margin-bottom:10px; }
@@ -746,6 +792,7 @@
   <header>
         <div class="actions">
       <button class="ghost" id="refreshBtn" title="טען מחדש מהאחסון">↻ רענון</button>
+      <button class="ghost" id="customerViewBtn" title="לקוחות יכולים להזין הזמנה בעצמם, בלי לצאת מהעמוד">🛒 כניסת לקוחות</button>
       <button class="ghost" id="fitAllBtn" title="הצג את כל הלקוחות במפה">⤢ הצג הכל</button>
       <button class="ghost" id="animToggleBtn" title="עצירה/הפעלה של אנימציית הרקע (חוסך סוללה/ביצועים)">✨ רקע</button>
     </div>
@@ -862,6 +909,46 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
     <div class="map-wrap">
       <div id="map"></div>
+    </div>
+  </div>
+
+  <div class="customer-order-view" id="customerOrderView" style="display:none">
+    <div class="customer-order-wrap">
+
+      <div class="cust-card" id="custLoginCard">
+        <label for="custPhoneInput">מספר טלפון</label>
+        <input type="tel" id="custPhoneInput" placeholder="לדוגמה: 0501234567" autocomplete="tel" inputmode="tel">
+        <button class="primary" id="custLoginBtn">כניסה</button>
+        <div class="error-msg" id="custLoginError"></div>
+        <div class="cust-hint">מספר הטלפון משמש לזיהוי הכרטיס שלכם במערכת - אין צורך בסיסמה נפרדת.</div>
+      </div>
+
+      <div class="cust-card" id="custOrderCard" style="display:none">
+        <div class="cust-greeting">שלום, <b id="custClientNameDisplay"></b></div>
+        <div id="custCatalogList"></div>
+
+        <div class="cust-no-order-row">
+          <input type="checkbox" id="custNoOrderCheckbox">
+          <label for="custNoOrderCheckbox" style="margin:0">לא רוצה לבצע הזמנה היום</label>
+        </div>
+        <div id="custNoOrderReasonWrap" style="display:none">
+          <label for="custNoOrderReason">סיבה (לא חובה)</label>
+          <textarea id="custNoOrderReason" placeholder="למשל: יש עדיין מלאי מההזמנה הקודמת..."></textarea>
+        </div>
+
+        <div class="cust-total-row" id="custTotalRow">
+          סה״כ (לפי ₪<span id="custUnitPriceDisplay">0</span> ליחידה): <b id="custTotalAmount">₪0.00</b>
+        </div>
+
+        <button class="primary" id="custSubmitOrderBtn">💾 שליחת הזמנה</button>
+        <div class="error-msg" id="custOrderError"></div>
+      </div>
+
+      <div class="cust-card cust-thankyou" id="custThankyouCard" style="display:none">
+        <div class="cust-thankyou-big">✅</div>
+        <div>ההזמנה נפתחה בוואטסאפ!</div>
+        <div class="cust-hint">נא לשלוח את ההודעה שנפתחה כדי להשלים את שליחת ההזמנה.</div>
+      </div>
     </div>
   </div>
 
@@ -2086,6 +2173,16 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     let digits = (phone || "").replace(/\D/g, "");
     if(digits.startsWith("0")) digits = "972" + digits.slice(1);
     return `https://wa.me/${digits}`;
+  }
+
+  // normalizes a phone number to a comparable local-Israeli-format string (e.g.
+  // "0501234567"), regardless of whether it was typed with 972-prefix, dashes,
+  // spaces, etc. - used for matching a customer's entered phone to a client record
+  function normalizePhoneForMatch(phone){
+    let digits = (phone || "").replace(/\D/g, "");
+    if(digits.startsWith("972")) digits = "0" + digits.slice(3);
+    if(!digits.startsWith("0") && digits.length === 9) digits = "0" + digits;
+    return digits;
   }
 
   const WHATSAPP_ICON_SVG = `<svg width="25" height="25" viewBox="0 0 30.667 30.667" xmlns="http://www.w3.org/2000/svg"><path fill="#73dd5c" d="M30.667,14.939c0,8.25-6.74,14.938-15.056,14.938c-2.639,0-5.118-0.675-7.276-1.857L0,30.667l2.717-8.017c-1.37-2.25-2.159-4.892-2.159-7.712C0.559,6.688,7.297,0,15.613,0C23.928,0.002,30.667,6.689,30.667,14.939z M15.61,2.382c-6.979,0-12.656,5.634-12.656,12.56c0,2.748,0.896,5.292,2.411,7.362l-1.58,4.663l4.862-1.545c2,1.312,4.393,2.076,6.963,2.076c6.979,0,12.658-5.633,12.658-12.559C28.27,8.016,22.59,2.382,15.61,2.382z M23.214,18.38c-0.094-0.151-0.34-0.243-0.708-0.427c-0.367-0.184-2.184-1.069-2.521-1.189c-0.34-0.123-0.586-0.185-0.832,0.182c-0.243,0.367-0.951,1.191-1.168,1.437c-0.215,0.245-0.43,0.276-0.799,0.095c-0.369-0.186-1.559-0.57-2.969-1.817c-1.097-0.972-1.838-2.169-2.052-2.536c-0.217-0.366-0.022-0.564,0.161-0.746c0.165-0.165,0.369-0.428,0.554-0.643c0.185-0.213,0.246-0.364,0.369-0.609c0.121-0.245,0.06-0.458-0.031-0.643c-0.092-0.184-0.829-1.984-1.138-2.717c-0.307-0.732-0.614-0.611-0.83-0.611c-0.215,0-0.461-0.03-0.707-0.03S9.897,8.215,9.56,8.582s-1.291,1.252-1.291,3.054c0,1.804,1.321,3.543,1.506,3.787c0.186,0.243,2.554,4.062,6.305,5.528c3.753,1.465,3.753,0.976,4.429,0.914c0.678-0.062,2.184-0.885,2.49-1.739C23.307,19.268,23.307,18.533,23.214,18.38z"/></svg>`;
@@ -4117,6 +4214,182 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const bounds = clients.map(c=>[c.lat,c.lon]);
     fitOrCenter(bounds, 14, 40);
   });
+
+  // ---- customer self-service order view (in-page, header stays visible) ----
+  function showCustomerOrderView(){
+    document.querySelector('.main').style.display = 'none';
+    document.querySelector('header .actions').style.display = 'none';
+    document.getElementById('hamburgerBtn').style.display = 'none';
+    document.getElementById('customerOrderView').style.display = 'block';
+    // reset to the login step each time it's opened
+    document.getElementById('custLoginCard').style.display = 'block';
+    document.getElementById('custOrderCard').style.display = 'none';
+    document.getElementById('custThankyouCard').style.display = 'none';
+    document.getElementById('custPhoneInput').value = '';
+    document.getElementById('custLoginError').textContent = '';
+  }
+  function hideCustomerOrderView(){
+    document.getElementById('customerOrderView').style.display = 'none';
+    document.querySelector('.main').style.display = 'flex';
+    document.querySelector('header .actions').style.display = 'flex';
+    document.getElementById('hamburgerBtn').style.display = '';
+  }
+  document.getElementById('customerViewBtn').addEventListener('click', showCustomerOrderView);
+
+  document.getElementById('custLoginBtn').addEventListener('click', async ()=>{
+    const btn = document.getElementById('custLoginBtn');
+    const errEl = document.getElementById('custLoginError');
+    const entered = normalizePhoneForMatch(document.getElementById('custPhoneInput').value);
+    errEl.textContent = '';
+    if(!entered){
+      errEl.textContent = 'יש להזין מספר טלפון תקין.';
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'מתחבר...';
+    try{
+      // re-fetch fresh data first, in case an order/edit happened on another
+      // device since this page was loaded
+      await loadData();
+      const match = clients.find(c => normalizePhoneForMatch(c.phone) === entered);
+      if(!match){
+        errEl.textContent = 'לא נמצא כרטיס עם מספר הטלפון הזה. בדקו את המספר ונסו שוב.';
+        return;
+      }
+      renderCustomerOrderForm(match);
+    }catch(err){
+      errEl.textContent = 'שגיאה בהתחברות: ' + err.message;
+    }finally{
+      btn.disabled = false;
+      btn.textContent = 'כניסה';
+    }
+  });
+  document.getElementById('custPhoneInput').addEventListener('keydown', e=>{
+    if(e.key === 'Enter') document.getElementById('custLoginBtn').click();
+  });
+
+  function renderCustomerOrderForm(c){
+    document.getElementById('custLoginCard').style.display = 'none';
+    document.getElementById('custOrderCard').style.display = 'block';
+    document.getElementById('custClientNameDisplay').textContent = c.business || c.name || 'לקוח יקר';
+    const unitPrice = parseFloat(c.price) || 0;
+    document.getElementById('custUnitPriceDisplay').textContent = unitPrice.toFixed(2);
+    document.getElementById('custTotalAmount').textContent = '₪0.00'; // always start clean - a stale total from a previous session must never carry over
+
+    const listEl = document.getElementById('custCatalogList');
+    listEl.innerHTML = PRODUCT_CATALOG.map((cat, ci) => `
+      <div class="cust-order-cat">
+        <div class="cust-order-cat-title" data-cat="${ci}"><span class="cust-order-cat-chevron">▸</span> ${escapeHtml(cat.title)}</div>
+        <div class="cust-order-cat-items" data-cat-items="${ci}" style="display:none">
+          ${cat.items.map(name => `
+            <div class="cust-order-item-row">
+              <input type="checkbox" class="cust-item-checkbox" data-item="${escapeHtml(name)}">
+              <label>${escapeHtml(name.startsWith(cat.prefix + " ") ? name.slice(cat.prefix.length + 1) : name)}</label>
+              <input type="number" class="cust-item-qty" data-item="${escapeHtml(name)}" min="0" value="1" style="display:none">
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    listEl.querySelectorAll('.cust-order-cat-title').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const items = listEl.querySelector(`.cust-order-cat-items[data-cat-items="${el.dataset.cat}"]`);
+        const isOpen = items.style.display !== 'none';
+        items.style.display = isOpen ? 'none' : 'block';
+        el.classList.toggle('open', !isOpen);
+      });
+    });
+
+    function recalcCustTotal(){
+      let total = 0;
+      listEl.querySelectorAll('.cust-item-checkbox').forEach(cb=>{
+        if(cb.checked){
+          const qtyInput = listEl.querySelector(`.cust-item-qty[data-item="${CSS.escape(cb.dataset.item)}"]`);
+          total += (parseFloat(qtyInput.value) || 0) * unitPrice;
+        }
+      });
+      document.getElementById('custTotalAmount').textContent = `₪${total.toFixed(2)}`;
+    }
+    listEl.querySelectorAll('.cust-item-checkbox').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const qtyInput = listEl.querySelector(`.cust-item-qty[data-item="${CSS.escape(cb.dataset.item)}"]`);
+        qtyInput.style.display = cb.checked ? 'block' : 'none';
+        recalcCustTotal();
+      });
+    });
+    listEl.querySelectorAll('.cust-item-qty').forEach(inp=>{
+      inp.addEventListener('input', recalcCustTotal);
+    });
+
+    const noOrderCheckbox = document.getElementById('custNoOrderCheckbox');
+    const noOrderReasonWrap = document.getElementById('custNoOrderReasonWrap');
+    const totalRow = document.getElementById('custTotalRow');
+    noOrderCheckbox.checked = false;
+    noOrderReasonWrap.style.display = 'none';
+    document.getElementById('custNoOrderReason').value = '';
+    totalRow.style.display = 'block';
+    noOrderCheckbox.addEventListener('change', ()=>{
+      const checked = noOrderCheckbox.checked;
+      noOrderReasonWrap.style.display = checked ? 'block' : 'none';
+      listEl.style.opacity = checked ? '.4' : '1';
+      listEl.style.pointerEvents = checked ? 'none' : 'auto';
+      totalRow.style.display = checked ? 'none' : 'block';
+    });
+
+    const submitBtn = document.getElementById('custSubmitOrderBtn');
+    // avoid stacking duplicate listeners if the customer logs in more than once
+    const freshSubmitBtn = submitBtn.cloneNode(true);
+    submitBtn.parentNode.replaceChild(freshSubmitBtn, submitBtn);
+    freshSubmitBtn.addEventListener('click', async ()=>{
+      const errEl = document.getElementById('custOrderError');
+      errEl.textContent = '';
+      const noOrder = noOrderCheckbox.checked;
+      let items = [];
+      let noOrderReason = '';
+
+      if(noOrder){
+        noOrderReason = document.getElementById('custNoOrderReason').value.trim();
+      } else {
+        listEl.querySelectorAll('.cust-item-checkbox').forEach(cb=>{
+          if(cb.checked){
+            const qtyInput = listEl.querySelector(`.cust-item-qty[data-item="${CSS.escape(cb.dataset.item)}"]`);
+            const qty = parseFloat(qtyInput.value) || 0;
+            if(qty > 0) items.push({ name: cb.dataset.item, qty });
+          }
+        });
+        if(items.length === 0){
+          errEl.textContent = 'יש לבחור לפחות מוצר אחד עם כמות גדולה מ-0, או לסמן "לא רוצה לבצע הזמנה".';
+          return;
+        }
+      }
+
+      freshSubmitBtn.disabled = true;
+      freshSubmitBtn.textContent = 'שולח...';
+      try{
+        const total = noOrder ? 0 : items.reduce((sum,it)=> sum + it.qty * unitPrice, 0);
+        const clientLabel = c.business || c.name || 'לקוח';
+        let messageLines = [`הזמנה חדשה מ: ${clientLabel}`, `טלפון: ${c.phone || ''}`, ''];
+        if(noOrder){
+          messageLines.push('לא בוצעה הזמנה היום' + (noOrderReason ? ` - סיבה: ${noOrderReason}` : ''));
+        } else {
+          messageLines.push('מוצרים:');
+          items.forEach(it => messageLines.push(`- ${it.name} ×${it.qty}`));
+          messageLines.push('', `סה״כ: ₪${total.toFixed(2)}`);
+        }
+        const waText = messageLines.join('\n');
+        const ownerPhone = '972523617178'; // 0523617178 in international format
+        window.open(`https://wa.me/${ownerPhone}?text=${encodeURIComponent(waText)}`, '_blank');
+        document.getElementById('custOrderCard').style.display = 'none';
+        document.getElementById('custThankyouCard').style.display = 'block';
+      }catch(err){
+        errEl.textContent = 'שגיאה בשליחת ההזמנה: ' + err.message;
+      }finally{
+        freshSubmitBtn.disabled = false;
+        freshSubmitBtn.textContent = '💾 שליחת הזמנה';
+      }
+    });
+  }
 
   document.getElementById('refreshBtn').addEventListener('click', async ()=>{
     await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline()]);
