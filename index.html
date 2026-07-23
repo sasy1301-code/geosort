@@ -4234,7 +4234,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     document.querySelector('header .actions').style.display = 'flex';
     document.getElementById('hamburgerBtn').style.display = '';
   }
-  document.getElementById('customerViewBtn').addEventListener('click', showCustomerOrderView);
+  document.getElementById('customerViewBtn').addEventListener('click', ()=>{
+    const link = `${window.location.origin}${window.location.pathname}?orders=1`;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(link).then(()=>{
+        alert('הקישור הועתק! אפשר לשלוח אותו ללקוחות:\n\n' + link);
+      }).catch(()=>{
+        prompt('העתיקו את הקישור הזה ושלחו אותו ללקוחות:', link);
+      });
+    } else {
+      prompt('העתיקו את הקישור הזה ושלחו אותו ללקוחות:', link);
+    }
+  });
 
   document.getElementById('custLoginBtn').addEventListener('click', async ()=>{
     const btn = document.getElementById('custLoginBtn');
@@ -4630,6 +4641,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   (async function init(){
+    const urlParams = new URLSearchParams(window.location.search);
+    if(urlParams.get('orders') === '1'){
+      // this is the customer-facing entry point shared via a link - skip loading
+      // and rendering the whole admin view (folders/map/clusters/etc.) entirely
+      showCustomerOrderView();
+      return;
+    }
     await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline()]);
     backfillDefaultWhatsappMessages();
     const bounds = renderAll();
