@@ -93,6 +93,7 @@
 
     <div class="total-row" id="totalRow">
       סה״כ (לפי ₪<span id="unitPriceDisplay">0</span> ליחידה): <b id="totalAmount">₪0.00</b>
+      <div style="margin-top:6px">סה״כ כולל מע״מ: <b id="totalAmountWithVat">₪0.00</b></div>
     </div>
 
     <button class="primary-btn" id="submitOrderBtn">💾 שליחת הזמנה</button>
@@ -114,6 +115,7 @@
   const SUPABASE_KEY = "sb_publishable_cR4JjUiuuxMGJ3Ke2FWBuQ_dcG25pvN";
   const STORAGE_KEY = "clients_data";
   const OWNER_WHATSAPP = "972523617178";
+  const VAT_RATE = 0.18;
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   const PRODUCT_CATALOG = [
@@ -180,6 +182,7 @@
     const unitPrice = parseFloat(c.price) || 0;
     document.getElementById('unitPriceDisplay').textContent = unitPrice.toFixed(2);
     document.getElementById('totalAmount').textContent = '₪0.00';
+    document.getElementById('totalAmountWithVat').textContent = '₪0.00';
 
     const listEl = document.getElementById('catalogList');
     listEl.innerHTML = PRODUCT_CATALOG.map((cat, ci) => `
@@ -215,6 +218,7 @@
         }
       });
       document.getElementById('totalAmount').textContent = `₪${total.toFixed(2)}`;
+      document.getElementById('totalAmountWithVat').textContent = `₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
     }
     listEl.querySelectorAll('.item-checkbox').forEach(cb=>{
       cb.addEventListener('change', ()=>{
@@ -269,7 +273,7 @@
       } else {
         messageLines.push('מוצרים:');
         items.forEach(it => messageLines.push(`- ${it.name} ×${it.qty}`));
-        messageLines.push('', `סה״כ: ₪${total.toFixed(2)}`);
+        messageLines.push('', `סה״כ: ₪${total.toFixed(2)}`, `סה״כ כולל מע״מ: ₪${(total * (1 + VAT_RATE)).toFixed(2)}`);
       }
       const waText = messageLines.join('\n');
       window.open(`https://wa.me/${OWNER_WHATSAPP}?text=${encodeURIComponent(waText)}`, '_blank');
