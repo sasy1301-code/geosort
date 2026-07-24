@@ -28,12 +28,16 @@
   }
   *{box-sizing:border-box;}
   button, input, select, textarea{ font-family:inherit; font-weight:inherit; }
+  /* field-use ergonomics: remove the grey tap-flash on touch, prevent accidental
+     double-tap-zoom on buttons, and stop tap targets being text-selected on long-press */
+  button{ -webkit-tap-highlight-color:transparent; touch-action:manipulation; user-select:none; }
   html,body{margin:0;padding:0;height:100%;}
   body{
     font-family:'Google Sans', 'Roboto', -apple-system, "Segoe UI", "Noto Sans Hebrew", Arial, sans-serif;
     background:#e8e9ee;
     color:var(--text);
     overflow:hidden;
+    -webkit-text-size-adjust:100%; /* stop mobile browsers auto-inflating some text */
   }
   #bgImage{
     display:none;
@@ -126,8 +130,12 @@
     padding:16px 16px 90px;
     scrollbar-width:thin;
     scrollbar-color:#0277fb transparent;
+    overscroll-behavior:contain; /* keep scroll momentum inside the sidebar, no page-level bounce */
+    -webkit-overflow-scrolling:touch; /* smooth inertial scrolling on iOS */
   }
-  .sidebar .scroll::-webkit-scrollbar{ width:0.5px; }
+  /* the old 0.5px scrollbar was effectively invisible and impossible to grab — give it a
+     real, thumb-able width so the sidebar can be scrolled by dragging, not only by wheel */
+  .sidebar .scroll::-webkit-scrollbar{ width:7px; }
   .sidebar .scroll::-webkit-scrollbar-track{ background:transparent; }
   .sidebar .scroll::-webkit-scrollbar-thumb{
     background:#0277fb; border-radius:6px;
@@ -724,6 +732,7 @@
   footer.note{
     flex:0 0 auto; background:var(--ink); color:var(--paper-2); font-size:.72rem;
     padding:6px 20px; text-align:center; opacity:.85;
+    padding-bottom:calc(6px + env(safe-area-inset-bottom)); /* clear the iPhone home-bar */
   }
   footer.note b{ color:var(--gold); }
 
@@ -748,6 +757,26 @@
     .stock-complete-label{ font-size:.68rem; }
     .stock-complete-num{ font-size:.9rem; min-width:16px; }
     .stock-reset-one{ font-size:.68rem; padding:2px; flex:0 0 auto; }
+
+    /* ---- field-use ergonomics on phones (added) ---- */
+    /* 16px inputs stop iOS from auto-zooming the whole page in every time a field is
+       focused — the single biggest annoyance when adding a client one-handed */
+    input[type=text], input[type=tel], input[type=number], input[type=date],
+    input[type=email], select, textarea{ font-size:16px; }
+    /* the 7–8 round action buttons per card were getting cramped/tiny on narrow
+       screens; let them keep a real finger-sized target and wrap to a second row
+       instead of shrinking below usability */
+    .client-card .cactions{ flex-wrap:wrap; gap:7px; }
+    .client-card .cactions .icon-circle-btn{
+      flex:1 1 42px; width:auto; min-width:42px; min-height:42px; max-width:64px;
+    }
+    /* nudge the smallest secondary text up so it stays readable in bright sunlight */
+    .leg-connector .leg-info{ font-size:.72rem; }
+    .client-card select.move-select, .client-card select.temp-folder-select{ font-size:16px; }
+    .client-card .caddr, .client-card .cphone, .client-card .cbillname{ font-size:.86rem; }
+    /* give the tappable links (Waze / phone / email) a bit more vertical breathing
+       room so they're easier to hit accurately */
+    .client-card .phone-link{ padding:2px 0; display:inline-block; }
   }
 </style>
 </head>
@@ -4182,25 +4211,36 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(isOpen){
       // closing: lock in the current height first, then animate down to 0
       bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
+      void bodyEl.offsetHeight; // force reflow so this starting value is registered
       requestAnimationFrame(()=>{
         bodyEl.classList.remove('is-open');
         requestAnimationFrame(()=>{ bodyEl.style.maxHeight = '0px'; });
       });
       if(chevronEl) chevronEl.style.transform = 'rotate(0deg)';
     } else {
-      // opening: animate up to the measured content height, then release the
-      // constraint to 'none' so later content changes aren't accidentally clipped
-      bodyEl.classList.add('is-open');
+      // opening: explicitly commit the starting point (0) and force a reflow
+      // before setting the target - otherwise the browser can sometimes skip
+      // straight to the final state instead of animating the transition
       const targetHeight = bodyEl.scrollHeight;
+      bodyEl.style.maxHeight = '0px';
+      void bodyEl.offsetHeight;
+      bodyEl.classList.add('is-open');
       bodyEl.style.maxHeight = targetHeight + 'px';
       if(chevronEl) chevronEl.style.transform = 'rotate(90deg)';
-      const onEnd = (e)=>{
-        if(e.propertyName === 'max-height' && bodyEl.classList.contains('is-open')){
-          bodyEl.style.maxHeight = 'none';
-        }
+      // release the max-height constraint once the transition should be done -
+      // using a timer (not just transitionend) as the primary mechanism, so the
+      // content never stays permanently clipped/stuck if the transition event
+      // doesn't fire for any reason (this was breaking scrolling for some folders)
+      let released = false;
+      const release = ()=>{
+        if(released) return;
+        released = true;
+        if(bodyEl.classList.contains('is-open')) bodyEl.style.maxHeight = 'none';
         bodyEl.removeEventListener('transitionend', onEnd);
       };
+      const onEnd = (e)=>{ if(e.propertyName === 'max-height') release(); };
       bodyEl.addEventListener('transitionend', onEnd);
+      setTimeout(release, 750); // slightly longer than the .65s CSS transition
     }
   }
 
