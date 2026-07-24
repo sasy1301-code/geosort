@@ -309,7 +309,8 @@
 
   /* ---- folder cards redesign (client-count folders inside :is(#folderList, #clusterList) only, so the
      clusters panel keeps its own colours) ---- */
-  :is(#folderList, #clusterList) .cluster-head{ background:#025ffb; border:1px solid #4394f7; gap:10px; }
+  :is(#folderList, #clusterList) .cluster-head{ background:#025ffb; border:1px solid #4394f7; gap:10px; padding:11px 10px; border-radius:10px; }
+  :is(#folderList, #clusterList) .cluster-group{ margin-bottom:2px; }
   :is(#folderList, #clusterList) .cluster-head:hover{ background:#1a72ff; }
   /* client-count circle: white with a navy number, folder name Regular @ 15pt */
   :is(#folderList, #clusterList) .cluster-head .count{ background:#fff; color:#0f1a2e; width:28px; height:28px; }
@@ -354,13 +355,14 @@
   input.folder-color-input::-moz-color-swatch, input.folder-swatch::-moz-color-swatch{ border:1px solid rgba(255,255,255,.35); border-radius:50%; }
   input.folder-color-input{ width:38px; height:38px; }
   input.folder-swatch{ width:14px; height:14px; flex:0 0 auto; }
-  .cluster-body{ padding:6px 4px 2px 4px; }
+  /* no horizontal inset, so the client cards line up pixel-for-pixel with the folder card width */
+  .cluster-body{ padding:6px 0 2px 0; }
   .leg-connector{
     display:flex; align-items:center; gap:6px; margin:2px 0; padding:2px 0;
   }
-  .leg-connector .leg-line{ flex:1; height:1px; background:rgba(255,255,255,.18); }
+  .leg-connector .leg-line{ flex:1; height:1px; background:#0f1a2e; }
   .leg-connector .leg-info{
-    white-space:nowrap; font-size:.66rem; color:rgba(255,255,255,.55); cursor:help;
+    white-space:nowrap; font-size:.66rem; color:#0f1a2e; cursor:help;
   }
   .route-summary{
     text-align:center; font-size:.82rem; color:#fff; background:rgba(59,211,50,.12);
@@ -400,13 +402,18 @@
     border-top:1px dashed rgba(255,255,255,.18);
   }
   .client-card{
-    padding:10px 10px; margin:6px 0; border-radius:7px; background:#111e63;
+    padding:10px 10px; margin:6px 0; border-radius:10px; background:#0f1a2e;
     border:1px solid transparent; /* reserved 1px so drag/select highlight never shifts layout — colour unchanged */
     cursor:pointer; color:#fff; position:relative;
   }
-  .client-card:hover{ background:#182a80; }
-  .client-card.card-alt{ background:#061c8a; }
-  .client-card.card-alt:hover{ background:#0a2bb0; }
+  .client-card:hover{ background:#040f1e; }
+  .client-card.card-alt{ background:#0f1a2e; }
+  .client-card.card-alt:hover{ background:#040f1e; }
+  /* collapsed cards are 8px shorter (4px trimmed top & bottom); open/edit cards keep full padding */
+  .client-card:not(.card-open):not(.editing){ padding-top:6px; padding-bottom:6px; }
+  /* when closed, drop the details' top margin so the summary row is perfectly centered
+     (equal space above and below), not pushed up by the collapsed details block */
+  .client-card:not(.card-open) .card-details{ margin-top:0; }
   .cluster-region-body .client-card{ background:#450d61; }
   .cluster-region-body .client-card:hover{ background:#5a1180; }
   .cluster-region-body .client-card.card-alt{ background:#330d46; }
@@ -448,30 +455,43 @@
   }
   .card-summary-left{ display:flex; align-items:center; gap:8px; flex:0 1 auto; min-width:0; }
   .card-summary-right{ display:flex; align-items:center; gap:8px; flex:0 1 auto; min-width:0; }
+  /* position badge — matches nomber.svg exactly (46.1×23.3): blue pill with a #4394f7
+     border, up/down arrows on the left, position number on the right */
   .pos-number-badge{
-    flex:0 0 auto; width:32px; height:20px; border-radius:10px;
-    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.4);
-    display:flex; align-items:center; justify-content:center; font-size:.72rem; font-weight:700; color:#fff;
+    flex:0 0 auto; box-sizing:border-box; width:46.1px; height:23.3px; direction:ltr;
+    display:flex; align-items:center; gap:3px; padding:0 6px 0 5px; border-radius:11.65px;
+    background:#025ffb; border:1px solid #4394f7;
   }
-  .pos-number-badge input.pos-input{
-    width:100%; height:100%; border:none; background:transparent; color:#fff; text-align:center;
-    font-size:.72rem; font-weight:700; padding:0; border-radius:10px; cursor:text;
+  .pos-number-badge .pos-arrows{ display:flex; flex-direction:column; gap:2px; flex:0 0 auto; }
+  .pos-number-badge .pos-up, .pos-number-badge .pos-down{
+    display:flex; align-items:center; justify-content:center;
+    background:none; border:none; padding:0; margin:0; cursor:pointer; line-height:0;
   }
-  .handled-toggle-wrap{ display:flex; align-items:center; gap:6px; flex:0 0 auto; }
-  .handled-switch{ position:relative; display:inline-block; width:32px; height:18px; flex:0 0 auto; }
+  .pos-number-badge .pos-up svg, .pos-number-badge .pos-down svg{ width:9px; height:6px; display:block; }
+  .pos-number-badge .pos-up:disabled, .pos-number-badge .pos-down:disabled{ opacity:.3; cursor:default; }
+  .pos-number-badge .pos-num{ flex:1 1 auto; font-size:.82rem; font-weight:400; color:#fff; text-align:center; }
+  /* the number is also editable — click it and type a new position (in addition to the arrows) */
+  .pos-number-badge .pos-num-input{
+    flex:1 1 auto; width:100%; min-width:0; box-sizing:border-box; font-family:inherit;
+    background:transparent; border:none; color:#fff; text-align:center;
+    font-size:.82rem; font-weight:400; padding:0; cursor:text; -moz-appearance:textfield;
+  }
+  .pos-number-badge .pos-num-input::-webkit-outer-spin-button,
+  .pos-number-badge .pos-num-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  /* while editing the position, the digits turn black so they're readable, back to white on blur */
+  .pos-number-badge .pos-num-input:focus{ outline:none; color:#000; caret-color:#000; }
+  /* handled toggle — same 46.1×23.3 size as the badge; white pill with a knob that slides
+     from side to side (red left = not handled → green right = handled), like yes/no.svg */
+  .handled-toggle-wrap{ display:flex; align-items:center; flex:0 0 auto; }
+  .handled-switch{ position:relative; display:inline-block; width:46.1px; height:23.3px; flex:0 0 auto; cursor:pointer; }
   .handled-switch input{ opacity:0; width:0; height:0; position:absolute; }
-  .handled-slider{
-    position:absolute; inset:0; background:#fff; border-radius:20px; cursor:pointer; transition:background .2s ease;
-    border:1px solid rgba(255,255,255,.4);
-  }
+  .handled-slider{ position:absolute; inset:0; background:#fff; border-radius:11.65px; cursor:pointer; }
   .handled-slider::before{
-    content:""; position:absolute; height:14px; width:14px; left:2px; top:50%;
-    transform:translateY(-50%);
-    background:#e03b3b; border-radius:50%; transition:transform .2s ease, background .2s ease;
+    content:""; position:absolute; width:19.8px; height:19.8px; border-radius:50%;
+    left:2.8px; top:1.8px; background:red;
+    transition:transform .22s ease, background .22s ease;
   }
-  .handled-checkbox:checked + .handled-slider::before{ transform:translateY(-50%) translateX(14px); background:#73dd5c; }
-  .handled-label{ display:inline-block; font-size:.7rem; color:#fff; white-space:nowrap; flex:0 0 auto; width:40px; text-align:right; }
-  .pos-number-badge input.pos-input:focus{ outline:2px solid var(--gold); }
+  .handled-checkbox:checked + .handled-slider::before{ transform:translateX(20.6px); background:#7ae61d; }
   .client-card .card-chevron{ color:#fff; flex:0 0 auto; display:inline-block; transition:transform .15s ease; }
   .client-card .card-details{ cursor:default; margin-top:8px; }
   .client-card .cname-link{
@@ -703,7 +723,7 @@
   }
   .edit-update-add-btn:hover{ background:#1533ad; }
   .client-card .invoice-divider{
-    border-top:1px dashed rgba(255,255,255,.18); margin-top:8px;
+    border-top:1px dashed rgba(255,255,255,.18); margin-top:16px;
   }
   .client-card .invoice-field{
     display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:6px;
@@ -724,7 +744,7 @@
     padding:2px 6px; font-size:.68rem; cursor:pointer; flex:0 0 auto;
   }
   .remove-temp-btn:hover{ background:rgba(255,255,255,.15); }
-  .client-card .cactions{ display:flex; gap:5px; margin-top:6px; align-items:center; position:relative; }
+  .client-card .cactions{ display:flex; gap:5px; margin-top:14px; margin-bottom:8px; align-items:center; position:relative; }
   .more-options-menu{
     position:absolute; left:0; bottom:calc(100% + 6px); z-index:30; background:#111e63;
     border:1px solid rgba(255,255,255,.3); border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.4);
@@ -803,12 +823,11 @@
        focused — the single biggest annoyance when adding a client one-handed */
     input[type=text], input[type=tel], input[type=number], input[type=date],
     input[type=email], select, textarea{ font-size:16px; }
-    /* the 7–8 round action buttons per card were getting cramped/tiny on narrow
-       screens; let them keep a real finger-sized target and wrap to a second row
-       instead of shrinking below usability */
-    .client-card .cactions{ flex-wrap:wrap; gap:7px; }
+    /* keep all the round action buttons on a single row (no wrapping) — they share the
+       width evenly and shrink to fit however many there are */
+    .client-card .cactions{ flex-wrap:nowrap; gap:5px; }
     .client-card .cactions .icon-circle-btn{
-      flex:1 1 42px; width:auto; min-width:42px; min-height:42px; max-width:64px;
+      flex:1 1 0; width:auto; min-width:0; max-width:none; min-height:0;
     }
     /* nudge the smallest secondary text up so it stays readable in bright sunlight */
     .leg-connector .leg-info{ font-size:.72rem; }
@@ -2252,7 +2271,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // shared class names across multiple inline SVGs in the document.
   const FOLDER_EYE_SVG = `<svg viewBox="0 0 51.8 39.1" xmlns="http://www.w3.org/2000/svg"><path fill="#0f1a2e" d="M51.4,18.4c-.3-.8-7.1-18.4-25.5-18.4S.7,17.7.4,18.4l-.4,1.1.4,1.1c.3.8,7.1,18.4,25.5,18.4s25.2-17.7,25.5-18.4l.4-1.1-.4-1.1Z"/><circle fill="#fff" cx="25.9" cy="19.6" r="9.1"/></svg>`;
   const FOLDER_CLOCK_SVG = `<svg viewBox="0 0 37 37.1" xmlns="http://www.w3.org/2000/svg"><path fill="#0f1a2e" d="M31.3,31.1c2.6-3,4.1-6.8,4.1-11.1,0-8.8-6.8-16.1-15.4-16.9v-1.6C20,.7,19.4,0,18.5,0s-1.5.7-1.5,1.5v1.6C8.3,3.9,1.5,11.2,1.5,20s1.6,8.1,4.1,11.1c-1.3.7-2.6,2-2.6,4.3s.7,1.5,1.5,1.5,1.5-.7,1.5-1.5c0-1.5,1.3-1.8,1.7-1.9.1,0,.2,0,.3,0,2.9,2.2,6.4,3.5,10.3,3.5s7.5-1.3,10.3-3.5c0,0,.2,0,.3,0,.4,0,1.7.4,1.7,1.9s.7,1.5,1.5,1.5,1.5-.7,1.5-1.5c0-2.3-1.3-3.7-2.6-4.3h0Z"/><path fill="#fff" d="M37,6.9c0,.9-.7,1.5-1.5,1.5s-1.5-.7-1.5-1.5c0-1.9-1.5-3.9-4.3-3.9s-1.5-.7-1.5-1.5.7-1.5,1.6-1.5c4.1,0,7.4,3.1,7.4,6.9Z"/><path fill="#fff" d="M3.1,6.9c0-1.9,1.5-3.9,4.3-3.9s1.5-.7,1.5-1.5-.7-1.5-1.5-1.5C3.2,0,0,3.1,0,6.9s.7,1.5,1.5,1.5,1.5-.7,1.5-1.5h0Z"/><path fill="#fff" d="M24.2,24.2c-.3.3-.7.5-1.1.5s-.8-.2-1.1-.5l-4.6-4.6c-.3-.3-.5-.7-.5-1.1v-7.7c0-.9.7-1.5,1.5-1.5s1.5.7,1.5,1.5v7.1l4.2,4.2c.6.6.6,1.6,0,2.2h0Z"/></svg>`;
-  const FOLDER_PEN_SVG = `<svg viewBox="0 0 47 46.7" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M.3,10.8c0,.1,1.5,2.3,5.1,6.6.8-2.2,2.2-5.1,4.6-7.4,2.4-2.3,5.3-3.7,7.6-4.5C13.3,1.8,11,.4,10.9.3c-.4-.3-1-.4-1.5-.3-.4,0-3.8.7-6.3,3.1C.7,5.6,0,9,0,9.4c0,.5,0,1,.3,1.5Z"/><path fill="#0f1a2e" d="M21.5,8.9c-1.4.3-5.5,1.4-8.4,4.2-2.8,2.8-4,6.7-4.3,8.1,2.1,2.3,4.7,5,7.8,8.1,12.9,12.9,18.1,16.2,18.3,16.4.3.2.6.3,1,.3l8.8.7h.2c.6,0,1.1-.2,1.5-.6.4-.4.7-1,.6-1.7l-.7-8.7c0-.4-.1-.7-.3-1-.1-.2-3.5-5.4-16.5-18.2-3-3-5.7-5.6-8-7.6h0Z"/></svg>`;
+  const FOLDER_PEN_SVG = `<svg viewBox="0 0 49.1 48.8" xmlns="http://www.w3.org/2000/svg"><path fill="#0f1a2e" d="M.3,11.3c0,.2,4,5.3,7.8,9.8.9-2.3,2.3-6.2,4.8-8.7,2.5-2.7,6.1-3.4,8.5-4.3C16.9,4.3,11.5.4,11.4.3c-.5-.3-1-.4-1.5-.3-.4,0-4,.7-6.5,3.2C.7,5.8,0,9.4,0,9.8c0,.5,0,1.1.3,1.5Z"/><path fill="#0f1a2e" d="M41.1,27.9c-2.5-2.8-5.9-6.3-10.3-10.7-3.2-3.2-6-5.8-8.4-8-1.4.3-5.8,1.5-8.8,4.4-3,2.9-4.1,7-4.5,8.5,2.2,2.4,4.9,5.2,8.2,8.5,4.4,4.3,7.9,7.6,10.6,10.1,2-4.2,5.9-9.9,13.1-12.8Z"/><path fill="#fff" d="M48.4,37.3c0-.4-.2-.7-.4-1,0-.1-1.2-1.7-4.2-5.3-7.5,2.5-11.2,8.6-12.9,12.4,3.7,3.2,5.4,4.3,5.6,4.4.3.2.7.3,1,.3l9.2.7c0,0,.1,0,.2,0,.6,0,1.2-.2,1.6-.7.5-.5.7-1.1.6-1.8l-.7-9.1Z"/></svg>`;
   const FOLDER_X_SVG = `<svg viewBox="0 0 57.4 57.4" xmlns="http://www.w3.org/2000/svg"><path fill="#ff7bac" d="M51.8,1l-23.1,23.1L5.6,1c-1.3-1.3-3.3-1.3-4.6,0h0C-.3,2.2-.3,4.3,1,5.6l23.1,23.1L1,51.8c-1.3,1.3-1.3,3.3,0,4.6h0c1.3,1.3,3.3,1.3,4.6,0l23.1-23.1,23.1,23.1c1.3,1.3,3.3,1.3,4.6,0h0c1.3-1.3,1.3-3.3,0-4.6l-23.1-23.1L56.5,5.6c1.3-1.3,1.3-3.3,0-4.6h0c-1.3-1.3-3.3-1.3-4.6,0Z"/></svg>`;
 
   // circular status dot for the "inactive client" toggle - red when clicking it
@@ -3078,7 +3097,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function buildClientCard(c, routeNumber, moveHandlers, showSkipToggle, isTempContext){
     if(editingClientId === c.id) return buildClientEditCard(c);
     const card = document.createElement('div');
-    card.className = 'client-card' + (c.skipRoute ? ' skipped-today' : '') + (c.handled ? ' handled' : '') + (c.inactive ? ' client-inactive' : '');
+    card.className = 'client-card' + (openClientCards.has(c.id) ? ' card-open' : '') + (c.skipRoute ? ' skipped-today' : '') + (c.handled ? ' handled' : '') + (c.inactive ? ' client-inactive' : '');
     card.dataset.clientId = c.id;
     if(moveHandlers){
       card.draggable = true;
@@ -3092,7 +3111,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <div class="card-summary-right">
           ${c.callBefore ? `<span class="call-before-dot" title="להתקשר לפני ההגעה"></span>` : ""}
           ${c.collectPayment ? `<span class="collect-payment-dot" title="לגבות תשלום"></span>` : ""}
-          ${routeNumber ? `<input type="color" class="stop-color-input" value="${stopColor}" title="בחירת צבע לכתובת הזו - כדי להבדיל בין רחובות שונים">` : ""}
           <a href="javascript:void(0)" class="cname-link" title="לחצו לצפייה/הוספה של הזמנה">${c.business ? escapeHtml(c.business) : escapeHtml(c.name)}</a>
         </div>
         <div class="card-summary-left">
@@ -3101,13 +3119,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
               <input type="checkbox" class="handled-checkbox" ${c.handled ? 'checked' : ''}>
               <span class="handled-slider"></span>
             </label>
-            <span class="handled-label">${c.handled ? 'טופל' : 'לא טופל'}</span>
           </div>
           ${routeNumber ? `
             <div class="pos-number-badge">
+              ${moveHandlers ? `
+                <span class="pos-arrows">
+                  <button type="button" class="pos-up" title="הקדם מיקום במסלול" ${routeNumber <= 1 ? 'disabled' : ''}><svg viewBox="0 0 10 6"><path fill="#fff" d="M5 0 10 6 0 6Z"/></svg></button>
+                  <button type="button" class="pos-down" title="אחר מיקום במסלול" ${routeNumber >= moveHandlers.total ? 'disabled' : ''}><svg viewBox="0 0 10 6"><path fill="#fff" d="M0 0 10 0 5 6Z"/></svg></button>
+                </span>` : ''}
               ${moveHandlers
-                ? `<input type="number" class="pos-input" min="1" max="${moveHandlers.total}" value="${routeNumber}" title="הקלידו מספר מיקום ולחצו Enter כדי להעביר את הכתובת לשם">`
-                : `<span>${routeNumber}</span>`}
+                ? `<input type="number" class="pos-num-input" min="1" max="${moveHandlers.total}" value="${routeNumber}" title="הקלד מיקום חדש ולחץ Enter כדי להעביר את הכתובת לשם">`
+                : `<span class="pos-num">${routeNumber}</span>`}
             </div>
           ` : ""}
           <span class="card-chevron" style="transform:rotate(${isCardOpen ? 90 : 0}deg)">${CHEVRON_ICON_SVG}</span>
@@ -3362,7 +3384,21 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       });
     }
     if(moveHandlers){
-      const posInput = card.querySelector('.pos-input');
+      const upBtn = card.querySelector('.pos-up');
+      const downBtn = card.querySelector('.pos-down');
+      if(upBtn){
+        upBtn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          if(routeNumber > 1) moveHandlers.moveTo(routeNumber - 1);
+        });
+      }
+      if(downBtn){
+        downBtn.addEventListener('click', (e)=>{
+          e.stopPropagation();
+          if(routeNumber < moveHandlers.total) moveHandlers.moveTo(routeNumber + 1);
+        });
+      }
+      const posInput = card.querySelector('.pos-num-input');
       if(posInput){
         posInput.addEventListener('click', e=>e.stopPropagation());
         posInput.addEventListener('mousedown', e=>e.stopPropagation());
