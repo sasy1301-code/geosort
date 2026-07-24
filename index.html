@@ -143,7 +143,7 @@
   .sidebar .scroll::-webkit-scrollbar-thumb:hover{ background:#0261cc; }
   .animated-collapse{
     overflow:hidden; max-height:0; opacity:0;
-    transition: max-height .65s cubic-bezier(.4,0,.2,1), opacity .55s ease;
+    transition: max-height .65s cubic-bezier(.4,0,.2,1), margin-top .65s cubic-bezier(.4,0,.2,1), opacity .55s ease;
   }
   .animated-collapse.is-open{ opacity:1; }
   section.panel{
@@ -389,14 +389,17 @@
     background:rgba(224,139,125,.12); color:#fff; font-size:.78rem; cursor:pointer;
   }
   .reset-invoices-btn:hover{ background:rgba(224,139,125,.22); }
+  /* daily-report button — dark navy pill (btn.svg) with the blue send-on-road icon (send.svg) */
   .send-daily-report-btn{
-    width:100%; margin-top:8px; padding:7px 10px; border:1px solid #73dd5c; border-radius:8px;
-    background:rgba(115,221,92,.14); color:#fff; font-size:.78rem; cursor:pointer;
+    width:200px; margin:8px auto 20px; padding:10px 18px; border:1px solid #4394f7; border-radius:23px;
+    background:#0f1a2e; color:#fff; font-size:10pt; font-weight:400; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px;
   }
-  .send-daily-report-btn:hover{ background:rgba(115,221,92,.25); }
+  .send-daily-report-btn:hover{ background:#17233b; }
+  .send-daily-report-btn svg{ width:23px; height:23px; display:block; flex:0 0 auto; }
   .invoice-summary input[type=date]{ width:auto; flex:0 0 auto; padding:5px 8px; font-size:.8rem; }
   .invoice-summary-total{ font-size:.85rem; color:#fff; white-space:nowrap; }
-  .invoice-summary-total b{ color:#3bd332; }
+  .invoice-summary-total b{ color:#0f1a2e; }
   .service-time-tag{
     font-size:.7rem; color:rgba(255,255,255,.6); margin-top:6px; padding-top:6px;
     border-top:1px dashed rgba(255,255,255,.18);
@@ -410,18 +413,17 @@
   .client-card.card-alt{ background:#0f1a2e; }
   .client-card.card-alt:hover{ background:#040f1e; }
   /* collapsed cards are 8px shorter (4px trimmed top & bottom); open/edit cards keep full padding */
-  .client-card:not(.card-open):not(.editing){ padding-top:6px; padding-bottom:6px; }
+  .client-card:not(.card-open):not(.editing){ padding-top:11px; padding-bottom:11px; }
   /* when closed, drop the details' top margin so the summary row is perfectly centered
      (equal space above and below), not pushed up by the collapsed details block */
-  .client-card:not(.card-open) .card-details{ margin-top:0; }
   .cluster-region-body .client-card{ background:#450d61; }
   .cluster-region-body .client-card:hover{ background:#5a1180; }
   .cluster-region-body .client-card.card-alt{ background:#330d46; }
   .cluster-region-body .client-card.card-alt:hover{ background:#451160; }
-  .client-card.skipped-today{ background:#4a4a4a !important; opacity:.75; }
-  .client-card.client-inactive{ background:#7a1f1f !important; }
-  .client-card.client-inactive:hover{ background:#8a2626 !important; }
-  .client-card.skipped-today:hover{ background:#565656 !important; }
+  .client-card.skipped-today{ background:#a5b3bc !important; opacity:.75; }
+  .client-card.client-inactive{ background:#d21b15 !important; }
+  .client-card.client-inactive:hover{ background:#e63229 !important; }
+  .client-card.skipped-today:hover{ background:#b3bfc7 !important; }
   .skip-badge{
     display:inline-block; font-size:.68rem; font-weight:700; color:#fff; background:rgba(255,255,255,.18);
     padding:2px 8px; border-radius:20px; margin-top:6px;
@@ -483,7 +485,7 @@
   /* handled toggle — same 46.1×23.3 size as the badge; white pill with a knob that slides
      from side to side (red left = not handled → green right = handled), like yes/no.svg */
   .handled-toggle-wrap{ display:flex; align-items:center; flex:0 0 auto; }
-  .handled-switch{ position:relative; display:inline-block; width:46.1px; height:23.3px; flex:0 0 auto; cursor:pointer; }
+  .handled-switch{ position:relative; display:inline-block; width:46.1px; height:23.3px; flex:0 0 auto; cursor:pointer; margin:0; }
   .handled-switch input{ opacity:0; width:0; height:0; position:absolute; }
   .handled-slider{ position:absolute; inset:0; background:#fff; border-radius:11.65px; cursor:pointer; }
   .handled-slider::before{
@@ -493,7 +495,10 @@
   }
   .handled-checkbox:checked + .handled-slider::before{ transform:translateX(20.6px); background:#7ae61d; }
   .client-card .card-chevron{ color:#fff; flex:0 0 auto; display:inline-block; transition:transform .15s ease; }
-  .client-card .card-details{ cursor:default; margin-top:8px; }
+  .client-card .card-details{ cursor:default; margin-top:0; }
+  /* when the card is open, push the whole details block (billing name, photo, WhatsApp
+     icons, address…) well clear of the header so nothing is cramped at the top */
+  .client-card .card-details.is-open{ margin-top:18px; }
   .client-card .cname-link{
     color:#fff;
     font-weight:600; font-size:.87rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -664,7 +669,7 @@
   }
   .client-card .whatsapp-preset-btn svg{ display:block; width:25px; height:25px; }
   .client-card .place-photo-wrap{
-    position:absolute; left:0; bottom:32px; width:38px; height:38px;
+    position:absolute; left:0; bottom:42px; width:38px; height:38px;
   }
   .client-card .place-photo-thumb{
     display:block; width:38px; height:38px; object-fit:cover;
@@ -689,8 +694,8 @@
   .client-card .whatsapp-btn svg{ display:block; width:25px; height:25px; }
   .client-card .caddr{ font-size:.82rem; color:#fff; margin-top:3px; }
   .client-card .cphone{ font-size:.82rem; color:#fff; margin-top:3px; }
-  .client-card .phone-link{ color:#9fc3ff; text-decoration:underline; cursor:pointer; }
-  .client-card .phone-link:hover{ color:#c3dcff; }
+  .client-card .phone-link{ color:#4394f7; text-decoration:underline; cursor:pointer; }
+  .client-card .phone-link:hover{ color:#7fb5fa; }
   .client-card .cprice{ font-size:.82rem; color:rgba(255,255,255,.75); }
   .client-card .cnotes-block{
     margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,.3);
@@ -704,13 +709,13 @@
   }
   .updates-log-title{ font-size:.82rem; font-weight:700; color:#fff; margin-bottom:3px; }
   .update-entry{ font-size:.74rem; color:rgba(255,255,255,.85); margin-top:2px; word-break:break-word; }
-  .update-entry .update-date{ color:var(--gold); font-weight:700; }
+  .update-entry .update-date{ color:#ff7bac; font-weight:700; }
   .edit-updates-list{ margin-bottom:6px; }
   .edit-update-row{
     display:flex; align-items:baseline; gap:6px; font-size:.78rem; padding:4px 2px;
     border-bottom:1px dashed rgba(255,255,255,.12);
   }
-  .edit-update-row .update-date{ color:var(--gold); font-weight:700; flex:0 0 auto; white-space:nowrap; }
+  .edit-update-row .update-date{ color:#ff7bac; font-weight:700; flex:0 0 auto; white-space:nowrap; }
   .edit-update-row .edit-update-text{ flex:1 1 auto; word-break:break-word; }
   .edit-update-row .edit-update-del{
     background:transparent; border:none; color:rgba(255,255,255,.6); cursor:pointer; font-size:.78rem; flex:0 0 auto;
@@ -2173,6 +2178,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         if(assignedFolder && assignedFolder.mapVisible === false) return; // whole folder hidden from the map for now
         if(!c.folder && !unassignedMapVisible) return; // "בלי תיקייה" bucket hidden from the map for now
         if(c.handled) return; // marked handled - off the map for 12 hours, then reverts automatically
+        if(c.inactive) return; // inactive client - not shown on the map
         bounds.push([c.lat, c.lon]);
         const folderInfo = folderPositionByClientId[c.id];
         let label, pinColor;
@@ -2273,6 +2279,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const FOLDER_CLOCK_SVG = `<svg viewBox="0 0 37 37.1" xmlns="http://www.w3.org/2000/svg"><path fill="#0f1a2e" d="M31.3,31.1c2.6-3,4.1-6.8,4.1-11.1,0-8.8-6.8-16.1-15.4-16.9v-1.6C20,.7,19.4,0,18.5,0s-1.5.7-1.5,1.5v1.6C8.3,3.9,1.5,11.2,1.5,20s1.6,8.1,4.1,11.1c-1.3.7-2.6,2-2.6,4.3s.7,1.5,1.5,1.5,1.5-.7,1.5-1.5c0-1.5,1.3-1.8,1.7-1.9.1,0,.2,0,.3,0,2.9,2.2,6.4,3.5,10.3,3.5s7.5-1.3,10.3-3.5c0,0,.2,0,.3,0,.4,0,1.7.4,1.7,1.9s.7,1.5,1.5,1.5,1.5-.7,1.5-1.5c0-2.3-1.3-3.7-2.6-4.3h0Z"/><path fill="#fff" d="M37,6.9c0,.9-.7,1.5-1.5,1.5s-1.5-.7-1.5-1.5c0-1.9-1.5-3.9-4.3-3.9s-1.5-.7-1.5-1.5.7-1.5,1.6-1.5c4.1,0,7.4,3.1,7.4,6.9Z"/><path fill="#fff" d="M3.1,6.9c0-1.9,1.5-3.9,4.3-3.9s1.5-.7,1.5-1.5-.7-1.5-1.5-1.5C3.2,0,0,3.1,0,6.9s.7,1.5,1.5,1.5,1.5-.7,1.5-1.5h0Z"/><path fill="#fff" d="M24.2,24.2c-.3.3-.7.5-1.1.5s-.8-.2-1.1-.5l-4.6-4.6c-.3-.3-.5-.7-.5-1.1v-7.7c0-.9.7-1.5,1.5-1.5s1.5.7,1.5,1.5v7.1l4.2,4.2c.6.6.6,1.6,0,2.2h0Z"/></svg>`;
   const FOLDER_PEN_SVG = `<svg viewBox="0 0 49.1 48.8" xmlns="http://www.w3.org/2000/svg"><path fill="#0f1a2e" d="M.3,11.3c0,.2,4,5.3,7.8,9.8.9-2.3,2.3-6.2,4.8-8.7,2.5-2.7,6.1-3.4,8.5-4.3C16.9,4.3,11.5.4,11.4.3c-.5-.3-1-.4-1.5-.3-.4,0-4,.7-6.5,3.2C.7,5.8,0,9.4,0,9.8c0,.5,0,1.1.3,1.5Z"/><path fill="#0f1a2e" d="M41.1,27.9c-2.5-2.8-5.9-6.3-10.3-10.7-3.2-3.2-6-5.8-8.4-8-1.4.3-5.8,1.5-8.8,4.4-3,2.9-4.1,7-4.5,8.5,2.2,2.4,4.9,5.2,8.2,8.5,4.4,4.3,7.9,7.6,10.6,10.1,2-4.2,5.9-9.9,13.1-12.8Z"/><path fill="#fff" d="M48.4,37.3c0-.4-.2-.7-.4-1,0-.1-1.2-1.7-4.2-5.3-7.5,2.5-11.2,8.6-12.9,12.4,3.7,3.2,5.4,4.3,5.6,4.4.3.2.7.3,1,.3l9.2.7c0,0,.1,0,.2,0,.6,0,1.2-.2,1.6-.7.5-.5.7-1.1.6-1.8l-.7-9.1Z"/></svg>`;
   const FOLDER_X_SVG = `<svg viewBox="0 0 57.4 57.4" xmlns="http://www.w3.org/2000/svg"><path fill="#ff7bac" d="M51.8,1l-23.1,23.1L5.6,1c-1.3-1.3-3.3-1.3-4.6,0h0C-.3,2.2-.3,4.3,1,5.6l23.1,23.1L1,51.8c-1.3,1.3-1.3,3.3,0,4.6h0c1.3,1.3,3.3,1.3,4.6,0l23.1-23.1,23.1,23.1c1.3,1.3,3.3,1.3,4.6,0h0c1.3-1.3,1.3-3.3,0-4.6l-23.1-23.1L56.5,5.6c1.3-1.3,1.3-3.3,0-4.6h0c-1.3-1.3-3.3-1.3-4.6,0Z"/></svg>`;
+  // "send daily report" button icon (send.svg) — a blue paper-plane following a dashed road
+  const SEND_ICON_SVG = `<svg viewBox="0 0 23.2 23.2" xmlns="http://www.w3.org/2000/svg"><path fill="#4394f7" d="M1,8.3l9.4,4.7c.7.4,1.6.3,2.2-.2l.2.3-.2-.3c.6-.5.9-1.4.6-2.1l-1.8-4,1.8-4c.3-.8,0-1.6-.6-2.2-.4-.3-.8-.5-1.2-.5s-.7,0-1,.3L1,4.9c-.6.4-1,1-1,1.7s.4,1.4,1,1.7ZM1.6,6L10.9,1.4c.2-.1.5-.2.8,0,.2.2.3.5.2.8l-1.6,3.6-5.3.9s0,0,0,0l5.4.9,1.6,3.6c0,.3,0,.6-.2.7-.1.1-.3.2-.4.2s-.2,0-.3,0L1.6,7.2c-.3-.2-.3-.5-.3-.6,0-.3.1-.5.4-.6Z"/><path fill="#4394f7" d="M16.6,22h-2c-.3,0-.6.3-.6.6s.3.6.6.6h2c.3,0,.6-.3.6-.6s-.3-.6-.6-.6Z"/><path fill="#4394f7" d="M10.6,22H3.6c-1.3,0-2.4-1.1-2.4-2.4s1.1-2.4,2.4-2.4h14c3.1,0,5.6-2.5,5.6-5.6s-2.5-5.6-5.6-5.6h-2c-.3,0-.6.3-.6.6s.3.6.6.6h2c2.4,0,4.4,2,4.4,4.4s-2,4.4-4.4,4.4H3.6c-2,0-3.6,1.6-3.6,3.6s1.6,3.6,3.6,3.6h7c.3,0,.6-.3.6-.6s-.3-.6-.6-.6Z"/><path fill="#4394f7" d="M22.6,22h-2c-.3,0-.6.3-.6.6s.3.6.6.6h2c.3,0,.6-.3.6-.6s-.3-.6-.6-.6Z"/></svg>`;
 
   // circular status dot for the "inactive client" toggle - red when clicking it
   // will mark the client inactive, green when clicking it will restore them
@@ -2341,6 +2349,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   function escapeHtml(s){
     return String(s ?? "").replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  }
+
+  // updates are stored as ISO YYYY-MM-DD; show them as DD-MM-YYYY (leave other formats as-is)
+  function fmtUpdateDate(d){
+    const m = String(d ?? "").match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : String(d ?? "");
   }
 
   // frames the map on a set of [lat, lon] points - centers+zooms for a single point,
@@ -2958,7 +2972,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       }
       listEl.innerHTML = updates.map(u => `
         <div class="edit-update-row" data-update-id="${u.id}">
-          <span class="update-date">${escapeHtml(u.date)}</span>
+          <span class="update-date">${escapeHtml(fmtUpdateDate(u.date))}</span>
           <span class="edit-update-text">${escapeHtml(u.text)}</span>
           <button class="edit-update-del" data-update-id="${u.id}" title="מחיקת העדכון הזה">🗑</button>
         </div>
@@ -3114,13 +3128,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <a href="javascript:void(0)" class="cname-link" title="לחצו לצפייה/הוספה של הזמנה">${c.business ? escapeHtml(c.business) : escapeHtml(c.name)}</a>
         </div>
         <div class="card-summary-left">
+          ${(!c.inactive && !c.skipRoute) ? `
           <div class="handled-toggle-wrap" title="${c.handled ? 'טופל - יחזור אוטומטית ללא טופל בעוד 12 שעות' : 'סמן כטופל'}">
             <label class="handled-switch">
               <input type="checkbox" class="handled-checkbox" ${c.handled ? 'checked' : ''}>
               <span class="handled-slider"></span>
             </label>
-          </div>
-          ${routeNumber ? `
+          </div>` : ""}
+          ${(!c.inactive && routeNumber) ? `
             <div class="pos-number-badge">
               ${moveHandlers ? `
                 <span class="pos-arrows">
@@ -3175,7 +3190,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <div class="updates-log">
             <div class="updates-log-title">עדכונים</div>
             ${c.updates.slice().sort((a,b)=> b.date.localeCompare(a.date)).map(u => `
-              <div class="update-entry"><span class="update-date">${escapeHtml(u.date)}</span> — ${escapeHtml(u.text)}</div>
+              <div class="update-entry"><span class="update-date">${escapeHtml(fmtUpdateDate(u.date))}</span> — ${escapeHtml(u.text)}</div>
             `).join('')}
           </div>
         ` : ""}
@@ -3312,15 +3327,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       renderAll();
     });
     const handledCheckbox = card.querySelector('.handled-checkbox');
-    handledCheckbox.addEventListener('click', e=>e.stopPropagation());
-    handledCheckbox.addEventListener('change', (e)=>{
-      c.handled = e.target.checked;
-      c.handledAt = c.handled ? Date.now() : null;
-      saveData();
-      // let the knob's slide/color transition play out first - a renderAll() right away
-      // would rebuild the DOM before the animation gets a chance to show
-      setTimeout(renderAll, 220);
-    });
+    if(handledCheckbox){
+      handledCheckbox.addEventListener('click', e=>e.stopPropagation());
+      handledCheckbox.addEventListener('change', (e)=>{
+        c.handled = e.target.checked;
+        c.handledAt = c.handled ? Date.now() : null;
+        saveData();
+        // let the knob's slide/color transition play out first - a renderAll() right away
+        // would rebuild the DOM before the animation gets a chance to show
+        setTimeout(renderAll, 220);
+      });
+    }
     const invoiceInput = card.querySelector('.last-invoice-input');
     if(invoiceInput){
       invoiceInput.addEventListener('click', e=>e.stopPropagation());
@@ -3555,7 +3572,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const activeMembers = filteredMembers.filter(m => !clients[m].skipRoute);
       const skippedMembers = filteredMembers.filter(m => clients[m].skipRoute);
       const orderedMembers = sinkInactiveToEnd(getOrderedClusterMembers(cl, activeMembers), i => clients[i].inactive); // full list, for display/position
-      const calcMembers = orderedMembers.filter(m => !clients[m].handled); // for route distance/time only
+      const calcMembers = orderedMembers.filter(m => !clients[m].handled && !clients[m].inactive); // for route distance/time only (inactive are off the map/route)
       const calcPosOf = {};
       calcMembers.forEach((m, i)=>{ calcPosOf[clients[m].id] = i; });
       const cachedClusterRoad = clusterRoadRouteCache[cl.key];
@@ -3589,7 +3606,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const activeListEl = document.createElement('div');
       body.appendChild(activeListEl);
 
+      const deferredInactive = [];   // inactive (red) cards render last, after the skipped section
       orderedMembers.forEach((m, idx)=>{
+        if(clients[m].inactive){ deferredInactive.push(m); return; }
         const moveHandlers = {
           isFirst: idx === 0,
           isLast: idx === orderedMembers.length - 1,
@@ -3603,7 +3622,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         activeListEl.appendChild(cardEl);
         if(idx < orderedMembers.length - 1){
           const curClient = clients[m], nextClient = clients[orderedMembers[idx+1]];
-          if(!curClient.handled && !nextClient.handled){
+          if(!curClient.handled && !nextClient.handled && !nextClient.inactive){
             const curCalcPos = calcPosOf[curClient.id];
             const realLeg = (clusterRoadMatches && cachedClusterRoad.legs[curCalcPos]) ? cachedClusterRoad.legs[curCalcPos] : null;
             activeListEl.appendChild(buildLegConnector(curClient, nextClient, realLeg));
@@ -3613,7 +3632,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
       if(skippedMembers.length){
         const skipHeader = document.createElement('div');
-        skipHeader.style.cssText = 'font-size:.72rem;color:rgba(255,255,255,.5);margin:10px 0 4px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.18)';
+        skipHeader.style.cssText = 'font-size:.72rem;color:#0f1a2e;margin:10px 0 4px;padding-top:8px;border-top:1px dashed #0f1a2e';
         skipHeader.textContent = `⏸ לא במסלול היום (${skippedMembers.length})`;
         body.appendChild(skipHeader);
         skippedMembers.forEach(m=>{
@@ -3621,10 +3640,20 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         });
       }
 
+      if(deferredInactive.length){
+        const inactiveHeader = document.createElement('div');
+        inactiveHeader.style.cssText = 'font-size:.72rem;color:#0f1a2e;margin:10px 0 4px;padding-top:8px;border-top:1px dashed #0f1a2e';
+        inactiveHeader.textContent = `🚫 לקוחות לא פעילים (${deferredInactive.length})`;
+        body.appendChild(inactiveHeader);
+        deferredInactive.forEach(m=>{
+          body.appendChild(buildClientCard(clients[m], null, null, true));
+        });
+      }
+
       wireDragReorder(activeListEl, (ids)=>{
         const folder = dominantFolderFor(filteredMembers);
         if(folder){
-          folder.order = ids.concat(skippedMembers.map(m => clients[m].id));
+          folder.order = ids.concat(deferredInactive.map(m => clients[m].id), skippedMembers.map(m => clients[m].id));
           saveFolders();
         } else {
           clusterOrder[cl.key] = ids;
@@ -3661,7 +3690,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </div>
         <div class="invoice-summary-total">סה״כ כל התיקיות: <b>₪0</b></div>
       </div>
-      <button class="send-daily-report-btn">📤 שליחת דו״ח יומי</button>
+      <button class="send-daily-report-btn"><span>שליחת דו״ח יומי</span>${SEND_ICON_SVG}</button>
       <button class="reset-invoices-btn" title="מאפס לכולם, לא ניתן לשחזר">🗑 אפס את כל הסכומים ל-0</button>
     `;
     const fromInput = container.querySelector('.grand-invoice-from');
@@ -3821,7 +3850,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         // ordering (numbers + ▲▼ + drag) is always available, whether or not 🧭 is on -
         // 🧭 only decides whether the connecting route line is drawn on the map
         const orderedMembers = sinkInactiveToEnd(getOrderedFolderMembers(folder, activeMembers), c => c.inactive); // full list, for display/position
-        const calcMembers = orderedMembers.filter(c => !c.handled); // for route distance/time only
+        const calcMembers = orderedMembers.filter(c => !c.handled && !c.inactive); // for route distance/time only (inactive are off the map/route)
         const cachedRoad = roadRouteCache[folder.name];
         const roadMatches = cachedRoad && cachedRoad.fingerprint === routeFingerprint(calcMembers);
 
@@ -3853,7 +3882,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const activeListEl = document.createElement('div');
         body.appendChild(activeListEl);
 
+        const deferredInactive = [];   // inactive (red) cards render last, after the skipped section
         orderedMembers.forEach((c, idx)=>{
+          if(c.inactive){ deferredInactive.push(c); return; }
           const moveHandlers = {
             isFirst: idx === 0,
             isLast: idx === orderedMembers.length - 1,
@@ -3873,7 +3904,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           activeListEl.appendChild(cardEl);
           if(idx < orderedMembers.length - 1){
             const nextC = orderedMembers[idx+1];
-            if(!c.handled && !nextC.handled){
+            if(!c.handled && !nextC.handled && !nextC.inactive){
               const curCalcPos = calcMembers.indexOf(c);
               const realLeg = (roadMatches && cachedRoad.legs[curCalcPos]) ? cachedRoad.legs[curCalcPos] : null;
               activeListEl.appendChild(buildLegConnector(c, nextC, realLeg));
@@ -3881,7 +3912,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           }
         });
         wireDragReorder(activeListEl, (ids)=>{
-          folder.order = ids.concat(skippedMembers.map(c => c.id));
+          folder.order = ids.concat(deferredInactive.map(c => c.id), skippedMembers.map(c => c.id));
           saveFolders();
           renderFolders();
           renderFolderRoute();
@@ -3889,10 +3920,20 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
         if(skippedMembers.length){
           const skipHeader = document.createElement('div');
-          skipHeader.style.cssText = 'font-size:.72rem;color:rgba(255,255,255,.5);margin:10px 0 4px;padding-top:8px;border-top:1px dashed rgba(255,255,255,.18)';
+          skipHeader.style.cssText = 'font-size:.72rem;color:#0f1a2e;margin:10px 0 4px;padding-top:8px;border-top:1px dashed #0f1a2e';
           skipHeader.textContent = `⏸ לא במסלול היום (${skippedMembers.length})`;
           body.appendChild(skipHeader);
           skippedMembers.forEach(c=>{
+            body.appendChild(buildClientCard(c, null, null, true, (c.folder||"") !== name && c.tempFolder === name));
+          });
+        }
+
+        if(deferredInactive.length){
+          const inactiveHeader = document.createElement('div');
+          inactiveHeader.style.cssText = 'font-size:.72rem;color:#0f1a2e;margin:10px 0 4px;padding-top:8px;border-top:1px dashed #0f1a2e';
+          inactiveHeader.textContent = `🚫 לקוחות לא פעילים (${deferredInactive.length})`;
+          body.appendChild(inactiveHeader);
+          deferredInactive.forEach(c=>{
             body.appendChild(buildClientCard(c, null, null, true, (c.folder||"") !== name && c.tempFolder === name));
           });
         }
@@ -3926,7 +3967,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
         const folderReportBtn = document.createElement('button');
         folderReportBtn.className = 'send-daily-report-btn';
-        folderReportBtn.textContent = '📤 שליחת דו״ח יומי';
+        folderReportBtn.innerHTML = '<span>שליחת דו״ח יומי</span>' + SEND_ICON_SVG;
         folderReportBtn.addEventListener('click', (e)=>{
           e.stopPropagation();
           const chosenDate = summaryDateInput.value;
