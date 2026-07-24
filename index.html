@@ -306,6 +306,41 @@
   }
   .cluster-head .map-visibility-toggle:hover{ background:rgba(255,255,255,.14); }
   .cluster-head .map-visibility-toggle.off{ color:#e08b7d; opacity:.85; }
+
+  /* ---- folder cards redesign (client-count folders inside :is(#folderList, #clusterList) only, so the
+     clusters panel keeps its own colours) ---- */
+  :is(#folderList, #clusterList) .cluster-head{ background:#025ffb; border:1px solid #4394f7; gap:10px; }
+  :is(#folderList, #clusterList) .cluster-head:hover{ background:#1a72ff; }
+  /* client-count circle: white with a navy number, folder name Regular @ 15pt */
+  :is(#folderList, #clusterList) .cluster-head .count{ background:#fff; color:#0f1a2e; width:28px; height:28px; }
+  :is(#folderList, #clusterList) .cluster-head .name{ font-weight:400; font-size:10pt; }
+  /* the rename input matches the folder name exactly (Regular, 10pt) so the text
+     doesn't jump size/weight when you enter edit mode */
+  :is(#folderList, #clusterList) .cluster-head .cluster-rename-input{ font-size:10pt; font-weight:400; }
+  /* SVG action icons (eye / clock / pencil / X) sit bare on the blue card.
+     each icon carries its own base size in --sz; hovering grows it by 2px. */
+  :is(#folderList, #clusterList) .cluster-head button{ display:inline-flex; align-items:center; justify-content:center; line-height:0; padding:2px 0; }
+  :is(#folderList, #clusterList) .cluster-head .map-visibility-toggle{ --sz:17px; }
+  :is(#folderList, #clusterList) .cluster-head .route-toggle{ --sz:14px; }
+  :is(#folderList, #clusterList) .cluster-head .rename-folder{ --sz:13px; }
+  :is(#folderList, #clusterList) .cluster-head .rename-cluster{ --sz:13px; }
+  :is(#folderList, #clusterList) .cluster-head .folder-del{ --sz:9px; }
+  /* the clusters' "reset to auto name" (↺) is a glyph, not an SVG — colour it navy to match */
+  #clusterList .cluster-head .reset-cluster-name{ color:#0f1a2e; font-size:15px; }
+  :is(#folderList, #clusterList) .cluster-head button svg{ width:var(--sz,19px); height:var(--sz,19px); display:block; }
+  /* no hover effect on the icons — they stay put, with no background highlight */
+  :is(#folderList, #clusterList) .cluster-head button:hover{ background:transparent; }
+  /* press feedback while held down: the navy parts turn pink, matching the X */
+  :is(#folderList, #clusterList) .cluster-head button:active svg [fill="#0f1a2e"]{ fill:#ff7bac; }
+  /* persistent "pressed" state — the toggle stays pink so you can see it is active.
+     these classes are re-applied from state on every render, so a second click
+     (which clears the state) returns the icon to navy. */
+  :is(#folderList, #clusterList) .cluster-head .map-visibility-toggle.off svg [fill="#0f1a2e"]{ fill:#ff7bac; }
+  :is(#folderList, #clusterList) .cluster-head .route-toggle.active svg [fill="#0f1a2e"]{ fill:#ff7bac; }
+  /* no background box behind the pressed/active toggle — only the pink icon signals it
+     (overrides the global gold .route-toggle.active background) */
+  :is(#folderList, #clusterList) .cluster-head .route-toggle.active,
+  :is(#folderList, #clusterList) .cluster-head .map-visibility-toggle.off{ background:transparent; }
   .cluster-rename-input{
     flex:1; font-size:.85rem; font-weight:600; border:1px solid var(--teal); border-radius:6px;
     padding:3px 7px; background:#fff; font-family:inherit; color:#021236; min-width:0;
@@ -2212,6 +2247,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // ▸/▾ glyph-swap pattern with a proper icon + rotation instead)
   const CHEVRON_ICON_SVG = `<svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg>`;
 
+  // folder-card action icons (from GeoSort/icon/*.svg) — two-tone (navy #0f1a2e + white #fff)
+  // so they read on the blue folder card. Fills are inlined (no <style>) to avoid leaking
+  // shared class names across multiple inline SVGs in the document.
+  const FOLDER_EYE_SVG = `<svg viewBox="0 0 51.8 39.1" xmlns="http://www.w3.org/2000/svg"><path fill="#0f1a2e" d="M51.4,18.4c-.3-.8-7.1-18.4-25.5-18.4S.7,17.7.4,18.4l-.4,1.1.4,1.1c.3.8,7.1,18.4,25.5,18.4s25.2-17.7,25.5-18.4l.4-1.1-.4-1.1Z"/><circle fill="#fff" cx="25.9" cy="19.6" r="9.1"/></svg>`;
+  const FOLDER_CLOCK_SVG = `<svg viewBox="0 0 37 37.1" xmlns="http://www.w3.org/2000/svg"><path fill="#0f1a2e" d="M31.3,31.1c2.6-3,4.1-6.8,4.1-11.1,0-8.8-6.8-16.1-15.4-16.9v-1.6C20,.7,19.4,0,18.5,0s-1.5.7-1.5,1.5v1.6C8.3,3.9,1.5,11.2,1.5,20s1.6,8.1,4.1,11.1c-1.3.7-2.6,2-2.6,4.3s.7,1.5,1.5,1.5,1.5-.7,1.5-1.5c0-1.5,1.3-1.8,1.7-1.9.1,0,.2,0,.3,0,2.9,2.2,6.4,3.5,10.3,3.5s7.5-1.3,10.3-3.5c0,0,.2,0,.3,0,.4,0,1.7.4,1.7,1.9s.7,1.5,1.5,1.5,1.5-.7,1.5-1.5c0-2.3-1.3-3.7-2.6-4.3h0Z"/><path fill="#fff" d="M37,6.9c0,.9-.7,1.5-1.5,1.5s-1.5-.7-1.5-1.5c0-1.9-1.5-3.9-4.3-3.9s-1.5-.7-1.5-1.5.7-1.5,1.6-1.5c4.1,0,7.4,3.1,7.4,6.9Z"/><path fill="#fff" d="M3.1,6.9c0-1.9,1.5-3.9,4.3-3.9s1.5-.7,1.5-1.5-.7-1.5-1.5-1.5C3.2,0,0,3.1,0,6.9s.7,1.5,1.5,1.5,1.5-.7,1.5-1.5h0Z"/><path fill="#fff" d="M24.2,24.2c-.3.3-.7.5-1.1.5s-.8-.2-1.1-.5l-4.6-4.6c-.3-.3-.5-.7-.5-1.1v-7.7c0-.9.7-1.5,1.5-1.5s1.5.7,1.5,1.5v7.1l4.2,4.2c.6.6.6,1.6,0,2.2h0Z"/></svg>`;
+  const FOLDER_PEN_SVG = `<svg viewBox="0 0 47 46.7" xmlns="http://www.w3.org/2000/svg"><path fill="#fff" d="M.3,10.8c0,.1,1.5,2.3,5.1,6.6.8-2.2,2.2-5.1,4.6-7.4,2.4-2.3,5.3-3.7,7.6-4.5C13.3,1.8,11,.4,10.9.3c-.4-.3-1-.4-1.5-.3-.4,0-3.8.7-6.3,3.1C.7,5.6,0,9,0,9.4c0,.5,0,1,.3,1.5Z"/><path fill="#0f1a2e" d="M21.5,8.9c-1.4.3-5.5,1.4-8.4,4.2-2.8,2.8-4,6.7-4.3,8.1,2.1,2.3,4.7,5,7.8,8.1,12.9,12.9,18.1,16.2,18.3,16.4.3.2.6.3,1,.3l8.8.7h.2c.6,0,1.1-.2,1.5-.6.4-.4.7-1,.6-1.7l-.7-8.7c0-.4-.1-.7-.3-1-.1-.2-3.5-5.4-16.5-18.2-3-3-5.7-5.6-8-7.6h0Z"/></svg>`;
+  const FOLDER_X_SVG = `<svg viewBox="0 0 57.4 57.4" xmlns="http://www.w3.org/2000/svg"><path fill="#ff7bac" d="M51.8,1l-23.1,23.1L5.6,1c-1.3-1.3-3.3-1.3-4.6,0h0C-.3,2.2-.3,4.3,1,5.6l23.1,23.1L1,51.8c-1.3,1.3-1.3,3.3,0,4.6h0c1.3,1.3,3.3,1.3,4.6,0l23.1-23.1,23.1,23.1c1.3,1.3,3.3,1.3,4.6,0h0c1.3-1.3,1.3-3.3,0-4.6l-23.1-23.1L56.5,5.6c1.3-1.3,1.3-3.3,0-4.6h0c-1.3-1.3-3.3-1.3-4.6,0Z"/></svg>`;
+
   // circular status dot for the "inactive client" toggle - red when clicking it
   // will mark the client inactive, green when clicking it will restore them
   function statusCircleIconSvg(color){
@@ -3400,7 +3443,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       renameFolder(folder, input.value);
     }
     input.addEventListener('keydown', (e)=>{
-      if(e.key === 'Enter'){ commit(); }
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        commit();
+        // renameFolder only re-renders when the name actually changed; if it was left
+        // unchanged/empty the input would otherwise stay open, so force-exit edit mode.
+        if(document.body.contains(input)) renderAll();
+      }
       if(e.key === 'Escape'){ done = true; renderAll(); }
     });
     input.addEventListener('blur', commit);
@@ -3435,8 +3484,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <div class="cluster-swatch" style="background:${cl.color}"></div>
         <div class="name" title="${isCustomName ? 'שם מותאם אישית' : ''}">${escapeHtml(cl.name)}</div>
         <div class="count">${filteredMembers.length}</div>
-        <button class="route-toggle ${inRouteMode ? 'active' : ''}" title="סידור הכתובות לפי מסלול נסיעה יעיל">🧭</button>
-        <button class="rename-cluster" title="שינוי שם האזור">✎</button>
+        <button class="route-toggle ${inRouteMode ? 'active' : ''}" title="סידור הכתובות לפי מסלול נסיעה יעיל">${FOLDER_CLOCK_SVG}</button>
+        <button class="rename-cluster" title="שינוי שם האזור">${FOLDER_PEN_SVG}</button>
         ${isCustomName ? '<button class="reset-cluster-name" title="חזרה לשם האוטומטי">↺</button>' : ''}
       `;
       head.addEventListener('click', (e)=>{
@@ -3678,10 +3727,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <input type="color" class="folder-swatch" value="${folder.color}" title="שינוי צבע התיקייה">
         <div class="name">${escapeHtml(name)}</div>
         <div class="count">${members.length}</div>
-        <button class="map-visibility-toggle ${mapVisible ? '' : 'off'}" title="${mapVisible ? 'הסתר את כל התיקייה מהמפה (למשל אם היום לא רלוונטית)' : 'הצג שוב את התיקייה על המפה'}">${mapVisible ? '👁' : '🚫'}</button>
-        <button class="route-toggle ${routeActive ? 'active' : ''}" title="הצג/הסתר מסלול נסיעה על המפה">🧭</button>
-        <button class="rename-folder" title="שינוי שם התיקייה">✎</button>
-        <button class="folder-del" title="מחיקת תיקייה (הכתובות לא יימחקו)">✕</button>
+        <button class="map-visibility-toggle ${mapVisible ? '' : 'off'}" title="${mapVisible ? 'הסתר את כל התיקייה מהמפה (למשל אם היום לא רלוונטית)' : 'הצג שוב את התיקייה על המפה'}">${FOLDER_EYE_SVG}</button>
+        <button class="route-toggle ${routeActive ? 'active' : ''}" title="הצג/הסתר מסלול נסיעה על המפה">${FOLDER_CLOCK_SVG}</button>
+        <button class="rename-folder" title="שינוי שם התיקייה">${FOLDER_PEN_SVG}</button>
+        <button class="folder-del" title="מחיקת תיקייה (הכתובות לא יימחקו)">${FOLDER_X_SVG}</button>
       `;
       const swatchInput = head.querySelector('.folder-swatch');
       swatchInput.addEventListener('click', e=> e.stopPropagation());
@@ -3883,10 +3932,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <div class="cluster-swatch" style="background:var(--muted)"></div>
         <div class="name">בלי תיקייה</div>
         <div class="count">${unassigned.length}</div>
-        <button class="map-visibility-toggle ${unassignedMapVisible ? '' : 'off'}" title="${unassignedMapVisible ? 'הסתר את הקבוצה הזו מהמפה' : 'הצג שוב את הקבוצה הזו על המפה'}">${unassignedMapVisible ? '👁' : '🚫'}</button>
-        <button class="route-toggle ${unassignedRouteActive ? 'active' : ''}" title="הצג/הסתר מסלול נסיעה על המפה">🧭</button>
-        <button class="rename-folder" title="לקבוצה הזו אין שם לשנות - היא אוספת אוטומטית כל לקוח בלי תיקייה">✎</button>
-        <button class="folder-del" title="אי אפשר למחוק את הקבוצה הזו - היא לא תיקייה אמיתית, רק שייכו כל לקוח לתיקייה כדי שהוא ייעלם ממנה">✕</button>
+        <button class="map-visibility-toggle ${unassignedMapVisible ? '' : 'off'}" title="${unassignedMapVisible ? 'הסתר את הקבוצה הזו מהמפה' : 'הצג שוב את הקבוצה הזו על המפה'}">${FOLDER_EYE_SVG}</button>
+        <button class="route-toggle ${unassignedRouteActive ? 'active' : ''}" title="הצג/הסתר מסלול נסיעה על המפה">${FOLDER_CLOCK_SVG}</button>
+        <button class="rename-folder" title="לקבוצה הזו אין שם לשנות - היא אוספת אוטומטית כל לקוח בלי תיקייה">${FOLDER_PEN_SVG}</button>
+        <button class="folder-del" title="אי אפשר למחוק את הקבוצה הזו - היא לא תיקייה אמיתית, רק שייכו כל לקוח לתיקייה כדי שהוא ייעלם ממנה">${FOLDER_X_SVG}</button>
       `;
       const body = document.createElement('div');
       body.className = 'cluster-body animated-collapse';
@@ -4575,7 +4624,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const bounds = renderAll();
     // belt-and-suspenders: force every folder/cluster body closed on first load,
     // no matter what caused it to render open
-    document.querySelectorAll('#folderList .cluster-body').forEach(b => { b.classList.remove('is-open'); b.style.maxHeight = '0px'; });
+    document.querySelectorAll(':is(#folderList, #clusterList) .cluster-body').forEach(b => { b.classList.remove('is-open'); b.style.maxHeight = '0px'; });
     if(clients.length){
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
     }
