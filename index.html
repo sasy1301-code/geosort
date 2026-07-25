@@ -444,6 +444,12 @@
   }
   .client-card[draggable="true"]{ cursor:grab; }
   .client-card.dragging{ opacity:.35; border-color:var(--gold); }
+  /* the finger-held card while touch-dragging: lifted off the list, following the finger */
+  .client-card.touch-dragging{
+    position:relative; z-index:60; will-change:transform;
+    box-shadow:0 12px 28px rgba(0,0,0,.5); border-color:var(--gold);
+    transition:box-shadow .18s ease; /* shadow eases in on lift; transform is driven per-frame */
+  }
   .cluster-body{ transition:background .15s ease; }
   .client-card input.stop-color-input{
     -webkit-appearance:none; appearance:none; border:none; padding:0; cursor:pointer;
@@ -454,6 +460,9 @@
   .client-card input.stop-color-input::-moz-color-swatch{ border:1px solid rgba(255,255,255,.6); border-radius:50%; }
   .card-summary-row{
     display:flex; align-items:center; justify-content:space-between; gap:10px;
+    /* press-and-hold here starts a touch drag on mobile — suppress the iOS long-press
+       callout / text-selection so the hold reads as a drag, not a selection */
+    -webkit-touch-callout:none; -webkit-user-select:none; user-select:none;
   }
   .card-summary-left{ display:flex; align-items:center; gap:8px; flex:0 1 auto; min-width:0; }
   .card-summary-right{ display:flex; align-items:center; gap:8px; flex:0 1 auto; min-width:0; }
@@ -1699,8 +1708,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     // final pass: 2-opt local search over the whole route, swapping pairs of legs
     // whenever doing so shortens the total distance - this is what actually pushes
     // a nearest-neighbor route toward the genuinely most efficient overall order,
-    // rather than just "reasonable" neighbor-by-neighbor placement
-    twoOptImprove(order, byId);
+    // rather than just "reasonable" neighbor-by-neighbor placement.
+    // BUT: only auto-optimize when there is NO saved manual order. Once the user has
+    // arranged the stops by hand (drag or typing a position), that arrangement is the
+    // source of truth and must NOT be reshuffled by the optimizer on the next render -
+    // otherwise manual reordering never "sticks". New addresses added later are still
+    // inserted near their closest neighbour above; they just don't trigger a full re-optimize.
+    if(prefix.length === 0) twoOptImprove(order, byId);
     return order;
   }
 
@@ -1806,7 +1820,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // returns the card element that the dragged card should be placed BEFORE,
   // based on the mouse's vertical position within the container (null = place last)
   function getDragAfterElement(container, y, selector){
-    const els = [...container.querySelectorAll((selector || '.client-card') + ':not(.dragging)')];
+    const els = [...container.querySelectorAll((selector || '.client-card') + ':not(.dragging):not(.touch-dragging)')];
     return els.reduce((closest, child)=>{
       const box = child.getBoundingClientRect();
       const offset = y - box.top - box.height / 2;
@@ -1818,7 +1832,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // FLIP technique: measures each child's position before a DOM mutation,
   // performs the mutation, then animates from the old position to the new one -
   // used so cards visibly glide into place during drag-reorder instead of jumping
-  function animateReorder(container, mutationFn){
+  function animateReorder(container, mutationFn, exceptEl){
     const cards = [...container.children];
     const firstRects = new Map();
     cards.forEach(el => firstRects.set(el, el.getBoundingClientRect()));
@@ -1826,6 +1840,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     mutationFn();
 
     cards.forEach(el => {
+      if(el === exceptEl) return; // the finger-held card is positioned manually, don't FLIP it
       const first = firstRects.get(el);
       if(!first) return;
       const last = el.getBoundingClientRect();
@@ -1886,6 +1901,89 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const ids = [...bodyEl.querySelectorAll('.client-card')].map(el => el.dataset.clientId);
       persistFn(ids);
     });
+
+    // ---- touch drag (mobile): HTML5 drag-and-drop doesn't fire from a finger, so we
+    // reproduce it with touch events. Press-and-hold a card's header, then slide: the card
+    // lifts and follows the finger while the others flow out of the way (FLIP), and it
+    // settles gracefully into its slot on release. A quick tap still just opens the card. ----
+    let tCard = null, tTimer = null, tDragging = false, tStartY = 0, tStartX = 0;
+    let grabOffset = 0, curTranslate = 0, settling = false;
+    const HOLD_MS = 240, CANCEL_PX = 12;
+
+    // slide the held card so its top edge tracks (fingerY - grabOffset), regardless of
+    // which slot it now occupies in the DOM
+    function followFinger(fingerY){
+      const naturalTop = tCard.getBoundingClientRect().top - curTranslate; // rect includes current transform
+      curTranslate = (fingerY - grabOffset) - naturalTop;
+      tCard.style.transform = `translateY(${curTranslate}px) scale(1.03)`;
+    }
+
+    bodyEl.addEventListener('touchstart', (e)=>{
+      if(e.touches.length !== 1 || settling) return;
+      const card = e.target.closest('.client-card');
+      if(!card || card.parentElement !== bodyEl) return;
+      // start a drag only from the header row, never from a control (button / input / toggle / badge)
+      if(!e.target.closest('.card-summary-row')) return;
+      if(e.target.closest('button, input, select, textarea, a, .handled-toggle-wrap, .pos-number-badge, .cactions')) return;
+      const t = e.touches[0];
+      tCard = card; tStartY = t.clientY; tStartX = t.clientX; tDragging = false;
+      tTimer = setTimeout(()=>{
+        tDragging = true;
+        curTranslate = 0;
+        grabOffset = tStartY - card.getBoundingClientRect().top;
+        card.classList.add('touch-dragging'); // shadow fades in via CSS; transform stays instant to track the finger
+        card.style.transform = 'translateY(0) scale(1.03)';
+        if(navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){ } }
+      }, HOLD_MS);
+    }, { passive:true });
+
+    bodyEl.addEventListener('touchmove', (e)=>{
+      if(!tCard) return;
+      const t = e.touches[0];
+      if(!tDragging){
+        // moved before the hold completed → it's a scroll, not a drag: let the page scroll
+        if(Math.abs(t.clientY - tStartY) > CANCEL_PX || Math.abs(t.clientX - tStartX) > CANCEL_PX){
+          clearTimeout(tTimer); tCard = null;
+        }
+        return;
+      }
+      e.preventDefault(); // lock page scroll while dragging the card
+      const afterEl = getDragAfterElement(bodyEl, t.clientY);
+      const inPlace = afterEl == null ? bodyEl.lastElementChild === tCard : afterEl.previousElementSibling === tCard;
+      if(!inPlace){
+        // flow the OTHER cards into their new spots; the held card is repositioned by hand
+        animateReorder(bodyEl, ()=>{
+          if(afterEl == null) bodyEl.appendChild(tCard);
+          else bodyEl.insertBefore(tCard, afterEl);
+        }, tCard);
+      }
+      followFinger(t.clientY);
+    }, { passive:false });
+
+    const endTouchDrag = ()=>{
+      clearTimeout(tTimer);
+      if(tDragging && tCard){
+        const card = tCard;
+        settling = true;
+        // glide from wherever the finger left it back down into its slot, then persist
+        card.style.transition = 'transform .26s cubic-bezier(.2,.85,.25,1), box-shadow .26s ease';
+        card.style.transform = 'translateY(0) scale(1)';
+        const ids = [...bodyEl.querySelectorAll('.client-card')].map(el => el.dataset.clientId);
+        let done = false;
+        const finish = ()=>{
+          if(done) return; done = true;
+          card.style.transition = ''; card.style.transform = '';
+          card.classList.remove('touch-dragging');
+          settling = false;
+          persistFn(ids);
+        };
+        card.addEventListener('transitionend', function te(ev){ if(ev.propertyName==='transform'){ card.removeEventListener('transitionend', te); finish(); } });
+        setTimeout(finish, 340); // safety net if transitionend doesn't fire
+      }
+      tCard = null; tDragging = false;
+    };
+    bodyEl.addEventListener('touchend', endTouchDrag);
+    bodyEl.addEventListener('touchcancel', endTouchDrag);
   }
 
   function renameCluster(key, newName){
@@ -3569,10 +3667,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const body = document.createElement('div');
       body.className = 'cluster-body cluster-region-body';
       body.style.display = openClusterNames.has(cl.key) ? 'block' : 'none';
-      const activeMembers = filteredMembers.filter(m => !clients[m].skipRoute);
-      const skippedMembers = filteredMembers.filter(m => clients[m].skipRoute);
-      const orderedMembers = sinkInactiveToEnd(getOrderedClusterMembers(cl, activeMembers), i => clients[i].inactive); // full list, for display/position
-      const calcMembers = orderedMembers.filter(m => !clients[m].handled && !clients[m].inactive); // for route distance/time only (inactive are off the map/route)
+      const activeMembers = filteredMembers.filter(m => !clients[m].skipRoute && !clients[m].inactive);
+      const skippedMembers = filteredMembers.filter(m => clients[m].skipRoute && !clients[m].inactive);
+      const inactiveMembers = filteredMembers.filter(m => clients[m].inactive);
+      const orderedMembers = getOrderedClusterMembers(cl, activeMembers); // active only, for display/position
+      const calcMembers = orderedMembers.filter(m => !clients[m].handled); // for route distance/time only
       const calcPosOf = {};
       calcMembers.forEach((m, i)=>{ calcPosOf[clients[m].id] = i; });
       const cachedClusterRoad = clusterRoadRouteCache[cl.key];
@@ -3606,9 +3705,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const activeListEl = document.createElement('div');
       body.appendChild(activeListEl);
 
-      const deferredInactive = [];   // inactive (red) cards render last, after the skipped section
       orderedMembers.forEach((m, idx)=>{
-        if(clients[m].inactive){ deferredInactive.push(m); return; }
         const moveHandlers = {
           isFirst: idx === 0,
           isLast: idx === orderedMembers.length - 1,
@@ -3640,12 +3737,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         });
       }
 
-      if(deferredInactive.length){
+      if(inactiveMembers.length){
         const inactiveHeader = document.createElement('div');
         inactiveHeader.style.cssText = 'font-size:.72rem;color:#0f1a2e;margin:10px 0 4px;padding-top:8px;border-top:1px dashed #0f1a2e';
-        inactiveHeader.textContent = `🚫 לקוחות לא פעילים (${deferredInactive.length})`;
+        inactiveHeader.textContent = `🚫 לקוחות לא פעילים (${inactiveMembers.length})`;
         body.appendChild(inactiveHeader);
-        deferredInactive.forEach(m=>{
+        inactiveMembers.forEach(m=>{
           body.appendChild(buildClientCard(clients[m], null, null, true));
         });
       }
@@ -3653,7 +3750,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       wireDragReorder(activeListEl, (ids)=>{
         const folder = dominantFolderFor(filteredMembers);
         if(folder){
-          folder.order = ids.concat(deferredInactive.map(m => clients[m].id), skippedMembers.map(m => clients[m].id));
+          folder.order = ids.concat(inactiveMembers.map(m => clients[m].id), skippedMembers.map(m => clients[m].id));
           saveFolders();
         } else {
           clusterOrder[cl.key] = ids;
@@ -3844,13 +3941,16 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(members.length === 0){
         body.innerHTML = `<div class="empty" style="padding:10px 4px">אין עדיין כתובות בתיקייה הזו. השתמשו בתפריט "העברה לתיקייה" בכרטיס של כל לקוח.</div>`;
       } else {
-        const activeMembers = members.filter(c => !c.skipRoute);
-        const skippedMembers = members.filter(c => c.skipRoute);
+        // three separate groups so ordering numbers line up with what's shown:
+        // active (routed), skipped-today, and inactive — each rendered in its own section.
+        const activeMembers = members.filter(c => !c.skipRoute && !c.inactive);
+        const skippedMembers = members.filter(c => c.skipRoute && !c.inactive);
+        const inactiveMembers = members.filter(c => c.inactive);
 
         // ordering (numbers + ▲▼ + drag) is always available, whether or not 🧭 is on -
         // 🧭 only decides whether the connecting route line is drawn on the map
-        const orderedMembers = sinkInactiveToEnd(getOrderedFolderMembers(folder, activeMembers), c => c.inactive); // full list, for display/position
-        const calcMembers = orderedMembers.filter(c => !c.handled && !c.inactive); // for route distance/time only (inactive are off the map/route)
+        const orderedMembers = getOrderedFolderMembers(folder, activeMembers); // active only, for display/position
+        const calcMembers = orderedMembers.filter(c => !c.handled); // for route distance/time only
         const cachedRoad = roadRouteCache[folder.name];
         const roadMatches = cachedRoad && cachedRoad.fingerprint === routeFingerprint(calcMembers);
 
@@ -3882,9 +3982,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const activeListEl = document.createElement('div');
         body.appendChild(activeListEl);
 
-        const deferredInactive = [];   // inactive (red) cards render last, after the skipped section
         orderedMembers.forEach((c, idx)=>{
-          if(c.inactive){ deferredInactive.push(c); return; }
           const moveHandlers = {
             isFirst: idx === 0,
             isLast: idx === orderedMembers.length - 1,
@@ -3912,7 +4010,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           }
         });
         wireDragReorder(activeListEl, (ids)=>{
-          folder.order = ids.concat(deferredInactive.map(c => c.id), skippedMembers.map(c => c.id));
+          folder.order = ids.concat(inactiveMembers.map(c => c.id), skippedMembers.map(c => c.id));
           saveFolders();
           renderFolders();
           renderFolderRoute();
@@ -3928,12 +4026,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           });
         }
 
-        if(deferredInactive.length){
+        if(inactiveMembers.length){
           const inactiveHeader = document.createElement('div');
           inactiveHeader.style.cssText = 'font-size:.72rem;color:#0f1a2e;margin:10px 0 4px;padding-top:8px;border-top:1px dashed #0f1a2e';
-          inactiveHeader.textContent = `🚫 לקוחות לא פעילים (${deferredInactive.length})`;
+          inactiveHeader.textContent = `🚫 לקוחות לא פעילים (${inactiveMembers.length})`;
           body.appendChild(inactiveHeader);
-          deferredInactive.forEach(c=>{
+          inactiveMembers.forEach(c=>{
             body.appendChild(buildClientCard(c, null, null, true, (c.folder||"") !== name && c.tempFolder === name));
           });
         }
