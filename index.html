@@ -24,7 +24,7 @@
     --text:#12242C;
     --muted:#5B6B6A;
     --danger:#9C3B2E;
-    --radius:10px;
+    --radius:15px;
   }
   *{box-sizing:border-box;}
   button, input, select, textarea{ font-family:inherit; font-weight:inherit; }
@@ -90,23 +90,23 @@
   .hamburger-btn{
     position:absolute; right:22px; top:50%; transform:translateY(-50%); z-index:2;
     background:transparent; border:none; color:#0f1a2e;
-    width:40px; height:40px; border-radius:8px; cursor:pointer;
+    width:40px; height:40px; border-radius:15px; cursor:pointer;
     display:flex; align-items:center; justify-content:center;
   }
   .hamburger-btn:hover{ background:rgba(15,26,46,.08); }
   .hamburger-menu{
     position:fixed; right:22px; top:76px; z-index:5000;
-    background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:10px;
+    background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:15px;
     box-shadow:0 8px 24px rgba(0,0,0,.4); min-width:160px; padding:6px; overflow:hidden;
   }
   .hamburger-menu-item{
     display:block; width:100%; text-align:right; background:transparent; border:none; color:#fff;
-    font-size:.88rem; font-family:inherit; font-weight:400; padding:9px 12px; border-radius:6px; cursor:pointer;
+    font-size:.88rem; font-family:inherit; font-weight:400; padding:9px 12px; border-radius:15px; cursor:pointer;
   }
   .hamburger-menu-item:hover{ background:rgba(255,255,255,.1); }
   header button.ghost, header a.ghost{
     background:transparent; border:1px solid rgba(245,241,231,.35); color:#0f1a2e;
-    padding:7px 12px; border-radius:8px; font-size:.95rem; font-family:inherit; font-weight:400; cursor:pointer;
+    padding:7px 12px; border-radius:15px; font-size:.95rem; font-family:inherit; font-weight:400; cursor:pointer;
   }
   header button.ghost:hover, header a.ghost:hover{ background:rgba(245,241,231,.12); }
 
@@ -138,7 +138,7 @@
   .sidebar .scroll::-webkit-scrollbar{ width:7px; }
   .sidebar .scroll::-webkit-scrollbar-track{ background:transparent; }
   .sidebar .scroll::-webkit-scrollbar-thumb{
-    background:#0277fb; border-radius:6px;
+    background:#0277fb; border-radius:15px;
   }
   .sidebar .scroll::-webkit-scrollbar-thumb:hover{ background:#0261cc; }
   .animated-collapse{
@@ -176,7 +176,7 @@
   section.panel h2 .dot{ width:9px;height:9px;border-radius:50%;background:var(--teal); }
   label{ display:block; font-size:.76rem; color:rgba(255,255,255,.62); margin:8px 0 4px; }
   input[type=text], input[type=tel], input[type=number], input[type=date], input[type=email]{
-    width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:7px;
+    width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px;
     font-size:.9rem; background:#fff; color:#021236; font-family:inherit;
   }
   input[type=text]::placeholder, input[type=tel]::placeholder, input[type=number]::placeholder{ color:rgba(2,18,54,.45); }
@@ -184,13 +184,13 @@
     outline:2px solid var(--teal); outline-offset:1px; background:#fff;
   }
   select{
-    width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:7px;
+    width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px;
     font-size:.9rem; background:#fff; font-family:inherit; color:#021236;
   }
   select option{ color:#021236; }
   select:focus{ outline:2px solid var(--teal); outline-offset:1px; background:#fff; }
   textarea{
-    width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:7px;
+    width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px;
     font-size:.87rem; font-family:inherit; resize:vertical; min-height:44px;
     background:#fff; color:#021236;
   }
@@ -198,7 +198,7 @@
   .row2{ display:flex; gap:8px; }
   .row2 > div{ flex:1; }
   button.primary{
-    margin-top:12px; width:100%; padding:10px; border:none; border-radius:8px;
+    margin-top:12px; width:100%; padding:10px; border:none; border-radius:15px;
     background:#1c3fd6; color:#fff; font-size:.9rem; cursor:pointer; font-weight:600;
   }
   button.primary:disabled{ opacity:.55; cursor:default; }
@@ -206,27 +206,27 @@
   #addBtn{ background:#007aff; }
   #addBtn:hover:not(:disabled){ background:#0066d6; }
   .error-msg{
-    background:#F7E7E2; color:var(--danger); border:1px solid #E3B4A5; border-radius:7px;
+    background:#F7E7E2; color:var(--danger); border:1px solid #E3B4A5; border-radius:15px;
     padding:8px 10px; font-size:.8rem; margin-top:10px; display:none;
   }
   .addr-field-wrap{ position:relative; }
   .biz-lookup-row{ margin-top:6px; }
   #bizLookupBtn{
     width:100%; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.3); color:#fff;
-    padding:7px 10px; border-radius:8px; font-size:.8rem; cursor:pointer;
+    padding:7px 10px; border-radius:15px; font-size:.8rem; cursor:pointer;
   }
   #bizLookupBtn:hover{ background:rgba(255,255,255,.18); }
   #bizLookupBtn:disabled{ opacity:.6; cursor:default; }
   .biz-lookup-suggestions{ margin-top:6px; }
   .biz-lookup-suggestions .suggestion-item{
     padding:9px 10px; font-size:.82rem; cursor:pointer; border:1px solid rgba(255,255,255,.18);
-    border-radius:8px; margin-bottom:6px; display:flex; gap:8px; align-items:flex-start; color:#fff;
+    border-radius:15px; margin-bottom:6px; display:flex; gap:8px; align-items:flex-start; color:#fff;
     background:#021236;
   }
   .biz-lookup-suggestions .suggestion-item:hover{ background:#0a2568; }
   .suggestions{
     position:absolute; top:100%; right:0; left:0; z-index:500;
-    background:#021236; border:1px solid rgba(255,255,255,.18); border-radius:8px;
+    background:#021236; border:1px solid rgba(255,255,255,.18); border-radius:15px;
     box-shadow:0 6px 18px rgba(0,0,0,.35); margin-top:4px; max-height:220px; overflow-y:auto;
     display:none;
   }
@@ -253,7 +253,7 @@
     flex:1; -webkit-appearance:none; appearance:none; background:transparent; cursor:pointer;
   }
   input[type=range]::-webkit-slider-runnable-track{
-    height:6px; border-radius:4px;
+    height:6px; border-radius:15px;
     background: linear-gradient(to left, #ffa90d 0%, #ffa90d var(--fill-pct, 30%), #fff var(--fill-pct, 30%), #fff 100%);
   }
   input[type=range]::-webkit-slider-thumb{
@@ -261,7 +261,7 @@
     background:#ffa90d; border:2px solid #fff; margin-top:-5px; cursor:pointer;
   }
   input[type=range]::-moz-range-track{
-    height:6px; border-radius:4px;
+    height:6px; border-radius:15px;
     background: linear-gradient(to left, #ffa90d 0%, #ffa90d var(--fill-pct, 30%), #fff var(--fill-pct, 30%), #fff 100%);
   }
   input[type=range]::-moz-range-thumb{
@@ -273,7 +273,7 @@
   .cluster-group[draggable="true"] > .cluster-head{ cursor:grab; }
   .cluster-group.dragging{ opacity:.4; }
   .cluster-head{
-    display:flex; align-items:center; gap:3px; padding:8px 10px; border-radius:7px;
+    display:flex; align-items:center; gap:3px; padding:8px 10px; border-radius:15px;
     background:rgba(255,255,255,.06); cursor:pointer; border:1px solid rgba(255,255,255,.14); color:#fff;
   }
   .cluster-head:hover{ background:rgba(255,255,255,.12); }
@@ -286,31 +286,31 @@
   }
   .cluster-head .folder-del{
     flex:0 0 auto; background:transparent; border:none; color:#e08b7d; cursor:pointer;
-    font-size:.85rem; padding:2px 6px; border-radius:5px;
+    font-size:.85rem; padding:2px 6px; border-radius:15px;
   }
   .cluster-head .folder-del:hover{ background:rgba(224,139,125,.18); }
   .cluster-head .route-toggle{
     flex:0 0 auto; background:transparent; border:none; color:rgba(255,255,255,.6); cursor:pointer;
-    font-size:.85rem; padding:2px 5px; border-radius:5px;
+    font-size:.85rem; padding:2px 5px; border-radius:15px;
   }
   .cluster-head .route-toggle:hover{ background:rgba(255,255,255,.14); color:#fff; }
   .cluster-head .route-toggle.active{ background:var(--gold); color:#021236; }
   .cluster-head .rename-cluster, .cluster-head .reset-cluster-name, .cluster-head .rename-folder{
     flex:0 0 auto; background:transparent; border:none; color:rgba(255,255,255,.6); cursor:pointer;
-    font-size:.8rem; padding:2px 5px; border-radius:5px;
+    font-size:.8rem; padding:2px 5px; border-radius:15px;
   }
   .cluster-head .rename-cluster:hover, .cluster-head .reset-cluster-name:hover, .cluster-head .rename-folder:hover{ background:rgba(255,255,255,.14); color:#fff; }
   .cluster-head .map-visibility-toggle{
     flex:0 0 auto; background:transparent; border:none; color:rgba(255,255,255,.75); cursor:pointer;
-    font-size:.85rem; padding:2px 6px; border-radius:5px;
+    font-size:.85rem; padding:2px 6px; border-radius:15px;
   }
   .cluster-head .map-visibility-toggle:hover{ background:rgba(255,255,255,.14); }
   .cluster-head .map-visibility-toggle.off{ color:#e08b7d; opacity:.85; }
 
   /* ---- folder cards redesign (client-count folders inside :is(#folderList, #clusterList) only, so the
      clusters panel keeps its own colours) ---- */
-  :is(#folderList, #clusterList) .cluster-head{ background:#025ffb; border:1px solid #4394f7; gap:10px; padding:11px 10px; border-radius:10px; }
-  :is(#folderList, #clusterList) .cluster-group{ margin-bottom:2px; }
+  :is(#folderList, #clusterList) .cluster-head{ background:#025ffb; border:1px solid #4394f7; gap:10px; padding:11px 10px; border-radius:15px; }
+  :is(#folderList, #clusterList) .cluster-group{ margin-bottom:8px; }
   :is(#folderList, #clusterList) .cluster-head:hover{ background:#1a72ff; }
   /* client-count circle: white with a navy number, folder name Regular @ 15pt */
   :is(#folderList, #clusterList) .cluster-head .count{ background:#fff; color:#0f1a2e; width:28px; height:28px; }
@@ -342,8 +342,13 @@
      (overrides the global gold .route-toggle.active background) */
   :is(#folderList, #clusterList) .cluster-head .route-toggle.active,
   :is(#folderList, #clusterList) .cluster-head .map-visibility-toggle.off{ background:transparent; }
+  /* the אזורים / אשכולות (region) cards keep their own look: deep purple, not the
+     folders' blue, with 8px of air between each card (same source-order specificity as
+     the shared :is() block above, so being later here is what makes these win) */
+  #clusterList .cluster-head{ background:#5a19bf; border:1px solid #8871d9; }
+  #clusterList .cluster-head:hover{ background:#6a2ad6; }
   .cluster-rename-input{
-    flex:1; font-size:.85rem; font-weight:600; border:1px solid var(--teal); border-radius:6px;
+    flex:1; font-size:.85rem; font-weight:600; border:1px solid var(--teal); border-radius:15px;
     padding:3px 7px; background:#fff; font-family:inherit; color:#021236; min-width:0;
   }
   input.folder-color-input, input.folder-swatch{
@@ -364,28 +369,33 @@
   .leg-connector .leg-info{
     white-space:nowrap; font-size:.66rem; color:#0f1a2e; cursor:help;
   }
+  /* only in the אזורים / אשכולות list: the between-card text and its divider line go white */
+  #clusterList .leg-connector .leg-line{ background:#fff; }
+  #clusterList .leg-connector .leg-info{ color:#fff; }
   .route-summary{
-    text-align:center; font-size:.82rem; color:#fff; background:rgba(59,211,50,.12);
-    border:1px solid rgba(59,211,50,.4); border-radius:8px; padding:8px 10px; margin:2px 0 10px;
+    text-align:center; font-size:.82rem; color:#0f1a2e; background:#fff;
+    border:1px solid #42c8fd; border-radius:15px; padding:8px 10px; margin:2px 0 10px;
     cursor:help;
   }
-  .route-summary b{ color:#3bd332; }
+  .route-summary b{ color:#ff7bac; }
   .invoice-summary{
     display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap;
-    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); border-radius:8px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.2); border-radius:15px;
     padding:8px 10px; margin:10px 0 2px;
   }
   .invoice-summary-range{ display:flex; align-items:center; gap:6px; flex:0 1 auto; }
   .invoice-summary-range input[type=date]{ width:auto; flex:0 0 auto; padding:5px 6px; font-size:.76rem; }
   .invoice-range-sep{ font-size:.74rem; color:rgba(255,255,255,.6); flex:0 0 auto; }
   .invoice-summary.grand{
-    background:rgba(59,211,50,.12); border:1px solid rgba(59,211,50,.4);
+    background:linear-gradient(180deg, #2e88ff 0%, #4be2fd 100%); border:1px solid #2e88ff;
     flex-direction:column; justify-content:center; text-align:center;
   }
   .invoice-summary.grand .invoice-summary-range{ justify-content:center; width:100%; }
-  .invoice-summary.grand .invoice-summary-total{ font-weight:700; width:100%; }
+  .invoice-summary.grand .invoice-summary-total{ font-weight:700; width:100%; color:#0f1a2e; }
+  /* "סה״כ כל התיקיות" label and the "עד" separator go dark navy on the gradient box */
+  .invoice-summary.grand .invoice-range-sep{ color:#0f1a2e; }
   .reset-invoices-btn{
-    width:100%; margin-top:6px; padding:7px 10px; border:1px solid #fff; border-radius:8px;
+    width:100%; margin-top:6px; padding:7px 10px; border:1px solid #fff; border-radius:15px;
     background:rgba(224,139,125,.12); color:#fff; font-size:.78rem; cursor:pointer;
   }
   .reset-invoices-btn:hover{ background:rgba(224,139,125,.22); }
@@ -405,7 +415,7 @@
     border-top:1px dashed rgba(255,255,255,.18);
   }
   .client-card{
-    padding:10px 10px; margin:6px 0; border-radius:10px; background:#0f1a2e;
+    padding:10px 10px; margin:6px 0; border-radius:15px; background:#0f1a2e;
     border:1px solid transparent; /* reserved 1px so drag/select highlight never shifts layout — colour unchanged */
     cursor:pointer; color:#fff; position:relative;
   }
@@ -416,17 +426,17 @@
   .client-card:not(.card-open):not(.editing){ padding-top:11px; padding-bottom:11px; }
   /* when closed, drop the details' top margin so the summary row is perfectly centered
      (equal space above and below), not pushed up by the collapsed details block */
-  .cluster-region-body .client-card{ background:#450d61; }
-  .cluster-region-body .client-card:hover{ background:#5a1180; }
-  .cluster-region-body .client-card.card-alt{ background:#330d46; }
-  .cluster-region-body .client-card.card-alt:hover{ background:#451160; }
+  .cluster-region-body .client-card{ background:#392966; }
+  .cluster-region-body .client-card:hover{ background:#463379; }
+  .cluster-region-body .client-card.card-alt{ background:#392966; }
+  .cluster-region-body .client-card.card-alt:hover{ background:#463379; }
   .client-card.skipped-today{ background:#a5b3bc !important; opacity:.75; }
   .client-card.client-inactive{ background:#d21b15 !important; }
   .client-card.client-inactive:hover{ background:#e63229 !important; }
   .client-card.skipped-today:hover{ background:#b3bfc7 !important; }
   .skip-badge{
     display:inline-block; font-size:.68rem; font-weight:700; color:#fff; background:rgba(255,255,255,.18);
-    padding:2px 8px; border-radius:20px; margin-top:6px;
+    padding:2px 8px; border-radius:15px; margin-top:6px;
   }
   .call-before-dot{
     display:inline-block; width:12px; height:12px; border-radius:50%; flex:0 0 auto;
@@ -447,7 +457,7 @@
   /* the finger-held card while touch-dragging: lifted off the list, following the finger */
   .client-card.touch-dragging{
     position:relative; z-index:60; will-change:transform;
-    box-shadow:0 12px 28px rgba(0,0,0,.5); border-color:var(--gold);
+    box-shadow:0 12px 28px rgba(0,0,0,.5); border-color:#4394f7;
     transition:box-shadow .18s ease; /* shadow eases in on lift; transform is driven per-frame */
   }
   .cluster-body{ transition:background .15s ease; }
@@ -473,6 +483,8 @@
     display:flex; align-items:center; gap:3px; padding:0 6px 0 5px; border-radius:11.65px;
     background:#025ffb; border:1px solid #4394f7;
   }
+  /* in the אזורים / אשכולות list the position badge is purple, not the folders' blue */
+  #clusterList .pos-number-badge{ background:#6303ed; border:1px solid #8871d9; }
   .pos-number-badge .pos-arrows{ display:flex; flex-direction:column; gap:2px; flex:0 0 auto; }
   .pos-number-badge .pos-up, .pos-number-badge .pos-down{
     display:flex; align-items:center; justify-content:center;
@@ -523,7 +535,7 @@
   }
   .photo-modal-box{ position:relative; max-width:90vw; max-height:90vh; }
   .photo-modal-img{
-    display:block; max-width:90vw; max-height:90vh; border-radius:10px;
+    display:block; max-width:90vw; max-height:90vh; border-radius:15px;
     box-shadow:0 10px 40px rgba(0,0,0,.6);
   }
   .photo-modal-close{
@@ -533,7 +545,7 @@
   }
   .photo-modal-close:hover{ background:#1c2f8a; }
   .order-modal{
-    background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:12px;
+    background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:15px;
     width:100%; max-width:640px; max-height:88vh; overflow-y:auto; color:#fff;
     padding:0; box-shadow:0 10px 40px rgba(0,0,0,.5);
   }
@@ -586,7 +598,7 @@
   }
   .order-total-row b{ color:#3bd332; }
   .order-save-btn{
-    width:100%; margin-top:10px; padding:10px; border:none; border-radius:8px;
+    width:100%; margin-top:10px; padding:10px; border:none; border-radius:15px;
     background:#1c3fd6; color:#fff; font-size:.9rem; cursor:pointer; font-weight:600;
   }
   .order-save-btn:hover{ background:#1533ad; }
@@ -641,7 +653,7 @@
   .order-history-chevron{ display:inline-block; width:12px; transition:transform .15s ease; }
   .order-history-row{
     display:flex; align-items:center; gap:8px; padding:8px; margin-bottom:6px;
-    background:rgba(255,255,255,.06); border-radius:8px;
+    background:rgba(255,255,255,.06); border-radius:15px;
   }
   .order-history-info{ flex:1 1 auto; min-width:0; }
   .order-history-date{ font-size:.74rem; color:rgba(255,255,255,.6); }
@@ -649,7 +661,7 @@
   .order-history-total{ font-weight:700; color:#3bd332; font-size:.85rem; flex:0 0 auto; }
   .order-history-actions{ display:flex; gap:4px; flex:0 0 auto; }
   .order-history-actions button{
-    background:transparent; border:1px solid rgba(255,255,255,.3); color:#fff; border-radius:5px;
+    background:transparent; border:1px solid rgba(255,255,255,.3); color:#fff; border-radius:15px;
     padding:3px 6px; font-size:.75rem; cursor:pointer;
   }
   .order-history-actions button:hover{ background:rgba(255,255,255,.15); }
@@ -682,7 +694,7 @@
   }
   .client-card .place-photo-thumb{
     display:block; width:38px; height:38px; object-fit:cover;
-    border-radius:6px; border:1px solid rgba(255,255,255,.4); cursor:pointer;
+    border-radius:15px; border:1px solid rgba(255,255,255,.4); cursor:pointer;
   }
   .client-card .place-photo-delete{
     position:absolute; top:-7px; right:-7px; width:18px; height:18px; border-radius:50%;
@@ -692,12 +704,12 @@
   .client-card .place-photo-delete:hover{ background:#ff5252; }
   .share-choice-menu{
     position:absolute; left:0; top:28px; z-index:20; background:#111e63;
-    border:1px solid rgba(255,255,255,.3); border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.4);
+    border:1px solid rgba(255,255,255,.3); border-radius:15px; box-shadow:0 6px 18px rgba(0,0,0,.4);
     min-width:150px; padding:4px; text-align:right;
   }
   .share-choice-menu button{
     display:block; width:100%; background:transparent; border:none; color:#fff; text-align:right;
-    font-size:.8rem; padding:8px 10px; border-radius:6px; cursor:pointer;
+    font-size:.8rem; padding:8px 10px; border-radius:15px; cursor:pointer;
   }
   .share-choice-menu button:hover{ background:rgba(255,255,255,.1); }
   .client-card .whatsapp-btn svg{ display:block; width:25px; height:25px; }
@@ -733,7 +745,7 @@
   .edit-update-add-row{ display:flex; gap:6px; margin-bottom:8px; }
   .edit-update-add-row input{ flex:1 1 auto; }
   .edit-update-add-btn{
-    flex:0 0 auto; background:#1c3fd6; color:#fff; border:none; border-radius:7px; padding:0 12px; cursor:pointer; font-size:.82rem;
+    flex:0 0 auto; background:#1c3fd6; color:#fff; border:none; border-radius:15px; padding:0 12px; cursor:pointer; font-size:.82rem;
   }
   .edit-update-add-btn:hover{ background:#1533ad; }
   .client-card .invoice-divider{
@@ -745,29 +757,29 @@
   .client-card .invoice-field label{ font-size:.75rem; color:rgba(255,255,255,.6); margin:0; flex:0 0 auto; }
   .client-card .invoice-field input{ width:90px; padding:5px 8px; font-size:.82rem; }
   .client-card select.move-select, .client-card select.temp-folder-select{
-    width:100%; font-size:.72rem; padding:4px 6px; border:1px solid rgba(255,255,255,.22); border-radius:6px;
+    width:100%; font-size:.72rem; padding:4px 6px; border:1px solid rgba(255,255,255,.22); border-radius:15px;
     margin-top:4px; background:#fff; font-family:inherit; color:#021236; cursor:pointer;
   }
   .temp-folder-badge{
     display:flex; align-items:center; justify-content:space-between; gap:6px; flex-wrap:wrap;
     font-size:.7rem; color:#ffd479; background:rgba(255,183,0,.15); border:1px solid rgba(255,183,0,.4);
-    border-radius:6px; padding:5px 8px; margin-top:6px;
+    border-radius:15px; padding:5px 8px; margin-top:6px;
   }
   .remove-temp-btn{
-    background:transparent; border:1px solid rgba(255,255,255,.4); color:#fff; border-radius:5px;
+    background:transparent; border:1px solid rgba(255,255,255,.4); color:#fff; border-radius:15px;
     padding:2px 6px; font-size:.68rem; cursor:pointer; flex:0 0 auto;
   }
   .remove-temp-btn:hover{ background:rgba(255,255,255,.15); }
   .client-card .cactions{ display:flex; gap:5px; margin-top:14px; margin-bottom:8px; align-items:center; position:relative; }
   .more-options-menu{
     position:absolute; left:0; bottom:calc(100% + 6px); z-index:30; background:#111e63;
-    border:1px solid rgba(255,255,255,.3); border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.4);
+    border:1px solid rgba(255,255,255,.3); border-radius:15px; box-shadow:0 6px 18px rgba(0,0,0,.4);
     min-width:170px; padding:4px; text-align:right;
     display:flex; flex-direction:column; gap:4px;
   }
   .more-options-menu button{
     display:flex; align-items:center; gap:8px; width:100%; height:36px; background:transparent; border:none; color:#fff; text-align:right;
-    font-size:.8rem; padding:0 10px; border-radius:6px; cursor:pointer; box-sizing:border-box;
+    font-size:.8rem; padding:0 10px; border-radius:15px; cursor:pointer; box-sizing:border-box;
   }
   .more-options-menu button svg{ flex:0 0 auto; }
   .more-options-menu .more-opt-delete{ color:#ff8a8a; }
@@ -786,7 +798,7 @@
   }
   .client-card .cactions .icon-circle-btn.toggle-skip.active{ opacity:.55; }
   .client-card .cactions button{
-    font-size:.72rem; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); color:#fff; border-radius:6px;
+    font-size:.72rem; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.08); color:#fff; border-radius:15px;
     padding:3px 8px; cursor:pointer;
   }
   .client-card .cactions button:disabled{ opacity:.3; cursor:default; }
@@ -1915,7 +1927,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     function followFinger(fingerY){
       const naturalTop = tCard.getBoundingClientRect().top - curTranslate; // rect includes current transform
       curTranslate = (fingerY - grabOffset) - naturalTop;
-      tCard.style.transform = `translateY(${curTranslate}px) scale(1.03)`;
+      tCard.style.transform = `translateY(${curTranslate}px)`; // no scale: card keeps its width so it can't be clipped at the sides inside the folder bounds
     }
 
     bodyEl.addEventListener('touchstart', (e)=>{
@@ -1931,8 +1943,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         tDragging = true;
         curTranslate = 0;
         grabOffset = tStartY - card.getBoundingClientRect().top;
-        card.classList.add('touch-dragging'); // shadow fades in via CSS; transform stays instant to track the finger
-        card.style.transform = 'translateY(0) scale(1.03)';
+        card.classList.add('touch-dragging'); // shadow + #4394f7 border signal the lift; no scale so the sides never clip
+        card.style.transform = 'translateY(0)';
         if(navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){ } }
       }, HOLD_MS);
     }, { passive:true });
@@ -1967,7 +1979,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         settling = true;
         // glide from wherever the finger left it back down into its slot, then persist
         card.style.transition = 'transform .26s cubic-bezier(.2,.85,.25,1), box-shadow .26s ease';
-        card.style.transform = 'translateY(0) scale(1)';
+        card.style.transform = 'translateY(0)';
         const ids = [...bodyEl.querySelectorAll('.client-card')].map(el => el.dataset.clientId);
         let done = false;
         const finish = ()=>{
@@ -2299,7 +2311,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             ${c.phone ? `<div style="font-size:.8rem;color:#3E5C76;margin-top:2px">📞 <a href="tel:${escapeHtml(telHref(c.phone))}" style="color:#3E5C76">${escapeHtml(c.phone)}</a></div>` : ""}
             ${c.notes ? `<div style="font-size:.78rem;margin-top:4px">${escapeHtml(c.notes)}</div>` : ""}
             <div style="margin-top:8px;display:flex;gap:6px">
-              <button onclick="window.__deleteClient('${c.id}')" style="font-size:.72rem;border:1px solid #ddd;border-radius:6px;padding:3px 8px;cursor:pointer;color:#9C3B2E;background:#fff">מחק</button>
+              <button onclick="window.__deleteClient('${c.id}')" style="font-size:.72rem;border:1px solid #ddd;border-radius:15px;padding:3px 8px;cursor:pointer;color:#9C3B2E;background:#fff">מחק</button>
             </div>
           </div>`
         );
@@ -3131,7 +3143,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     function showAddrOptions(results, newHouseNumber){
       const box = card.querySelector('.edit-addr-suggestions');
       box.innerHTML = results.map((r, i) =>
-        `<button type="button" class="edit-addr-option" data-i="${i}" style="display:block;width:100%;text-align:right;margin-bottom:4px;font-size:.78rem;padding:6px 8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:6px;cursor:pointer">${escapeHtml(r.label)}</button>`
+        `<button type="button" class="edit-addr-option" data-i="${i}" style="display:block;width:100%;text-align:right;margin-bottom:4px;font-size:.78rem;padding:6px 8px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.08);color:#fff;border-radius:15px;cursor:pointer">${escapeHtml(r.label)}</button>`
       ).join('');
       box.style.display = 'block';
       box.querySelectorAll('.edit-addr-option').forEach(btn=>{
@@ -3643,6 +3655,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         if(e.target.closest('.rename-cluster') || e.target.closest('.reset-cluster-name') || e.target.closest('.route-toggle')) return;
         toggleClusterOpen(cl.key);
         body.style.display = openClusterNames.has(cl.key) ? 'block' : 'none';
+        body.style.maxHeight = 'none'; // region bodies open via display, never clamp their height
         const bounds = filteredMembers.map(m=>[clients[m].lat, clients[m].lon]);
         fitOrCenter(bounds, 14, 40);
       });
@@ -3666,6 +3679,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
       const body = document.createElement('div');
       body.className = 'cluster-body cluster-region-body';
+      body.style.maxHeight = 'none'; // region body height is controlled by display, not the collapse max-height
       body.style.display = openClusterNames.has(cl.key) ? 'block' : 'none';
       const activeMembers = filteredMembers.filter(m => !clients[m].skipRoute && !clients[m].inactive);
       const skippedMembers = filteredMembers.filter(m => clients[m].skipRoute && !clients[m].inactive);
@@ -3939,7 +3953,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         body.style.maxHeight = 'none'; // reflecting existing state on render, not an animated user action
       }
       if(members.length === 0){
-        body.innerHTML = `<div class="empty" style="padding:10px 4px">אין עדיין כתובות בתיקייה הזו. השתמשו בתפריט "העברה לתיקייה" בכרטיס של כל לקוח.</div>`;
+        body.innerHTML = `<div class="empty" style="padding:10px 4px;color:#0f1a2e">אין עדיין כתובות בתיקייה הזו. השתמשו בתפריט "העברה לתיקייה" בכרטיס של כל לקוח.</div>`;
       } else {
         // three separate groups so ordering numbers line up with what's shown:
         // active (routed), skipped-today, and inactive — each rendered in its own section.
@@ -4799,7 +4813,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const bounds = renderAll();
     // belt-and-suspenders: force every folder/cluster body closed on first load,
     // no matter what caused it to render open
-    document.querySelectorAll(':is(#folderList, #clusterList) .cluster-body').forEach(b => { b.classList.remove('is-open'); b.style.maxHeight = '0px'; });
+    document.querySelectorAll(':is(#folderList, #clusterList) .cluster-body.animated-collapse').forEach(b => { b.classList.remove('is-open'); b.style.maxHeight = '0px'; });
     if(clients.length){
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
     }
