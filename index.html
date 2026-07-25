@@ -722,6 +722,7 @@
   .client-card .phone-link{ color:#4394f7; text-decoration:underline; cursor:pointer; }
   .client-card .phone-link:hover{ color:#7fb5fa; }
   .client-card .cprice{ font-size:.82rem; color:rgba(255,255,255,.75); }
+  .client-card .cprice-vat{ margin-top:4px; }
   .client-card .cdiscount-row{ display:flex; align-items:center; gap:8px; margin-top:10px; }
   .client-card .cdiscount-label{ font-size:.82rem; color:rgba(255,255,255,.75); flex:0 0 auto; }
   .client-card .card-discount-input{
@@ -1191,6 +1192,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   })();
 
   const PALETTE = ["#1E7A73","#C79A2E","#A85C32","#6B4C7A","#3E5C76","#5C7A3A","#9C3B2E","#7A5C1E"];
+
+  // VAT (מע״מ) rate for computing the VAT-inclusive price/total from the pre-VAT price.
+  // The prices entered on cards stay pre-VAT (that's what the daily report sums); the
+  // inclusive figure is derived on the fly for the card display and the WhatsApp reports.
+  const VAT_RATE = 0.18;
 
   // cross-device storage via Supabase - all clients/folders/etc. are saved as JSON
   // blobs in a single key/value table (app_storage), so this works the same on any
@@ -3318,6 +3324,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             ${c.phone ? `<a href="${escapeHtml(waHref(c.phone))}" target="_blank" class="whatsapp-btn" title="שליחת הודעת ווטסאפ ללקוח">${WHATSAPP_ICON_SVG}</a>` : ""}
           </div>
         ` : ""}
+        ${c.price ? `<div class="cprice cprice-vat">מחיר ליחידה כולל מע״מ (${Math.round(VAT_RATE*100)}%): ₪${(parseFloat(c.price) * (1 + VAT_RATE)).toFixed(2)}</div>` : ""}
         <div class="cdiscount-row">
           <span class="cdiscount-label">הנחה קבועה (%):</span>
           <input type="number" class="card-discount-input" min="0" max="100" step="0.1" value="${escapeHtml((c.defaultDiscount !== undefined && c.defaultDiscount !== null && c.defaultDiscount !== '') ? String(c.defaultDiscount) : '')}" placeholder="0" title="אחוז הנחה קבוע ללקוח — נכנס אוטומטית לפופאפ ההזמנה. עדיין אפשר לשנות בכל הזמנה בנפרד.">
@@ -3890,7 +3897,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         });
       });
       const rangeLabel = fromDate === toDate ? fromDate : `${fromDate} עד ${toDate}`;
-      const report = `דוח כל התיקיות: ${rangeLabel}\nכמות הזמנות חדשות: ${orderCount}\nסכום: ₪${total.toFixed(2)}`;
+      const report = `דוח כל התיקיות: ${rangeLabel}\nכמות הזמנות חדשות: ${orderCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
       let waNumber = '052-3617178'.replace(/\D/g, '');
       if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
       window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(report)}`, '_blank');
@@ -4136,7 +4143,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
               }
             });
           });
-          const report = `דוח יומי - תיקיית ${name}: ${chosenDate}\nכמות הזמנות חדשות: ${orderCount}\nסכום: ₪${total.toFixed(2)}`;
+          const report = `דוח יומי - תיקיית ${name}: ${chosenDate}\nכמות הזמנות חדשות: ${orderCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
           let waNumber = '052-3617178'.replace(/\D/g, '');
           if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
           window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(report)}`, '_blank');
