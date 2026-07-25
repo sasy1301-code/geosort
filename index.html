@@ -146,6 +146,9 @@
     transition: max-height .65s cubic-bezier(.4,0,.2,1), margin-top .65s cubic-bezier(.4,0,.2,1), opacity .55s ease;
   }
   .animated-collapse.is-open{ opacity:1; }
+  /* a collapsed folder body must take zero vertical space — otherwise its 6/2px padding
+     leaks through the max-height:0 clip and adds ~8px on top of the 8px group gap */
+  .cluster-body.animated-collapse:not(.is-open){ padding-top:0; padding-bottom:0; }
   section.panel{
     background:#021236;
     color:#fff;
@@ -389,6 +392,7 @@
   .invoice-summary.grand{
     background:linear-gradient(180deg, #2e88ff 0%, #4be2fd 100%); border:1px solid #2e88ff;
     flex-direction:column; justify-content:center; text-align:center;
+    padding:13px 10px; /* +5px top & +5px bottom over the base 8px, growing the box by 10px vertically */
   }
   .invoice-summary.grand .invoice-summary-range{ justify-content:center; width:100%; }
   .invoice-summary.grand .invoice-summary-total{ font-weight:700; width:100%; color:#0f1a2e; }
@@ -519,7 +523,7 @@
   .client-card .card-details{ cursor:default; margin-top:0; }
   /* when the card is open, push the whole details block (billing name, photo, WhatsApp
      icons, address…) well clear of the header so nothing is cramped at the top */
-  .client-card .card-details.is-open{ margin-top:18px; }
+  .client-card .card-details.is-open{ margin-top:14px; }
   .client-card .cname-link{
     color:#fff;
     font-weight:600; font-size:.87rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -718,6 +722,16 @@
   .client-card .phone-link{ color:#4394f7; text-decoration:underline; cursor:pointer; }
   .client-card .phone-link:hover{ color:#7fb5fa; }
   .client-card .cprice{ font-size:.82rem; color:rgba(255,255,255,.75); }
+  .client-card .cdiscount-row{ display:flex; align-items:center; gap:8px; margin-top:10px; }
+  .client-card .cdiscount-label{ font-size:.82rem; color:rgba(255,255,255,.75); flex:0 0 auto; }
+  .client-card .card-discount-input{
+    width:80px; padding:5px 8px; border-radius:15px; border:1px solid rgba(255,255,255,.25);
+    background:#fff; color:#0f1a2e; font-family:inherit; font-size:.82rem; text-align:center;
+    -moz-appearance:textfield;
+  }
+  .client-card .card-discount-input::-webkit-outer-spin-button,
+  .client-card .card-discount-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .client-card .card-discount-input:focus{ outline:none; border-color:#4394f7; }
   .client-card .cnotes-block{
     margin-top:8px; padding-top:8px; border-top:1px dashed rgba(255,255,255,.3);
   }
@@ -2204,19 +2218,33 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       }
       groups.push(members);
     }
-    // sort clusters by size desc, then build names/colors
-    groups.sort((a,b)=>b.length-a.length);
-    clusters = groups.map((members, idx)=>{
+    // dominant city of a raw cluster (the city most of its members share)
+    const dominantCityOf = (members)=>{
       const cityCounts = {};
-      members.forEach(m=>{
-        const c = clients[m].city || "";
-        if(c) cityCounts[c] = (cityCounts[c]||0)+1;
-      });
-      let dominantCity = "";
-      let best = 0;
-      Object.entries(cityCounts).forEach(([c,count])=>{
-        if(count>best){ best=count; dominantCity = c; }
-      });
+      members.forEach(m=>{ const c = clients[m].city || ""; if(c) cityCounts[c] = (cityCounts[c]||0)+1; });
+      let dominantCity = "", best = 0;
+      Object.entries(cityCounts).forEach(([c,count])=>{ if(count>best){ best=count; dominantCity = c; } });
+      return dominantCity;
+    };
+    // Keep pieces of the same area together. When the radius shrinks and one area
+    // (e.g. "אזור תל אביב-יפו") breaks into several clusters, every piece still shares the
+    // same dominant city - so we group clusters by dominant city and render the pieces one
+    // under the other, instead of letting the size-sort scatter them across the list.
+    // city-groups are ordered by their largest piece; within a group, largest piece first;
+    // clusters with no city each stand on their own.
+    let clusterObjs = groups.map(members => ({ members, dominantCity: dominantCityOf(members) }));
+    const cityGroups = new Map();
+    clusterObjs.forEach((co, i)=>{
+      const gkey = co.dominantCity || (' nocity' + i);
+      if(!cityGroups.has(gkey)) cityGroups.set(gkey, []);
+      cityGroups.get(gkey).push(co);
+    });
+    const orderedGroups = [...cityGroups.values()];
+    orderedGroups.forEach(g => g.sort((a,b)=> b.members.length - a.members.length));
+    orderedGroups.sort((a,b)=> b[0].members.length - a[0].members.length);
+    clusterObjs = orderedGroups.flat();
+    clusters = clusterObjs.map((co, idx)=>{
+      const { members, dominantCity } = co;
       const defaultName = dominantCity ? (members.length>1 ? ("אזור " + dominantCity) : dominantCity) : ("אזור " + (idx+1));
       // the custom-name key is the exact set of client IDs in this cluster (order-independent).
       // this means a rename sticks to precisely the addresses you renamed - if the cluster later
@@ -2836,7 +2864,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           </div>
           <div class="order-discount-row">
             <label>הנחה (%)</label>
-            <input type="number" min="0" max="100" step="0.1" class="order-discount-input" value="${escapeHtml((prefillDiscount !== undefined && prefillDiscount !== null) ? prefillDiscount : (c.discountPercent || ''))}" placeholder="0">
+            <input type="number" min="0" max="100" step="0.1" class="order-discount-input" value="${escapeHtml((prefillDiscount !== undefined && prefillDiscount !== null) ? prefillDiscount : ((c.defaultDiscount !== undefined && c.defaultDiscount !== null && c.defaultDiscount !== '') ? c.defaultDiscount : (c.discountPercent || '')))}" placeholder="0">
           </div>
           <div class="order-total-row">
             סה״כ (לפי ₪${unitPrice.toFixed(2)} ליחידה): <b class="order-total-amount">₪0.00</b>
@@ -3290,6 +3318,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             ${c.phone ? `<a href="${escapeHtml(waHref(c.phone))}" target="_blank" class="whatsapp-btn" title="שליחת הודעת ווטסאפ ללקוח">${WHATSAPP_ICON_SVG}</a>` : ""}
           </div>
         ` : ""}
+        <div class="cdiscount-row">
+          <span class="cdiscount-label">הנחה קבועה (%):</span>
+          <input type="number" class="card-discount-input" min="0" max="100" step="0.1" value="${escapeHtml((c.defaultDiscount !== undefined && c.defaultDiscount !== null && c.defaultDiscount !== '') ? String(c.defaultDiscount) : '')}" placeholder="0" title="אחוז הנחה קבוע ללקוח — נכנס אוטומטית לפופאפ ההזמנה. עדיין אפשר לשנות בכל הזמנה בנפרד.">
+        </div>
         ${c.notes ? `
           <div class="cnotes-block">
             <div class="cnotes-title">הערות:</div>
@@ -3336,6 +3368,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       else openClientCards.add(c.id);
       toggleAnimatedCollapse(card.querySelector('.card-details'), card.querySelector('.card-chevron'));
     });
+    const cardDiscountInput = card.querySelector('.card-discount-input');
+    if(cardDiscountInput){
+      // stop the card from toggling open/closed when interacting with the field
+      cardDiscountInput.addEventListener('click', e=>e.stopPropagation());
+      // save the permanent per-client discount on blur/Enter (not per keystroke)
+      cardDiscountInput.addEventListener('change', ()=>{
+        const v = cardDiscountInput.value.trim();
+        c.defaultDiscount = v === '' ? '' : Math.min(100, Math.max(0, parseFloat(v) || 0));
+        saveData();
+      });
+    }
     const photoUploadInput = card.querySelector('.photo-upload-input');
     const photoThumb = card.querySelector('.place-photo-thumb');
     if(photoUploadInput){
@@ -3801,7 +3844,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </div>
         <div class="invoice-summary-total">סה״כ כל התיקיות: <b>₪0</b></div>
       </div>
-      <button class="send-daily-report-btn"><span>שליחת דו״ח יומי</span>${SEND_ICON_SVG}</button>
+      <button class="send-daily-report-btn"><span>שליחת דו״ח כללי</span>${SEND_ICON_SVG}</button>
       <button class="reset-invoices-btn" title="מאפס לכולם, לא ניתן לשחזר">🗑 אפס את כל הסכומים ל-0</button>
     `;
     const fromInput = container.querySelector('.grand-invoice-from');
