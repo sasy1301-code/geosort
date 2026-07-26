@@ -2330,17 +2330,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         if(!c.folder && !unassignedMapVisible) return; // "בלי תיקייה" bucket hidden from the map for now
         if(c.handled) return; // marked handled - off the map for 12 hours, then reverts automatically
         if(c.inactive) return; // inactive client - not shown on the map
+        if(c.skipRoute) return; // "דלג על כתובת זו היום" - drops off the map automatically until re-included
         bounds.push([c.lat, c.lon]);
         const folderInfo = folderPositionByClientId[c.id];
-        let label, pinColor;
-        if(c.skipRoute){
-          label = '⏸';
-          pinColor = '#8a8a8a';
-        } else {
-          label = (!inRouteMode && folderInfo) ? folderInfo.position : visiblePosIdx+1;
-          visiblePosIdx++;
-          pinColor = assignedFolder ? assignedFolder.color : cl.color;
-        }
+        const label = (!inRouteMode && folderInfo) ? folderInfo.position : visiblePosIdx+1;
+        visiblePosIdx++;
+        const pinColor = assignedFolder ? assignedFolder.color : cl.color;
         const marker = L.marker([c.lat, c.lon], { icon: pinIcon(pinColor, label) });
         marker.__clientId = c.id;
         marker.bindPopup(
