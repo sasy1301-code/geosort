@@ -4247,6 +4247,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         wireDragReorder(activeListEl, (ids)=>{
           folder.order = ids.concat(inactiveMembers.map(c => c.id), skippedMembers.map(c => c.id));
           saveFolders();
+          renderMap();       // redraw the numbered markers so the map matches the new order
           renderFolders();
           renderFolderRoute();
         });
