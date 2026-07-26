@@ -877,14 +877,20 @@
   }
   footer.note b{ color:var(--gold); }
 
+  /* on desktop, drop the whole panel stack (add-client / search / folders / clustering)
+     10px lower together so it clears the menu tab on the right edge */
+  @media (min-width:861px){
+    .sidebar .scroll{ padding-top:36px; }
+  }
+
   @media (max-width:860px){
     .main{ flex-direction:column; gap:0; }
     .sidebar{ width:100%; flex:1 1 auto; min-height:0; border-left:none; border-top:none; order:2; }
     .map-wrap{ order:1; height:40vh; flex:0 0 auto; }
     .map-actions{ padding:8px; gap:6px; }
     .map-actions button.ghost{ padding:5px 8px; font-size:.82rem; white-space:nowrap; }
-    /* on phones the tab rides over the map, not the sidebar — keep its original spot */
-    .side-menu-tab{ top:-35px; }
+    /* on phones the tab rides over the map — drop it 40px so it sits toward the map's middle */
+    .side-menu-tab{ top:5px; }
     section.panel{ margin-bottom:10px; }
     .stock-row{ gap:0; font-size:.72rem; align-items:flex-start; justify-content:space-between; }
     .stock-name{ flex:0 0 auto; flex-direction:column; align-items:center; text-align:center; }
