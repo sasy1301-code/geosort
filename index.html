@@ -904,10 +904,17 @@
     background:transparent; border:none; border-radius:0; color:#fff; text-align:right;
     font-family:inherit; font-size:14px; font-weight:400; padding:0 4px 0 0; cursor:pointer; box-sizing:border-box;
   }
-  .more-options-menu button svg{ flex:0 0 auto; width:22px; height:22px; border-radius:50%; overflow:visible; transition:background .15s ease, box-shadow .15s ease; }
-  /* on hover: a circle around the icon in the client-card hover colour, 4px larger radius
-     than the icon (box-shadow ring adds the 4px on every side, with no layout shift) */
-  .more-options-menu button:hover svg{ background:#040f1e; box-shadow:0 0 0 8px #040f1e; }
+  /* icon sits inside a wrapper span; the hover circle lives on the SPAN (not the svg) so it
+     works on iOS Safari too — Safari clips an SVG to its own border-radius even with
+     overflow:visible, which was cropping the icons on mobile */
+  .more-options-menu button .mo-ico{
+    flex:0 0 auto; width:22px; height:22px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s ease, box-shadow .15s ease;
+  }
+  .more-options-menu button .mo-ico svg{ width:22px; height:22px; display:block; overflow:visible; }
+  /* on hover: a circle around the icon in the client-card hover colour, 8px larger radius */
+  .more-options-menu button:hover .mo-ico{ background:#040f1e; box-shadow:0 0 0 8px #040f1e; }
   /* line.svg is a ~0.2px hairline that won't show at row height, so render its line
      crisply: thin #0277fb bar, full width, with the same faded ends line.svg has */
   .more-options-menu .mo-line{
@@ -3580,13 +3587,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const menu = document.createElement('div');
         menu.className = 'more-options-menu';
         menu.innerHTML = `
-          <button type="button" class="more-opt-share">${SHARE_ICON_SVG}<span>שיתוף כרטיס לקוח</span></button>
+          <button type="button" class="more-opt-share"><span class="mo-ico">${SHARE_ICON_SVG}</span><span>שיתוף כרטיס לקוח</span></button>
           ${MENU_LINE_SVG}
-          <button type="button" class="more-opt-photo">${PHOTO_ICON_SVG}<span>צילום תמונה</span></button>
+          <button type="button" class="more-opt-photo"><span class="mo-ico">${PHOTO_ICON_SVG}</span><span>צילום תמונה</span></button>
           ${MENU_LINE_SVG}
-          <button type="button" class="more-opt-inactive">${EYE_ICON_SVG}<span>${c.inactive ? 'החזר לפעיל' : 'לקוח לא פעיל'}</span></button>
+          <button type="button" class="more-opt-inactive"><span class="mo-ico">${EYE_ICON_SVG}</span><span>${c.inactive ? 'החזר לפעיל' : 'לקוח לא פעיל'}</span></button>
           ${MENU_LINE_SVG}
-          <button type="button" class="more-opt-delete">${DELETE_ICON_SVG}<span>מחיקת כרטיס לקוח</span></button>
+          <button type="button" class="more-opt-delete"><span class="mo-ico">${DELETE_ICON_SVG}</span><span>מחיקת כרטיס לקוח</span></button>
         `;
         menu.addEventListener('click', e2=>e2.stopPropagation());
         menu.querySelector('.more-opt-share').addEventListener('click', ()=>{
