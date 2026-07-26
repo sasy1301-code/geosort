@@ -95,11 +95,26 @@
        no box-shadow while closed, so the strip meets the page with a clean edge (the
        shadow only appears once the drawer is open) */
     transform:translateX(calc(100% - 6px));
-    /* fast on click, easing off toward the end (easeOutExpo-style) */
-    transition:transform .5s cubic-bezier(.16,1,.3,1), box-shadow .5s ease;
+    /* transform is driven by the open/close keyframes below (with an 8px overshoot bounce) */
+    transition:box-shadow .55s ease;
     box-sizing:border-box; padding:56px 30px 30px;
   }
-  .side-menu.open{ transform:translateX(0); box-shadow:-12px 0 40px rgba(0,0,0,.45); }
+  .side-menu.open{ transform:translateX(0); box-shadow:-12px 0 40px rgba(0,0,0,.45); animation:drawerIn .6s ease-out both; }
+  .side-menu.closing{ animation:drawerOut .5s ease-out both; }
+  /* slide in, then recoil 8px back toward closed and settle — a soft bounce at the end */
+  @keyframes drawerIn{
+    0%{ transform:translateX(calc(100% - 6px)); }
+    62%{ transform:translateX(0); }
+    80%{ transform:translateX(8px); }
+    100%{ transform:translateX(0); }
+  }
+  /* slide out, then recoil 8px back toward open and settle — same bounce on exit */
+  @keyframes drawerOut{
+    0%{ transform:translateX(0); }
+    62%{ transform:translateX(calc(100% - 6px)); }
+    80%{ transform:translateX(calc(100% - 14px)); }
+    100%{ transform:translateX(calc(100% - 6px)); }
+  }
   .side-menu-overlay{
     position:fixed; inset:0; background:rgba(10,15,30,.4); z-index:5999;
     opacity:0; pointer-events:none; transition:opacity .5s cubic-bezier(.16,1,.3,1);
@@ -122,7 +137,20 @@
     background:none; border:none; cursor:pointer; text-decoration:none;
     color:#fff; font-family:inherit; font-size:12pt; font-weight:400; padding:0;
     -webkit-text-size-adjust:100%; text-size-adjust:100%; /* keep every item at exactly 12pt on mobile */
+    /* resting/closing state: tucked to the right, shrunk & faded (snappy exit) */
+    opacity:0; transform:translateX(28px) scale(.88);
+    transition:opacity .28s ease, transform .34s cubic-bezier(.16,1,.3,1);
   }
+  /* opening: each item "inflates" in — pops to full size & slides into place, staggered */
+  .side-menu.open .side-menu-item{
+    opacity:1; transform:translateX(0) scale(1);
+    transition:opacity .5s ease, transform .62s cubic-bezier(.34,1.42,.5,1);
+  }
+  .side-menu.open .side-menu-item:nth-child(1){ transition-delay:.12s; }
+  .side-menu.open .side-menu-item:nth-child(2){ transition-delay:.19s; }
+  .side-menu.open .side-menu-item:nth-child(3){ transition-delay:.26s; }
+  .side-menu.open .side-menu-item:nth-child(4){ transition-delay:.33s; }
+  .side-menu.open .side-menu-item:nth-child(5){ transition-delay:.40s; }
   .side-menu-item .txt{ font-size:12pt; font-weight:400; line-height:1.2; font-family:inherit; }
   .side-menu-item .icon{ width:27px; height:27px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
   .side-menu-item .icon svg{ width:27px; height:27px; display:block; fill:#0277fb; }
@@ -632,10 +660,11 @@
   }
   .order-total-row b{ color:#3bd332; }
   .order-save-btn{
-    width:100%; margin-top:10px; padding:10px; border:none; border-radius:15px;
-    background:#1c3fd6; color:#fff; font-size:.9rem; cursor:pointer; font-weight:600;
+    width:fit-content; margin:14px auto 6px; padding:10px 22px; border:1px solid #4394f7; border-radius:23px;
+    background:#4394f7; color:#fff; font-size:10pt; font-weight:400; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:8px; white-space:nowrap;
   }
-  .order-save-btn:hover{ background:#1533ad; }
+  .order-save-btn:hover{ background:#3384ea; }
   .order-history{
     padding:14px 20px; border-top:1px solid rgba(255,255,255,.15); background:rgba(0,0,0,.15);
   }
@@ -845,29 +874,64 @@
   .remove-temp-btn:hover{ background:rgba(255,255,255,.15); }
   .client-card .cactions{ display:flex; gap:5px; margin-top:14px; margin-bottom:8px; align-items:center; position:relative; }
   .more-options-menu{
-    position:absolute; left:0; bottom:calc(100% + 6px); z-index:30; background:#111e63;
-    border:1px solid rgba(255,255,255,.3); border-radius:15px; box-shadow:0 6px 18px rgba(0,0,0,.4);
-    min-width:170px; padding:4px; text-align:right;
-    display:flex; flex-direction:column; gap:4px;
+    position:absolute; left:0; bottom:calc(100% + 6px); z-index:30; background:#0f1a2e;
+    border:1px solid #0277fb; border-radius:25px; box-shadow:0 10px 30px rgba(0,0,0,.5);
+    width:217px; height:auto; box-sizing:border-box; padding:3px 15px;
+    display:flex; flex-direction:column;
+    /* iOS Safari-style context-menu open: springs up from the + button with a soft
+       overshoot-and-settle and a subtle blur-in, so it flows rather than jumps */
+    transform-origin:bottom left;
+    animation:moMenuOpen .44s cubic-bezier(.34,1.56,.64,1) both;
+    will-change:transform, opacity, filter;
   }
-  .more-options-menu button{
-    display:flex; align-items:center; gap:8px; width:100%; height:36px; background:transparent; border:none; color:#fff; text-align:right;
-    font-size:.8rem; padding:0 10px; border-radius:15px; cursor:pointer; box-sizing:border-box;
+  @keyframes moMenuOpen{
+    0%{ transform:scale(.3); opacity:0; filter:blur(6px); }
+    38%{ opacity:1; filter:blur(0); }
+    100%{ transform:scale(1); opacity:1; filter:blur(0); }
   }
-  .more-options-menu button svg{ flex:0 0 auto; }
-  .more-options-menu .more-opt-delete{ color:#ff8a8a; }
-  .more-options-menu .more-opt-delete:hover{ background:rgba(255,80,80,.15); }
-  .more-options-menu button:hover{ background:rgba(255,255,255,.1); }
+  /* closing: dissolves back down toward the button */
+  .more-options-menu.mo-closing{
+    animation:moMenuClose .22s cubic-bezier(.4,0,.7,1) both; pointer-events:none;
+  }
+  @keyframes moMenuClose{
+    0%{ transform:scale(1); opacity:1; filter:blur(0); }
+    100%{ transform:scale(.4); opacity:0; filter:blur(4px); }
+  }
+  /* icon on the right, text right-aligned next to it (RTL: first child sits at the right).
+     high specificity so it beats ".client-card .cactions button" (which adds a gray fill+border) */
+  .client-card .cactions .more-options-menu button{
+    flex:0 0 auto; height:49px; display:flex; align-items:center; justify-content:flex-start; gap:16px; width:100%;
+    background:transparent; border:none; border-radius:0; color:#fff; text-align:right;
+    font-family:inherit; font-size:14px; font-weight:400; padding:0 4px 0 0; cursor:pointer; box-sizing:border-box;
+  }
+  .more-options-menu button svg{ flex:0 0 auto; width:22px; height:22px; border-radius:50%; overflow:visible; transition:background .15s ease, box-shadow .15s ease; }
+  /* on hover: a circle around the icon in the client-card hover colour, 4px larger radius
+     than the icon (box-shadow ring adds the 4px on every side, with no layout shift) */
+  .more-options-menu button:hover svg{ background:#040f1e; box-shadow:0 0 0 8px #040f1e; }
+  /* line.svg is a ~0.2px hairline that won't show at row height, so render its line
+     crisply: thin #0277fb bar, full width, with the same faded ends line.svg has */
+  .more-options-menu .mo-line{
+    display:block; width:100%; height:0.5px; flex:0 0 auto; background:#0277fb;
+    -webkit-mask:linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+    mask:linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+  }
+  .more-options-menu .mo-line svg{ display:none; }
   .client-card .cactions .icon-circle-btn{
     display:flex; align-items:center; justify-content:center;
     flex:1 1 0; width:0; aspect-ratio:1/1; border-radius:50%; background:#fff; border:1px solid #999;
-    cursor:pointer; padding:0; min-width:0; transition:background .1s ease, color .1s ease;
-    color:var(--icon-color, #333);
+    cursor:pointer; padding:0; min-width:0; color:var(--icon-color, #333); will-change:transform;
+    /* release springs back with a soft overshoot bounce */
+    transition:transform .34s cubic-bezier(.34,1.56,.64,1), background .1s ease, color .1s ease;
   }
   .client-card .cactions .icon-circle-btn svg{ display:block; width:60%; height:60%; }
   .client-card .cactions .icon-circle-btn:active,
   .client-card .cactions .icon-circle-btn.active{
     background:var(--icon-color, #333); color:#fff;
+  }
+  /* tap feedback: quick dip on press (only while physically held, not on persistent .active) */
+  .client-card .cactions .icon-circle-btn:active{
+    transform:scale(.82);
+    transition:transform .08s ease, background .1s ease, color .1s ease;
   }
   .client-card .cactions .icon-circle-btn.toggle-skip.active{ opacity:.55; }
   .client-card .cactions button{
@@ -2479,11 +2543,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // visually distinguishing it from the regular WhatsApp icon
   const WHATSAPP_PRESET_ICON_SVG = `<svg width="25" height="25" viewBox="0 0 452.8 461.7" xmlns="http://www.w3.org/2000/svg" fill="#73dd5c"><path d="M183.2,198.9c2.8-3.3,3.8-5.6,5.7-9.4,1.9-3.8.9-7.1-.5-9.9-1.4-2.8-12.7-30.5-17.4-41.8-4.6-11-9.2-9.5-12.7-9.7-3.3-.2-7-.2-10.8-.2s-9.9,1.4-15,7.1c-5.2,5.6-19.7,19.3-19.7,47s20.2,54.5,23,58.3,39.7,60.7,96.2,85.1c13.4,5.8,23.9,9.3,32.1,11.9,13.5,4.3,25.8,3.7,35.5,2.2,10.8-1.6,33.3-13.6,38-26.8,4.7-13.2,4.7-24.5,3.3-26.8-1.4-2.4-5.2-3.8-10.8-6.6-5.6-2.8-33.3-16.5-38.5-18.3-5.2-1.9-8.9-2.8-12.7,2.8-3.8,5.6-14.5,18.3-17.8,22.1-3.3,3.8-6.6,4.2-12.2,1.4-5.6-2.8-23.8-8.8-45.3-28-16.7-14.9-28.1-33.4-31.3-39-3.3-5.6-.3-8.7,2.5-11.5,2.5-2.5,5.6-6.6,8.5-9.9Z"/><path d="M436.6,148c-8.9,9.8-19.7,17.8-31.9,23.4,6.6,19.3,10.1,39.9,10.1,60.9,0,103.4-84.1,187.4-187.4,187.4h0c-33.6,0-66.6-9-95.4-26.1l-6.8-4.1-70.9,18.6,18.9-69.2-4.5-7.1c-18.8-29.8-28.7-64.3-28.6-99.7,0-103.3,84.1-187.4,187.5-187.4s30.9,1.9,45.7,5.6c4.5-12.7,11.6-24.1,20.6-33.7-21.2-6.5-43.6-9.9-66.4-9.9C103.1,6.7,2,107.8,1.9,232.1c0,39.7,10.4,78.5,30.1,112.7L0,461.7l119.5-31.4c32.9,18,70,27.4,107.7,27.5h0c124.3,0,225.4-101.1,225.5-225.5,0-29.4-5.6-57.9-16.2-84.3Z"/><path d="M281.1,83.3c0,46,37.3,83.3,83.3,83.3s24.7-2.8,35.5-7.9c12.1-5.7,22.5-14.2,30.6-24.7,10.8-14,17.2-31.6,17.2-50.7,0-46-37.3-83.3-83.3-83.3-21.6,0-41.2,8.2-56,21.6-9.7,8.8-17.4,20-22.1,32.5-3.4,9.1-5.3,18.9-5.3,29.2ZM336.6,76.4h20.8v-20.8c0-2.3,1.1-4.3,2.8-5.6,1.2-.9,2.6-1.4,4.1-1.4,3.8,0,6.9,3.1,6.9,6.9v20.8h20.8c3.8,0,6.9,3.1,6.9,6.9s-.1,1.6-.4,2.3c-.9,2.7-3.5,4.7-6.6,4.7h-20.8v20.8c0,.3,0,.7,0,1-.5,3.4-3.4,6-6.9,6s-6.9-3.1-6.9-6.9v-20.8h-20.8c-3.8,0-6.9-3.1-6.9-6.9s1.4-4.8,3.4-6c1-.6,2.2-1,3.5-1Z"/></svg>`;
 
-  const SHARE_ICON_SVG = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9fc3ff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="2.8"/><circle cx="6" cy="12" r="2.8"/><circle cx="18" cy="19" r="2.8"/><line x1="8.4" y1="10.7" x2="15.6" y2="6.3"/><line x1="8.4" y1="13.3" x2="15.6" y2="17.7"/></svg>`;
+  // card "+" menu icons — from GeoSort/קבצים/menu, all recoloured to the menu blue #0277fb
+  const SHARE_ICON_SVG = `<svg viewBox="0 0 24 24" fill="#4394f7"><path d="M18.453,15.013c-1.929,0-3.549,1.314-3.975,3.074-1.852-.373-4.383-1.177-6.301-2.903,.889-.733,1.455-1.83,1.455-3.053,0-1.102-.459-2.102-1.201-2.825,1.917-1.601,4.422-2.359,6.276-2.72,.63,1.411,2.072,2.401,3.745,2.401,2.252,0,4.085-1.792,4.085-3.993s-1.833-3.994-4.085-3.994-4.084,1.792-4.084,3.994c0,.214,.017,.423,.051,.628-1.983,.394-4.721,1.245-6.804,3.067-.607-.35-1.314-.551-2.068-.551-2.252,0-4.085,1.792-4.085,3.994s1.833,3.994,4.085,3.994c.628,0,1.222-.139,1.754-.388,2.138,2.035,5.011,2.943,7.068,3.348,.043,2.166,1.859,3.915,4.083,3.915,2.252,0,4.085-1.792,4.085-3.994s-1.833-3.993-4.085-3.993Zm0-13.013c1.701,0,3.085,1.343,3.085,2.994s-1.384,2.993-3.085,2.993-3.084-1.343-3.084-2.993,1.384-2.994,3.084-2.994ZM2.462,12.131c0-1.651,1.384-2.994,3.085-2.994s3.084,1.343,3.084,2.994-1.384,2.994-3.084,2.994-3.085-1.343-3.085-2.994Zm15.99,9.869c-1.701,0-3.084-1.343-3.084-2.994s1.384-2.993,3.084-2.993,3.085,1.343,3.085,2.993-1.384,2.994-3.085,2.994Z"/></svg>`;
 
-  const PHOTO_ICON_SVG = `<svg width="22" height="22" viewBox="-4.0 -21.6 161.6 161.6" fill="#f2bc07"><path d="M149.1,43.5h0C139.2,27.3,116.5,0,76.8,0S14.5,27.3,4.5,43.5c-6,9.6-6,21.6,0,31.3,10,16.3,32.6,43.5,72.3,43.5s62.4-27.3,72.3-43.5c6-9.6,6-21.6,0-31.3ZM142.6,70.8c-9.2,14.9-29.9,39.9-65.8,39.9S20.1,85.7,11,70.8c-4.4-7.2-4.4-16.1,0-23.3C20.1,32.6,40.9,7.6,76.8,7.6s56.7,25,65.8,39.9c4.4,7.2,4.4,16.1,0,23.3Z"/><path d="M76.8,28.8c-16.7,0-30.3,13.6-30.3,30.3s13.6,30.3,30.3,30.3,30.3-13.6,30.3-30.3c0-16.7-13.6-30.3-30.3-30.3ZM76.8,81.8c-12.5,0-22.7-10.2-22.7-22.7s10.2-22.7,22.7-22.7,22.7,10.2,22.7,22.7-10.2,22.7-22.7,22.7Z"/></svg>`;
+  const PHOTO_ICON_SVG = `<svg viewBox="0 0 24 24" fill="#4394f7"><path d="M19.5,0H4.5C2.019,0,0,2.019,0,4.5v15c0,2.481,2.019,4.5,4.5,4.5h15c2.481,0,4.5-2.019,4.5-4.5V4.5c0-2.481-2.019-4.5-4.5-4.5Zm0,23H4.5c-1.93,0-3.5-1.57-3.5-3.5v-2.718l5.92-5.92c1.147-1.146,3.014-1.146,4.16,0l10.992,10.992c-.64,.699-1.552,1.146-2.573,1.146Zm3.5-3.5c0,.543-.135,1.051-.357,1.51L11.787,10.154c-1.537-1.536-4.037-1.536-5.574,0L1,15.368V4.5c0-1.93,1.57-3.5,3.5-3.5h15c1.93,0,3.5,1.57,3.5,3.5v15Zm-6.5-15.5c-1.379,0-2.5,1.122-2.5,2.5s1.121,2.5,2.5,2.5,2.5-1.122,2.5-2.5-1.121-2.5-2.5-2.5Zm0,4c-.827,0-1.5-.673-1.5-1.5s.673-1.5,1.5-1.5,1.5,.673,1.5,1.5-.673,1.5-1.5,1.5Z"/></svg>`;
 
-  const DELETE_ICON_SVG = `<svg width="22" height="22" viewBox="-21.3 -5.0 172.1 172.1" fill="#e92a2e"><path d="M98.9,162.1H32.2c-11,.3-17.7-9.3-18.4-19.4l-5.6-96.6C3.4,45.2-.1,41.6,0,36.7v-9.1c.2-6,5.7-8.8,10.8-8.8h26.4c-1.9-8.8,2-18.8,11-18.8h32.4c9.1,0,13,10.2,11.1,18.8h28.5c7.4.3,9.4,7.4,9.4,13.3s-.9,12.5-8.6,14.2l-6.8,100.7c-.5,6.9-8.2,15.1-15.4,15.1h.2ZM84.2,10.8c0-1.7-4-3.7-5.9-3.7l-30.1.6c-4.2,0-5.2,8.9-2.6,11.1h39l-.5-8.2v.2ZM7.4,26.5v12h114.8v-12H7.4ZM31.9,154.5h65.7c4.8-1.1,9.4-4.8,9.7-10.2l6.3-98.2H16.5l.3,8,.9,22.2,3.7,64.3c.3,5.9,2.6,13.7,10.5,13.7v.2Z"/><path d="M68.5,135.4c-.8,2-2.8,3.7-4,3.4-2-.6-3.4-2.3-3.5-4.3v-69.9c.8-1.2,2.8-2.6,4-2.6s2.9,1.7,3.5,2.8c0,0,0,70.6,0,70.6Z"/><path d="M45.8,133c.2,3.1-1.5,5.4-3.7,5.4s-4.3-2.5-3.7-4.9l-2-68.8c.8-1.1,2.8-2.5,3.9-2.6s3.1,1.4,3.7,2.5l2,68.5h-.2Z"/><path d="M90.8,133c0,2.8-.9,4.8-3.4,5.6s-4.3-2-4.3-4.2l2.2-67.2c0-2.6.6-4.5,2.8-4.9s4.9,1.2,4.8,4l-2.2,66.8h.2Z"/></svg>`;
+  const EYE_ICON_SVG = `<svg viewBox="0 0 153.6 118.3" fill="#4394f7"><path d="M149.1,43.5h0C139.2,27.3,116.5,0,76.8,0S14.5,27.3,4.5,43.5c-6,9.6-6,21.6,0,31.3,10,16.3,32.6,43.5,72.3,43.5s62.4-27.3,72.3-43.5c6-9.6,6-21.6,0-31.3ZM142.6,70.8c-9.2,14.9-29.9,39.9-65.8,39.9S20.1,85.7,11,70.8c-4.4-7.2-4.4-16.1,0-23.3C20.1,32.6,40.9,7.6,76.8,7.6s56.7,25,65.8,39.9c4.4,7.2,4.4,16.1,0,23.3Z"/><path d="M76.8,28.8c-16.7,0-30.3,13.6-30.3,30.3s13.6,30.3,30.3,30.3,30.3-13.6,30.3-30.3c0-16.7-13.6-30.3-30.3-30.3ZM76.8,81.8c-12.5,0-22.7-10.2-22.7-22.7s10.2-22.7,22.7-22.7,22.7,10.2,22.7,22.7-10.2,22.7-22.7,22.7Z"/></svg>`;
+
+  const DELETE_ICON_SVG = `<svg viewBox="0 0 129.6 162.1" fill="#4394f7"><path d="M98.9,162.1H32.2c-11,.3-17.7-9.3-18.4-19.4l-5.6-96.6C3.4,45.2-.1,41.6,0,36.7v-9.1c.2-6,5.7-8.8,10.8-8.8h26.4c-1.9-8.8,2-18.8,11-18.8h32.4c9.1,0,13,10.2,11.1,18.8h28.5c7.4.3,9.4,7.4,9.4,13.3s-.9,12.5-8.6,14.2l-6.8,100.7c-.5,6.9-8.2,15.1-15.4,15.1h.2ZM84.2,10.8c0-1.7-4-3.7-5.9-3.7l-30.1.6c-4.2,0-5.2,8.9-2.6,11.1h39l-.5-8.2v.2ZM7.4,26.5v12h114.8v-12H7.4ZM31.9,154.5h65.7c4.8-1.1,9.4-4.8,9.7-10.2l6.3-98.2H16.5l.3,8,.9,22.2,3.7,64.3c.3,5.9,2.6,13.7,10.5,13.7v.2Z"/><path d="M68.5,135.4c-.8,2-2.8,3.7-4,3.4-2-.6-3.4-2.3-3.5-4.3v-69.9c.8-1.2,2.8-2.6,4-2.6s2.9,1.7,3.5,2.8c0,0,0,70.6,0,70.6Z"/><path d="M45.8,133c.2,3.1-1.5,5.4-3.7,5.4s-4.3-2.5-3.7-4.9l-2-68.8c.8-1.1,2.8-2.5,3.9-2.6s3.1,1.4,3.7,2.5l2,68.5h-.2Z"/><path d="M90.8,133c0,2.8-.9,4.8-3.4,5.6s-4.3-2-4.3-4.2l2.2-67.2c0-2.6.6-4.5,2.8-4.9s4.9,1.2,4.8,4l-2.2,66.8h.2Z"/></svg>`;
+
+  // divider between menu rows — line.svg (thin blue), stretched to full width
+  const MENU_LINE_SVG = `<span class="mo-line"><svg viewBox="0 0 177.5 3.4" preserveAspectRatio="none" fill="#4394f7"><path d="M174.4,1.6c-42.8.1-129,.1-171.8,0,42.8-.1,129-.1,171.8,0h0Z"/></svg></span>`;
 
   // reusable chevron icon (uploaded design) - always drawn pointing right, then
   // rotated via CSS transform to point down when "open" (replaces the old
@@ -2893,7 +2963,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeOrderModal(); });
 
     const modal = document.createElement('div');
-    modal.className = 'order-modal';
+    modal.className = 'order-modal inventory-modal';
     overlay.appendChild(modal);
 
     function itemKey(name){ return name.replace(/[^א-תa-zA-Z0-9]/g,'_'); }
@@ -2904,8 +2974,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
       modal.innerHTML = `
         <div class="order-modal-header">
-          <h3>${c.business ? escapeHtml(c.business) : escapeHtml(c.name)} — הזמנה</h3>
-          <button class="order-modal-close" title="סגור">✕</button>
+          <h3><span class="inv-hdr-icon"><svg viewBox="30.9 30.9 123.9 123.9" xmlns="http://www.w3.org/2000/svg"><path d="M65.8,122.3h6.1c5.4,0,10.6-2.2,14.4-6l54.9-54.9c4.6-4.7,4.6-12.2,0-16.9-4.8-4.5-12.2-4.5-16.9,0l-54.9,54.9c-3.8,3.8-6,9-6,14.4v6.1c0,1.3,1.1,2.4,2.4,2.4ZM68.2,113.8c0-4.2,1.6-8.1,4.6-11l54.9-54.9h0c2.8-2.7,7.2-2.7,10.1,0h0c2.8,2.8,2.8,7.4,0,10.2l-54.9,54.9c-3,2.9-6.9,4.6-11,4.6h-3.7v-3.7Z"/><path d="M142.4,81.4c-1.3,0-2.4,1.1-2.4,2.4v24.7h-20.1c-6.3,0-11.4,5.1-11.4,11.4v20.1h-47.2c-8.6,0-15.6-7-15.6-15.6v-63.1c0-8.6,7-15.6,15.6-15.6h40.7c1.3,0,2.4-1.1,2.4-2.4s-1.1-2.4-2.4-2.4h-40.7c-11.2,0-20.4,9.2-20.4,20.4v63.1c0,11.2,9.2,20.4,20.4,20.4h51.1c5.4,0,10.6-2.2,14.4-6l12-12c3.8-3.8,6-9.1,6-14.4v-28.7c0-1.3-1.1-2.4-2.4-2.4ZM139.6,115.9c-.6,2.9-2.1,5.5-4.2,7.6l-12,12c-2.1,2.1-4.7,3.5-7.6,4.2l-2.6.6v-20.3c0-3.6,3-6.6,6.6-6.6h20.3l-.6,2.6Z"/></svg></span> ${c.business ? escapeHtml(c.business) : escapeHtml(c.name)} — הזמנה</h3>
+          <button class="order-modal-close" title="סגור"><svg viewBox="0 0 57.4 57.4" xmlns="http://www.w3.org/2000/svg"><path fill="#ff7bac" d="M51.8,1l-23.1,23.1L5.6,1c-1.3-1.3-3.3-1.3-4.6,0h0C-.3,2.2-.3,4.3,1,5.6l23.1,23.1L1,51.8c-1.3,1.3-1.3,3.3,0,4.6h0c1.3,1.3,3.3,1.3,4.6,0l23.1-23.1,23.1,23.1c1.3,1.3,3.3,1.3,4.6,0h0c1.3-1.3,1.3-3.3,0-4.6l-23.1-23.1L56.5,5.6c1.3-1.3,1.3-3.3,0-4.6h0c-1.3-1.3-3.3-1.3-4.6,0Z"/></svg></button>
         </div>
         <div class="order-modal-body">
           ${PRODUCT_CATALOG.map(cat => {
@@ -2915,7 +2985,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
               <div class="order-cat-title" data-open="${hasPrefill ? '1' : '0'}">
                 <span class="order-cat-chevron" style="transform:rotate(${hasPrefill ? 90 : 0}deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(cat.title)}
               </div>
-              <div class="order-cat-items" style="display:${hasPrefill ? 'block' : 'none'}">
+              <div class="order-cat-items animated-collapse${hasPrefill ? ' is-open' : ''}" style="${hasPrefill ? 'max-height:none' : ''}">
                 ${cat.items.map(name => {
                   const key = itemKey(name);
                   const qty = prefillMap[name] || '';
@@ -2962,11 +3032,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
       modal.querySelectorAll('.order-cat-title').forEach(titleEl=>{
         titleEl.addEventListener('click', ()=>{
-          const itemsEl = titleEl.nextElementSibling;
-          const chevron = titleEl.querySelector('.order-cat-chevron');
-          const isOpen = itemsEl.style.display !== 'none';
-          itemsEl.style.display = isOpen ? 'none' : 'block';
-          chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+          toggleAnimatedCollapse(titleEl.nextElementSibling, titleEl.querySelector('.order-cat-chevron'));
         });
       });
 
@@ -3510,14 +3576,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       moreOptionsBtn.addEventListener('click', (e)=>{
         e.stopPropagation();
         const existing = card.querySelector('.more-options-menu');
-        if(existing){ existing.remove(); return; }
+        if(existing){ closeMoreMenu(existing); return; }
         const menu = document.createElement('div');
         menu.className = 'more-options-menu';
         menu.innerHTML = `
-          <button type="button" class="more-opt-share">${SHARE_ICON_SVG} שיתוף כרטיס לקוח</button>
-          <button type="button" class="more-opt-photo">${PHOTO_ICON_SVG} צילום תמונה</button>
-          <button type="button" class="more-opt-inactive">${c.inactive ? statusCircleIconSvg('#0da255') + ' החזר לפעיל' : statusCircleIconSvg('#e92a2e') + ' לקוח לא פעיל'}</button>
-          <button type="button" class="more-opt-delete">${DELETE_ICON_SVG} מחיקת כרטיס לקוח</button>
+          <button type="button" class="more-opt-share">${SHARE_ICON_SVG}<span>שיתוף כרטיס לקוח</span></button>
+          ${MENU_LINE_SVG}
+          <button type="button" class="more-opt-photo">${PHOTO_ICON_SVG}<span>צילום תמונה</span></button>
+          ${MENU_LINE_SVG}
+          <button type="button" class="more-opt-inactive">${EYE_ICON_SVG}<span>${c.inactive ? 'החזר לפעיל' : 'לקוח לא פעיל'}</span></button>
+          ${MENU_LINE_SVG}
+          <button type="button" class="more-opt-delete">${DELETE_ICON_SVG}<span>מחיקת כרטיס לקוח</span></button>
         `;
         menu.addEventListener('click', e2=>e2.stopPropagation());
         menu.querySelector('.more-opt-share').addEventListener('click', ()=>{
@@ -3547,15 +3616,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     callBeforeBtn.addEventListener('click', (e)=>{
       e.stopPropagation();
       c.callBefore = !c.callBefore;
+      callBeforeBtn.classList.toggle('active', c.callBefore); // recolour during the animation, not after
       saveData();
-      renderAll();
+      setTimeout(renderAll, 240); // let the button's tap-bounce finish before the card rebuilds
     });
     const collectPaymentBtn = card.querySelector('.toggle-collect-payment');
     collectPaymentBtn.addEventListener('click', (e)=>{
       e.stopPropagation();
       c.collectPayment = !c.collectPayment;
+      collectPaymentBtn.classList.toggle('active', c.collectPayment); // recolour during the animation, not after
       saveData();
-      renderAll();
+      setTimeout(renderAll, 240); // let the button's tap-bounce finish before the card rebuilds
     });
     const handledCheckbox = card.querySelector('.handled-checkbox');
     if(handledCheckbox){
@@ -3584,8 +3655,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       skipBtn.addEventListener('click', (e)=>{
         e.stopPropagation();
         c.skipRoute = !c.skipRoute;
+        skipBtn.classList.toggle('active', c.skipRoute); // recolour during the animation, not after
         saveData();
-        renderAll();
+        setTimeout(renderAll, 240); // let the button's tap-bounce finish before the card rebuilds
       });
     }
     const colorInput = card.querySelector('.stop-color-input');
@@ -3663,7 +3735,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     card.querySelector('.edit-client').addEventListener('click', (e)=>{
       e.stopPropagation();
       editingClientId = c.id;
-      renderAll();
+      setTimeout(renderAll, 240); // let the button's tap-bounce finish before the card rebuilds
     });
     card.querySelector('.focus').addEventListener('click', (e)=>{
       e.stopPropagation();
@@ -4788,8 +4860,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   const sideMenu = document.getElementById('sideMenu');
   const sideMenuOverlay = document.getElementById('sideMenuOverlay');
-  function openSideMenu(){ sideMenu.classList.add('open'); sideMenuOverlay.classList.add('open'); }
-  function closeSideMenu(){ sideMenu.classList.remove('open'); sideMenuOverlay.classList.remove('open'); }
+  function openSideMenu(){ sideMenu.classList.remove('closing'); sideMenu.classList.add('open'); sideMenuOverlay.classList.add('open'); }
+  function closeSideMenu(){
+    if(!sideMenu.classList.contains('open')) return;
+    sideMenu.classList.remove('open');
+    sideMenuOverlay.classList.remove('open');
+    sideMenu.classList.add('closing'); // plays the drawerOut bounce, then we clear it
+    let done = false;
+    const finish = ()=>{ if(done) return; done = true; sideMenu.classList.remove('closing'); sideMenu.removeEventListener('animationend', onEnd); };
+    const onEnd = (e)=>{ if(e.target === sideMenu && e.animationName === 'drawerOut') finish(); };
+    sideMenu.addEventListener('animationend', onEnd);
+    setTimeout(finish, 560);
+  }
   function toggleSideMenu(){ sideMenu.classList.contains('open') ? closeSideMenu() : openSideMenu(); }
   document.getElementById('sideMenuTab').addEventListener('click', (e)=>{ e.stopPropagation(); toggleSideMenu(); });
   sideMenuOverlay.addEventListener('click', closeSideMenu);
@@ -4856,9 +4938,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(!m.contains(e.target) && !e.target.closest('.share-card-btn')) m.remove();
     });
   });
+  // play the closing animation, then remove the menu (with a timer fallback)
+  function closeMoreMenu(menu){
+    if(!menu || menu.classList.contains('mo-closing')) return;
+    menu.classList.add('mo-closing');
+    let done = false;
+    const finish = ()=>{ if(done) return; done = true; menu.remove(); };
+    menu.addEventListener('animationend', finish, {once:true});
+    setTimeout(finish, 240);
+  }
   document.addEventListener('click', (e)=>{
     document.querySelectorAll('.more-options-menu').forEach(m=>{
-      if(!m.contains(e.target) && !e.target.closest('.more-options-btn')) m.remove();
+      if(!m.contains(e.target) && !e.target.closest('.more-options-btn')) closeMoreMenu(m);
     });
   });
 
