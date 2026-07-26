@@ -4762,6 +4762,35 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   sideMenuOverlay.addEventListener('click', closeSideMenu);
   document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && sideMenu.classList.contains('open')) closeSideMenu(); });
   sideMenu.querySelector('a.side-menu-item').addEventListener('click', closeSideMenu); // "כניסת לקוחות" navigates away
+  // ---- open / close the drawer with a finger swipe ----
+  // the drawer lives on the RIGHT edge: swipe left (from the edge) to open, swipe right to close.
+  (function(){
+    const EDGE = 55;     // px from the right screen edge where an "open" swipe may begin
+    const THRESH = 55;   // min horizontal travel (px) to count as a swipe
+    const RATIO = 1.4;   // gesture must be this much more horizontal than vertical (else it's a scroll)
+    const MAXTIME = 800; // ms — longer presses aren't swipes
+    let sx=0, sy=0, st=0, tracking=false, fromEdge=false;
+    window.addEventListener('touchstart', (e)=>{
+      if(e.touches.length !== 1){ tracking=false; return; }
+      const t = e.touches[0];
+      sx = t.clientX; sy = t.clientY; st = Date.now(); tracking = true;
+      fromEdge = (window.innerWidth - sx) <= EDGE;     // started near the right edge?
+    }, {passive:true});
+    window.addEventListener('touchend', (e)=>{
+      if(!tracking) return; tracking = false;
+      const t = e.changedTouches && e.changedTouches[0]; if(!t) return;
+      const dx = t.clientX - sx, dy = t.clientY - sy, dt = Date.now() - st;
+      if(dt > MAXTIME) return;
+      if(Math.abs(dx) < THRESH) return;                // too small
+      if(Math.abs(dx) < Math.abs(dy) * RATIO) return;  // too vertical → it's a scroll, ignore
+      const isOpen = sideMenu.classList.contains('open');
+      if(dx < 0){                                      // swipe left
+        if(!isOpen && fromEdge) openSideMenu();        // open only when starting from the right edge
+      } else {                                         // swipe right
+        if(isOpen) closeSideMenu();                    // close from anywhere on the screen
+      }
+    }, {passive:true});
+  })();
   document.getElementById('inventoryMenuItem').addEventListener('click', ()=>{
     closeSideMenu();
     try{
