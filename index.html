@@ -434,6 +434,13 @@
   }
   .send-daily-report-btn:hover{ background:#17233b; }
   .send-daily-report-btn svg{ width:23px; height:23px; display:block; flex:0 0 auto; }
+  /* "קבע 50 לכל המוצרים" — same pill as the report button, filled in blue */
+  .vehicle-stock-reset-btn{
+    width:fit-content; margin:8px auto 20px; padding:10px 22px; border:1px solid #4394f7; border-radius:23px;
+    background:#4394f7; color:#fff; font-size:10pt; font-weight:400; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px; white-space:nowrap;
+  }
+  .vehicle-stock-reset-btn:hover{ background:#3384ea; }
   .invoice-summary input[type=date]{ width:auto; flex:0 0 auto; padding:5px 8px; font-size:.8rem; }
   .invoice-summary-total{ font-size:.85rem; color:#fff; white-space:nowrap; }
   .invoice-summary-total b{ color:#0f1a2e; }
@@ -656,6 +663,14 @@
   .stock-complete-block{ display:flex; align-items:center; gap:5px; flex:0 0 auto; white-space:nowrap; }
   .stock-complete-label{ color:rgba(255,255,255,.6); font-size:.78rem; }
   .stock-complete-num{ color:#3bd332; font-weight:700; font-size:1.05rem; min-width:22px; text-align:center; }
+  .stock-left-block{ display:flex; align-items:center; gap:5px; flex:0 0 auto; white-space:nowrap; }
+  .stock-left-label{ color:rgba(255,255,255,.6); font-size:.78rem; }
+  .stock-left-num{ color:#ffab12; font-weight:700; font-size:1.05rem; min-width:22px; text-align:center; }
+  /* the editable field is now the "initial quantity loaded" — dark text on its white box */
+  .inventory-modal input.stock-qty-input{ color:#0f1a2e !important; }
+  /* center the "initial quantity" label+field in the middle of the whole row (desktop only;
+     on phones the row stacks into columns so it stays in normal flow) */
+  .inventory-modal .stock-row{ position:relative; }
   .stock-reset-one{
     background:transparent; border:none; color:#fff; font-size:.78rem; cursor:pointer; flex:0 0 auto; padding:2px 4px;
   }
@@ -673,6 +688,19 @@
     text-align:center; font-size:.95rem; color:#fff; font-weight:700;
   }
   .inventory-grand-total b{ color:#3bd332; font-size:1.1rem; }
+  /* ---- inventory (מלאי) popup — its own dark palette ---- */
+  /* match the add-client tab exactly: same #0f1a2e fill AND same subtle bluish frame
+     (the shared .order-modal white border read lighter than the tab) */
+  .order-modal.inventory-modal{ background:#0f1a2e; border:1px solid rgba(140,160,255,.35); }
+  .inventory-modal .order-modal-header{ background:#0f1a2e; }
+  .inventory-modal .order-modal-header h3{ font-weight:400; display:flex; align-items:center; gap:23px; }
+  .inventory-modal .inv-hdr-icon{ width:24px; height:24px; flex:0 0 auto; display:inline-flex; align-items:center; justify-content:center; }
+  .inventory-modal .inv-hdr-icon svg{ width:24px; height:24px; display:block; fill:#0277fb; }
+  .inventory-modal .order-modal-close{ display:inline-flex; align-items:center; justify-content:center; padding:2px; }
+  .inventory-modal .order-modal-close svg{ width:16px; height:16px; display:block; }
+  .inventory-modal .order-cat-title{ color:#fbb03b; }
+  .inventory-modal .order-cat-title:hover{ color:#ffc463; }
+  .inventory-modal .inventory-grand-total b{ color:#fbb03b; }
   .order-history-title{
     font-weight:700; font-size:.85rem; margin-bottom:8px; cursor:pointer;
     display:flex; align-items:center; gap:6px; user-select:none;
@@ -881,6 +909,7 @@
      10px lower together so it clears the menu tab on the right edge */
   @media (min-width:861px){
     .sidebar .scroll{ padding-top:36px; }
+    .inventory-modal .stock-remaining{ position:absolute; left:50%; top:50%; transform:translate(-50%, calc(-50% + 6px)); margin:0; }
   }
 
   @media (max-width:860px){
@@ -901,6 +930,9 @@
     .stock-complete-block{ flex:0 0 auto; flex-direction:column; align-items:center; text-align:center; gap:0; }
     .stock-complete-label{ font-size:.68rem; }
     .stock-complete-num{ font-size:.9rem; min-width:16px; }
+    .stock-left-block{ flex:0 0 auto; flex-direction:column; align-items:center; text-align:center; gap:0; }
+    .stock-left-label{ font-size:.68rem; }
+    .stock-left-num{ font-size:.9rem; min-width:16px; }
     .stock-reset-one{ font-size:.68rem; padding:2px; flex:0 0 auto; }
 
     /* ---- field-use ergonomics on phones (added) ---- */
@@ -2607,10 +2639,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     modal.className = 'order-modal';
     overlay.appendChild(modal);
 
+    modal.classList.add('inventory-modal');
     modal.innerHTML = `
       <div class="order-modal-header">
-        <h3>🚚 מלאי ברכב</h3>
-        <button class="order-modal-close" title="סגור">✕</button>
+        <h3><span class="inv-hdr-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m19.5,7h-2.5v-.5c0-2.054-1.388-3.847-3.375-4.358-.264-.068-.54.092-.609.359-.069.268.092.54.36.609,1.545.397,2.625,1.792,2.625,3.39v12.5H3.5c-1.378,0-2.5-1.121-2.5-2.5v-4c0-.276-.224-.5-.5-.5s-.5.224-.5.5v4c0,1.499.952,2.771,2.28,3.268-.179.387-.28.802-.28,1.232,0,1.654,1.346,3,3,3s3-1.346,3-3c0-.344-.064-.68-.18-1h8.359c-.116.32-.18.656-.18,1,0,1.654,1.346,3,3,3s3-1.346,3-3c0-.429-.101-.844-.28-1.232,1.328-.498,2.28-1.769,2.28-3.268v-5c0-2.481-2.019-4.5-4.5-4.5Zm0,1c1.93,0,3.5,1.57,3.5,3.5v1.5h-6v-5h2.5Zm-12.5,13c0,1.103-.897,2-2,2s-2-.897-2-2c0-.361.122-.705.314-1.019.063.003.122.019.186.019h3.196c.185.309.304.646.304,1Zm14,0c0,1.103-.897,2-2,2s-2-.897-2-2c0-.354.119-.691.304-1h3.196c.064,0,.123-.015.186-.019.192.314.314.657.314,1.019Zm-.5-2h-3.5v-5h6v2.5c0,1.379-1.122,2.5-2.5,2.5ZM2.5,10h6c1.378,0,2.5-1.121,2.5-2.5V2.5c0-1.379-1.122-2.5-2.5-2.5H2.5C1.122,0,0,1.121,0,2.5v5c0,1.379,1.122,2.5,2.5,2.5ZM1,2.5c0-.827.673-1.5,1.5-1.5h6c.827,0,1.5.673,1.5,1.5v5c0,.827-.673,1.5-1.5,1.5H2.5c-.827,0-1.5-.673-1.5-1.5V2.5Zm3,1c0-.276.224-.5.5-.5h2c.276,0,.5.224.5.5s-.224.5-.5.5h-2c-.276,0-.5-.224-.5-.5Z"/></svg></span> מלאי ברכב</h3>
+        <button class="order-modal-close" title="סגור"><svg viewBox="0 0 57.4 57.4" xmlns="http://www.w3.org/2000/svg"><path fill="#ff7bac" d="M51.8,1l-23.1,23.1L5.6,1c-1.3-1.3-3.3-1.3-4.6,0h0C-.3,2.2-.3,4.3,1,5.6l23.1,23.1L1,51.8c-1.3,1.3-1.3,3.3,0,4.6h0c1.3,1.3,3.3,1.3,4.6,0l23.1-23.1,23.1,23.1c1.3,1.3,3.3,1.3,4.6,0h0c1.3-1.3,1.3-3.3,0-4.6l-23.1-23.1L56.5,5.6c1.3-1.3,1.3-3.3,0-4.6h0c-1.3-1.3-3.3-1.3-4.6,0Z"/></svg></button>
       </div>
       <div class="order-modal-body">
         <div class="vehicle-stock-hint">המלאי רץ ברציפות ולא מתאפס לבד בכל יום - הוא יורד לפי כל הזמנה. אפשר לגעת במספר "מלאי נותר ברכב" ליד כל מוצר ולהקליד את הכמות שיש בפועל</div>
@@ -2661,7 +2694,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       listEl.innerHTML = PRODUCT_CATALOG.map(cat => `
         <div class="order-cat">
           <div class="order-cat-title" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(cat.title)}</div>
-          <div class="order-cat-items" style="display:none">
+          <div class="order-cat-items animated-collapse">
             ${cat.items.map(name => {
               const { remaining, usedSinceAnchor, anchorQty } = getRemaining(name);
               const isLow = remaining <= VEHICLE_STOCK_LOW_THRESHOLD;
@@ -2676,15 +2709,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
                     </span>
                   </div>
                   <div class="stock-remaining">
-                    <span class="stock-remaining-label">מלאי נותר ברכב:</span>
+                    <span class="stock-remaining-label">כמות התחלתית ברכב:</span>
                     <span class="stock-remaining-value">
-                      <input type="number" class="stock-qty-input ${isLow ? 'stock-low-text' : ''}" data-name="${escapeHtml(name)}" value="${remaining}" min="0" title="הקלידו את הכמות שיש בפועל ברכב ולחצו Enter">
-                      מתוך ${anchorQty}
+                      <input type="number" class="stock-qty-input" data-name="${escapeHtml(name)}" value="${anchorQty}" min="0" title="הקלידו את הכמות ההתחלתית שנטענה לרכב ולחצו Enter">
                     </span>
                   </div>
                   <div class="stock-complete-block">
                     <div class="stock-complete-label">ירד</div>
                     <div class="stock-complete-num">${usedSinceAnchor}</div>
+                  </div>
+                  <div class="stock-left-block">
+                    <div class="stock-left-label">נותר</div>
+                    <div class="stock-left-num">${remaining}</div>
                   </div>
                 </div>
               `;
@@ -2692,7 +2728,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           </div>
         </div>
       `).join('') + `
-        <button class="reset-invoices-btn vehicle-stock-reset-btn">🔄 קבע 50 לכל המוצרים</button>
+        <button class="vehicle-stock-reset-btn"><span>קבע 50 לכל המוצרים</span></button>
       `;
       listEl.querySelectorAll('.stock-qty-input').forEach(input=>{
         input.addEventListener('click', e=>e.stopPropagation());
@@ -2724,9 +2760,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         titleEl.addEventListener('click', ()=>{
           const itemsEl = titleEl.nextElementSibling;
           const chevron = titleEl.querySelector('.order-cat-chevron');
-          const isOpen = itemsEl.style.display !== 'none';
-          itemsEl.style.display = isOpen ? 'none' : 'block';
-          chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+          toggleAnimatedCollapse(itemsEl, chevron); // smooth open/close like the sidebar tabs
         });
       });
     }
@@ -2775,10 +2809,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     modal.className = 'order-modal';
     overlay.appendChild(modal);
 
+    modal.classList.add('inventory-modal');
     modal.innerHTML = `
       <div class="order-modal-header">
-        <h3>📦 מלאי - סך הזמנות למוצר</h3>
-        <button class="order-modal-close" title="סגור">✕</button>
+        <h3><span class="inv-hdr-icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m23.623 12.247-1.171-1.808c-.563-.869-1.416-1.521-2.401-1.838l-1.437-.461c-.261-.083-.544.061-.629.323-.084.263.06.544.323.629l1.437.461c.014.005-7.752 2.623-7.752 2.623l-7.785-2.603c.063-.035 1.421-.456 1.484-.481.263-.084.408-.366.323-.629-.084-.263-.366-.406-.629-.323l-1.437.461c-.985.316-1.838.969-2.401 1.838l-1.179 1.822c-.238.394-.369.885-.369 1.385 0 .296.053.59.157.875.3.832 1.006 1.422 1.85 1.65l-.004 2.322c-.003 1.512.959 2.849 2.393 3.327l5.544 1.848c.663.221 1.359.331 2.055.331s1.393-.11 2.056-.331l5.551-1.851c1.43-.476 2.391-1.808 2.394-3.314l.004-2.334c.843-.228 1.543-.818 1.844-1.649.104-.283.156-.577.156-.873 0-.5-.131-.992-.377-1.399zm-22.527 1.928c-.171-.436-.099-1.018.121-1.384l1.17-1.808c.183-.282.412-.526.664-.742l8.186 2.737-1.95 3.251c-.371.617-1.168.924-1.87.69l-5.314-1.771c-.468-.155-.836-.511-1.007-.973zm3.618 6.695c-1.024-.342-1.719-1.296-1.717-2.376l.003-1.991 4.102 1.365c.264.088.538.132.812.132.911 0 1.766-.481 2.23-1.258l1.355-2.259-.003 8.475c-.42-.038-.838-.107-1.24-.241l-5.544-1.848zm16.283-2.37c-.001 1.076-.689 2.027-1.71 2.367l-5.551 1.851c-.401.135-.818.204-1.238.242l.003-8.478 1.355 2.261c.464.776 1.319 1.258 2.23 1.258.275 0 .548-.044.813-.132l4.101-1.367-.003 1.999zm1.908-4.327c-.172.464-.54.819-1.008.975l-5.313 1.771c-.706.233-1.5-.072-1.871-.69l-1.952-3.255 8.184-2.737c.254.217.484.463.667.746l1.163 1.794c.229.382.301.952.13 1.396zm-10.905-4.173c2.757 0 5-2.243 5-5s-2.243-5-5-5-5 2.243-5 5 2.243 5 5 5zm0-9c2.206 0 4 1.794 4 4s-1.794 4-4 4-4-1.794-4-4 1.794-4 4-4zm-1.71 5.532-1.133-1.118c-.197-.194-.199-.51-.005-.707s.511-.199.707-.005l1.132 1.116c.248.242.65.241.896-.003l2.248-2.175c.199-.192.516-.187.707.012.192.198.187.515-.012.707l-2.245 2.171c-.315.311-.731.466-1.147.466s-.832-.155-1.149-.465z"/></svg></span> מלאי - סך הזמנות למוצר</h3>
+        <button class="order-modal-close" title="סגור"><svg viewBox="0 0 57.4 57.4" xmlns="http://www.w3.org/2000/svg"><path fill="#ff7bac" d="M51.8,1l-23.1,23.1L5.6,1c-1.3-1.3-3.3-1.3-4.6,0h0C-.3,2.2-.3,4.3,1,5.6l23.1,23.1L1,51.8c-1.3,1.3-1.3,3.3,0,4.6h0c1.3,1.3,3.3,1.3,4.6,0l23.1-23.1,23.1,23.1c1.3,1.3,3.3,1.3,4.6,0h0c1.3-1.3,1.3-3.3,0-4.6l-23.1-23.1L56.5,5.6c1.3-1.3,1.3-3.3,0-4.6h0c-1.3-1.3-3.3-1.3-4.6,0Z"/></svg></button>
       </div>
       <div class="order-modal-body">
         <div class="invoice-summary-range" style="justify-content:center;margin-bottom:14px">
@@ -2813,7 +2848,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       listEl.innerHTML = PRODUCT_CATALOG.map(cat => `
         <div class="order-cat">
           <div class="order-cat-title" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(cat.title)}</div>
-          <div class="order-cat-items" style="display:none">
+          <div class="order-cat-items animated-collapse">
             ${cat.items.map(name => `
               <div class="inventory-row">
                 <div class="inventory-name">${escapeHtml(name)}</div>
@@ -2829,9 +2864,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         titleEl.addEventListener('click', ()=>{
           const itemsEl = titleEl.nextElementSibling;
           const chevron = titleEl.querySelector('.order-cat-chevron');
-          const isOpen = itemsEl.style.display !== 'none';
-          itemsEl.style.display = isOpen ? 'none' : 'block';
-          chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+          toggleAnimatedCollapse(itemsEl, chevron); // smooth open/close like the sidebar tabs
         });
       });
     }
