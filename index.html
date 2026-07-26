@@ -677,7 +677,14 @@
   }
   .client-card .whatsapp-btn{
     display:inline-block; width:25px; height:25px; cursor:pointer; flex:0 0 auto;
-    position:relative; top:-8px;
+  }
+  /* the WhatsApp icons + photo live in a left column anchored to the הנחה קבועה row,
+     so the bottom icon always lines up with that field regardless of whether the card
+     has a price/VAT line above it */
+  .client-card .cdiscount-row{ position:relative; }
+  .client-card .card-left-icons{
+    position:absolute; left:0; bottom:50%; transform:translateY(12.5px);
+    display:flex; flex-direction:column; align-items:center; gap:10px;
   }
   .client-card .share-card-row{ height:0; overflow:visible; position:relative; }
   .client-card .share-card-btn{
@@ -690,11 +697,11 @@
   .client-card .whatsapp-preset-row{ height:0; overflow:visible; position:relative; }
   .client-card .whatsapp-preset-btn{
     display:inline-flex; align-items:center; justify-content:center; width:25px; height:25px;
-    position:absolute; left:0; bottom:8px; cursor:pointer;
+    cursor:pointer; flex:0 0 auto;
   }
   .client-card .whatsapp-preset-btn svg{ display:block; width:25px; height:25px; }
   .client-card .place-photo-wrap{
-    position:absolute; left:0; bottom:42px; width:38px; height:38px;
+    position:relative; width:38px; height:38px; flex:0 0 auto;
   }
   .client-card .place-photo-thumb{
     display:block; width:38px; height:38px; object-fit:cover;
@@ -3304,28 +3311,24 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           ${c.phone ? `<div class="cphone">טלפון: <a href="tel:${escapeHtml(telHref(c.phone))}" class="phone-link" title="חייג ללקוח">${escapeHtml(c.phone)}</a></div>` : ""}
           ${c.email ? `<div class="cphone">אימייל: <a href="mailto:${escapeHtml(c.email)}" class="phone-link" title="שליחת מייל ללקוח">${escapeHtml(c.email)}</a></div>` : ""}
         </div>
-        <div class="photo-card-row">
-          ${c.photo ? `
-            <div class="place-photo-wrap">
-              <img src="${escapeHtml(c.photo)}" class="place-photo-thumb" alt="תמונת המקום" title="לחצו לצפייה בתמונה">
-              <button type="button" class="place-photo-delete" title="מחיקת התמונה">✕</button>
-            </div>
-          ` : ""}
-          <input type="file" accept="image/*" class="photo-upload-input" style="display:none">
-        </div>
-        ${c.phone ? `
-          <div class="whatsapp-preset-row">
-            <a href="${escapeHtml(waHref(c.phone))}${c.whatsappMessage ? `?text=${encodeURIComponent(c.whatsappMessage)}` : ''}" target="_blank" class="whatsapp-preset-btn" title="שליחת הודעת וואטסאפ מוכנה מראש">${WHATSAPP_PRESET_ICON_SVG}</a>
-          </div>
-        ` : ""}
-        ${(c.price || c.phone) ? `
+        ${c.price ? `
           <div class="cprice-row">
-            ${c.price ? `<div class="cprice">מחיר ליחידה: ₪${escapeHtml(c.price)}</div>` : `<div></div>`}
-            ${c.phone ? `<a href="${escapeHtml(waHref(c.phone))}" target="_blank" class="whatsapp-btn" title="שליחת הודעת ווטסאפ ללקוח">${WHATSAPP_ICON_SVG}</a>` : ""}
+            <div class="cprice">מחיר ליחידה: ₪${escapeHtml(c.price)}</div>
           </div>
         ` : ""}
         ${c.price ? `<div class="cprice cprice-vat">מחיר ליחידה כולל מע״מ (${Math.round(VAT_RATE*100)}%): ₪${(parseFloat(c.price) * (1 + VAT_RATE)).toFixed(2)}</div>` : ""}
         <div class="cdiscount-row">
+          <div class="card-left-icons">
+            ${c.photo ? `
+              <div class="place-photo-wrap">
+                <img src="${escapeHtml(c.photo)}" class="place-photo-thumb" alt="תמונת המקום" title="לחצו לצפייה בתמונה">
+                <button type="button" class="place-photo-delete" title="מחיקת התמונה">✕</button>
+              </div>
+            ` : ""}
+            ${c.phone ? `<a href="${escapeHtml(waHref(c.phone))}${c.whatsappMessage ? `?text=${encodeURIComponent(c.whatsappMessage)}` : ''}" target="_blank" class="whatsapp-preset-btn" title="שליחת הודעת וואטסאפ מוכנה מראש">${WHATSAPP_PRESET_ICON_SVG}</a>` : ""}
+            ${c.phone ? `<a href="${escapeHtml(waHref(c.phone))}" target="_blank" class="whatsapp-btn" title="שליחת הודעת ווטסאפ ללקוח">${WHATSAPP_ICON_SVG}</a>` : ""}
+            <input type="file" accept="image/*" class="photo-upload-input" style="display:none">
+          </div>
           <span class="cdiscount-label">הנחה קבועה (%):</span>
           <input type="number" class="card-discount-input" min="0" max="100" step="0.1" value="${escapeHtml((c.defaultDiscount !== undefined && c.defaultDiscount !== null && c.defaultDiscount !== '') ? String(c.defaultDiscount) : '')}" placeholder="0" title="אחוז הנחה קבוע ללקוח — נכנס אוטומטית לפופאפ ההזמנה. עדיין אפשר לשנות בכל הזמנה בנפרד.">
         </div>
