@@ -37,7 +37,7 @@
     background:#e8e9ee;
     color:var(--text);
     overflow:hidden;
-    -webkit-text-size-adjust:100%; /* stop mobile browsers auto-inflating some text */
+    -webkit-text-size-adjust:100%; -moz-text-size-adjust:100%; text-size-adjust:100%; /* stop mobile browsers auto-inflating some text */
   }
   #bgImage{
     display:none;
@@ -87,23 +87,44 @@
     position:absolute; left:22px; top:50%; transform:translateY(-50%);
     display:flex; gap:10px; z-index:2;
   }
-  .hamburger-btn{
-    position:absolute; right:22px; top:50%; transform:translateY(-50%); z-index:2;
-    background:transparent; border:none; color:#0f1a2e;
-    width:40px; height:40px; border-radius:15px; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
+  /* ---- dark slide-out drawer with the open_2.svg edge tab ---- */
+  .side-menu{
+    position:fixed; top:0; right:0; height:100vh; width:80vw; max-width:360px; z-index:6000;
+    background:#0e1a2d;
+    /* closed: a thin strip of the drawer stays peeking on the right edge, full height.
+       no box-shadow while closed, so the strip meets the page with a clean edge (the
+       shadow only appears once the drawer is open) */
+    transform:translateX(calc(100% - 6px));
+    transition:transform .42s cubic-bezier(.33,1,.68,1), box-shadow .42s ease;
+    box-sizing:border-box; padding:56px 30px 30px;
   }
-  .hamburger-btn:hover{ background:rgba(15,26,46,.08); }
-  .hamburger-menu{
-    position:fixed; right:22px; top:76px; z-index:5000;
-    background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:15px;
-    box-shadow:0 8px 24px rgba(0,0,0,.4); min-width:160px; padding:6px; overflow:hidden;
+  .side-menu.open{ transform:translateX(0); box-shadow:-12px 0 40px rgba(0,0,0,.45); }
+  .side-menu-overlay{
+    position:fixed; inset:0; background:rgba(10,15,30,.4); z-index:5999;
+    opacity:0; pointer-events:none; transition:opacity .42s ease;
   }
-  .hamburger-menu-item{
-    display:block; width:100%; text-align:right; background:transparent; border:none; color:#fff;
-    font-size:.88rem; font-family:inherit; font-weight:400; padding:9px 12px; border-radius:15px; cursor:pointer;
+  .side-menu-overlay.open{ opacity:1; pointer-events:auto; }
+  /* the tab is the open_2.svg bump on the panel's left edge; the navy strip blends into the
+     panel and only the half-circle bump + blue chevron protrude, riding in with the panel */
+  .side-menu-tab{
+    position:absolute; top:-33px; left:-33px; width:47px; height:198px;
+    background:none; border:none; padding:0; cursor:pointer; z-index:1;
+    /* no shadow, so the svg strip meets the panel's peek strip as one flat 6px line */
   }
-  .hamburger-menu-item:hover{ background:rgba(255,255,255,.1); }
+  .side-menu-tab svg{ display:block; width:47px; height:198px; }
+  /* only the chevron flips (to the close direction) with an animation when the drawer is open */
+  .side-menu-tab .chev{ transform-box:fill-box; transform-origin:center; transition:transform .35s ease; }
+  .side-menu.open .side-menu-tab .chev{ transform:scaleX(-1); }
+  .side-menu-items{ display:flex; flex-direction:column; gap:26px; margin-top:8px; }
+  .side-menu-item{
+    display:flex; align-items:center; justify-content:flex-start; gap:12px; width:100%;
+    background:none; border:none; cursor:pointer; text-decoration:none;
+    color:#fff; font-family:inherit; font-size:12pt; font-weight:400; padding:0;
+    -webkit-text-size-adjust:100%; text-size-adjust:100%; /* keep every item at exactly 12pt on mobile */
+  }
+  .side-menu-item .txt{ font-size:12pt; font-weight:400; line-height:1.2; font-family:inherit; }
+  .side-menu-item .dot{ width:9px; height:9px; border-radius:50%; background:#2f7cf6; flex:0 0 auto; }
+  .side-menu-item:hover .txt{ color:#2f7cf6; }
   header button.ghost, header a.ghost{
     background:transparent; border:1px solid rgba(245,241,231,.35); color:#0f1a2e;
     padding:7px 12px; border-radius:15px; font-size:.95rem; font-family:inherit; font-weight:400; cursor:pointer;
@@ -898,13 +919,21 @@
       <button class="ghost" id="fitAllBtn" title="הצג את כל הלקוחות במפה">⤢ הצג הכל</button>
       <button class="ghost" id="animToggleBtn" title="עצירה/הפעלה של אנימציית הרקע (חוסך סוללה/ביצועים)">✨ רקע</button>
     </div>
-    <button class="hamburger-btn" id="hamburgerBtn" title="תפריט"><svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><rect y="11" width="24" height="2" rx="1"/><rect y="4" width="24" height="2" rx="1"/><rect y="18" width="24" height="2" rx="1"/></svg></button>
   </header>
-  <div class="hamburger-menu" id="hamburgerMenu" style="display:none">
-    <a class="hamburger-menu-item" href="./order/" target="_blank" style="text-decoration:none; box-sizing:border-box;">🛒 כניסת לקוחות</a>
-    <button class="hamburger-menu-item" id="inventoryMenuItem">📦 מלאי</button>
-    <button class="hamburger-menu-item" id="vehicleStockMenuItem">🚚 מלאי ברכב</button>
-    <button class="hamburger-menu-item" id="dedupeOrdersMenuItem">🧹 ניקוי הזמנות כפולות</button>
+  <div class="side-menu-overlay" id="sideMenuOverlay"></div>
+  <div class="side-menu" id="sideMenu">
+    <button class="side-menu-tab" id="sideMenuTab" aria-label="פתח/סגור תפריט">
+      <svg viewBox="0 0 55 231.9" xmlns="http://www.w3.org/2000/svg" style="overflow:visible">
+        <path fill="#0e1a2d" d="M27.5,71.8c10.2-8.3,11-19.8,11-19.8V3c.4,0,12.8,0,12.8,0v110.1s0,115.9,0,115.9c0,0-12.3,0-12.8,0v-54.7s-.8-11.6-11-19.8c-10.2-8.3-25.1-28.4-23.8-41.3-1.3-12.9,13.5-33,23.8-41.3Z"/>
+        <path class="chev" fill="#2f7cf6" d="M35.9,98.3l.8.8-11.5,11.5c-.1.1-.2.2-.2.4s0,.3.2.4l11.5,11.5-.8.8-11.5-11.5c-.3-.3-.5-.7-.5-1.1s.2-.8.5-1.1l11.5-11.5Z"/>
+      </svg>
+    </button>
+    <nav class="side-menu-items">
+      <button class="side-menu-item" id="inventoryMenuItem"><span class="dot"></span><span class="txt">מלאי כללי</span></button>
+      <button class="side-menu-item" id="vehicleStockMenuItem"><span class="dot"></span><span class="txt">מלאי רכב</span></button>
+      <a class="side-menu-item" href="./order/" target="_blank"><span class="dot"></span><span class="txt">כניסת לקוחות</span></a>
+      <button class="side-menu-item" id="dedupeOrdersMenuItem"><span class="dot"></span><span class="txt">ניקוי הזמנות כפולות</span></button>
+    </nav>
   </div>
 
   <div class="main">
@@ -4713,13 +4742,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   wireFolderDragReorder(document.getElementById('folderList'));
 
-  document.getElementById('hamburgerBtn').addEventListener('click', (e)=>{
-    e.stopPropagation();
-    const menu = document.getElementById('hamburgerMenu');
-    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-  });
+  const sideMenu = document.getElementById('sideMenu');
+  const sideMenuOverlay = document.getElementById('sideMenuOverlay');
+  function openSideMenu(){ sideMenu.classList.add('open'); sideMenuOverlay.classList.add('open'); }
+  function closeSideMenu(){ sideMenu.classList.remove('open'); sideMenuOverlay.classList.remove('open'); }
+  function toggleSideMenu(){ sideMenu.classList.contains('open') ? closeSideMenu() : openSideMenu(); }
+  document.getElementById('sideMenuTab').addEventListener('click', (e)=>{ e.stopPropagation(); toggleSideMenu(); });
+  sideMenuOverlay.addEventListener('click', closeSideMenu);
+  document.addEventListener('keydown', (e)=>{ if(e.key === 'Escape' && sideMenu.classList.contains('open')) closeSideMenu(); });
+  sideMenu.querySelector('a.side-menu-item').addEventListener('click', closeSideMenu); // "כניסת לקוחות" navigates away
   document.getElementById('inventoryMenuItem').addEventListener('click', ()=>{
-    document.getElementById('hamburgerMenu').style.display = 'none';
+    closeSideMenu();
     try{
       openInventoryModal();
     }catch(err){
@@ -4728,7 +4761,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
   });
   document.getElementById('vehicleStockMenuItem').addEventListener('click', ()=>{
-    document.getElementById('hamburgerMenu').style.display = 'none';
+    closeSideMenu();
     try{
       openVehicleStockModal();
     }catch(err){
@@ -4737,18 +4770,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
   });
   document.getElementById('dedupeOrdersMenuItem').addEventListener('click', ()=>{
-    document.getElementById('hamburgerMenu').style.display = 'none';
+    closeSideMenu();
     try{
       cleanupDuplicateOrders();
     }catch(err){
       console.error('dedupe orders error', err);
       alert('שגיאה בניקוי הזמנות כפולות: ' + err.message);
-    }
-  });
-  document.addEventListener('click', (e)=>{
-    const menu = document.getElementById('hamburgerMenu');
-    if(menu.style.display !== 'none' && !menu.contains(e.target) && e.target.id !== 'hamburgerBtn'){
-      menu.style.display = 'none';
     }
   });
   document.addEventListener('click', (e)=>{
