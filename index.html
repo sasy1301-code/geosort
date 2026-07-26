@@ -879,8 +879,8 @@
 
   @media (max-width:860px){
     .main{ flex-direction:column; gap:0; }
-    .sidebar{ width:100%; flex:0 0 auto; height:44vh; border-left:none; border-top:none; order:2; }
-    .map-wrap{ order:1; height:auto; flex:1 1 auto; }
+    .sidebar{ width:100%; flex:1 1 auto; min-height:0; border-left:none; border-top:none; order:2; }
+    .map-wrap{ order:1; height:40vh; flex:0 0 auto; }
     .map-actions{ padding:8px; gap:6px; }
     .map-actions button.ghost{ padding:5px 8px; font-size:.82rem; white-space:nowrap; }
     /* on phones the tab rides over the map, not the sidebar — keep its original spot */
