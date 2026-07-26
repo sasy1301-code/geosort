@@ -108,7 +108,7 @@
   /* the tab is the open_2.svg bump on the panel's left edge; the navy strip blends into the
      panel and only the half-circle bump + blue chevron protrude, riding in with the panel */
   .side-menu-tab{
-    position:absolute; top:-35px; left:-33px; width:47px; height:198px;
+    position:absolute; top:-38px; left:-33px; width:47px; height:198px;
     background:none; border:none; padding:0; cursor:pointer; z-index:1;
     /* no shadow, so the svg strip meets the panel's peek strip as one flat 6px line */
   }
@@ -118,7 +118,7 @@
   .side-menu.open .side-menu-tab .chev{ transform:scaleX(-1); }
   .side-menu-items{ display:flex; flex-direction:column; gap:26px; margin-top:8px; }
   .side-menu-item{
-    display:flex; align-items:center; justify-content:flex-start; gap:12px; width:100%;
+    display:flex; align-items:center; justify-content:flex-start; gap:30px; width:100%;
     background:none; border:none; cursor:pointer; text-decoration:none;
     color:#fff; font-family:inherit; font-size:12pt; font-weight:400; padding:0;
     -webkit-text-size-adjust:100%; text-size-adjust:100%; /* keep every item at exactly 12pt on mobile */
@@ -853,11 +853,21 @@
     text-align:center; color:rgba(255,255,255,.55); font-size:.85rem; padding:26px 10px;
   }
 
-  .map-wrap{ flex:1 1 auto; position:relative; min-height:0; padding:14px; background:transparent; }
+  .map-wrap{ flex:1 1 auto; position:relative; min-height:0; padding:0; background:transparent; }
   #map{
-    position:absolute; inset:14px; border-radius:var(--radius); overflow:hidden;
+    position:absolute; inset:0; border-radius:0; overflow:hidden;
     border:none;
   }
+  /* refresh / show-all / background buttons, centered above "הוספת לקוח" at the top of the sidebar */
+  .map-actions{
+    flex:0 0 auto; display:flex; justify-content:center; align-items:center;
+    gap:10px; padding:12px 10px; flex-wrap:wrap;
+  }
+  .map-actions button.ghost{
+    background:transparent; border:1px solid rgba(15,26,46,.3); color:#0f1a2e;
+    padding:7px 14px; border-radius:999px; font-size:.95rem; font-family:inherit; font-weight:400; cursor:pointer;
+  }
+  .map-actions button.ghost:hover{ background:rgba(15,26,46,.06); }
   .leaflet-popup-content{ font-family:inherit; direction:rtl; }
 
   footer.note{
@@ -868,15 +878,13 @@
   footer.note b{ color:var(--gold); }
 
   @media (max-width:860px){
-    .main{ flex-direction:column; gap:10px; }
+    .main{ flex-direction:column; gap:0; }
     .sidebar{ width:100%; flex:0 0 auto; height:44vh; border-left:none; border-top:none; order:2; }
-    .map-wrap{ order:1; height:auto; flex:1 1 auto; margin-top:10px; }
-    .header-logo{ height:36px; }
-    header{ height:44px; }
-    header .actions{ left:8px; top:10px; bottom:auto; transform:none; gap:3px; max-width:calc(100% - 60px); overflow-x:auto; }
-    header button.ghost, header a.ghost{ padding:4px 6px; font-size:.79rem; font-family:inherit; font-weight:400; white-space:nowrap; }
-    .hamburger-btn{ right:8px; top:10px; bottom:auto; transform:none; width:34px; height:34px; }
-    .hamburger-menu{ top:44px; right:8px; }
+    .map-wrap{ order:1; height:auto; flex:1 1 auto; }
+    .map-actions{ padding:8px; gap:6px; }
+    .map-actions button.ghost{ padding:5px 8px; font-size:.82rem; white-space:nowrap; }
+    /* on phones the tab rides over the map, not the sidebar — keep its original spot */
+    .side-menu-tab{ top:-35px; }
     section.panel{ margin-bottom:10px; }
     .stock-row{ gap:0; font-size:.72rem; align-items:flex-start; justify-content:space-between; }
     .stock-name{ flex:0 0 auto; flex-direction:column; align-items:center; text-align:center; }
@@ -915,13 +923,6 @@
 <div id="bgImage"></div>
 <canvas id="starfield"></canvas>
 <div class="app">
-  <header>
-        <div class="actions">
-      <button class="ghost" id="refreshBtn" title="טען מחדש מהאחסון">↻ רענון</button>
-      <button class="ghost" id="fitAllBtn" title="הצג את כל הלקוחות במפה">⤢ הצג הכל</button>
-      <button class="ghost" id="animToggleBtn" title="עצירה/הפעלה של אנימציית הרקע (חוסך סוללה/ביצועים)">✨ רקע</button>
-    </div>
-  </header>
   <div class="side-menu-overlay" id="sideMenuOverlay"></div>
   <div class="side-menu" id="sideMenu">
     <button class="side-menu-tab" id="sideMenuTab" aria-label="פתח/סגור תפריט">
@@ -940,7 +941,10 @@
 
   <div class="main">
     <div class="sidebar">
-      
+      <div class="map-actions">
+        <button class="ghost" id="refreshBtn" title="טען מחדש מהאחסון">↻ רענון</button>
+        <button class="ghost" id="fitAllBtn" title="הצג את כל הלקוחות במפה">⤢ הצג הכל</button>
+      </div>
       <div class="scroll">
 
         <section class="panel" id="addClientPanel">
@@ -1060,16 +1064,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </section>
 
       </div>
+      <footer class="note">
+        הנתונים כאן נשמרים <b>בעננים</b> ומסונכרנים בין כל המכשירים/דפדפנים שנכנסים לקישור הזה עם המפתח הזה.
+      </footer>
     </div>
 
     <div class="map-wrap">
       <div id="map"></div>
     </div>
   </div>
-
-  <footer class="note">
-    הנתונים כאן נשמרים <b>בעננים</b> ומסונכרנים בין כל המכשירים/דפדפנים שנכנסים לקישור הזה עם המפתח הזה.
-  </footer>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
