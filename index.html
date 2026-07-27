@@ -1376,7 +1376,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     <div class="products-inner">
       <section class="panel" id="catalogPanel">
         <h2 style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:#5d03ef;position:relative;top:5px"></span> <span style="position:relative;top:5px">מוצרים ומחירים</span></h2>
-        <div class="row2" style="align-items:flex-end;margin-top:4px">
+        <div class="search-box" style="margin-top:8px">
+          <input type="text" id="catalogSearchBox" placeholder="חפש לפי שם מוצר...">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5B6B6A" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="search-box" style="margin-top:8px">
+          <input type="text" id="catalogFolderSearchBox" placeholder="חפש לפי שם תיקייה...">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#5B6B6A" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div class="row2" style="align-items:flex-end;margin-top:10px">
           <div style="flex:1"><label for="new-catalog-cat">קטגוריה חדשה</label><input type="text" id="new-catalog-cat" placeholder="למשל: מוצרי חלב"></div>
           <div style="flex:0 0 auto"><button class="primary" id="addCatalogCatBtn" style="margin-top:0;width:auto;padding:9px 14px;border:1px solid transparent">+ הוסף</button></div>
         </div>
@@ -1574,6 +1582,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const openCatalogCatIds = new Set(); // which category folders are expanded (kept across re-renders)
   const openCatalogSubIds = new Set(); // which sub-category folders are expanded (kept across re-renders)
   const openCatalogSubSubIds = new Set(); // which sub-sub-category folders are expanded
+  let _catFilter = null; // active catalog search filter (product-name + folder-name), or null
 
   let clients = [];
   let vehicleStockBaseline = { anchors: {} }; // per-product: { qty: <stock level set at this point>, cumulative: <cumulative orders total at that moment> } - lets the driver set any starting quantity, not just 50
@@ -2437,6 +2446,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // cfg.ignoreSelector: controls inside the item that must NOT begin a drag (buttons/inputs)
   // cfg.persistFn(els): receives the ordered item elements after a drop/settle
   function wireCatalogReorder(container, cfg){
+    if(_catFilter) return; // no drag-reorder while a search filter is active (would reorder only the visible subset)
     const { itemSelector, handleSelector, ignoreSelector, persistFn } = cfg;
 
     // ---- mouse: per-item HTML5 drag setup. items are rebuilt on every render, so this
@@ -5668,15 +5678,49 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     });
   }
 
+  // read the two catalog search fields → a filter, or null when both are empty.
+  // productVisible(pr): the product passes the name query AND sits in a folder whose name
+  // passes the folder query. fMatch(name): a folder name passes the folder query.
+  function computeCatalogFilter(){
+    const nameEl = document.getElementById('catalogSearchBox');
+    const folderEl = document.getElementById('catalogFolderSearchBox');
+    const nameQ = nameEl ? normalizeSearchText(nameEl.value) : '';
+    const folderQ = folderEl ? normalizeSearchText(folderEl.value) : '';
+    if(!nameQ && !folderQ) return null;
+    const norm = normalizeSearchText;
+    const catById = new Map(catalog.categories.map(c=>[c.id,c]));
+    const subById = new Map(catalog.subcategories.map(s=>[s.id,s]));
+    const ssById = new Map(catalog.subsubcategories.map(s=>[s.id,s]));
+    const fMatch = nm => !!folderQ && norm(nm||'').includes(folderQ);
+    const productVisible = pr => {
+      if(nameQ && !norm(pr.name||'').includes(nameQ)) return false;
+      if(folderQ){
+        const names = [];
+        const c = catById.get(pr.categoryId); if(c) names.push(c.name);
+        const s = subById.get(pr.subcategoryId); if(s) names.push(s.name);
+        const ss = ssById.get(pr.subsubcategoryId); if(ss) names.push(ss.name);
+        if(!names.some(fMatch)) return false;
+      }
+      return true;
+    };
+    return { nameQ, folderQ, fMatch, productVisible };
+  }
+
   function subsubcatGroupHtml(ss){
-    const prods = catalogSubsubProducts(ss.id);
-    const open = openCatalogSubSubIds.has(ss.id);
+    const F = _catFilter;
+    let prods = catalogSubsubProducts(ss.id);
+    if(F){
+      prods = prods.filter(F.productVisible);
+      if(!prods.length && !F.fMatch(ss.name)) return ''; // nothing here matches the search
+    }
+    const open = F ? true : openCatalogSubSubIds.has(ss.id);
+    const count = F ? prods.length : catalogSubsubProducts(ss.id).length;
     return `
       <div class="cluster-group catalog-subsubcat" data-subsubid="${ss.id}">
         <div class="cluster-head subsubcat-head">
           <span class="name">${escapeHtml(ss.name)}</span>
           ${ss.trackStock ? '<span class="subsub-track-badge" title="עוקב מלאי — מופיע במלאי הכללי וברכב">מלאי</span>' : ''}
-          <span class="count">${prods.length}</span>
+          <span class="count">${count}</span>
           <button type="button" class="rename-folder subsub-rename" title="שנה שם">${FOLDER_PEN_SVG}</button>
           <button type="button" class="folder-del subsub-del" title="מחק תת־תת־קטגוריה">${CATALOG_TRASH_SVG}</button>
         </div>
@@ -5690,21 +5734,25 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   function subcatGroupHtml(sub){
-    const prods = catalogSubProducts(sub.id);
-    const subsubs = catalogSubsubcatsFor(sub.id);
-    const open = openCatalogSubIds.has(sub.id);
-    const nothing = prods.length === 0 && subsubs.length === 0;
+    const F = _catFilter;
+    let prods = catalogSubProducts(sub.id);
+    if(F) prods = prods.filter(F.productVisible);
+    const subsubsHtml = catalogSubsubcatsFor(sub.id).map(subsubcatGroupHtml).join('');
+    if(F && !prods.length && !subsubsHtml && !F.fMatch(sub.name)) return ''; // no match under this sub-category
+    const open = F ? true : openCatalogSubIds.has(sub.id);
+    const count = F ? catalog.products.filter(p=>p.subcategoryId===sub.id && F.productVisible(p)).length : catalogSubTotal(sub.id);
+    const nothing = prods.length === 0 && !subsubsHtml;
     return `
       <div class="cluster-group catalog-subcat" data-subid="${sub.id}">
         <div class="cluster-head subcat-head">
           <span class="name">${escapeHtml(sub.name)}</span>
-          <span class="count">${catalogSubTotal(sub.id)}</span>
+          <span class="count">${count}</span>
           <button type="button" class="rename-folder sub-rename" title="שנה שם">${FOLDER_PEN_SVG}</button>
           <button type="button" class="folder-del sub-del" title="מחק תת־קטגוריה">${CATALOG_TRASH_SVG}</button>
         </div>
         <div class="cluster-body animated-collapse${open?' is-open':''}" style="${open?'max-height:none':''}">
           <div class="catalog-prod-list">${prods.map(catalogProductRow).join('')}</div>
-          <div class="catalog-subsubcats">${subsubs.map(subsubcatGroupHtml).join('')}</div>
+          <div class="catalog-subsubcats">${subsubsHtml}</div>
           ${nothing ? '<div class="catalog-empty">אין מוצרים בתת־קטגוריה זו.</div>' : ''}
           <div class="catalog-cat-actions catalog-subcat-actions">
             <button type="button" class="catalog-add-subsub">+ תת־תת־קטגוריה</button>
@@ -5733,17 +5781,21 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function renderCatalog(){
     const list = document.getElementById('catalogList');
     if(!list) return;
+    _catFilter = computeCatalogFilter();
+    const F = _catFilter;
     const cats = catalog.categories.slice().sort((a,b)=>(a.order||0)-(b.order||0));
     if(!cats.length){
       list.innerHTML = '<div class="catalog-empty">אין קטגוריות עדיין — הוסיפו קטגוריה כדי להתחיל.</div>';
       return;
     }
-    list.innerHTML = cats.map(cat=>{
-      const direct = catalogDirectProducts(cat.id);
-      const subs = catalogSubcatsFor(cat.id);
-      const total = catalog.products.filter(p => p.categoryId === cat.id).length;
-      const open = openCatalogCatIds.has(cat.id);
-      const nothing = direct.length === 0 && subs.length === 0;
+    const catsHtml = cats.map(cat=>{
+      let direct = catalogDirectProducts(cat.id);
+      if(F) direct = direct.filter(F.productVisible);
+      const subsHtml = catalogSubcatsFor(cat.id).map(subcatGroupHtml).join('');
+      if(F && !direct.length && !subsHtml && !F.fMatch(cat.name)) return ''; // nothing in this category matches
+      const total = F ? catalog.products.filter(p => p.categoryId === cat.id && F.productVisible(p)).length : catalog.products.filter(p => p.categoryId === cat.id).length;
+      const open = F ? true : openCatalogCatIds.has(cat.id);
+      const nothing = direct.length === 0 && !subsHtml;
       return `
         <div class="cluster-group catalog-cat" data-id="${cat.id}">
           <div class="cluster-head cat-head">
@@ -5754,7 +5806,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           </div>
           <div class="cluster-body animated-collapse${open?' is-open':''}" style="${open?'max-height:none':''}">
             <div class="catalog-prod-list catalog-direct-list">${direct.map(catalogProductRow).join('')}</div>
-            <div class="catalog-subcats">${subs.map(subcatGroupHtml).join('')}</div>
+            <div class="catalog-subcats">${subsHtml}</div>
             ${nothing ? '<div class="catalog-empty">אין מוצרים בקטגוריה זו.</div>' : ''}
             <div class="catalog-cat-actions">
               <button type="button" class="catalog-add-sub">+ תת־קטגוריה</button>
@@ -5763,6 +5815,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           </div>
         </div>`;
     }).join('');
+    if(F && !catsHtml){
+      list.innerHTML = '<div class="catalog-empty">לא נמצאו מוצרים או תיקיות התואמים לחיפוש.</div>';
+      return;
+    }
+    list.innerHTML = catsHtml;
 
     list.querySelectorAll('.catalog-cat').forEach(group=>{
       const catId = group.dataset.id;
@@ -5953,6 +6010,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
   document.getElementById('addCatalogCatBtn').addEventListener('click', addCatalogCategory);
   document.getElementById('new-catalog-cat').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); addCatalogCategory(); } });
+  // catalog search: product-name field + folder-name field → filter the catalog tree live
+  { const cs = document.getElementById('catalogSearchBox'); if(cs) cs.addEventListener('input', renderCatalog); }
+  { const fs = document.getElementById('catalogFolderSearchBox'); if(fs) fs.addEventListener('input', renderCatalog); }
 
   // product editor modal — reuses the dark inventory-modal + blue pill save button
   // downscale a picked/taken photo to a small JPEG data-URL so it doesn't bloat the
