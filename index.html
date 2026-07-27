@@ -234,8 +234,26 @@
   .catalog-cat-actions .catalog-add-prod{ width:auto; flex:1; margin-top:0; }
   .catalog-add-sub{ flex:0 0 auto; background:transparent; border:1px solid #8871d9; color:rgba(255,255,255,.9); border-radius:12px; padding:8px 14px; cursor:pointer; font-size:.82rem; white-space:nowrap; }
   .catalog-add-sub:hover{ background:rgba(136,113,217,.2); }
+  /* ---- sub-sub-categories: one level deeper, a lighter tint of the sub-category folder ---- */
+  .catalog-subsubcats{ display:flex; flex-direction:column; gap:6px; margin-top:6px; }
+  .catalog-subsubcats:empty{ display:none; }
+  #catalogList .catalog-subsubcat > .subsubcat-head{ background:rgba(136,113,217,.12); border:1px dashed #a99ee6; padding:7px 10px 7px 15px; border-radius:15px; }
+  #catalogList .catalog-subsubcat > .subsubcat-head:hover{ background:rgba(136,113,217,.22); }
+  #catalogList .catalog-subsubcat > .subsubcat-head .name{ font-size:.82rem; font-weight:600; }
+  #catalogList .catalog-subsubcat .subsub-rename{ --sz:18px; }
+  #catalogList .catalog-subsubcat .subsub-del{ --sz:18px; color:#fff; }
+  #catalogList .catalog-subsubcat .subsub-del:hover{ background:transparent; color:#fff; }
+  #catalogList .catalog-subsubcat .subsub-del{ padding-left:0; }
+  .catalog-subsubcat .cluster-body{ padding:6px 0 2px; }
+  .catalog-subsubcat.touch-dragging{ position:relative; z-index:60; will-change:transform; box-shadow:0 12px 28px rgba(0,0,0,.5); transition:box-shadow .18s ease; }
+  .catalog-subsubcat.dragging{ opacity:.4; }
+  .catalog-add-subsub{ flex:0 0 auto; background:transparent; border:1px dashed #a99ee6; color:rgba(255,255,255,.9); border-radius:12px; padding:8px 14px; cursor:pointer; font-size:.82rem; white-space:nowrap; }
+  .catalog-add-subsub:hover{ background:rgba(136,113,217,.16); }
+  /* a folder header lit up as the "drop the product here" target while dragging a product */
+  #catalogList .cluster-head.catalog-drop-target{ outline:2px dashed #4db8ff; outline-offset:2px; box-shadow:0 0 0 3px rgba(67,148,247,.32), 0 8px 22px rgba(0,0,0,.35); transform:scale(1.02); transition:box-shadow .12s ease, transform .12s ease; }
   /* sub-category selector in the product editor — matches the dark modal fields */
-  .inventory-modal select.pe-subcat{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:12px; background:#0f1a2e; color:#fff; border:1px solid rgba(255,255,255,.18); font-size:16px; margin:0 0 2px; }
+  .inventory-modal select.pe-subcat,
+  .inventory-modal select.pe-subsubcat{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:12px; background:#0f1a2e; color:#fff; border:1px solid rgba(255,255,255,.18); font-size:16px; margin:0 0 2px; }
   .pe-checks{ display:flex; flex-direction:column; gap:8px; margin:12px 0 4px; }
   .pe-check{ display:flex; align-items:center; gap:8px; color:#fff; font-size:.86rem; cursor:pointer; margin:0; }
   .pe-check input{ width:auto; flex:0 0 auto; }
@@ -248,6 +266,61 @@
   .pe-photo-btn:hover{ background:#1533ad; }
   .pe-photo-remove{ background:transparent; border:none; color:#e08b7d; cursor:pointer; font-size:.78rem; padding:2px; text-align:right; }
   .pe-photo-remove:hover{ color:#ff7bac; }
+  /* ---- price migration tool ---- */
+  .mig-entry-wrap{ margin-top:18px; }
+  .mig-entry-btn{ width:100%; background:transparent; border:1px dashed rgba(255,255,255,.28); color:rgba(255,255,255,.7); border-radius:15px; padding:10px; font-size:.82rem; cursor:pointer; }
+  .mig-entry-btn:hover{ background:rgba(255,255,255,.06); color:#fff; }
+  .mig-intro{ color:rgba(255,255,255,.8); font-size:.84rem; line-height:1.5; margin:0 0 12px; }
+  .mig-ref{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:15px; background:#fff; color:#021236; border:1px solid rgba(255,255,255,.18); font-size:16px; margin:0 0 12px; }
+  .mig-report{ margin:2px 0 10px; max-height:38vh; overflow:auto; }
+  .mig-report .mig-empty{ color:rgba(255,255,255,.6); font-size:.82rem; text-align:center; padding:10px 0; }
+  .mig-summary{ color:#fbb03b; font-weight:600; font-size:.86rem; margin:4px 2px 10px; }
+  .mig-table{ width:100%; border-collapse:collapse; font-size:.82rem; }
+  .mig-table th{ color:rgba(255,255,255,.6); font-weight:600; text-align:right; padding:6px 8px; border-bottom:1px solid rgba(255,255,255,.14); position:sticky; top:0; background:#0f1a2e; }
+  .mig-table td{ color:#fff; padding:7px 8px; border-bottom:1px solid rgba(255,255,255,.08); }
+  .mig-table td.mig-pct{ color:#4394f7; font-weight:600; }
+  .mig-table tr.mig-anom td.mig-pct{ color:#ff7bac; }
+  .mig-warn{ background:rgba(255,123,172,.1); border:1px solid rgba(255,123,172,.35); border-radius:15px; padding:10px 12px; color:#ffb3cd; font-size:.8rem; line-height:1.55; margin:6px 0 14px; }
+  .mig-warn b{ color:#ff9ec2; }
+  .mig-done{ color:#73dd5c; font-weight:600; text-align:center; padding:12px; font-size:.9rem; }
+  /* ---- regular-products drill-down tree inside the order popup ---- */
+  .ordreg-top{ margin-bottom:12px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,.12); }
+  .ordreg-cat{ margin:2px 0; padding-right:12px; }
+  .ordreg-sub{ margin:2px 0; padding-right:14px; }
+  .ordreg-subsub{ margin:2px 0; padding-right:14px; }
+  .inventory-modal .order-cat-title.ordreg-lvl1{ font-size:.84rem; }
+  .inventory-modal .order-cat-title.ordreg-lvl2{ font-size:.8rem; color:rgba(255,255,255,.82); }
+  .inventory-modal .order-cat-title.ordreg-lvl3{ font-size:.78rem; color:rgba(255,255,255,.72); }
+  .ordreg-headname{ flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ordreg-headdisc{ flex:0 0 auto; display:flex; align-items:center; gap:6px; font-weight:400; font-size:.72rem; color:rgba(255,255,255,.6); cursor:default; }
+  .ordreg-headdisc-lbl{ white-space:nowrap; flex:0 0 auto; }
+  /* .inventory-modal prefix (2 classes) beats the grouped input[type=number] rule so the
+     header fields stay compact and leave room for the folder name */
+  .inventory-modal .ordreg-subdisc{ width:54px; padding:4px 4px; font-size:.76rem; text-align:center; }
+  /* sub-sub-category blanket price (final unit price for the whole group, per client) */
+  .ordreg-headprice{ flex:0 1 auto; min-width:0; display:flex; align-items:center; gap:5px; font-weight:400; font-size:.7rem; color:rgba(255,255,255,.6); cursor:default; }
+  .ordreg-headprice-lbl{ white-space:nowrap; flex:0 0 auto; }
+  .inventory-modal .ordreg-subsubprice{ width:54px; padding:4px 4px; font-size:.76rem; text-align:center; }
+  .ordreg-price-old{ color:rgba(255,255,255,.42); font-weight:400; font-size:.78rem; }
+  .ordreg-price-new{ color:#35d07f; font-weight:700; white-space:nowrap; }
+  /* name takes the slack (so it's always visible + truncates only when very long); a fixed
+     gap keeps the price off the name; the price sits in a fixed column near the quantity so
+     every price still lines up vertically. cols: name | gap | price | כמות: | qty */
+  .ordreg-item{ display:grid; grid-template-columns:minmax(60px,1fr) 20px 58px auto 54px; align-items:center; gap:8px; padding:5px 14px 5px 0; font-size:.85rem; }
+  .ordreg-price{ color:#0277fb; font-weight:600; font-size:.85rem; line-height:1.2; white-space:nowrap; text-align:right; }
+  .ordreg-check-label{ display:flex; align-items:center; gap:8px; cursor:pointer; min-width:0; color:#fff; }
+  .ordreg-check-label input{ width:auto; flex:0 0 auto; }
+  .ordreg-check-label .ordreg-name{ flex:0 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ordreg-disc{ width:100%; box-sizing:border-box; padding:5px 3px; font-size:.75rem; text-align:center; }
+  .ordreg-qty-label{ color:rgba(255,255,255,.62); font-size:.76rem; white-space:nowrap; text-align:left; margin-inline-start:14px; }
+  .ordreg-qty{ width:100%; box-sizing:border-box; padding:5px 3px; font-size:.78rem; text-align:center; }
+  @media (max-width:480px){
+    .ordreg-item{ gap:6px; grid-template-columns:minmax(62px,1fr) 8px 54px auto 40px; padding:5px 8px 5px 0; }
+    .ordreg-qty-label{ font-size:.72rem; margin-inline-start:6px; }
+    .ordreg-price{ font-size:.78rem; }
+  }
+  .ordreg-disc:disabled{ opacity:.4; }
+  .ordreg-empty{ color:rgba(255,255,255,.55); font-size:.8rem; padding:6px 2px; }
   header button.ghost, header a.ghost{
     background:transparent; border:1px solid rgba(245,241,231,.35); color:#0f1a2e;
     padding:7px 12px; border-radius:15px; font-size:.95rem; font-family:inherit; font-weight:400; cursor:pointer;
@@ -1300,6 +1373,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <div style="flex:0 0 auto"><button class="primary" id="addCatalogCatBtn" style="margin-top:0;width:auto;padding:9px 14px;border:1px solid transparent">+ הוסף</button></div>
         </div>
         <div id="catalogList" style="margin-top:14px"></div>
+        <div class="mig-entry-wrap">
+          <button type="button" id="openMigrationBtn" class="mig-entry-btn">מיגרציית מחירים ישנים ← הנחה קבועה (חד־פעמי)</button>
+        </div>
       </section>
     </div>
   </div>
@@ -1485,9 +1561,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const CATALOG_KEY = "catalog"; // separate app_storage key so saving the catalog never rewrites the clients blob
   // { categories:[{id,name,order}], subcategories:[{id,categoryId,name,order}],
   //   products:[{id,categoryId,subcategoryId,name,sku,unit,price,imageUrl,note,active,trackStock,order}] }
-  let catalog = { categories: [], subcategories: [], products: [] };
+  let catalog = { categories: [], subcategories: [], subsubcategories: [], products: [] };
   const openCatalogCatIds = new Set(); // which category folders are expanded (kept across re-renders)
   const openCatalogSubIds = new Set(); // which sub-category folders are expanded (kept across re-renders)
+  const openCatalogSubSubIds = new Set(); // which sub-sub-category folders are expanded
 
   let clients = [];
   let vehicleStockBaseline = { anchors: {} }; // per-product: { qty: <stock level set at this point>, cumulative: <cumulative orders total at that moment> } - lets the driver set any starting quantity, not just 50
@@ -1890,9 +1967,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       catalog = {
         categories:    Array.isArray(p && p.categories)    ? p.categories    : [],
         subcategories: Array.isArray(p && p.subcategories) ? p.subcategories : [],
+        subsubcategories: Array.isArray(p && p.subsubcategories) ? p.subsubcategories : [],
         products:      Array.isArray(p && p.products)      ? p.products      : []
       };
-    }catch(e){ catalog = { categories: [], subcategories: [], products: [] }; }
+    }catch(e){ catalog = { categories: [], subcategories: [], subsubcategories: [], products: [] }; }
   }
   async function saveCatalog(){
     try{ await sbSet(CATALOG_KEY, JSON.stringify(catalog)); }
@@ -2391,6 +2469,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         grabOffset = startY - item.getBoundingClientRect().top;
         item.classList.add('touch-dragging');
         item.style.transform = 'translateY(0)';
+        // let elementFromPoint see the folder UNDER the lifted product, not the product itself
+        if(cfg.crossFolder) item.style.pointerEvents = 'none';
         if(navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){ } }
       }, HOLD_MS);
     }, { passive:true });
@@ -2414,10 +2494,29 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         }, held);
       }
       followFinger(t.clientY);
+      // cross-folder: is the finger over a DIFFERENT folder's header? highlight it as a target
+      if(cfg.crossFolder){
+        const under = document.elementFromPoint(t.clientX, t.clientY);
+        const head = under && under.closest('.cat-head, .subcat-head, .subsubcat-head');
+        const tgt = head ? folderTargetFromEl(head) : null;
+        const pr = catalog.products.find(p => p.id === held.dataset.pid);
+        if(tgt && !isSameCatalogFolder(pr, tgt)){ setCatalogDropHighlight(head); held.__dropTarget = tgt; }
+        else { setCatalogDropHighlight(null); held.__dropTarget = null; }
+      }
     }, { passive:false });
 
     const endTouch = ()=>{
       clearTimeout(timer);
+      // cross-folder drop wins over an in-list reorder: move the product into the target folder
+      if(cfg.crossFolder && dragging && held && held.__dropTarget){
+        const tgt = held.__dropTarget, pid = held.dataset.pid;
+        setCatalogDropHighlight(null);
+        held.style.pointerEvents = ''; held.style.transition = ''; held.style.transform = '';
+        held.classList.remove('touch-dragging'); held.__dropTarget = null;
+        held = null; dragging = false;
+        moveProductToFolder(pid, tgt); // re-renders the catalog
+        return;
+      }
       if(dragging && held){
         const item = held;
         settling = true;
@@ -2428,6 +2527,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const finish = ()=>{
           if(done) return; done = true;
           item.style.transition = ''; item.style.transform = '';
+          item.style.pointerEvents = '';
           item.classList.remove('touch-dragging');
           settling = false;
           persistFn(els);
@@ -2435,6 +2535,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         item.addEventListener('transitionend', function te(ev){ if(ev.propertyName==='transform'){ item.removeEventListener('transitionend', te); finish(); } });
         setTimeout(finish, 340); // safety net if transitionend doesn't fire
       }
+      if(cfg.crossFolder) setCatalogDropHighlight(null);
       held = null; dragging = false;
     };
     container.addEventListener('touchend', endTouch);
@@ -3251,6 +3352,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     function renderForm(prefillItems, prefillNoOrder, prefillReason, prefillDiscount){
       const prefillMap = {};
       (prefillItems || []).forEach(it => { prefillMap[it.name] = it.qty; });
+      // catalog-line quantities keyed by productId, to repopulate the tree when editing an order
+      const ordregQty = {};
+      (prefillItems || []).forEach(it => { if(it.productId) ordregQty[it.productId] = it.qty; });
 
       modal.innerHTML = `
         <div class="order-modal-header">
@@ -3258,6 +3362,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <button class="order-modal-close" title="סגור"><svg viewBox="0 0 57.4 57.4" xmlns="http://www.w3.org/2000/svg"><path fill="#ff7bac" d="M51.8,1l-23.1,23.1L5.6,1c-1.3-1.3-3.3-1.3-4.6,0h0C-.3,2.2-.3,4.3,1,5.6l23.1,23.1L1,51.8c-1.3,1.3-1.3,3.3,0,4.6h0c1.3,1.3,3.3,1.3,4.6,0l23.1-23.1,23.1,23.1c1.3,1.3,3.3,1.3,4.6,0h0c1.3-1.3,1.3-3.3,0-4.6l-23.1-23.1L56.5,5.6c1.3-1.3,1.3-3.3,0-4.6h0c-1.3-1.3-3.3-1.3-4.6,0Z"/></svg></button>
         </div>
         <div class="order-modal-body">
+          <div class="ordreg-top">
+            <div class="order-cat-title ordreg-toplevel" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0)">${CHEVRON_ICON_SVG}</span> קטלוג מוצרים</div>
+            <div class="order-cat-items animated-collapse">${regularProductsTreeHtml(c, ordregQty)}</div>
+          </div>
           ${PRODUCT_CATALOG.map(cat => {
             const hasPrefill = cat.items.some(name => prefillMap[name]);
             return `
@@ -3298,7 +3406,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             <input type="number" min="0" max="100" step="0.1" class="order-discount-input" value="${escapeHtml((prefillDiscount !== undefined && prefillDiscount !== null) ? prefillDiscount : ((c.defaultDiscount !== undefined && c.defaultDiscount !== null && c.defaultDiscount !== '') ? c.defaultDiscount : (c.discountPercent || '')))}" placeholder="0">
           </div>
           <div class="order-total-row">
-            סה״כ (לפי ₪${unitPrice.toFixed(2)} ליחידה): <b class="order-total-amount">₪0.00</b>
+            סה״כ: <b class="order-total-amount">₪0.00</b>
           </div>
           <button class="order-save-btn">💾 שמור הזמנה${orderModalEditingId ? ' (עדכון)' : ''}</button>
         </div>
@@ -3313,6 +3421,72 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       modal.querySelectorAll('.order-cat-title').forEach(titleEl=>{
         titleEl.addEventListener('click', ()=>{
           toggleAnimatedCollapse(titleEl.nextElementSibling, titleEl.querySelector('.order-cat-chevron'));
+        });
+      });
+
+      // "regular products" tree: checkbox toggles the client's regular list; the paired
+      // discount field is a per-product override for this client. persisted immediately.
+      modal.querySelectorAll('.ordreg-check').forEach(chk=>{
+        chk.addEventListener('change', ()=>{
+          const pid = chk.dataset.pid;
+          if(!Array.isArray(c.regularProducts)) c.regularProducts = [];
+          const i = c.regularProducts.indexOf(pid);
+          if(chk.checked){ if(i < 0) c.regularProducts.push(pid); } else if(i >= 0) c.regularProducts.splice(i, 1);
+          const q = modal.querySelector(`.ordreg-qty[data-pid="${pid}"]`);
+          if(q){ q.disabled = !chk.checked; if(!chk.checked) q.value = ''; }
+          saveData();
+          recalcTotal();
+        });
+      });
+      // quantity is order-specific (not saved to the client) — it only drives the total + the saved order
+      modal.querySelectorAll('.ordreg-qty').forEach(qi=>{
+        qi.addEventListener('input', recalcTotal);
+        qi.addEventListener('change', recalcTotal);
+      });
+      // sub-category discount: applies to every product in that sub-category (shown as the
+      // products' placeholder). a product's own discount still overrides it.
+      modal.querySelectorAll('.ordreg-subdisc').forEach(inp=>{
+        inp.addEventListener('click', e=>e.stopPropagation());   // don't toggle the collapse
+        inp.closest('.ordreg-headdisc').addEventListener('click', e=>e.stopPropagation());
+        inp.addEventListener('change', ()=>{
+          const sid = inp.dataset.sid;
+          if(!c.subcatDiscounts) c.subcatDiscounts = {};
+          const v = inp.value.trim();
+          let ph = '% הנחה';
+          if(v === '') delete c.subcatDiscounts[sid];
+          else { const cl = Math.min(100, Math.max(0, parseFloat(v) || 0)); c.subcatDiscounts[sid] = cl; ph = String(cl); }
+          saveData();
+          recalcTotal();
+        });
+      });
+      // sub-sub-category blanket price: one fixed unit price for EVERY product in that
+      // sub-sub-category, for this client. it becomes the final price (overrides the base
+      // price + any discount). live-updates each product's shown price.
+      function refreshSubsubPriceCells(ssid){
+        const bp = (c.subsubPrices && c.subsubPrices[ssid]!==undefined && c.subsubPrices[ssid]!==null && c.subsubPrices[ssid]!=='') ? c.subsubPrices[ssid] : null;
+        modal.querySelectorAll(`.ordreg-price[data-ssid="${CSS.escape(ssid)}"]`).forEach(sp=>{
+          const base = sp.dataset.base || '';
+          const baseTxt = base!=='' ? ('₪'+base) : '';
+          if(bp!==null){
+            const bpNum = Math.max(0, parseFloat(bp)||0);
+            sp.innerHTML = `${baseTxt?`<s class="ordreg-price-old">${baseTxt}</s> `:''}<b class="ordreg-price-new">₪${bpNum}</b>`;
+          } else {
+            sp.textContent = baseTxt;
+          }
+        });
+      }
+      modal.querySelectorAll('.ordreg-subsubprice').forEach(inp=>{
+        inp.addEventListener('click', e=>e.stopPropagation());   // don't toggle the collapse
+        inp.closest('.ordreg-headprice').addEventListener('click', e=>e.stopPropagation());
+        inp.addEventListener('change', ()=>{
+          const ssid = inp.dataset.ssid;
+          if(!c.subsubPrices) c.subsubPrices = {};
+          const v = inp.value.trim();
+          if(v === '') delete c.subsubPrices[ssid];
+          else c.subsubPrices[ssid] = Math.max(0, parseFloat(v) || 0);
+          saveData();
+          refreshSubsubPriceCells(ssid);
+          recalcTotal();
         });
       });
 
@@ -3335,21 +3509,49 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       });
 
       const discountInput = modal.querySelector('.order-discount-input');
+      // effective unit price + discount for a catalog line. precedence:
+      //  1. a per-client blanket price on the product's sub-sub-category → that IS the final unit
+      //     price (no further % applied — the seller set the exact price).
+      //  2. otherwise base price, discounted by the product's sub-category discount → else the
+      //     order's global discount.
+      function ordregLine(pid, g){
+        const pr = catalog.products.find(p=>p.id===pid);
+        if(!pr) return { unit:0, disc:0 };
+        const base = parseFloat(pr.price) || 0;
+        if(pr.subsubcategoryId && c.subsubPrices){
+          const bp = c.subsubPrices[pr.subsubcategoryId];
+          if(bp!==undefined && bp!==null && bp!==''){
+            return { unit: Math.max(0, parseFloat(bp) || 0), disc: 0 };
+          }
+        }
+        const sd = (pr.subcategoryId && c.subcatDiscounts) ? c.subcatDiscounts[pr.subcategoryId] : undefined;
+        let ld = (sd!==undefined && sd!==null && sd!=='') ? parseFloat(sd) : NaN;
+        if(isNaN(ld)) ld = g;
+        return { unit: base, disc: Math.min(100, Math.max(0, ld)) };
+      }
       function recalcTotal(){
         if(noOrderCheckbox.checked){
           modal.querySelector('.order-total-amount').textContent = `₪0.00`;
           return;
         }
-        let subtotal = 0;
+        const g = Math.min(100, Math.max(0, parseFloat(discountInput.value) || 0));
+        let oldSub = 0;
         modal.querySelectorAll('.order-item-checkbox').forEach(cb=>{
           if(cb.checked){
             const qtyInput = modal.querySelector(`.order-item-qty[data-item="${CSS.escape(cb.dataset.item)}"]`);
-            const qty = parseFloat(qtyInput.value) || 0;
-            subtotal += qty * unitPrice;
+            oldSub += (parseFloat(qtyInput.value) || 0) * unitPrice;
           }
         });
-        const discountPct = Math.min(100, Math.max(0, parseFloat(discountInput.value) || 0));
-        const total = subtotal * (1 - discountPct / 100);
+        let catTotal = 0;
+        modal.querySelectorAll('.ordreg-qty').forEach(qi=>{
+          const qty = parseFloat(qi.value) || 0;
+          if(qty <= 0) return;
+          const pr = catalog.products.find(p=>p.id===qi.dataset.pid);
+          if(!pr) return;
+          const { unit, disc } = ordregLine(qi.dataset.pid, g);
+          catTotal += unit * qty * (1 - disc/100);
+        });
+        const total = oldSub * (1 - g/100) + catTotal;
         modal.querySelector('.order-total-amount').textContent = `₪${total.toFixed(2)}`;
       }
       discountInput.addEventListener('input', recalcTotal);
@@ -3365,6 +3567,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const noOrder = noOrderCheckbox.checked;
         let items = [];
         let noOrderReason = "";
+        const discountPct = Math.min(100, Math.max(0, parseFloat(modal.querySelector('.order-discount-input').value) || 0));
         if(!noOrder){
           modal.querySelectorAll('.order-item-checkbox').forEach(cb=>{
             if(cb.checked){
@@ -3372,6 +3575,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
               const qty = parseFloat(qtyInput.value) || 0;
               if(qty > 0) items.push({ name: cb.dataset.item, qty });
             }
+          });
+          // catalog-tree lines: each carries its own effective unit price + discount, frozen into the order
+          modal.querySelectorAll('.ordreg-qty').forEach(qi=>{
+            const qty = parseFloat(qi.value) || 0;
+            if(qty <= 0) return;
+            const pr = catalog.products.find(p=>p.id===qi.dataset.pid);
+            if(!pr) return;
+            const { unit, disc } = ordregLine(qi.dataset.pid, discountPct);
+            items.push({ name: pr.name, qty, productId: pr.id, listPrice: unit, discountPct: disc, lineTotal: +(unit*qty*(1-disc/100)).toFixed(2) });
           });
           if(items.length === 0){
             alert('יש לבחור לפחות מוצר אחד עם כמות גדולה מ-0, או לסמן "לא בוצעה הזמנה".');
@@ -3385,9 +3597,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           }
         }
         saveBtn.disabled = true;
-        const discountPct = Math.min(100, Math.max(0, parseFloat(modal.querySelector('.order-discount-input').value) || 0));
-        const subtotal = noOrder ? 0 : items.reduce((sum,it)=> sum + it.qty * unitPrice, 0);
-        const total = subtotal * (1 - discountPct / 100);
+        let oldSub = 0, catTotal = 0;
+        items.forEach(it=>{ if(it.productId != null) catTotal += (it.lineTotal || 0); else oldSub += it.qty * unitPrice; });
+        const total = noOrder ? 0 : (oldSub * (1 - discountPct / 100) + catTotal);
         c.discountPercent = discountPct || "";
         c.orders = c.orders || [];
         if(orderModalEditingId){
@@ -5180,6 +5392,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     } else {
       productsViewEl.classList.add('view-hidden');
       mainViewEl.classList.remove('view-hidden');
+      // re-render the client cards so their "regular products" reflect any catalog changes
+      // made in the products view this session
+      if(typeof renderAll === 'function'){ try{ renderAll(); }catch(_){} }
       // the map lived in a hidden container — re-measure it so it never breaks, then
       // let it settle. (we keep the single map instance; never destroy/recreate it.)
       if(typeof map !== 'undefined' && map){
@@ -5209,13 +5424,111 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function catalogDirectProducts(catId){
     return catalog.products.filter(p => p.categoryId === catId && !p.subcategoryId).sort((a,b)=>(a.order||0)-(b.order||0));
   }
-  // products inside a specific sub-category
+  // products sitting DIRECTLY in a sub-category (not inside a sub-sub-category)
   function catalogSubProducts(subId){
-    return catalog.products.filter(p => p.subcategoryId === subId).sort((a,b)=>(a.order||0)-(b.order||0));
+    return catalog.products.filter(p => p.subcategoryId === subId && !p.subsubcategoryId).sort((a,b)=>(a.order||0)-(b.order||0));
+  }
+  // every product under a sub-category, whether direct or inside one of its sub-sub-categories
+  function catalogSubTotal(subId){
+    return catalog.products.filter(p => p.subcategoryId === subId).length;
+  }
+  // products inside a specific sub-sub-category
+  function catalogSubsubProducts(subsubId){
+    return catalog.products.filter(p => p.subsubcategoryId === subsubId).sort((a,b)=>(a.order||0)-(b.order||0));
   }
   function catalogSubcatsFor(catId){
     return catalog.subcategories.filter(s => s.categoryId === catId).sort((a,b)=>(a.order||0)-(b.order||0));
   }
+  function catalogSubsubcatsFor(subId){
+    return catalog.subsubcategories.filter(ss => ss.subcategoryId === subId).sort((a,b)=>(a.order||0)-(b.order||0));
+  }
+
+  // ---- drag a product INTO a folder: resolve a folder header element to a destination
+  // {catId, subId, subsubId}, and move the product there (like dropping a file in a folder). ----
+  function folderTargetFromEl(el){
+    if(!el) return null;
+    const ssHead = el.closest('.subsubcat-head');
+    if(ssHead){
+      const group = ssHead.closest('.catalog-subsubcat');
+      const ss = group && catalog.subsubcategories.find(x => x.id === group.dataset.subsubid);
+      if(ss){ const sub = catalog.subcategories.find(s => s.id === ss.subcategoryId);
+        return { catId: sub ? sub.categoryId : null, subId: ss.subcategoryId, subsubId: ss.id, label: ss.name }; }
+    }
+    const subHead = el.closest('.subcat-head');
+    if(subHead){
+      const group = subHead.closest('.catalog-subcat');
+      const sub = group && catalog.subcategories.find(s => s.id === group.dataset.subid);
+      if(sub) return { catId: sub.categoryId, subId: sub.id, subsubId: null, label: sub.name };
+    }
+    const catHead = el.closest('.cat-head');
+    if(catHead){
+      const group = catHead.closest('.catalog-cat');
+      const cat = group && catalog.categories.find(c => c.id === group.dataset.id);
+      if(cat) return { catId: cat.id, subId: null, subsubId: null, label: cat.name };
+    }
+    return null;
+  }
+  function isSameCatalogFolder(pr, t){
+    if(!pr || !t) return false;
+    return (pr.categoryId||null)===(t.catId||null) && (pr.subcategoryId||null)===(t.subId||null) && (pr.subsubcategoryId||null)===(t.subsubId||null);
+  }
+  function moveProductToFolder(pid, t){
+    const pr = catalog.products.find(p => p.id === pid);
+    if(!pr || !t || isSameCatalogFolder(pr, t)) return false;
+    pr.categoryId = t.catId || null;
+    pr.subcategoryId = t.subId || null;
+    pr.subsubcategoryId = t.subsubId || null;
+    // drop it at the end of its new list
+    const dest = t.subsubId ? catalogSubsubProducts(t.subsubId)
+      : t.subId ? catalogSubProducts(t.subId)
+      : catalogDirectProducts(t.catId);
+    const maxOrder = dest.reduce((m,x)=> x.id!==pr.id ? Math.max(m, x.order||0) : m, -1);
+    pr.order = maxOrder + 1;
+    // reveal the destination so the moved product is visible
+    if(t.catId) openCatalogCatIds.add(t.catId);
+    if(t.subId) openCatalogSubIds.add(t.subId);
+    if(t.subsubId) openCatalogSubSubIds.add(t.subsubId);
+    saveCatalog(); renderCatalog();
+    return true;
+  }
+  // single shared "this folder is the drop target" highlight
+  let catalogDropHi = null;
+  function setCatalogDropHighlight(head){
+    if(catalogDropHi === head) return;
+    if(catalogDropHi) catalogDropHi.classList.remove('catalog-drop-target');
+    catalogDropHi = head || null;
+    if(catalogDropHi) catalogDropHi.classList.add('catalog-drop-target');
+  }
+  // mouse (HTML5 DnD): make a folder header accept a dragged product row. attached per-head
+  // each render (heads are rebuilt); stopPropagation keeps the sub-category reorder container
+  // from also handling the drop.
+  function wireHeadProductDrop(head){
+    if(head.__pdrop) return; head.__pdrop = true;
+    head.addEventListener('dragover', (e)=>{
+      const dragging = document.querySelector('.catalog-prod-row.dragging');
+      if(!dragging) return;
+      const tgt = folderTargetFromEl(head);
+      const pr = catalog.products.find(p => p.id === dragging.dataset.pid);
+      if(!tgt || isSameCatalogFolder(pr, tgt)){ if(catalogDropHi===head) setCatalogDropHighlight(null); return; }
+      e.preventDefault(); e.stopPropagation();
+      if(e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+      setCatalogDropHighlight(head);
+    });
+    head.addEventListener('dragleave', (e)=>{
+      if(catalogDropHi===head && !head.contains(e.relatedTarget)) setCatalogDropHighlight(null);
+    });
+    head.addEventListener('drop', (e)=>{
+      const dragging = document.querySelector('.catalog-prod-row.dragging');
+      if(!dragging) return;
+      const tgt = folderTargetFromEl(head);
+      const pr = catalog.products.find(p => p.id === dragging.dataset.pid);
+      setCatalogDropHighlight(null);
+      if(!tgt || isSameCatalogFolder(pr, tgt)) return;
+      e.preventDefault(); e.stopPropagation();
+      moveProductToFolder(dragging.dataset.pid, tgt);
+    });
+  }
+
   function catalogProductRow(pr){
     const meta = [
       (pr.price!=='' && pr.price!=null) ? ('₪'+escapeHtml(String(pr.price))) : '',
@@ -5254,6 +5567,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       itemSelector: '.catalog-prod-row',
       handleSelector: null,
       ignoreSelector: 'button, input, .catalog-prod-del',
+      crossFolder: true, // a product row can also be dropped onto another folder's header
       persistFn: (els)=>{
         els.forEach((el,i)=>{ const p = catalog.products.find(p=>p.id===el.dataset.pid); if(p) p.order = i; });
         saveCatalog(); renderCatalog();
@@ -5261,21 +5575,46 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     });
   }
 
+  function subsubcatGroupHtml(ss){
+    const prods = catalogSubsubProducts(ss.id);
+    const open = openCatalogSubSubIds.has(ss.id);
+    return `
+      <div class="cluster-group catalog-subsubcat" data-subsubid="${ss.id}">
+        <div class="cluster-head subsubcat-head">
+          <span class="name">${escapeHtml(ss.name)}</span>
+          <span class="count">${prods.length}</span>
+          <button type="button" class="rename-folder subsub-rename" title="שנה שם">${FOLDER_PEN_SVG}</button>
+          <button type="button" class="folder-del subsub-del" title="מחק תת־תת־קטגוריה">${CATALOG_TRASH_SVG}</button>
+        </div>
+        <div class="cluster-body animated-collapse${open?' is-open':''}" style="${open?'max-height:none':''}">
+          <div class="catalog-prod-list">${prods.length ? prods.map(catalogProductRow).join('') : ''}</div>
+          ${prods.length ? '' : '<div class="catalog-empty">אין מוצרים בתת־תת־קטגוריה זו.</div>'}
+          <button type="button" class="primary catalog-add-prod catalog-add-prod-subsub">+ הוסף מוצר</button>
+        </div>
+      </div>`;
+  }
+
   function subcatGroupHtml(sub){
     const prods = catalogSubProducts(sub.id);
+    const subsubs = catalogSubsubcatsFor(sub.id);
     const open = openCatalogSubIds.has(sub.id);
+    const nothing = prods.length === 0 && subsubs.length === 0;
     return `
       <div class="cluster-group catalog-subcat" data-subid="${sub.id}">
         <div class="cluster-head subcat-head">
           <span class="name">${escapeHtml(sub.name)}</span>
-          <span class="count">${prods.length}</span>
+          <span class="count">${catalogSubTotal(sub.id)}</span>
           <button type="button" class="rename-folder sub-rename" title="שנה שם">${FOLDER_PEN_SVG}</button>
           <button type="button" class="folder-del sub-del" title="מחק תת־קטגוריה">${CATALOG_TRASH_SVG}</button>
         </div>
         <div class="cluster-body animated-collapse${open?' is-open':''}" style="${open?'max-height:none':''}">
-          <div class="catalog-prod-list">${prods.length ? prods.map(catalogProductRow).join('') : ''}</div>
-          ${prods.length ? '' : '<div class="catalog-empty">אין מוצרים בתת־קטגוריה זו.</div>'}
-          <button type="button" class="primary catalog-add-prod catalog-add-prod-sub">+ הוסף מוצר</button>
+          <div class="catalog-prod-list">${prods.map(catalogProductRow).join('')}</div>
+          <div class="catalog-subsubcats">${subsubs.map(subsubcatGroupHtml).join('')}</div>
+          ${nothing ? '<div class="catalog-empty">אין מוצרים בתת־קטגוריה זו.</div>' : ''}
+          <div class="catalog-cat-actions catalog-subcat-actions">
+            <button type="button" class="catalog-add-subsub">+ תת־תת־קטגוריה</button>
+            <button type="button" class="primary catalog-add-prod catalog-add-prod-sub">+ הוסף מוצר</button>
+          </div>
         </div>
       </div>`;
   }
@@ -5286,7 +5625,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const items = [];
     bodyEl.querySelectorAll(':scope > .catalog-prod-list > .catalog-prod-row').forEach(r=>items.push(r));
     bodyEl.querySelectorAll(':scope > .catalog-subcats > .catalog-subcat').forEach(s=>items.push(s));
-    const act = bodyEl.querySelector(':scope > .catalog-cat-actions') || bodyEl.querySelector(':scope > .catalog-add-prod-sub');
+    bodyEl.querySelectorAll(':scope > .catalog-subsubcats > .catalog-subsubcat').forEach(s=>items.push(s));
+    const act = bodyEl.querySelector(':scope > .catalog-cat-actions') || bodyEl.querySelector(':scope > .catalog-add-prod-sub') || bodyEl.querySelector(':scope > .catalog-add-prod-subsub');
     if(act) items.push(act);
     items.forEach((el,i)=>{
       el.style.animation = 'none';
@@ -5349,9 +5689,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       group.querySelector('.cat-del').addEventListener('click', (e)=>{
         e.stopPropagation();
         if(!confirm(`למחוק את הקטגוריה "${cat.name}" וכל המוצרים והתת־קטגוריות שבתוכה?`)) return;
+        const removedSubIds = new Set(catalog.subcategories.filter(s => s.categoryId === catId).map(s => s.id));
         catalog.categories = catalog.categories.filter(c => c.id !== catId);
         catalog.products = catalog.products.filter(p => p.categoryId !== catId);
         catalog.subcategories = catalog.subcategories.filter(s => s.categoryId !== catId);
+        catalog.subsubcategories = catalog.subsubcategories.filter(ss => !removedSubIds.has(ss.subcategoryId));
         openCatalogCatIds.delete(catId);
         saveCatalog(); renderCatalog();
       });
@@ -5393,17 +5735,77 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         });
         subGroup.querySelector('.sub-del').addEventListener('click', (e)=>{
           e.stopPropagation();
-          const cnt = catalogSubProducts(subId).length;
+          const cnt = catalogSubTotal(subId);
           const msg = cnt ? `למחוק את תת־הקטגוריה "${sub.name}"? ${cnt} המוצרים שבתוכה יעברו ישירות לקטגוריה.` : `למחוק את תת־הקטגוריה "${sub.name}"?`;
           if(!confirm(msg)) return;
-          // keep the products — move them up to the category level rather than deleting them
-          catalog.products.forEach(p=>{ if(p.subcategoryId === subId) p.subcategoryId = null; });
+          // keep the products — move them (and any inside sub-sub-categories) up to the category level
+          catalog.products.forEach(p=>{ if(p.subcategoryId === subId){ p.subcategoryId = null; p.subsubcategoryId = null; } });
+          catalog.subsubcategories = catalog.subsubcategories.filter(ss => ss.subcategoryId !== subId);
           catalog.subcategories = catalog.subcategories.filter(s => s.id !== subId);
           openCatalogSubIds.delete(subId);
           saveCatalog(); renderCatalog();
         });
-        subGroup.querySelector('.catalog-add-prod-sub').addEventListener('click', ()=> openProductEditor(catId, null, subId));
+        subGroup.querySelector(':scope > .cluster-body > .catalog-subcat-actions .catalog-add-prod-sub')
+          .addEventListener('click', ()=> openProductEditor(catId, null, subId));
+        subGroup.querySelector(':scope > .cluster-body > .catalog-subcat-actions .catalog-add-subsub')
+          .addEventListener('click', (e)=>{
+            e.stopPropagation();
+            const nn = prompt('שם תת־תת־קטגוריה חדשה:', '');
+            if(!nn || !nn.trim()) return;
+            const ss = { id: genCatalogId(), subcategoryId: subId, name: nn.trim(), order: catalogSubsubcatsFor(subId).length };
+            catalog.subsubcategories.push(ss);
+            openCatalogCatIds.add(catId);
+            openCatalogSubIds.add(subId);
+            openCatalogSubSubIds.add(ss.id);
+            saveCatalog(); renderCatalog();
+          });
+        // this sub-category's direct products (not the ones nested in sub-sub-categories)
         wireCatalogProdList(subGroup.querySelector(':scope > .cluster-body > .catalog-prod-list'), catId);
+
+        // sub-sub-categories inside this sub-category
+        const subsubsWrap = subGroup.querySelector(':scope > .cluster-body > .catalog-subsubcats');
+        subsubsWrap.querySelectorAll(':scope > .catalog-subsubcat').forEach(ssGroup=>{
+          const subsubId = ssGroup.dataset.subsubid;
+          const ss = catalog.subsubcategories.find(x => x.id === subsubId);
+          if(!ss) return;
+          const ssBody = ssGroup.querySelector(':scope > .cluster-body');
+          ssGroup.querySelector('.subsubcat-head').addEventListener('click', (e)=>{
+            if(e.target.closest('.subsub-del, .subsub-rename')) return;
+            const opening = !openCatalogSubSubIds.has(subsubId);
+            toggleAnimatedCollapse(ssBody, null);
+            if(opening) staggerCatalogOpen(ssBody);
+            if(openCatalogSubSubIds.has(subsubId)) openCatalogSubSubIds.delete(subsubId); else openCatalogSubSubIds.add(subsubId);
+          });
+          ssGroup.querySelector('.subsub-rename').addEventListener('click', (e)=>{
+            e.stopPropagation();
+            const nn = prompt('שם תת־תת־הקטגוריה:', ss.name);
+            if(nn && nn.trim()){ ss.name = nn.trim(); saveCatalog(); renderCatalog(); }
+          });
+          ssGroup.querySelector('.subsub-del').addEventListener('click', (e)=>{
+            e.stopPropagation();
+            const cnt = catalogSubsubProducts(subsubId).length;
+            const msg = cnt ? `למחוק את תת־תת־הקטגוריה "${ss.name}"? ${cnt} המוצרים שבתוכה יעברו לתת־הקטגוריה.` : `למחוק את תת־תת־הקטגוריה "${ss.name}"?`;
+            if(!confirm(msg)) return;
+            // keep the products — move them up to the sub-category level
+            catalog.products.forEach(p=>{ if(p.subsubcategoryId === subsubId) p.subsubcategoryId = null; });
+            catalog.subsubcategories = catalog.subsubcategories.filter(x => x.id !== subsubId);
+            openCatalogSubSubIds.delete(subsubId);
+            saveCatalog(); renderCatalog();
+          });
+          ssGroup.querySelector('.catalog-add-prod-subsub').addEventListener('click', ()=> openProductEditor(catId, null, subId, subsubId));
+          wireCatalogProdList(ssGroup.querySelector(':scope > .cluster-body > .catalog-prod-list'), catId);
+        });
+
+        // drag-to-reorder sub-sub-categories within this sub-category
+        wireCatalogReorder(subsubsWrap, {
+          itemSelector: '.catalog-subsubcat',
+          handleSelector: '.subsubcat-head',
+          ignoreSelector: 'button, input, .subsub-rename, .subsub-del',
+          persistFn: (els)=>{
+            els.forEach((el,i)=>{ const x = catalog.subsubcategories.find(s=>s.id===el.dataset.subsubid); if(x) x.order = i; });
+            saveCatalog(); renderCatalog();
+          }
+        });
       });
 
       // drag-to-reorder sub-categories within this category
@@ -5430,6 +5832,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         saveCatalog(); renderCatalog();
       }
     });
+
+    // every folder header (category / sub-category / sub-sub-category) accepts a dragged
+    // product row via mouse — dropping a product on a folder moves it into that folder.
+    list.querySelectorAll('.cat-head, .subcat-head, .subsubcat-head').forEach(wireHeadProductDrop);
   }
 
   function addCatalogCategory(){
@@ -5473,15 +5879,22 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     reader.readAsDataURL(file);
   }
 
-  function openProductEditor(categoryId, product, defaultSubId){
+  function openProductEditor(categoryId, product, defaultSubId, defaultSubsubId){
     const editing = !!product;
     const p = product || {};
     const subs = catalogSubcatsFor(categoryId);
     const curSub = editing ? (p.subcategoryId || '') : (defaultSubId || '');
+    const curSubsub = editing ? (p.subsubcategoryId || '') : (defaultSubsubId || '');
     const subOptionsHtml = subs.length ? (
       `<option value=""${curSub===''?' selected':''}>— ללא תת־קטגוריה —</option>` +
       subs.map(s=>`<option value="${s.id}"${curSub===s.id?' selected':''}>${escapeHtml(s.name)}</option>`).join('')
     ) : '';
+    const subsubOptionsFor = (subId, cur)=>{
+      const list = subId ? catalogSubsubcatsFor(subId) : [];
+      if(!list.length) return '';
+      return `<option value=""${cur===''?' selected':''}>— ללא תת־תת־קטגוריה —</option>` +
+        list.map(ss=>`<option value="${ss.id}"${cur===ss.id?' selected':''}>${escapeHtml(ss.name)}</option>`).join('');
+    };
     const existing = document.getElementById('productEditorOverlay');
     if(existing) existing.remove();
     const overlay = document.createElement('div');
@@ -5514,7 +5927,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <div style="flex:1"><label>יחידת מידה</label><input type="text" class="pe-unit" value="${escapeHtml(p.unit || '')}" placeholder="שקית / ק״ג / יח׳"></div>
         </div>
         ${subOptionsHtml ? `<label>תת־קטגוריה</label>
-        <select class="pe-subcat">${subOptionsHtml}</select>` : ''}
+        <select class="pe-subcat">${subOptionsHtml}</select>
+        <div class="pe-subsubcat-wrap"${(curSub && catalogSubsubcatsFor(curSub).length) ? '' : ' style="display:none"'}>
+          <label>תת־תת־קטגוריה</label>
+          <select class="pe-subsubcat">${subsubOptionsFor(curSub, curSubsub)}</select>
+        </div>` : ''}
         <label>מק״ט / ברקוד</label>
         <input type="text" class="pe-sku" value="${escapeHtml(p.sku || '')}" placeholder="לא חובה">
         <label>הערה</label>
@@ -5527,6 +5944,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       </div>`;
     modal.querySelector('.order-modal-close').addEventListener('click', ()=> overlay.remove());
     const nameInput = modal.querySelector('.pe-name');
+
+    // the sub-sub-category select depends on the chosen sub-category: repopulate + show/hide
+    const subSelEl = modal.querySelector('.pe-subcat');
+    const subsubWrap = modal.querySelector('.pe-subsubcat-wrap');
+    const subsubSelEl = modal.querySelector('.pe-subsubcat');
+    if(subSelEl && subsubWrap && subsubSelEl){
+      subSelEl.addEventListener('change', ()=>{
+        const opts = subsubOptionsFor(subSelEl.value, '');
+        subsubSelEl.innerHTML = opts;
+        subsubWrap.style.display = opts ? '' : 'none';
+      });
+    }
 
     // ---- photo: upload / take, downscale, preview; default 📦 icon when empty ----
     let currentImageUrl = p.imageUrl || '';
@@ -5566,19 +5995,27 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       };
       const subSel = modal.querySelector('.pe-subcat');
       const chosenSub = subSel ? (subSel.value || null) : (defaultSubId || null);
-      const targetLen = () => (chosenSub ? catalogSubProducts(chosenSub) : catalogDirectProducts(categoryId)).length;
+      const subsubSel = modal.querySelector('.pe-subsubcat');
+      // a sub-sub-category only counts when its wrapper is visible and a real sub-category is chosen
+      const subsubVisible = subsubWrap && subsubWrap.style.display !== 'none';
+      const chosenSubsub = (chosenSub && subsubSel && subsubVisible) ? (subsubSel.value || null) : null;
+      const targetLen = () => (chosenSubsub ? catalogSubsubProducts(chosenSubsub)
+        : chosenSub ? catalogSubProducts(chosenSub) : catalogDirectProducts(categoryId)).length;
       if(editing){
-        const moved = (product.subcategoryId || null) !== chosenSub;
+        const moved = (product.subcategoryId || null) !== chosenSub || (product.subsubcategoryId || null) !== chosenSubsub;
         Object.assign(product, data);
         product.subcategoryId = chosenSub;
+        product.subsubcategoryId = chosenSubsub;
         if(moved) product.order = targetLen(); // drop it at the end of its new list
         if(chosenSub) openCatalogSubIds.add(chosenSub);
+        if(chosenSubsub) openCatalogSubSubIds.add(chosenSubsub);
       } else {
         catalog.products.push(Object.assign({
-          id: genCatalogId(), categoryId, subcategoryId: chosenSub, imageUrl: '', order: targetLen()
+          id: genCatalogId(), categoryId, subcategoryId: chosenSub, subsubcategoryId: chosenSubsub, imageUrl: '', order: targetLen()
         }, data));
         openCatalogCatIds.add(categoryId);
         if(chosenSub) openCatalogSubIds.add(chosenSub);
+        if(chosenSubsub) openCatalogSubSubIds.add(chosenSubsub);
       }
       saveCatalog(); renderCatalog();
       overlay.remove();
@@ -5586,6 +6023,156 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     document.body.appendChild(overlay);
     setTimeout(()=> nameInput.focus(), 30);
   }
+
+  // ---- SPEC §4: "regular products" — chosen inside the client's ORDER popup as a drill-down
+  // catalog tree: category → sub-category → products. each product has a checkbox + optional
+  // per-client discount %. only the checked products are kept as the client's regular products.
+  // reuses the order popup's .order-cat-title/.order-cat-items collapse (auto-wired). ----
+  function regularProductsTreeHtml(c, qtyMap){
+    if(!catalog.products.length){
+      return `<div class="ordreg-empty">אין עדיין מוצרים בקטלוג. הוסף מוצרים במסך "מוצרים ומחירים".</div>`;
+    }
+    qtyMap = qtyMap || {};
+    const regs = new Set(c.regularProducts || []);
+    const subDiscs = c.subcatDiscounts || {};
+    const subsubPrices = c.subsubPrices || {}; // per-client fixed unit price for a whole sub-sub-category
+    // renders the price cell: a plain base price, or — when this product's sub-sub-category has a
+    // blanket price for this client — the base price struck through with the override beside it
+    const priceCellHtml = (base, ssid)=>{
+      const bp = (ssid && subsubPrices[ssid]!==undefined && subsubPrices[ssid]!==null && subsubPrices[ssid]!=='') ? subsubPrices[ssid] : null;
+      const baseTxt = base!=='' ? ('₪'+escapeHtml(base)) : '';
+      if(bp!==null){
+        const bpNum = Math.max(0, parseFloat(bp)||0);
+        return `${baseTxt?`<s class="ordreg-price-old">${baseTxt}</s> `:''}<b class="ordreg-price-new">₪${bpNum}</b>`;
+      }
+      return baseTxt;
+    };
+    // sid = the sub-category this product belongs to ('' for a direct product); inherited =
+    // the sub-category discount, shown as a placeholder when the product has no own override
+    const item = (pr, sid, inherited)=>{
+      const checked = regs.has(pr.id);
+      const base = (pr.price!=='' && pr.price!=null) ? String(pr.price) : '';
+      const ssid = pr.subsubcategoryId || '';
+      const qv = (qtyMap[pr.id]!==undefined && qtyMap[pr.id]!==null && qtyMap[pr.id]!=='') ? qtyMap[pr.id] : '';
+      return `<div class="ordreg-item">
+        <label class="ordreg-check-label"><input type="checkbox" class="ordreg-check" data-pid="${pr.id}" ${checked?'checked':''}> <span class="ordreg-name">${escapeHtml(pr.name)}</span></label>
+        <span class="ordreg-gap"></span>
+        <span class="ordreg-price" data-pid="${pr.id}" data-base="${escapeHtml(base)}" data-ssid="${ssid}">${priceCellHtml(base, ssid)}</span>
+        <span class="ordreg-qty-label">כמות:</span>
+        <input type="number" class="ordreg-qty" data-pid="${pr.id}" min="0" step="1" placeholder="0" value="${escapeHtml(String(qv))}" ${checked?'':'disabled'} title="כמות להזמנה">
+      </div>`;
+    };
+    const cats = catalog.categories.slice().sort((a,b)=>(a.order||0)-(b.order||0));
+    const catHtml = cats.map(cat=>{
+      const direct = catalog.products.filter(p=>p.categoryId===cat.id && !p.subcategoryId && p.active!==false).sort((a,b)=>(a.order||0)-(b.order||0));
+      const subs = catalog.subcategories.filter(s=>s.categoryId===cat.id).sort((a,b)=>(a.order||0)-(b.order||0))
+        .map(s=>{
+          const sd = (subDiscs[s.id]!==undefined && subDiscs[s.id]!==null && subDiscs[s.id]!=='') ? subDiscs[s.id] : '';
+          // products sitting directly in the sub-category (not in a sub-sub-category)
+          const sp = catalog.products.filter(p=>p.subcategoryId===s.id && !p.subsubcategoryId && p.active!==false).sort((a,b)=>(a.order||0)-(b.order||0));
+          // sub-sub-categories under this sub-category
+          const subsubs = catalog.subsubcategories.filter(ss=>ss.subcategoryId===s.id).sort((a,b)=>(a.order||0)-(b.order||0))
+            .map(ss=>{
+              const ssp = catalog.products.filter(p=>p.subsubcategoryId===ss.id && p.active!==false).sort((a,b)=>(a.order||0)-(b.order||0));
+              if(!ssp.length) return '';
+              const ssp2 = (subsubPrices[ss.id]!==undefined && subsubPrices[ss.id]!==null && subsubPrices[ss.id]!=='') ? subsubPrices[ss.id] : '';
+              return `<div class="ordreg-subsub">
+                <div class="order-cat-title ordreg-lvl3" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0)">${CHEVRON_ICON_SVG}</span> <span class="ordreg-headname">${escapeHtml(ss.name)}</span><span class="ordreg-headprice"><span class="ordreg-headprice-lbl">מחיר גורף ₪:</span><input type="number" class="ordreg-subsubprice" data-ssid="${ss.id}" min="0" step="0.01" placeholder="—" value="${escapeHtml(String(ssp2))}" title="מחיר אחיד לכל מוצרי תת־התת־קטגוריה עבור לקוח זה"></span></div>
+                <div class="order-cat-items animated-collapse">${ssp.map(p=>item(p, s.id, sd)).join('')}</div>
+              </div>`;
+            }).join('');
+          if(!sp.length && !subsubs) return '';
+          return `<div class="ordreg-sub">
+            <div class="order-cat-title ordreg-lvl2" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0)">${CHEVRON_ICON_SVG}</span> <span class="ordreg-headname">${escapeHtml(s.name)}</span><span class="ordreg-headdisc"><span class="ordreg-headdisc-lbl">הנחה %:</span><input type="number" class="ordreg-subdisc" data-sid="${s.id}" min="0" max="100" step="0.1" placeholder="0" value="${escapeHtml(String(sd))}" title="הנחה על כל מוצרי תת־הקטגוריה הזו"></span></div>
+            <div class="order-cat-items animated-collapse">${sp.map(p=>item(p, s.id, sd)).join('')}${subsubs}</div>
+          </div>`;
+        }).join('');
+      if(!direct.length && !subs) return '';
+      return `<div class="ordreg-cat">
+        <div class="order-cat-title ordreg-lvl1" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(cat.name)}</div>
+        <div class="order-cat-items animated-collapse">${direct.map(p=>item(p, '', undefined)).join('')}${subs}</div>
+      </div>`;
+    }).join('');
+    return catHtml || `<div class="ordreg-empty">אין מוצרים פעילים בקטלוג.</div>`;
+  }
+
+  // ---- price migration (SPEC §8): existing per-unit price → fixed discount % vs a
+  // reference product. non-destructive: shows a full report and only applies on explicit
+  // confirm. one-directional. existing orders are never touched. ----
+  function openMigrationTool(){
+    const existing = document.getElementById('migrationOverlay');
+    if(existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.className = 'order-modal-overlay';
+    overlay.id = 'migrationOverlay';
+    overlay.addEventListener('click', (e)=>{ if(e.target === overlay) overlay.remove(); });
+    const modal = document.createElement('div');
+    modal.className = 'order-modal inventory-modal';
+    overlay.appendChild(modal);
+
+    const pricedProducts = catalog.products.filter(p => p.price !== '' && p.price != null && !isNaN(parseFloat(p.price)));
+    const refOptions = pricedProducts.map(p => `<option value="${p.id}">${escapeHtml(p.name)} — ₪${escapeHtml(String(p.price))}</option>`).join('');
+
+    modal.innerHTML = `
+      <div class="order-modal-header">
+        <h3><span class="inv-hdr-icon">${CATALOG_TAG_SVG}</span> מיגרציית מחירים</h3>
+        <button class="order-modal-close" title="סגור">${CATALOG_X_SVG}</button>
+      </div>
+      <div class="order-modal-body">
+        <p class="mig-intro">ממיר את "מחיר ליחידה" הקיים בכרטיסי הלקוחות לאחוז הנחה קבוע, יחסית ל<b>מוצר ייחוס</b> שתבחר. פעולה חד־כיוונית — האחוז יחול מעכשיו על כל המוצרים בקטלוג.</p>
+        ${pricedProducts.length ? `
+          <label>מוצר ייחוס (המוצר שמולו נקבעו המחירים בכרטיסים)</label>
+          <select class="mig-ref"><option value="">— בחר מוצר ייחוס —</option>${refOptions}</select>
+          <div class="mig-report"><div class="mig-empty">בחר מוצר ייחוס כדי לראות את הדוח.</div></div>
+          <div class="mig-warn"><b>לפני ביצוע:</b> ודא שיש לך גיבוי של הקובץ. ההמרה <b>חד־כיוונית</b> ולא ניתנת לביטול. האחוז שיחושב יחול על <b>כל</b> המוצרים בקטלוג, גם כאלה שלא ניתנה עליהם הנחה קודם. הזמנות ישנות לא ישתנו.</div>
+          <button class="order-save-btn mig-apply" disabled>בצע מיגרציה</button>
+        ` : `
+          <div class="mig-empty">אין עדיין מוצרים עם מחיר בסיס בקטלוג.<br>הוסף קודם את המוצרים שלך עם מחיר, ואז חזור לכאן.</div>
+        `}
+      </div>`;
+
+    modal.querySelector('.order-modal-close').addEventListener('click', ()=> overlay.remove());
+
+    if(pricedProducts.length){
+      const refSel = modal.querySelector('.mig-ref');
+      const reportEl = modal.querySelector('.mig-report');
+      const applyBtn = modal.querySelector('.mig-apply');
+      let plan = [];
+      const round2 = (n)=> Math.round(n*100)/100;
+      const clientsWithPrice = ()=> clients.filter(c => c.price !== '' && c.price != null && !isNaN(parseFloat(c.price)));
+
+      function buildReport(){
+        const ref = catalog.products.find(p => p.id === refSel.value);
+        if(!ref){ reportEl.innerHTML = '<div class="mig-empty">בחר מוצר ייחוס כדי לראות את הדוח.</div>'; applyBtn.disabled = true; plan = []; return; }
+        const refPrice = parseFloat(ref.price);
+        const rows = clientsWithPrice();
+        if(!rows.length){ reportEl.innerHTML = '<div class="mig-empty">אין לקוחות עם "מחיר ליחידה" להמרה.</div>'; applyBtn.disabled = true; plan = []; return; }
+        plan = rows.map(c=>{
+          const raw = round2((1 - parseFloat(c.price)/refPrice) * 100);
+          const pct = Math.max(0, Math.min(100, raw));
+          return { client:c, raw, pct, anom: raw !== pct };
+        });
+        const tbody = plan.map(r=>`<tr class="${r.anom?'mig-anom':''}"><td>${escapeHtml(r.client.business || r.client.name || '—')}</td><td>₪${escapeHtml(String(r.client.price))}</td><td class="mig-pct">${r.pct}%${r.anom?` <span style="opacity:.8">(${r.raw}%)</span>`:''}</td></tr>`).join('');
+        reportEl.innerHTML = `<div class="mig-summary">${plan.length} לקוחות יעודכנו · מוצר ייחוס: ${escapeHtml(ref.name)} (₪${escapeHtml(String(ref.price))})</div><table class="mig-table"><thead><tr><th>לקוח</th><th>מחיר נוכחי</th><th>הנחה שתחושב</th></tr></thead><tbody>${tbody}</tbody></table>`;
+        applyBtn.disabled = false;
+      }
+      refSel.addEventListener('change', buildReport);
+
+      applyBtn.addEventListener('click', ()=>{
+        if(!plan.length) return;
+        if(!confirm(`לבצע מיגרציה ל-${plan.length} לקוחות? הפעולה חד־כיוונית ולא ניתנת לביטול.`)) return;
+        plan.forEach(r=>{ r.client.defaultDiscount = r.pct; });
+        saveData();
+        if(typeof renderAll === 'function') renderAll();
+        modal.querySelector('.order-modal-body').innerHTML = `<div class="mig-done">✓ המיגרציה בוצעה — ${plan.length} לקוחות עודכנו עם אחוז הנחה קבוע.</div><button class="order-save-btn" id="migClose">סגור</button>`;
+        modal.querySelector('#migClose').addEventListener('click', ()=> overlay.remove());
+      });
+    }
+
+    document.body.appendChild(overlay);
+  }
+  { const mb = document.getElementById('openMigrationBtn'); if(mb) mb.addEventListener('click', openMigrationTool); }
+
   // ---- open / close the drawer with a finger swipe ----
   // the drawer lives on the RIGHT edge: swipe left (from the edge) to open, swipe right to close.
   (function(){
