@@ -239,6 +239,15 @@
   .pe-checks{ display:flex; flex-direction:column; gap:8px; margin:12px 0 4px; }
   .pe-check{ display:flex; align-items:center; gap:8px; color:#fff; font-size:.86rem; cursor:pointer; margin:0; }
   .pe-check input{ width:auto; flex:0 0 auto; }
+  /* product photo uploader in the editor */
+  .pe-photo{ display:flex; align-items:center; gap:12px; margin:2px 0 14px; }
+  .pe-photo-preview{ width:76px; height:76px; border-radius:15px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); display:flex; align-items:center; justify-content:center; font-size:1.9rem; overflow:hidden; flex:0 0 auto; }
+  .pe-photo-preview img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .pe-photo-actions{ display:flex; flex-direction:column; gap:6px; }
+  .pe-photo-btn{ background:#1c3fd6; color:#fff; border:none; border-radius:15px; padding:7px 14px; font-size:.82rem; cursor:pointer; font-weight:600; white-space:nowrap; }
+  .pe-photo-btn:hover{ background:#1533ad; }
+  .pe-photo-remove{ background:transparent; border:none; color:#e08b7d; cursor:pointer; font-size:.78rem; padding:2px; text-align:right; }
+  .pe-photo-remove:hover{ color:#ff7bac; }
   header button.ghost, header a.ghost{
     background:transparent; border:1px solid rgba(245,241,231,.35); color:#0f1a2e;
     padding:7px 12px; border-radius:15px; font-size:.95rem; font-family:inherit; font-weight:400; cursor:pointer;
@@ -287,7 +296,7 @@
   /* keep the collapse animation on folder/category bodies: the later plain `.cluster-body`
      rule (transition:background) would otherwise clobber the max-height transition and make
      them snap open/closed instantly. This more-specific rule restores both. */
-  .cluster-body.animated-collapse{ transition: max-height .65s cubic-bezier(.4,0,.2,1), margin-top .65s cubic-bezier(.4,0,.2,1), opacity .55s ease, background .15s ease; }
+  .cluster-body.animated-collapse{ transition: max-height .65s cubic-bezier(.4,0,.2,1), margin-top .65s cubic-bezier(.4,0,.2,1), padding .65s cubic-bezier(.4,0,.2,1), opacity .55s ease, background .15s ease; }
   /* catalog folders: the body itself doesn't fade as a whole — instead it opens downward
      and then each strip/sub-folder slides+fades in, one after another (staggered in JS) */
   #catalogList .cluster-body.animated-collapse{ opacity:1; }
@@ -4920,13 +4929,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function toggleAnimatedCollapse(bodyEl, chevronEl){
     const isOpen = bodyEl.classList.contains('is-open');
     if(isOpen){
-      // closing: lock in the current height first, then animate down to 0
+      // closing: lock in the current height, drop is-open (starts the padding/opacity
+      // transitions from the committed state), then on the next frame animate down to 0.
+      // one rAF (not two) so the collapse starts immediately with no "stuck" pause.
       bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
       void bodyEl.offsetHeight; // force reflow so this starting value is registered
-      requestAnimationFrame(()=>{
-        bodyEl.classList.remove('is-open');
-        requestAnimationFrame(()=>{ bodyEl.style.maxHeight = '0px'; });
-      });
+      bodyEl.classList.remove('is-open');
+      requestAnimationFrame(()=>{ bodyEl.style.maxHeight = '0px'; });
       if(chevronEl) chevronEl.style.transform = 'rotate(0deg)';
     } else {
       // opening: add is-open FIRST (restores the padding that the collapsed rule zeroes out)
@@ -5437,6 +5446,33 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   document.getElementById('new-catalog-cat').addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); addCatalogCategory(); } });
 
   // product editor modal — reuses the dark inventory-modal + blue pill save button
+  // downscale a picked/taken photo to a small JPEG data-URL so it doesn't bloat the
+  // catalog blob. (interim: images live inline; move to a Supabase Storage bucket + URL
+  // per SPEC §9 once a bucket exists.)
+  function resizeImageToDataUrl(file, maxDim, quality, cb){
+    const reader = new FileReader();
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+        if(Math.max(w,h) > maxDim){
+          if(w >= h){ h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        try{
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          cb(canvas.toDataURL('image/jpeg', quality));
+        }catch(_){ cb(e.target.result); }
+      };
+      img.onerror = ()=> cb('');
+      img.src = e.target.result;
+    };
+    reader.onerror = ()=> cb('');
+    reader.readAsDataURL(file);
+  }
+
   function openProductEditor(categoryId, product, defaultSubId){
     const editing = !!product;
     const p = product || {};
@@ -5461,6 +5497,16 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <button class="order-modal-close" title="סגור">${CATALOG_X_SVG}</button>
       </div>
       <div class="order-modal-body">
+        <div class="pe-photo">
+          <div class="pe-photo-preview">${p.imageUrl ? `<img src="${escapeHtml(p.imageUrl)}" alt="">` : '📦'}</div>
+          <div class="pe-photo-actions">
+            <button type="button" class="pe-photo-btn pe-photo-upload">🖼 העלה תמונה</button>
+            <button type="button" class="pe-photo-btn pe-photo-camera">📷 צלם תמונה</button>
+            <button type="button" class="pe-photo-remove"${p.imageUrl ? '' : ' style="display:none"'}>הסר תמונה</button>
+          </div>
+          <input type="file" class="pe-file-upload" accept="image/*" hidden>
+          <input type="file" class="pe-file-camera" accept="image/*" capture="environment" hidden>
+        </div>
         <label>שם מוצר</label>
         <input type="text" class="pe-name" value="${escapeHtml(p.name || '')}" placeholder="שם המוצר">
         <div class="row2">
@@ -5481,6 +5527,30 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       </div>`;
     modal.querySelector('.order-modal-close').addEventListener('click', ()=> overlay.remove());
     const nameInput = modal.querySelector('.pe-name');
+
+    // ---- photo: upload / take, downscale, preview; default 📦 icon when empty ----
+    let currentImageUrl = p.imageUrl || '';
+    const preview = modal.querySelector('.pe-photo-preview');
+    const removeBtn = modal.querySelector('.pe-photo-remove');
+    const fileUpload = modal.querySelector('.pe-file-upload');
+    const fileCamera = modal.querySelector('.pe-file-camera');
+    const setPreview = (url)=>{
+      currentImageUrl = url || '';
+      preview.innerHTML = currentImageUrl ? `<img src="${escapeHtml(currentImageUrl)}" alt="">` : '📦';
+      removeBtn.style.display = currentImageUrl ? '' : 'none';
+    };
+    const handleFile = (input)=>{
+      const file = input.files && input.files[0];
+      input.value = ''; // let the same file be re-picked later
+      if(!file) return;
+      resizeImageToDataUrl(file, 400, 0.82, (dataUrl)=>{ if(dataUrl) setPreview(dataUrl); });
+    };
+    modal.querySelector('.pe-photo-upload').addEventListener('click', ()=> fileUpload.click());
+    modal.querySelector('.pe-photo-camera').addEventListener('click', ()=> fileCamera.click());
+    fileUpload.addEventListener('change', ()=> handleFile(fileUpload));
+    fileCamera.addEventListener('change', ()=> handleFile(fileCamera));
+    removeBtn.addEventListener('click', ()=> setPreview(''));
+
     modal.querySelector('.pe-save').addEventListener('click', ()=>{
       const name = nameInput.value.trim();
       if(!name){ nameInput.focus(); return; }
@@ -5491,7 +5561,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         sku: modal.querySelector('.pe-sku').value.trim(),
         note: modal.querySelector('.pe-note').value.trim(),
         active: modal.querySelector('.pe-active').checked,
-        trackStock: modal.querySelector('.pe-track').checked
+        trackStock: modal.querySelector('.pe-track').checked,
+        imageUrl: currentImageUrl
       };
       const subSel = modal.querySelector('.pe-subcat');
       const chosenSub = subSel ? (subSel.value || null) : (defaultSubId || null);
