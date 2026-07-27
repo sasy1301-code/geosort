@@ -251,6 +251,11 @@
   .catalog-add-subsub:hover{ background:rgba(136,113,217,.16); }
   /* a folder header lit up as the "drop the product here" target while dragging a product */
   #catalogList .cluster-head.catalog-drop-target{ outline:2px dashed #4db8ff; outline-offset:2px; box-shadow:0 0 0 3px rgba(67,148,247,.32), 0 8px 22px rgba(0,0,0,.35); transform:scale(1.02); transition:box-shadow .12s ease, transform .12s ease; }
+  /* "track stock" toggle inside a sub-sub-category + the badge shown on a tracked folder head */
+  .catalog-track-check{ display:flex; align-items:center; gap:8px; color:rgba(255,255,255,.9); font-size:.8rem; cursor:pointer; margin:8px 2px 6px; padding:8px 10px; border-radius:12px; background:rgba(2,119,251,.12); border:1px dashed rgba(77,184,255,.5); }
+  .catalog-track-check input{ width:auto; flex:0 0 auto; }
+  #catalogList .subsub-track-badge{ font-size:.6rem; font-weight:700; color:#0f1a2e; background:#4db8ff; border-radius:8px; padding:2px 7px; margin-inline-start:8px; margin-inline-end:16px; letter-spacing:.02em; flex:0 0 auto; }
+  .inventory-modal .inv-empty{ color:rgba(255,255,255,.62); font-size:.86rem; text-align:center; line-height:1.6; padding:22px 10px; }
   /* sub-category selector in the product editor — matches the dark modal fields */
   .inventory-modal select.pe-subcat,
   .inventory-modal select.pe-subsubcat{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:12px; background:#0f1a2e; color:#fff; border:1px solid rgba(255,255,255,.18); font-size:16px; margin:0 0 2px; }
@@ -318,6 +323,10 @@
     .ordreg-item{ gap:6px; grid-template-columns:minmax(62px,1fr) 8px 54px auto 40px; padding:5px 8px 5px 0; }
     .ordreg-qty-label{ font-size:.72rem; margin-inline-start:6px; }
     .ordreg-price{ font-size:.78rem; }
+    /* mobile: every level of the catalog tree opens straight down, right-aligned — no
+       progressive left indentation as you go category → sub → sub-sub */
+    .ordreg-cat, .ordreg-sub, .ordreg-subsub{ padding-right:0; }
+    .ordreg-cat > .order-cat-items, .ordreg-sub > .order-cat-items, .ordreg-subsub > .order-cat-items{ padding-right:0; }
   }
   .ordreg-disc:disabled{ opacity:.4; }
   .ordreg-empty{ color:rgba(255,255,255,.55); font-size:.8rem; padding:6px 2px; }
@@ -643,6 +652,13 @@
     display:flex; align-items:center; justify-content:center; gap:10px; white-space:nowrap;
   }
   .vehicle-stock-reset-btn:hover{ background:#3384ea; }
+  /* "אפס הכל ל-0" in the general inventory — pink outline to read as a careful/reset action */
+  .inventory-reset-btn{
+    width:fit-content; margin:14px auto 6px; padding:10px 22px; border:1px solid #ff7bac; border-radius:23px;
+    background:transparent; color:#ff9ec2; font-size:10pt; font-weight:400; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; gap:10px; white-space:nowrap;
+  }
+  .inventory-reset-btn:hover{ background:rgba(255,123,172,.14); color:#ffb3cd; }
   .invoice-summary input[type=date]{ width:auto; flex:0 0 auto; padding:5px 8px; font-size:.8rem; }
   .invoice-summary-total{ font-size:.85rem; color:#fff; white-space:nowrap; }
   .invoice-summary-total b{ color:#0f1a2e; }
@@ -1255,16 +1271,8 @@
           <input type="text" id="f-businessid" placeholder="מספר ח.פ או ת.ז">
           <label for="f-contact">שם איש הקשר</label>
           <input type="text" id="f-contact" placeholder="לדוגמה: משה, מנהל המקום">
-          <div class="row2">
-            <div>
-              <label for="f-phone">טלפון</label>
-              <input type="tel" id="f-phone" placeholder="050-0000000">
-            </div>
-            <div>
-              <label for="f-price">מחיר ליחידה</label>
-              <input type="number" id="f-price" placeholder="₪0" step="0.01" min="0">
-            </div>
-          </div>
+          <label for="f-phone">טלפון</label>
+          <input type="tel" id="f-phone" placeholder="050-0000000">
           <label for="f-email">אימייל</label>
           <input type="email" id="f-email" placeholder="לדוגמה: info@business.co.il">
           <label>כתובת</label>
@@ -1556,6 +1564,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const STORAGE_KEY = "clients_data";
   const FOLDERS_KEY = "folders_list";
   const VEHICLE_STOCK_BASELINE_KEY = "vehicle_stock_baseline";
+  const INVENTORY_COUNT_FROM_KEY = "inventory_count_from"; // date the general-inventory tally counts from
   const CLUSTER_NAMES_KEY = "cluster_names_map";
   const CLUSTER_ORDER_KEY = "cluster_order_map";
   const CATALOG_KEY = "catalog"; // separate app_storage key so saving the catalog never rewrites the clients blob
@@ -1568,6 +1577,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   let clients = [];
   let vehicleStockBaseline = { anchors: {} }; // per-product: { qty: <stock level set at this point>, cumulative: <cumulative orders total at that moment> } - lets the driver set any starting quantity, not just 50
+  let inventoryCountFrom = ""; // general-inventory running tally start date ("" = never reset → defaults to today)
   let folders = []; // manually-created folder names, e.g. "ראשון לציון" or "צפון"
   let clusterNames = {}; // custom overrides for automatic cluster names, keyed by dominant-city/geo key
   let clusterOrder = {}; // manual up/down ordering of addresses within a cluster, keyed the same way
@@ -1993,6 +2003,16 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }catch(e){ /* no baseline saved yet, or fetch failed - just use the default */ }
   }
 
+  async function loadInventoryCountFrom(){
+    try{
+      const raw = await sbGet(INVENTORY_COUNT_FROM_KEY);
+      if(raw){ const v = JSON.parse(raw); inventoryCountFrom = (typeof v === 'string') ? v : ''; }
+    }catch(e){ /* none saved yet - default to today at open time */ }
+  }
+  async function saveInventoryCountFrom(){
+    try{ await sbSet(INVENTORY_COUNT_FROM_KEY, JSON.stringify(inventoryCountFrom)); }
+    catch(e){ console.error("שגיאת שמירת תאריך איפוס מלאי", e); }
+  }
   async function saveVehicleStockBaseline(){
     try{
       await sbSet(VEHICLE_STOCK_BASELINE_KEY, JSON.stringify(vehicleStockBaseline));
@@ -2993,7 +3013,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     lines.push(`כתובת: ${c.address || ''}`);
     if(c.phone) lines.push(`טלפון: ${c.phone}`);
     if(c.email) lines.push(`אימייל: ${c.email}`);
-    if(c.price) lines.push(`מחיר ליחידה: ₪${c.price}`);
     if(c.notes) lines.push(`הערות: ${c.notes}`);
     return lines.filter(Boolean).join('\n');
   }
@@ -3142,21 +3161,25 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
 
     function refreshVehicleStock(){
-      listEl.innerHTML = PRODUCT_CATALOG.map(cat => `
+      const groups = buildInventoryGroups();
+      if(!groups.length){
+        listEl.innerHTML = `<div class="inv-empty">אין מוצרים מסומנים כ"עוקב מלאי". סמנו מוצר, או תת־תת־קטגוריה שלמה, במסך "מוצרים ומחירים".</div>`;
+        return;
+      }
+      listEl.innerHTML = groups.map(g => `
         <div class="order-cat">
-          <div class="order-cat-title" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(cat.title)}</div>
+          <div class="order-cat-title" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(g.title)}</div>
           <div class="order-cat-items animated-collapse">
-            ${cat.items.map(name => {
+            ${g.products.map(pr => {
+              const name = pr.name;
               const { remaining, usedSinceAnchor, anchorQty } = getRemaining(name);
               const isLow = remaining <= VEHICLE_STOCK_LOW_THRESHOLD;
-              const variant = name.startsWith(cat.prefix + " ") ? name.slice(cat.prefix.length + 1) : name;
               return `
                 <div class="stock-row">
                   <div class="stock-name">
                     ${isLow ? `<span class="stock-low-dot" title="המלאי ברכב עומד להיגמר"></span>` : ""}
                     <span class="stock-name-block">
-                      <span class="stock-name-prefix">${escapeHtml(cat.prefix)}</span>
-                      <span class="stock-name-variant">${escapeHtml(variant)}</span>
+                      <span class="stock-name-variant">${escapeHtml(name)}</span>
                     </span>
                   </div>
                   <div class="stock-remaining">
@@ -3199,9 +3222,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       listEl.querySelector('.vehicle-stock-reset-btn').addEventListener('click', ()=>{
         const ok = confirm("לקבוע 50 יחידות לכל המוצרים? זה יסמן שהרכב מולא מחדש עכשיו.");
         if(!ok) return;
-        PRODUCT_CATALOG.forEach(cat=>{
-          cat.items.forEach(name=>{
-            vehicleStockBaseline.anchors[name] = { qty: 50, cumulative: getCumulativeOrderedQty(name) };
+        buildInventoryGroups().forEach(g=>{
+          g.products.forEach(pr=>{
+            vehicleStockBaseline.anchors[pr.name] = { qty: 50, cumulative: getCumulativeOrderedQty(pr.name) };
           });
         });
         saveVehicleStockBaseline();
@@ -3268,11 +3291,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       </div>
       <div class="order-modal-body">
         <div class="invoice-summary-range" style="justify-content:center;margin-bottom:14px">
-          <input type="date" class="inventory-from" value="${today}">
+          <input type="date" class="inventory-from" value="${inventoryCountFrom || today}">
           <span class="invoice-range-sep">עד</span>
           <input type="date" class="inventory-to" value="${today}">
         </div>
         <div class="inventory-list"></div>
+        <button type="button" class="inventory-reset-btn">אפס הכל ל-0 (התחל ספירה מחדש)</button>
       </div>
     `;
 
@@ -3281,6 +3305,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const fromInput = modal.querySelector('.inventory-from');
     const toInput = modal.querySelector('.inventory-to');
     const listEl = modal.querySelector('.inventory-list');
+    const resetBtn = modal.querySelector('.inventory-reset-btn');
+
+    // reset the running tally: from now the count starts at 0 and accumulates new orders.
+    // the date pickers still let you look back at any earlier period.
+    resetBtn.addEventListener('click', ()=>{
+      if(!confirm('לאפס את מלאי הכללי ל-0 ולהתחיל לספור מהתחלה?\nהספירה תתחיל מהיום. הזמנות ישנות נשמרות וזמינות דרך בחירת התאריכים.')) return;
+      inventoryCountFrom = today;
+      saveInventoryCountFrom();
+      fromInput.value = today;
+      toInput.value = today;
+      refreshInventory();
+    });
 
     function refreshInventory(){
       const fromDate = fromInput.value;
@@ -3295,15 +3331,20 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           }
         });
       });
-      const grandTotal = Object.values(totals).reduce((sum, v) => sum + v, 0);
-      listEl.innerHTML = PRODUCT_CATALOG.map(cat => `
+      const groups = buildInventoryGroups();
+      if(!groups.length){
+        listEl.innerHTML = `<div class="inv-empty">אין מוצרים מסומנים כ"עוקב מלאי". סמנו מוצר, או תת־תת־קטגוריה שלמה, במסך "מוצרים ומחירים".</div>`;
+        return;
+      }
+      const grandTotal = groups.reduce((sum,g)=> sum + g.products.reduce((s,pr)=> s + (totals[pr.name]||0), 0), 0);
+      listEl.innerHTML = groups.map(g => `
         <div class="order-cat">
-          <div class="order-cat-title" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(cat.title)}</div>
+          <div class="order-cat-title" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(g.title)}</div>
           <div class="order-cat-items animated-collapse">
-            ${cat.items.map(name => `
+            ${g.products.map(pr => `
               <div class="inventory-row">
-                <div class="inventory-name">${escapeHtml(name)}</div>
-                <div class="inventory-qty">כמות הזמנות כללית: <b>${totals[name] || 0}</b></div>
+                <div class="inventory-name">${escapeHtml(pr.name)}</div>
+                <div class="inventory-qty">כמות הזמנות כללית: <b>${totals[pr.name] || 0}</b></div>
               </div>
             `).join('')}
           </div>
@@ -3710,8 +3751,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       <input type="tel" class="edit-phone" value="${escapeHtml(c.phone||'')}">
       <label>אימייל</label>
       <input type="email" class="edit-email" value="${escapeHtml(c.email||'')}">
-      <label>מחיר ליחידה</label>
-      <input type="number" class="edit-price" value="${escapeHtml(c.price||'')}" step="0.01" min="0">
       <label>עיר</label>
       <input type="text" class="edit-city" value="${escapeHtml(origCity)}">
       <label>רחוב</label>
@@ -3796,7 +3835,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       c.contact = card.querySelector('.edit-contact').value.trim();
       c.phone = card.querySelector('.edit-phone').value.trim();
       c.email = card.querySelector('.edit-email').value.trim();
-      c.price = card.querySelector('.edit-price').value.trim();
       c.notes = card.querySelector('.edit-notes').value.trim();
       c.whatsappMessage = card.querySelector('.edit-whatsapp-msg').value.trim();
     }
@@ -3937,12 +3975,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           ${c.phone ? `<div class="cphone">טלפון: <a href="tel:${escapeHtml(telHref(c.phone))}" class="phone-link" title="חייג ללקוח">${escapeHtml(c.phone)}</a></div>` : ""}
           ${c.email ? `<div class="cphone">אימייל: <a href="mailto:${escapeHtml(c.email)}" class="phone-link" title="שליחת מייל ללקוח">${escapeHtml(c.email)}</a></div>` : ""}
         </div>
-        ${c.price ? `
-          <div class="cprice-row">
-            <div class="cprice">מחיר ליחידה: ₪${escapeHtml(c.price)}</div>
-          </div>
-        ` : ""}
-        ${c.price ? `<div class="cprice cprice-vat">מחיר ליחידה כולל מע״מ (${Math.round(VAT_RATE*100)}%): ₪${(parseFloat(c.price) * (1 + VAT_RATE)).toFixed(2)}</div>` : ""}
         <div class="cdiscount-row">
           <div class="card-left-icons">
             ${c.photo ? `
@@ -4981,7 +5013,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     document.getElementById('f-contact').value = '';
     document.getElementById('f-phone').value = '';
     document.getElementById('f-email').value = '';
-    document.getElementById('f-price').value = '';
     document.getElementById('f-street').value = '';
     document.getElementById('f-housenum').value = '';
     document.getElementById('f-city').value = '';
@@ -5217,7 +5248,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
 
   document.getElementById('refreshBtn').addEventListener('click', async ()=>{
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadCatalog()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog()]);
     renderAll();
   });
 
@@ -5275,7 +5306,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const contactEl = document.getElementById('f-contact');
     const phoneEl = document.getElementById('f-phone');
     const emailEl = document.getElementById('f-email');
-    const priceEl = document.getElementById('f-price');
     const streetEl = document.getElementById('f-street');
     const houseNumEl = document.getElementById('f-housenum');
     const cityEl = document.getElementById('f-city');
@@ -5290,7 +5320,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const business = businessEl.value.trim();
     const name = nameEl.value.trim();
     const contact = contactEl.value.trim();
-    const price = priceEl.value.trim();
+    const price = ""; // per-unit price removed — prices now live in the product catalog
     const houseNumber = houseNumEl.value.trim();
     const { street, city, streetParam } = currentAddressQuery();
 
@@ -5443,6 +5473,38 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     return catalog.subsubcategories.filter(ss => ss.subcategoryId === subId).sort((a,b)=>(a.order||0)-(b.order||0));
   }
 
+  // ---- inventory (general + vehicle): which catalog products are "tracked" and how they group.
+  // a product is tracked when its own trackStock is on OR its sub-sub-category is marked tracked.
+  // a tracked sub-sub-category becomes its own folder; any other tracked product falls under its
+  // category folder. groups come back in catalog order, ready for both inventory screens. ----
+  function subsubIsTracked(ssid){
+    if(!ssid) return false;
+    const ss = catalog.subsubcategories.find(x => x.id === ssid);
+    return !!(ss && ss.trackStock);
+  }
+  function productIsTracked(pr){
+    return pr.trackStock === true || subsubIsTracked(pr.subsubcategoryId);
+  }
+  function buildInventoryGroups(){
+    const byOrder = (a,b)=>(a.order||0)-(b.order||0);
+    const groups = [];
+    catalog.categories.slice().sort(byOrder).forEach(cat=>{
+      // tracked products directly-tracked (not via a tracked sub-sub-category) → category folder
+      const loose = catalog.products
+        .filter(pr => pr.categoryId===cat.id && productIsTracked(pr) && !subsubIsTracked(pr.subsubcategoryId))
+        .sort(byOrder);
+      if(loose.length) groups.push({ title: cat.name, products: loose });
+      // each tracked sub-sub-category in this category → its own folder (e.g. "סמאש ג׳רקי")
+      catalog.subcategories.filter(s=>s.categoryId===cat.id).sort(byOrder).forEach(s=>{
+        catalog.subsubcategories.filter(ss=>ss.subcategoryId===s.id && ss.trackStock).sort(byOrder).forEach(ss=>{
+          const prods = catalog.products.filter(pr=>pr.subsubcategoryId===ss.id).sort(byOrder);
+          if(prods.length) groups.push({ title: ss.name, products: prods });
+        });
+      });
+    });
+    return groups;
+  }
+
   // ---- drag a product INTO a folder: resolve a folder header element to a destination
   // {catId, subId, subsubId}, and move the product there (like dropping a file in a folder). ----
   function folderTargetFromEl(el){
@@ -5582,6 +5644,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       <div class="cluster-group catalog-subsubcat" data-subsubid="${ss.id}">
         <div class="cluster-head subsubcat-head">
           <span class="name">${escapeHtml(ss.name)}</span>
+          ${ss.trackStock ? '<span class="subsub-track-badge" title="עוקב מלאי — מופיע במלאי הכללי וברכב">מלאי</span>' : ''}
           <span class="count">${prods.length}</span>
           <button type="button" class="rename-folder subsub-rename" title="שנה שם">${FOLDER_PEN_SVG}</button>
           <button type="button" class="folder-del subsub-del" title="מחק תת־תת־קטגוריה">${CATALOG_TRASH_SVG}</button>
@@ -5589,6 +5652,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <div class="cluster-body animated-collapse${open?' is-open':''}" style="${open?'max-height:none':''}">
           <div class="catalog-prod-list">${prods.length ? prods.map(catalogProductRow).join('') : ''}</div>
           ${prods.length ? '' : '<div class="catalog-empty">אין מוצרים בתת־תת־קטגוריה זו.</div>'}
+          <label class="catalog-track-check"><input type="checkbox" class="subsub-track-check" ${ss.trackStock ? 'checked' : ''}> עוקב מלאי (מופיע במלאי הכללי וברכב)</label>
           <button type="button" class="primary catalog-add-prod catalog-add-prod-subsub">+ הוסף מוצר</button>
         </div>
       </div>`;
@@ -5793,6 +5857,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             saveCatalog(); renderCatalog();
           });
           ssGroup.querySelector('.catalog-add-prod-subsub').addEventListener('click', ()=> openProductEditor(catId, null, subId, subsubId));
+          const trackChk = ssGroup.querySelector('.subsub-track-check');
+          if(trackChk){
+            trackChk.addEventListener('click', e=>e.stopPropagation());
+            trackChk.addEventListener('change', ()=>{
+              ss.trackStock = trackChk.checked;   // whole sub-sub-category tracked → its own inventory folder
+              saveCatalog(); renderCatalog();      // re-render to show/hide the "מלאי" badge on the head
+            });
+          }
           wireCatalogProdList(ssGroup.querySelector(':scope > .cluster-body > .catalog-prod-list'), catId);
         });
 
@@ -6341,7 +6413,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   (async function init(){
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadCatalog()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog()]);
     backfillDefaultWhatsappMessages();
     openFolderNames.clear();
     openClusterNames.clear();
