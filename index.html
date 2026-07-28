@@ -3411,7 +3411,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function openOrderModal(c){
     orderModalEditingId = null;
     closeOrderModal();
-    const unitPrice = parseFloat(c.price) || 0;
+    const unitPrice = 0; // per-unit price is now informational (shown on the card) and never affects an order
 
     const overlay = document.createElement('div');
     overlay.id = 'orderModalOverlay';
@@ -3441,31 +3441,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             <div class="order-cat-title ordreg-toplevel" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0)">${CHEVRON_ICON_SVG}</span> קטלוג מוצרים</div>
             <div class="order-cat-items animated-collapse">${regularProductsTreeHtml(c, ordregQty)}</div>
           </div>
-          ${PRODUCT_CATALOG.map(cat => {
-            const hasPrefill = cat.items.some(name => prefillMap[name]);
-            return `
-            <div class="order-cat">
-              <div class="order-cat-title" data-open="${hasPrefill ? '1' : '0'}">
-                <span class="order-cat-chevron" style="transform:rotate(${hasPrefill ? 90 : 0}deg)">${CHEVRON_ICON_SVG}</span> ${escapeHtml(cat.title)}
-              </div>
-              <div class="order-cat-items animated-collapse${hasPrefill ? ' is-open' : ''}" style="${hasPrefill ? 'max-height:none' : ''}">
-                ${cat.items.map(name => {
-                  const key = itemKey(name);
-                  const qty = prefillMap[name] || '';
-                  return `
-                    <div class="order-item-row">
-                      <label class="order-item-check">
-                        <input type="checkbox" data-item="${escapeHtml(name)}" class="order-item-checkbox" id="oi_${key}" ${qty ? 'checked' : ''}>
-                        ${escapeHtml(name)}
-                      </label>
-                      <span class="order-item-qty-label">כמות:</span>
-                      <input type="number" min="0" step="1" class="order-item-qty" data-item="${escapeHtml(name)}" value="${qty}">
-                    </div>
-                  `;
-                }).join('')}
-              </div>
-            </div>
-          `;}).join('')}
           <div class="no-order-row">
             <label>
               <input type="checkbox" class="no-order-checkbox" ${prefillNoOrder ? 'checked' : ''}>
@@ -3789,6 +3764,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       <input type="tel" class="edit-phone" value="${escapeHtml(c.phone||'')}">
       <label>אימייל</label>
       <input type="email" class="edit-email" value="${escapeHtml(c.email||'')}">
+      <label>מחיר ליחידה</label>
+      <input type="number" class="edit-price" value="${escapeHtml(c.price||'')}" step="0.01" min="0">
       <label>עיר</label>
       <input type="text" class="edit-city" value="${escapeHtml(origCity)}">
       <label>רחוב</label>
@@ -3873,6 +3850,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       c.contact = card.querySelector('.edit-contact').value.trim();
       c.phone = card.querySelector('.edit-phone').value.trim();
       c.email = card.querySelector('.edit-email').value.trim();
+      c.price = card.querySelector('.edit-price').value.trim();
       c.notes = card.querySelector('.edit-notes').value.trim();
       c.whatsappMessage = card.querySelector('.edit-whatsapp-msg').value.trim();
     }
@@ -4013,6 +3991,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           ${c.phone ? `<div class="cphone">טלפון: <a href="tel:${escapeHtml(telHref(c.phone))}" class="phone-link" title="חייג ללקוח">${escapeHtml(c.phone)}</a></div>` : ""}
           ${c.email ? `<div class="cphone">אימייל: <a href="mailto:${escapeHtml(c.email)}" class="phone-link" title="שליחת מייל ללקוח">${escapeHtml(c.email)}</a></div>` : ""}
         </div>
+        ${c.price ? `
+          <div class="cprice-row">
+            <div class="cprice">מחיר ליחידה: ₪${escapeHtml(c.price)}</div>
+          </div>
+        ` : ""}
+        ${c.price ? `<div class="cprice cprice-vat">מחיר ליחידה כולל מע״מ (${Math.round(VAT_RATE*100)}%): ₪${(parseFloat(c.price) * (1 + VAT_RATE)).toFixed(2)}</div>` : ""}
         <div class="cdiscount-row">
           <div class="card-left-icons">
             ${c.photo ? `
