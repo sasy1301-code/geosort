@@ -200,7 +200,7 @@
   .catalog-prod-row:hover{ background:#f1f3f8; }
   .catalog-prod-row.inactive{ opacity:.5; }
   .catalog-prod-thumb{ width:34px; height:34px; border-radius:8px; flex:0 0 auto; background:rgba(4,15,30,.06); display:flex; align-items:center; justify-content:center; font-size:1rem; overflow:hidden; }
-  .catalog-prod-thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .catalog-prod-thumb img{ width:100%; height:100%; object-fit:cover; display:block; cursor:zoom-in; }
   .catalog-prod-info{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; }
   .catalog-prod-name{ color:#040f1e; font-size:.88rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .catalog-prod-meta{ color:#0277fb; font-size:.76rem; }
@@ -5652,6 +5652,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(!listEl) return;
     listEl.querySelectorAll(':scope > .catalog-prod-row').forEach(row=>{
       const pid = row.dataset.pid;
+      // tapping a product's photo opens it enlarged in the photo viewer
+      const thumb = row.querySelector('.catalog-prod-thumb');
+      if(thumb){
+        thumb.addEventListener('click', (e)=>{
+          const pr = catalog.products.find(p => p.id === pid);
+          if(pr && pr.imageUrl){ e.stopPropagation(); openPhotoModal(pr.imageUrl); }
+        });
+      }
       // the strip itself no longer opens the editor — only the pencil/gear icon does
       row.querySelector('.catalog-prod-edit').addEventListener('click', (e)=>{
         e.stopPropagation();
@@ -6123,6 +6131,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     // ---- photo: upload / take, downscale, preview; default 📦 icon when empty ----
     let currentImageUrl = p.imageUrl || '';
     const preview = modal.querySelector('.pe-photo-preview');
+    if(currentImageUrl) preview.style.cursor = 'zoom-in'; // existing photo is clickable to enlarge
     const removeBtn = modal.querySelector('.pe-photo-remove');
     const fileUpload = modal.querySelector('.pe-file-upload');
     const fileCamera = modal.querySelector('.pe-file-camera');
@@ -6130,7 +6139,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       currentImageUrl = url || '';
       preview.innerHTML = currentImageUrl ? `<img src="${escapeHtml(currentImageUrl)}" alt="">` : '📦';
       removeBtn.style.display = currentImageUrl ? '' : 'none';
+      preview.style.cursor = currentImageUrl ? 'zoom-in' : ''; // hint that the photo can be enlarged
     };
+    // tapping the preview photo opens it enlarged
+    preview.addEventListener('click', ()=>{ if(currentImageUrl) openPhotoModal(currentImageUrl); });
     const handleFile = (input)=>{
       const file = input.files && input.files[0];
       input.value = ''; // let the same file be re-picked later
