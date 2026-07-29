@@ -484,6 +484,11 @@
   .search-box{ position:relative; }
   .search-box input{ padding-right:32px; }
   .search-box svg{ position:absolute; right:9px; top:9px; width:16px; height:16px; opacity:.6; stroke:#021236; }
+  /* folder header shown inside the search results when searching by folder name */
+  #searchResults .search-folder-label{ display:flex; align-items:center; gap:8px; margin:12px 2px 6px; font-weight:600; color:#f5f1e7; font-size:.92rem; }
+  #searchResults .search-folder-label .sfl-swatch{ width:14px; height:14px; border-radius:4px; flex:0 0 auto; border:1px solid rgba(0,0,0,.2); }
+  #searchResults .search-folder-label .sfl-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #searchResults .search-folder-label .sfl-count{ background:#025ffb; color:#fff; border-radius:20px; padding:1px 11px; font-size:.8rem; flex:0 0 auto; }
 
   .slider-row{ display:flex; align-items:center; gap:10px; margin-top:4px; }
   input[type=range]{
@@ -544,41 +549,41 @@
   .cluster-head .map-visibility-toggle:hover{ background:rgba(255,255,255,.14); }
   .cluster-head .map-visibility-toggle.off{ color:#e08b7d; opacity:.85; }
 
-  /* ---- folder cards redesign (client-count folders inside :is(#folderList, #clusterList) only, so the
+  /* ---- folder cards redesign (client-count folders inside :is(#folderList, #clusterList, #searchResults) only, so the
      clusters panel keeps its own colours) ---- */
-  :is(#folderList, #clusterList) .cluster-head{ background:#025ffb; border:1px solid #4394f7; gap:10px; padding:11px 10px; border-radius:15px; }
-  :is(#folderList, #clusterList) .cluster-group{ margin-bottom:8px; }
-  :is(#folderList, #clusterList) .cluster-head:hover{ background:#1a72ff; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head{ background:#025ffb; border:1px solid #4394f7; gap:10px; padding:11px 10px; border-radius:15px; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-group{ margin-bottom:8px; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head:hover{ background:#1a72ff; }
   /* client-count circle: white with a navy number, folder name Regular @ 15pt */
-  :is(#folderList, #clusterList) .cluster-head .count{ background:#fff; color:#0f1a2e; width:28px; height:28px; }
-  :is(#folderList, #clusterList) .cluster-head .name{ font-weight:400; font-size:10pt; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .count{ background:#fff; color:#0f1a2e; width:28px; height:28px; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .name{ font-weight:400; font-size:10pt; }
   /* the rename input matches the folder name exactly (Regular, 10pt) so the text
      doesn't jump size/weight when you enter edit mode */
-  :is(#folderList, #clusterList) .cluster-head .cluster-rename-input{ font-size:10pt; font-weight:400; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .cluster-rename-input{ font-size:10pt; font-weight:400; }
   /* SVG action icons (eye / clock / pencil / X) sit bare on the blue card.
      each icon carries its own base size in --sz; hovering grows it by 2px. */
-  :is(#folderList, #clusterList) .cluster-head button{ display:inline-flex; align-items:center; justify-content:center; line-height:0; padding:2px 0; }
-  :is(#folderList, #clusterList) .cluster-head .map-visibility-toggle{ --sz:17px; }
-  :is(#folderList, #clusterList) .cluster-head .route-toggle{ --sz:14px; }
-  :is(#folderList, #clusterList) .cluster-head .rename-folder{ --sz:13px; }
-  :is(#folderList, #clusterList) .cluster-head .rename-cluster{ --sz:13px; }
-  :is(#folderList, #clusterList) .cluster-head .folder-del{ --sz:9px; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head button{ display:inline-flex; align-items:center; justify-content:center; line-height:0; padding:2px 0; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .map-visibility-toggle{ --sz:17px; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .route-toggle{ --sz:14px; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .rename-folder{ --sz:13px; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .rename-cluster{ --sz:13px; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .folder-del{ --sz:9px; }
   /* the clusters' "reset to auto name" (↺) is a glyph, not an SVG — colour it navy to match */
   #clusterList .cluster-head .reset-cluster-name{ color:#0f1a2e; font-size:15px; }
-  :is(#folderList, #clusterList) .cluster-head button svg{ width:var(--sz,19px); height:var(--sz,19px); display:block; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head button svg{ width:var(--sz,19px); height:var(--sz,19px); display:block; }
   /* no hover effect on the icons — they stay put, with no background highlight */
-  :is(#folderList, #clusterList) .cluster-head button:hover{ background:transparent; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head button:hover{ background:transparent; }
   /* press feedback while held down: the navy parts turn pink, matching the X */
-  :is(#folderList, #clusterList) .cluster-head button:active svg [fill="#0f1a2e"]{ fill:#ff7bac; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head button:active svg [fill="#0f1a2e"]{ fill:#ff7bac; }
   /* persistent "pressed" state — the toggle stays pink so you can see it is active.
      these classes are re-applied from state on every render, so a second click
      (which clears the state) returns the icon to navy. */
-  :is(#folderList, #clusterList) .cluster-head .map-visibility-toggle.off svg [fill="#0f1a2e"]{ fill:#ff7bac; }
-  :is(#folderList, #clusterList) .cluster-head .route-toggle.active svg [fill="#0f1a2e"]{ fill:#ff7bac; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .map-visibility-toggle.off svg [fill="#0f1a2e"]{ fill:#ff7bac; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .route-toggle.active svg [fill="#0f1a2e"]{ fill:#ff7bac; }
   /* no background box behind the pressed/active toggle — only the pink icon signals it
      (overrides the global gold .route-toggle.active background) */
-  :is(#folderList, #clusterList) .cluster-head .route-toggle.active,
-  :is(#folderList, #clusterList) .cluster-head .map-visibility-toggle.off{ background:transparent; }
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .route-toggle.active,
+  :is(#folderList, #clusterList, #searchResults) .cluster-head .map-visibility-toggle.off{ background:transparent; }
   /* the אזורים / אשכולות (region) cards keep their own look: deep purple, not the
      folders' blue, with 8px of air between each card (same source-order specificity as
      the shared :is() block above, so being later here is what makes these win) */
@@ -2446,7 +2451,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // cfg.ignoreSelector: controls inside the item that must NOT begin a drag (buttons/inputs)
   // cfg.persistFn(els): receives the ordered item elements after a drop/settle
   function wireCatalogReorder(container, cfg){
-    if(_catFilter) return; // no drag-reorder while a search filter is active (would reorder only the visible subset)
+    if(_catFilter && container.closest && container.closest('#catalogList')) return; // no catalog drag while a catalog search is active (the folder list is unaffected)
     const { itemSelector, handleSelector, ignoreSelector, persistFn } = cfg;
 
     // ---- mouse: per-item HTML5 drag setup. items are rebuilt on every render, so this
@@ -4596,19 +4601,34 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     });
   }
 
+  let _folderMovedToSearch = false; // true while matching folder card(s) are lifted from the panel into the search area
   function renderSearchResults(){
     const box = document.getElementById('searchResults');
     const q = normalizeSearchText(document.getElementById('searchBox').value);
+    const fq = normalizeSearchText(document.getElementById('folderSearchBox').value);
     box.innerHTML = "";
-    if(!q) return;
-    const matches = clients.filter(c => matchesSearch(c, q));
-    if(matches.length === 0){
-      box.innerHTML = `<div class="empty" style="padding:8px 4px">לא נמצאו כתובות מתאימות.</div>`;
-      return;
+    _folderMovedToSearch = false;
+    const emptyLine = (text)=>{ const d=document.createElement('div'); d.className='empty'; d.style.padding='8px 4px'; d.textContent=text; return d; };
+    // field 1 — search by client name / address → matching client cards
+    if(q){
+      const matches = clients.filter(c => matchesSearch(c, q));
+      if(matches.length === 0) box.appendChild(emptyLine('לא נמצאו כתובות מתאימות.'));
+      else matches.forEach(c=>{ box.appendChild(buildClientCard(c, null, null, true)); });
     }
-    matches.forEach(c=>{
-      box.appendChild(buildClientCard(c, null, null, true));
-    });
+    // field 2 — search by folder name → LIFT the real, fully-wired folder card(s) up from the
+    // folders panel into the search area (same card, just relocated).
+    if(fq){
+      const groups = [...document.querySelectorAll('#folderList .cluster-group[data-folder-name]')];
+      const matches = groups.filter(g => normalizeSearchText(g.dataset.folderName || '').includes(fq));
+      if(matches.length === 0) box.appendChild(emptyLine('לא נמצאו תיקיות מתאימות.'));
+      else { matches.forEach(g => box.appendChild(g)); _folderMovedToSearch = true; }
+    }
+  }
+  // called from the search boxes: if folder cards were lifted out, rebuild the folder panel first
+  // (restoring them there) and then re-apply the search, so nothing is lost between keystrokes.
+  function refreshSearch(){
+    if(_folderMovedToSearch){ renderFolders(); _folderMovedToSearch = false; }
+    renderSearchResults();
   }
 
   function renderFolders(){
@@ -4620,10 +4640,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       return;
     }
 
-    const folderSearchQ = normalizeSearchText(document.getElementById('folderSearchBox').value);
-    const visibleFolders = folderSearchQ
-      ? folders.filter(f => normalizeSearchText(f.name).includes(folderSearchQ))
-      : folders;
+    const folderSearchQ = ""; // folder-name search now shows its results in the search panel (renderSearchResults), not by filtering this list
+    const visibleFolders = folders;
 
     let anyVisible = false;
 
@@ -5261,10 +5279,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
   updateSliderFill(document.getElementById('thresholdSlider'));
 
-  document.getElementById('searchBox').addEventListener('input', renderSearchResults);
-  document.getElementById('folderSearchBox').addEventListener('input', ()=>{ setTimeout(renderFolders, 0); });
-  document.getElementById('folderSearchBox').addEventListener('keyup', ()=>{ setTimeout(renderFolders, 0); });
-  document.getElementById('folderSearchBox').addEventListener('change', renderFolders);
+  document.getElementById('searchBox').addEventListener('input', refreshSearch);
+  document.getElementById('folderSearchBox').addEventListener('input', refreshSearch);
+  document.getElementById('folderSearchBox').addEventListener('keyup', refreshSearch);
+  document.getElementById('folderSearchBox').addEventListener('change', refreshSearch);
 
   document.getElementById('fitAllBtn').addEventListener('click', ()=>{
     if(clients.length===0) return;
@@ -5404,7 +5422,23 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
   });
 
-  wireFolderDragReorder(document.getElementById('folderList'));
+  // folder reorder — same press-hold touch + mouse drag as the catalog (drag a folder by its
+  // header up/down; on drop, reorder the `folders` array to match and persist). replaces the
+  // old mouse-only reorder so it works on tablet/mobile too.
+  wireCatalogReorder(document.getElementById('folderList'), {
+    itemSelector: '.cluster-group',
+    handleSelector: '.cluster-head',
+    ignoreSelector: 'button, input, .folder-swatch, .rename-folder, .folder-del, .route-toggle, .map-visibility-toggle',
+    persistFn: (els)=>{
+      const orderedNames = els.map(el => el.dataset.folderName).filter(Boolean);
+      // only persist when the whole list is shown — a folder-search filter hides some, and
+      // reordering a partial view would scramble the hidden ones
+      if(orderedNames.length !== folders.length) return;
+      folders.sort((a,b)=> orderedNames.indexOf(a.name) - orderedNames.indexOf(b.name));
+      saveFolders();
+      renderFolders();
+    }
+  });
 
   const sideMenu = document.getElementById('sideMenu');
   const sideMenuOverlay = document.getElementById('sideMenuOverlay');
@@ -6507,7 +6541,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const bounds = renderAll();
     // belt-and-suspenders: force every folder/cluster body closed on first load,
     // no matter what caused it to render open
-    document.querySelectorAll(':is(#folderList, #clusterList) .cluster-body.animated-collapse').forEach(b => { b.classList.remove('is-open'); b.style.maxHeight = '0px'; });
+    document.querySelectorAll(':is(#folderList, #clusterList, #searchResults) .cluster-body.animated-collapse').forEach(b => { b.classList.remove('is-open'); b.style.maxHeight = '0px'; });
     if(clients.length){
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
     }
