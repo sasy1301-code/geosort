@@ -98,7 +98,10 @@
     /* transform is driven by the open/close keyframes below (with an 8px overshoot bounce) */
     transition:box-shadow .55s ease;
     box-sizing:border-box; padding:56px 30px 30px;
+    /* keep every label a clean Regular (400), rendered antialiased so it never looks heavy */
+    font-weight:400; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
   }
+  .side-menu, .side-menu .side-menu-item, .side-menu .side-menu-item .txt{ font-weight:400; }
   .side-menu.open{ transform:translateX(0); box-shadow:-12px 0 40px rgba(0,0,0,.45); animation:drawerIn .6s ease-out both; }
   .side-menu.closing{ animation:drawerOut .5s ease-out both; }
   /* slide in, then recoil 8px back toward closed and settle — a soft bounce at the end */
@@ -154,8 +157,42 @@
   .side-menu.open .side-menu-item:nth-child(6){ transition-delay:.47s; }
   .side-menu.open .side-menu-item:nth-child(7){ transition-delay:.54s; }
   .side-menu-item .txt{ font-size:12pt; font-weight:400; line-height:1.2; font-family:inherit; }
-  .side-menu-item .icon{ width:27px; height:27px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
-  .side-menu-item .icon svg{ width:27px; height:27px; display:block; fill:#0277fb; }
+  /* ===== SYSTEM ICON DISC — the one reusable standard for EVERY icon in the app =====
+     Put the icon in a wrapper (a <button> or <span>) with class="sys-icon-disc" holding one
+     <svg>. Set --sysicon to the icon's px size (default 15). The #091321 disc is 16px larger
+     (an ~8px ring). On hover ONLY the disc grows ~5px — the icon itself stays exactly the same
+     size (it is counter-scaled). For a non-15px icon, also set --hscale to keep the ~5px grow:
+     --hscale = (discSize + 5) / discSize. This is how every new icon should be added. */
+  .sys-icon-disc{
+    --sysicon:15px; --hscale:1.16;
+    display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;
+    width:calc(var(--sysicon) + 16px); height:calc(var(--sysicon) + 16px);
+    background:#091321; border-radius:50%; border:none; padding:0; cursor:pointer;
+    transition:transform .15s ease;
+  }
+  .sys-icon-disc > svg{ width:var(--sysicon); height:var(--sysicon); display:block; transition:transform .15s ease; }
+  .sys-icon-disc:hover{ transform:scale(var(--hscale)); }                  /* only the disc grows */
+  .sys-icon-disc:hover > svg{ transform:scale(calc(1 / var(--hscale))); }  /* icon stays the same size */
+  /* side-menu icons follow the disc standard (27px icon → 43px disc) */
+  .side-menu-item .icon{ width:43px; height:43px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; background:#091321; border-radius:50%; transition:transform .15s ease; }
+  /* hover: the disc grows ~5px (43→48) and eases back */
+  .side-menu-item:hover .icon{ transform:scale(1.116); }
+  .side-menu-item .icon svg{ width:27px; height:27px; display:block; fill:#0277fb; transform:translateY(var(--ny,0px)); transition:transform .15s ease; }
+  /* hover: the disc grows ~5px; the icon is counter-scaled so it stays the same size (keeps its --ny nudge) */
+  .side-menu-item:hover .icon svg{ transform:translateY(var(--ny,0px)) scale(.896); }
+  /* optical centering: these icons are bounding-box-centered but their painted mass sits low/high,
+     so a tiny per-icon --ny nudge brings the *visual* centre onto the disc centre. A NEW icon
+     defaults to 0 (no nudge); measure it and set --ny only if it looks off. */
+  #viewCustomersItem .icon svg{ --ny:-1.5px; }
+  #viewProductsItem .icon svg{ --ny:1px; }
+  #inventoryMenuItem .icon svg{ --ny:-1px; }
+  #vehicleStockMenuItem .icon svg{ --ny:-0.5px; }
+  .side-menu-item[href="./order/"] .icon svg{ --ny:-1.8px; }
+  #backupDataMenuItem .icon svg{ --ny:-3px; }
+  /* these three icons read a touch large — render them 2px smaller (27→25) */
+  #vehicleStockMenuItem .icon svg,
+  .side-menu-item[href="./order/"] .icon svg,
+  #dedupeOrdersMenuItem .icon svg{ width:25px; height:25px; }
   .side-menu-item:hover .txt{ color:#2f7cf6; }
   /* the active view is marked with the menu's existing hover colour */
   .side-menu-item.active-view .txt{ color:#2f7cf6; }
@@ -175,6 +212,19 @@
   .ord-agent-row select{ flex:1 1 auto; }
   #ordAddAgentBtn{ flex:0 0 auto; width:auto; padding:9px 14px; border-radius:15px; background:#2f7cf6; color:#fff; border:1px solid transparent; font-family:inherit; font-size:.85rem; cursor:pointer; white-space:nowrap; }
   #ordAddAgentBtn:hover{ background:#4d93ff; }
+  /* ---- settings page ---- */
+  .settings-section{ margin-top:8px; }
+  .settings-section-title{ font-size:1rem; font-weight:600; color:#fff; margin:6px 0 2px; }
+  .settings-add-row{ display:flex; gap:8px; align-items:stretch; }
+  .settings-add-row input{ flex:1 1 auto; }
+  #settingsAddAgentBtn{ flex:0 0 auto; width:auto; margin-top:0; padding:9px 16px; border-radius:15px; background:#2f7cf6; color:#fff; border:1px solid transparent; font-family:inherit; font-size:.9rem; cursor:pointer; white-space:nowrap; }
+  #settingsAddAgentBtn:hover{ background:#4d93ff; }
+  .settings-agent-list{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+  .settings-agent-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; background:#0f1a2e; border:1px solid rgba(140,160,255,.28); border-radius:14px; padding:10px 14px; }
+  .settings-agent-name{ color:#fff; font-size:.95rem; }
+  /* trash button uses the shared sys-icon-disc standard; only its colour is bespoke (salmon) */
+  .settings-agent-del{ color:#ff7bac; }
+  .settings-agent-empty{ color:rgba(255,255,255,.55); font-size:.86rem; text-align:center; padding:18px 10px; border:1px dashed rgba(140,160,255,.35); border-radius:14px; }
   #ordFormHost{ margin-top:14px; }
   #ordFormHost:empty{ margin-top:0; }
   #ordFormHost .ord-placeholder{ color:rgba(255,255,255,.55); font-size:.86rem; text-align:center; padding:26px 10px; border:1px dashed rgba(140,160,255,.35); border-radius:14px; }
@@ -1069,15 +1119,20 @@
   .order-history-date{ font-size:.74rem; color:rgba(255,255,255,.6); }
   .order-history-items{ font-size:.78rem; color:#fff; margin-top:2px; word-break:break-word; }
   .order-history-total{ font-weight:700; color:#3bd332; font-size:.85rem; flex:0 0 auto; }
-  .order-history-actions{ display:flex; gap:4px; flex:0 0 auto; }
+  .order-history-actions{ display:flex; gap:8px; flex:0 0 auto; }
+  /* order-history icons follow the disc standard: #091321 disc, 15px icon → 31px disc, no border */
   .order-history-actions button{
-    background:transparent; border:1px solid rgba(255,255,255,.3); border-radius:15px;
-    padding:4px 7px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
+    background:#091321; border:none; border-radius:50%;
+    width:31px; height:31px; padding:0; cursor:pointer; flex:0 0 auto;
+    display:inline-flex; align-items:center; justify-content:center;
+    transition:transform .15s ease;
   }
-  .order-history-actions button:hover{ background:rgba(255,255,255,.15); }
+  /* hover: the disc grows ~5px (31→36); the icon is counter-scaled so it stays the same size */
+  .order-history-actions button:hover{ transform:scale(1.16); }
+  .order-history-actions button:hover svg{ transform:scale(.862); }
   .order-history-actions .order-edit-btn{ color:#4394f7; }   /* same pencil as the product catalog */
   .order-history-actions .order-del-btn{ color:#ff7bac; }    /* same trash + salmon as elsewhere */
-  .order-history-actions button svg{ width:15px; height:15px; display:block; }
+  .order-history-actions button svg{ width:15px; height:15px; display:block; transition:transform .15s ease; }
   .client-card .cbillname{ font-size:.82rem; color:#fff; margin-top:3px; }
   .client-card .caddr-group{ margin-top:10px; }
   .client-card .cprice-row{
@@ -1236,20 +1291,24 @@
   /* icon sits inside a wrapper span; the hover circle lives on the SPAN (not the svg) so it
      works on iOS Safari too — Safari clips an SVG to its own border-radius even with
      overflow:visible, which was cropping the icons on mobile */
+  /* + menu icons follow the disc standard: #091321 disc, 22px icon → 38px disc */
   .more-options-menu button .mo-ico{
-    flex:0 0 auto; width:22px; height:22px; border-radius:50%;
+    flex:0 0 auto; width:38px; height:38px; border-radius:50%; background:#091321;
     display:flex; align-items:center; justify-content:center;
-    transition:background .15s ease, box-shadow .15s ease;
+    transition:transform .15s ease;
   }
-  .more-options-menu button .mo-ico svg{ width:22px; height:22px; display:block; overflow:visible; }
-  /* on hover: a circle around the icon in the client-card hover colour, 8px larger radius */
-  .more-options-menu button:hover .mo-ico{ background:#040f1e; box-shadow:0 0 0 8px #040f1e; }
+  .more-options-menu button .mo-ico svg{ width:22px; height:22px; display:block; overflow:visible; transition:transform .15s ease; }
+  /* hover: the disc grows ~5px; the icon is counter-scaled so it stays the same size */
+  .more-options-menu button:hover .mo-ico{ transform:scale(1.13); }
+  .more-options-menu button:hover .mo-ico svg{ transform:scale(.885); }
   /* line.svg is a ~0.2px hairline that won't show at row height, so render its line
      crisply: thin #0277fb bar, full width, with the same faded ends line.svg has */
+  /* separator: a 1px line with faded ends drawn as a background gradient (no CSS mask),
+     so it renders reliably on iOS Safari where a 0.5px masked hairline could disappear */
   .more-options-menu .mo-line{
-    display:block; width:100%; height:0.5px; flex:0 0 auto; background:#0277fb;
-    -webkit-mask:linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
-    mask:linear-gradient(90deg, transparent 0, #000 7%, #000 93%, transparent 100%);
+    display:block; width:100%; height:1px; flex:0 0 auto; background:transparent;
+    background-image:linear-gradient(90deg, transparent 0, #0277fb 8%, #0277fb 92%, transparent 100%);
+    background-repeat:no-repeat;
   }
   .more-options-menu .mo-line svg{ display:none; }
   .client-card .cactions .icon-circle-btn{
@@ -1422,6 +1481,8 @@
       </svg>
     </button>
     <nav class="side-menu-items">
+      <button class="side-menu-item" id="settingsMenuItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></span><span class="txt">הגדרות</span></button>
+      <div class="side-menu-sep" aria-hidden="true"></div>
       <button class="side-menu-item view-nav-item" id="viewCustomersItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></span><span class="txt">לקוחות ואזורים</span></button>
       <button class="side-menu-item view-nav-item" id="viewProductsItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg></span><span class="txt">מוצרים ומחירים</span></button>
       <button class="side-menu-item view-nav-item" id="viewOrdersItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM8 7h8c.55 0 1 .45 1 1s-.45 1-1 1H8c-.55 0-1-.45-1-1s.45-1 1-1zm3 10H8c-.55 0-1-.45-1-1s.45-1 1-1h3c.55 0 1 .45 1 1s-.45 1-1 1zm5-4H8c-.55 0-1-.45-1-1s.45-1 1-1h8c.55 0 1 .45 1 1s-.45 1-1 1z"/></svg></span><span class="txt">הזמנות</span></button>
@@ -1587,6 +1648,22 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     </div>
   </div>
 
+  <div class="products-view settings-view view-hidden" id="settingsView">
+    <div class="products-inner">
+      <section class="panel" id="settingsPanel">
+        <h2 style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">סוכנים</span></h2>
+        <div class="settings-section">
+          <label class="ord-field-label" for="settingsAgentInput">הוספת סוכן חדש</label>
+          <div class="settings-add-row">
+            <input type="text" id="settingsAgentInput" autocomplete="off" placeholder="שם הסוכן">
+            <button type="button" class="primary" id="settingsAddAgentBtn">+ הוסף</button>
+          </div>
+          <div id="settingsAgentList" class="settings-agent-list"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
   <div class="products-view orders-view view-hidden" id="ordersView">
     <div class="products-inner">
       <section class="panel" id="ordersPanel">
@@ -1595,7 +1672,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <label class="ord-field-label" for="ordAgentSelect">שם סוכן</label>
         <div class="ord-agent-row">
           <select id="ordAgentSelect"><option value="">— בחר סוכן —</option></select>
-          <button type="button" id="ordAddAgentBtn" title="הוסף סוכן חדש לרשימה">+ סוכן</button>
         </div>
 
         <label class="ord-field-label" for="ordClientSearch">שם לקוח</label>
@@ -2062,6 +2138,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // logic below would "recover" a just-deleted order back from the server
   const recentlyDeletedOrderIds = new Set();
   const recentlyDeletedUpdateIds = new Set();
+  // agent names deleted here (on the settings page). the merge-safe saveAgents folds in any
+  // server names missing locally, which would otherwise resurrect a just-deleted agent.
+  const recentlyDeletedAgents = new Set();
   // clients whose "last invoice" was intentionally blanked here (e.g. their last order was
   // deleted). the merge-safe save below restores blank fields from the server, which would
   // otherwise resurrect a deleted order's total as the last invoice - so skip that for these.
@@ -2239,7 +2318,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         serverAgents = parsed.map(a => typeof a === 'string' ? a : (a && a.name) || '').filter(Boolean);
       }catch(e){ /* fetch failed - proceed with local only */ }
       const have = new Set(agents);
-      serverAgents.forEach(n=>{ if(!have.has(n)){ agents.push(n); have.add(n); } });
+      serverAgents.forEach(n=>{ if(!have.has(n) && !recentlyDeletedAgents.has(n)){ agents.push(n); have.add(n); } });
       await sbSet(AGENTS_KEY, JSON.stringify(agents));
     }catch(e){
       console.error("שגיאת שמירת סוכנים", e);
@@ -5849,28 +5928,44 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const mainViewEl = document.querySelector('.main');
   const productsViewEl = document.getElementById('productsView');
   const ordersViewEl = document.getElementById('ordersView');
+  const settingsViewEl = document.getElementById('settingsView');
   const viewCustomersItem = document.getElementById('viewCustomersItem');
   const viewProductsItem = document.getElementById('viewProductsItem');
   const viewOrdersItem = document.getElementById('viewOrdersItem');
+  const settingsMenuItem = document.getElementById('settingsMenuItem');
   function updateActiveViewItem(){
     viewCustomersItem.classList.toggle('active-view', currentView === 'customers');
     viewProductsItem.classList.toggle('active-view', currentView === 'products');
     viewOrdersItem.classList.toggle('active-view', currentView === 'orders');
+    settingsMenuItem.classList.toggle('active-view', currentView === 'settings');
+  }
+  function hideAllViews(){
+    mainViewEl.classList.add('view-hidden');
+    productsViewEl.classList.add('view-hidden');
+    ordersViewEl.classList.add('view-hidden');
+    settingsViewEl.classList.add('view-hidden');
   }
   function switchView(view){
-    if(view !== 'customers' && view !== 'products' && view !== 'orders') return;
+    if(view !== 'customers' && view !== 'products' && view !== 'orders' && view !== 'settings') return;
     currentView = view;
-    if(view === 'products'){
+    if(view === 'settings'){
+      hideAllViews();
+      settingsViewEl.classList.remove('view-hidden');
+      renderSettingsAgents(); // build the agents list on entry
+    } else if(view === 'products'){
       mainViewEl.classList.add('view-hidden');
       ordersViewEl.classList.add('view-hidden');
+      settingsViewEl.classList.add('view-hidden');
       productsViewEl.classList.remove('view-hidden');
       renderCatalog(); // reload the catalog fresh on entry
     } else if(view === 'orders'){
       mainViewEl.classList.add('view-hidden');
       productsViewEl.classList.add('view-hidden');
+      settingsViewEl.classList.add('view-hidden');
       ordersViewEl.classList.remove('view-hidden');
       renderOrdersView(); // (re)build the agent + client selectors on entry
     } else {
+      settingsViewEl.classList.add('view-hidden');
       productsViewEl.classList.add('view-hidden');
       ordersViewEl.classList.add('view-hidden');
       mainViewEl.classList.remove('view-hidden');
@@ -5889,6 +5984,52 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   viewCustomersItem.addEventListener('click', ()=>{ switchView('customers'); closeSideMenu(); });
   viewProductsItem.addEventListener('click', ()=>{ switchView('products'); closeSideMenu(); });
   viewOrdersItem.addEventListener('click', ()=>{ ordEditingOrderId = null; switchView('orders'); closeSideMenu(); });
+  settingsMenuItem.addEventListener('click', ()=>{ switchView('settings'); closeSideMenu(); });
+
+  // ---- settings page: agents management ----
+  const settingsAgentInput = document.getElementById('settingsAgentInput');
+  const settingsAddAgentBtn = document.getElementById('settingsAddAgentBtn');
+  const settingsAgentList = document.getElementById('settingsAgentList');
+  function renderSettingsAgents(){
+    if(!settingsAgentList) return;
+    if(!agents.length){
+      settingsAgentList.innerHTML = '<div class="settings-agent-empty">אין עדיין סוכנים. הוסיפו סוכן כדי שיופיע ברשימת הבחירה בעמוד ההזמנות.</div>';
+      return;
+    }
+    settingsAgentList.innerHTML = agents.map((n,i)=>`
+      <div class="settings-agent-row" data-idx="${i}">
+        <span class="settings-agent-name">${escapeHtml(n)}</span>
+        <button type="button" class="settings-agent-del sys-icon-disc" title="מחק סוכן">${CATALOG_TRASH_SVG}</button>
+      </div>`).join('');
+    settingsAgentList.querySelectorAll('.settings-agent-del').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const row = btn.closest('.settings-agent-row');
+        const idx = parseInt(row.dataset.idx, 10);
+        const name = agents[idx];
+        if(name == null) return;
+        if(!confirm(`למחוק את הסוכן "${name}" מהרשימה?`)) return;
+        agents.splice(idx, 1);
+        recentlyDeletedAgents.add(name); // block the merge-safe save from resurrecting it
+        saveAgents();
+        renderSettingsAgents();
+        if(typeof populateAgentSelect === 'function') populateAgentSelect(); // keep the orders dropdown in sync
+      });
+    });
+  }
+  function addAgentFromSettings(){
+    const name = (settingsAgentInput.value || '').trim();
+    if(!name) return;
+    if(agents.includes(name)){ settingsAgentInput.value = ''; return; }
+    agents.push(name);
+    recentlyDeletedAgents.delete(name); // re-adding a previously deleted name clears the guard
+    saveAgents();
+    settingsAgentInput.value = '';
+    renderSettingsAgents();
+    if(typeof populateAgentSelect === 'function') populateAgentSelect(); // keep the orders dropdown in sync
+  }
+  settingsAddAgentBtn.addEventListener('click', addAgentFromSettings);
+  settingsAgentInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); addAgentFromSettings(); } });
+
   updateActiveViewItem();
 
   // ================= ORDERS PAGE =================
@@ -5898,7 +6039,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // here, plus an agent selector, a client picker/search, and an order-note field. The existing
   // card popup is intentionally left in place for now.
   const ordAgentSelect = document.getElementById('ordAgentSelect');
-  const ordAddAgentBtn = document.getElementById('ordAddAgentBtn');
   const ordClientSearch = document.getElementById('ordClientSearch');
   const ordClientResults = document.getElementById('ordClientResults');
   const ordClientSelect = document.getElementById('ordClientSelect');
@@ -6349,15 +6489,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
   }
 
-  ordAddAgentBtn.addEventListener('click', ()=>{
-    const name = (prompt('שם הסוכן החדש:', '') || '').trim();
-    if(!name) return;
-    if(agents.includes(name)){ ordAgentSelect.value = name; return; }
-    agents.push(name);
-    saveAgents();
-    populateAgentSelect();
-    ordAgentSelect.value = name;
-  });
+  // agents are added/removed on the Settings page now; the orders page only picks from the list
   // live search as the user types
   ordClientSearch.addEventListener('input', renderClientResults);
   ordClientSearch.addEventListener('focus', ()=>{ if(ordClientSearch.value.trim()) renderClientResults(); });
