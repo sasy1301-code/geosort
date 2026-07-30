@@ -214,9 +214,12 @@
   .ord-head-field{ display:inline-flex; align-items:center; gap:5px; flex:0 0 auto; margin-inline-start:8px; background:transparent; border:none; padding:0; }
   .ord-head-field-lbl{ font-size:.62rem; color:rgba(255,255,255,.8); white-space:nowrap; }
   .ord-head-field input{ width:52px; padding:3px 5px; border-radius:8px; font-size:.74rem; text-align:center; background:#fff; color:#021236; border:1px solid rgba(255,255,255,.25); }
-  /* product row: catalog look, but not clickable (same height as the products page) */
-  #ordCatalogList .ord-prod-row{ cursor:default; }
-  .ord-prod-row:hover{ background:rgba(255,255,255,.06); }
+  /* product row: catalog look; clickable to select (same height as the products page) */
+  #ordCatalogList .ord-prod-row{ cursor:pointer; }
+  #ordCatalogList .ord-prod-row:hover{ background:#f4f7fc; }
+  /* a selected product (quantity ≥ 1) — the card turns purple */
+  #ordCatalogList .ord-prod-row.selected{ background:#cab2ed; border-color:#b79ce0; }
+  #ordCatalogList .ord-prod-row.selected:hover{ background:#c0a5e8; }
   /* quantity stepper: a number field with − / + buttons on its sides */
   .ord-prod-qty{ flex:0 0 auto; direction:ltr; display:inline-flex; align-items:center; }
   .ord-qty-btn{ width:28px; height:32px; padding:0; border:1px solid rgba(4,15,30,.18); background:#f2f5fb; color:#021236; font-size:1.15rem; font-weight:700; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; user-select:none; }
@@ -5890,10 +5893,31 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         if(set.has(id)) set.delete(id); else set.add(id);
       });
     });
+    // marks a product card selected (purple) whenever its quantity is ≥ 1
+    function syncRowSelected(row){
+      if(!row) return;
+      const inp = row.querySelector('.ordreg-qty');
+      row.classList.toggle('selected', (parseInt(inp && inp.value, 10) || 0) > 0);
+    }
     // a product is in the order simply when its quantity is > 0 (no include-checkbox needed)
     host.querySelectorAll('.ordreg-qty').forEach(qi=>{
-      qi.addEventListener('input', recalcTotal);
-      qi.addEventListener('change', recalcTotal);
+      const upd = ()=>{ recalcTotal(); syncRowSelected(qi.closest('.ord-prod-row')); };
+      qi.addEventListener('input', upd);
+      qi.addEventListener('change', upd);
+    });
+    // clicking anywhere on a product card (except the stepper) toggles its selection:
+    // off → quantity 1 (selected/purple); on → quantity 0 (deselected)
+    host.querySelectorAll('.ord-prod-row').forEach(row=>{
+      row.addEventListener('click', (e)=>{
+        if(e.target.closest('.ord-prod-qty')) return; // the − / + / field handle quantity themselves
+        const inp = row.querySelector('.ordreg-qty');
+        if(!inp) return;
+        const v = parseInt(inp.value, 10) || 0;
+        inp.value = v > 0 ? '' : '1';
+        syncRowSelected(row);
+        recalcTotal();
+      });
+      syncRowSelected(row); // reflect any pre-filled quantity on (re)render
     });
     // the − / + stepper buttons decrement/increment the quantity field beside them
     host.querySelectorAll('.ord-qty-btn').forEach(btn=>{
@@ -5904,6 +5928,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         v = btn.classList.contains('ord-qty-plus') ? v + 1 : Math.max(0, v - 1);
         inp.value = v === 0 ? '' : String(v);
         recalcTotal();
+        syncRowSelected(btn.closest('.ord-prod-row'));
       });
     });
     host.querySelectorAll('.ordreg-subdisc').forEach(inp=>{
