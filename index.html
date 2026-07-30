@@ -559,6 +559,17 @@
   #searchResults .search-folder-label .sfl-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   #searchResults .search-folder-label .sfl-count{ background:#025ffb; color:#fff; border-radius:20px; padding:1px 11px; font-size:.8rem; flex:0 0 auto; }
 
+  /* login gate shown on entry (temporary fixed password) */
+  .login-overlay{ position:fixed; inset:0; z-index:100000; background:#0a1428; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .login-overlay.unlocked{ display:none; }
+  .login-box{ width:100%; max-width:340px; box-sizing:border-box; background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:18px; padding:28px 22px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.55); }
+  .login-title{ font-size:1.35rem; font-weight:700; color:#fff; margin-bottom:6px; }
+  .login-sub{ font-size:.85rem; color:rgba(255,255,255,.6); margin-bottom:18px; }
+  .login-input{ width:100%; box-sizing:border-box; padding:13px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.25); background:#fff; color:#021236; font-size:1.15rem; text-align:center; letter-spacing:.25em; }
+  .login-input:focus{ outline:2px solid #2f7cf6; outline-offset:1px; }
+  .login-btn{ width:100%; margin-top:14px; padding:13px; border:none; border-radius:14px; background:#2f7cf6; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; font-family:inherit; }
+  .login-btn:hover{ background:#4d93ff; }
+  .login-error{ color:#ff8a8a; font-size:.82rem; margin-top:10px; min-height:1.1em; }
   .slider-row{ display:flex; align-items:center; gap:10px; margin-top:4px; }
   input[type=range]{
     flex:1; -webkit-appearance:none; appearance:none; background:transparent; cursor:pointer;
@@ -1333,6 +1344,35 @@
 </style>
 </head>
 <body>
+<div id="loginOverlay" class="login-overlay">
+  <div class="login-box">
+    <div class="login-title">מרכז לקוחות</div>
+    <div class="login-sub">הזן סיסמה כדי להיכנס למערכת</div>
+    <input type="password" id="loginPassword" class="login-input" placeholder="••••" autocomplete="off" inputmode="numeric">
+    <button type="button" id="loginBtn" class="login-btn">כניסה</button>
+    <div id="loginError" class="login-error"></div>
+  </div>
+</div>
+<script>
+  (function(){
+    var PASSWORD = '1301';
+    var overlay = document.getElementById('loginOverlay');
+    var input = document.getElementById('loginPassword');
+    var btn = document.getElementById('loginBtn');
+    var err = document.getElementById('loginError');
+    function tryLogin(){
+      if(input.value === PASSWORD){
+        overlay.classList.add('unlocked');
+      } else {
+        err.textContent = 'סיסמה שגויה, נסה שוב';
+        input.value = ''; input.focus();
+      }
+    }
+    btn.addEventListener('click', tryLogin);
+    input.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryLogin(); });
+    setTimeout(function(){ try{ input.focus(); }catch(_){} }, 120);
+  })();
+</script>
 <div id="bgImage"></div>
 <canvas id="starfield"></canvas>
 <div class="app">
@@ -3696,7 +3736,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </div>
         <div class="order-history">
           <div class="order-history-title"><span class="order-history-chevron" style="transform:rotate(0deg)">${CHEVRON_ICON_SVG}</span> היסטוריית הזמנות</div>
-          <div class="order-history-list" style="display:none"></div>
+          <div class="order-history-collapse animated-collapse"><div class="order-history-list"></div></div>
         </div>
       `;
 
@@ -3787,11 +3827,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       });
 
       modal.querySelector('.order-history-title').addEventListener('click', ()=>{
-        const listEl = modal.querySelector('.order-history-list');
-        const chevron = modal.querySelector('.order-history-chevron');
-        const isOpen = listEl.style.display !== 'none';
-        listEl.style.display = isOpen ? 'none' : 'block';
-        chevron.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(90deg)';
+        // open/close with the same smooth collapse animation used by folders & cards
+        toggleAnimatedCollapse(modal.querySelector('.order-history-collapse'), modal.querySelector('.order-history-chevron'));
       });
 
       const noOrderCheckbox = modal.querySelector('.no-order-checkbox');
@@ -5518,13 +5555,21 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     el.style.setProperty('--fill-pct', pct + '%');
   }
 
-  document.getElementById('thresholdSlider').addEventListener('input', (e)=>{
+  // The thumb, its fill and the value label update on every tick so the slider flows smoothly
+  // with the finger; the heavy re-clustering (renderAll) is throttled to ~10×/sec so it can't
+  // block the main thread on every move and make the thumb stutter/jump.
+  let _thTrail = null, _thLast = 0;
+  const _thSlider = document.getElementById('thresholdSlider');
+  _thSlider.addEventListener('input', (e)=>{
     threshold = parseFloat(e.target.value);
     document.getElementById('thresholdVal').textContent = formatThreshold(threshold);
     updateSliderFill(e.target);
-    renderAll();
+    const now = (window.performance && performance.now) ? performance.now() : 0;
+    if(now - _thLast >= 110){ _thLast = now; renderAll(); }
+    else { if(_thTrail) clearTimeout(_thTrail); _thTrail = setTimeout(()=>{ _thTrail = null; _thLast = (window.performance && performance.now) ? performance.now() : 0; renderAll(); }, 110); }
   });
-  updateSliderFill(document.getElementById('thresholdSlider'));
+  _thSlider.addEventListener('change', ()=>{ if(_thTrail){ clearTimeout(_thTrail); _thTrail = null; } renderAll(); }); // final re-cluster on release
+  updateSliderFill(_thSlider);
 
   document.getElementById('searchBox').addEventListener('input', refreshSearch);
   document.getElementById('folderSearchBox').addEventListener('input', refreshSearch);
