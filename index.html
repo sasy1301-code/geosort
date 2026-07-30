@@ -747,6 +747,7 @@
     display:flex; align-items:center; justify-content:center; gap:10px; white-space:nowrap;
   }
   .inventory-reset-btn:hover{ background:rgba(255,123,172,.14); color:#ffb3cd; }
+  .inventory-reset-btn svg{ width:15px; height:15px; display:block; flex:0 0 auto; }
   .invoice-summary input[type=date]{ width:auto; flex:0 0 auto; padding:5px 8px; font-size:.8rem; }
   .invoice-summary-total{ font-size:.85rem; color:#fff; white-space:nowrap; }
   .invoice-summary-total b{ color:#0f1a2e; }
@@ -777,6 +778,11 @@
   .skip-badge{
     display:inline-block; font-size:.68rem; font-weight:700; color:#fff; background:rgba(255,255,255,.18);
     padding:2px 8px; border-radius:15px; margin-top:6px;
+  }
+  /* "test client" — orders excluded from every tally; amber pill next to the name */
+  .test-badge{
+    display:inline-block; font-size:.62rem; font-weight:700; color:#0f1a2e; background:#fbb03b;
+    padding:1px 7px; border-radius:15px; margin-inline-start:6px; vertical-align:middle; white-space:nowrap;
   }
   .call-before-dot{
     display:inline-block; width:12px; height:12px; border-radius:50%; flex:0 0 auto;
@@ -874,13 +880,18 @@
     82%{ transform:scale(.995); }              /* barely-there settle-back */
     100%{ transform:scale(1); }
   }
-  @keyframes modalPopOut{ from{ transform:scale(1); opacity:1; } to{ transform:scale(.965); opacity:0; } }
+  @keyframes modalPopOut{               /* exact mirror of modalPopIn, played in reverse: grow slightly then shrink+fade */
+    0%{ transform:scale(1); opacity:1; }
+    18%{ transform:scale(.995); }
+    40%{ transform:scale(1.02); opacity:1; }  /* the same gentle grow-past, on the way out */
+    100%{ transform:scale(.92); opacity:0; }
+  }
   @keyframes overlayFadeIn{ from{ opacity:0; } to{ opacity:1; } }
   @keyframes overlayFadeOut{ from{ opacity:1; } to{ opacity:0; } }
   .order-modal-overlay, .photo-modal-overlay{ animation:overlayFadeIn .4s ease backwards; }
   .order-modal, .photo-modal-box{ animation:modalPopIn .6s cubic-bezier(.25,.8,.35,1) backwards; }
-  .order-modal-overlay.modal-closing, .photo-modal-overlay.modal-closing{ animation:overlayFadeOut .3s ease forwards; }
-  .order-modal-overlay.modal-closing .order-modal, .photo-modal-overlay.modal-closing .photo-modal-box{ animation:modalPopOut .3s cubic-bezier(.4,0,.6,1) forwards; }
+  .order-modal-overlay.modal-closing, .photo-modal-overlay.modal-closing{ animation:overlayFadeOut .5s ease forwards; }
+  .order-modal-overlay.modal-closing .order-modal, .photo-modal-overlay.modal-closing .photo-modal-box{ animation:modalPopOut .6s cubic-bezier(.25,.8,.35,1) forwards; }
   /* tactile press feedback (scale up while held, ease back on release) is driven from JS via
      inline transform, so it applies to every button without clobbering existing transitions. */
   @media (prefers-reduced-motion: reduce){ .order-modal, .photo-modal-box, .order-modal-overlay, .photo-modal-overlay{ animation:none; } }
@@ -1060,10 +1071,13 @@
   .order-history-total{ font-weight:700; color:#3bd332; font-size:.85rem; flex:0 0 auto; }
   .order-history-actions{ display:flex; gap:4px; flex:0 0 auto; }
   .order-history-actions button{
-    background:transparent; border:1px solid rgba(255,255,255,.3); color:#fff; border-radius:15px;
-    padding:3px 6px; font-size:.75rem; cursor:pointer;
+    background:transparent; border:1px solid rgba(255,255,255,.3); border-radius:15px;
+    padding:4px 7px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;
   }
   .order-history-actions button:hover{ background:rgba(255,255,255,.15); }
+  .order-history-actions .order-edit-btn{ color:#4394f7; }   /* same pencil as the product catalog */
+  .order-history-actions .order-del-btn{ color:#ff7bac; }    /* same trash + salmon as elsewhere */
+  .order-history-actions button svg{ width:15px; height:15px; display:block; }
   .client-card .cbillname{ font-size:.82rem; color:#fff; margin-top:3px; }
   .client-card .caddr-group{ margin-top:10px; }
   .client-card .cprice-row{
@@ -3243,6 +3257,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   const DELETE_ICON_SVG = `<svg viewBox="0 0 129.6 162.1" fill="#4394f7"><path d="M98.9,162.1H32.2c-11,.3-17.7-9.3-18.4-19.4l-5.6-96.6C3.4,45.2-.1,41.6,0,36.7v-9.1c.2-6,5.7-8.8,10.8-8.8h26.4c-1.9-8.8,2-18.8,11-18.8h32.4c9.1,0,13,10.2,11.1,18.8h28.5c7.4.3,9.4,7.4,9.4,13.3s-.9,12.5-8.6,14.2l-6.8,100.7c-.5,6.9-8.2,15.1-15.4,15.1h.2ZM84.2,10.8c0-1.7-4-3.7-5.9-3.7l-30.1.6c-4.2,0-5.2,8.9-2.6,11.1h39l-.5-8.2v.2ZM7.4,26.5v12h114.8v-12H7.4ZM31.9,154.5h65.7c4.8-1.1,9.4-4.8,9.7-10.2l6.3-98.2H16.5l.3,8,.9,22.2,3.7,64.3c.3,5.9,2.6,13.7,10.5,13.7v.2Z"/><path d="M68.5,135.4c-.8,2-2.8,3.7-4,3.4-2-.6-3.4-2.3-3.5-4.3v-69.9c.8-1.2,2.8-2.6,4-2.6s2.9,1.7,3.5,2.8c0,0,0,70.6,0,70.6Z"/><path d="M45.8,133c.2,3.1-1.5,5.4-3.7,5.4s-4.3-2.5-3.7-4.9l-2-68.8c.8-1.1,2.8-2.5,3.9-2.6s3.1,1.4,3.7,2.5l2,68.5h-.2Z"/><path d="M90.8,133c0,2.8-.9,4.8-3.4,5.6s-4.3-2-4.3-4.2l2.2-67.2c0-2.6.6-4.5,2.8-4.9s4.9,1.2,4.8,4l-2.2,66.8h.2Z"/></svg>`;
 
+  // lab flask — marks the "test client" menu row
+  const TEST_ICON_SVG = `<svg viewBox="0 0 24 24" fill="#4394f7"><path d="M9 2a1 1 0 0 0 0 2h.5v5.06L4.3 17.4A2.5 2.5 0 0 0 6.43 21.2h11.14a2.5 2.5 0 0 0 2.13-3.8l-5.2-8.34V4H15a1 1 0 1 0 0-2H9zm2.5 2h1v5.35a1 1 0 0 0 .15.53l1.86 2.98a6.02 6.02 0 0 0-3.03.66 4.02 4.02 0 0 1-2.62.32l1.49-2.28a1 1 0 0 0 .15-.53V4z"/></svg>`;
+
   // divider between menu rows — line.svg (thin blue), stretched to full width
   const MENU_LINE_SVG = `<span class="mo-line"><svg viewBox="0 0 177.5 3.4" preserveAspectRatio="none" fill="#4394f7"><path d="M174.4,1.6c-42.8.1-129,.1-171.8,0,42.8-.1,129-.1,171.8,0h0Z"/></svg></span>`;
 
@@ -3421,6 +3438,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     function getCumulativeOrderedQty(name){
       let total = 0;
       clients.forEach(c=>{
+        if(c.testClient) return; // test-client orders never affect the vehicle stock
         (c.orders || []).forEach(o=>{
           if(!o.noOrder){
             (o.items || []).forEach(it=>{
@@ -3538,7 +3556,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const overlay = document.getElementById('photoModalOverlay');
     if(!overlay || overlay.classList.contains('modal-closing')) return;
     overlay.classList.add('modal-closing'); // play the calm fade-out, then remove
-    setTimeout(()=>{ try{ overlay.remove(); }catch(_){} }, 320);
+    setTimeout(()=>{ try{ overlay.remove(); }catch(_){} }, 620);
   }
 
   // tactile press feedback for every button: it grows to 110% and STAYS there while the finger
@@ -3637,7 +3655,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <input type="date" class="inventory-to" value="${today}">
         </div>
         <div class="inventory-list"></div>
-        <button type="button" class="inventory-reset-btn">אפס הכל ל-0 (התחל ספירה מחדש)</button>
+        <button type="button" class="inventory-reset-btn">${CATALOG_TRASH_SVG}<span>אפס הכל ל-0 (התחל ספירה מחדש)</span></button>
       </div>
     `;
 
@@ -3664,6 +3682,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const toDate = toInput.value;
       const totals = {}; // product name -> total qty
       clients.forEach(c=>{
+        if(c.testClient) return; // test-client orders never count in the inventory tally
         (c.orders || []).forEach(o=>{
           if(o.date >= fromDate && o.date <= toDate && !o.noOrder){
             (o.items || []).forEach(it=>{
@@ -3714,7 +3733,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const overlay = document.getElementById('orderModalOverlay');
     if(!overlay || overlay.classList.contains('modal-closing')) return;
     overlay.classList.add('modal-closing'); // play the calm fade-out, then remove
-    setTimeout(()=>{ try{ overlay.remove(); }catch(_){} }, 320);
+    setTimeout(()=>{ try{ overlay.remove(); }catch(_){} }, 620);
   }
 
   // keep c.lastInvoice / c.lastInvoiceDate in sync with the client's most recent saved order.
@@ -4030,8 +4049,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           </div>
           <div class="order-history-total">₪${o.total.toFixed(2)}</div>
           <div class="order-history-actions">
-            <button class="order-edit-btn" data-order-id="${o.id}" title="עריכה">✎</button>
-            <button class="order-del-btn" data-order-id="${o.id}" title="מחיקה">🗑</button>
+            <button class="order-edit-btn" data-order-id="${o.id}" title="עריכה">${CATALOG_EDIT_SVG}</button>
+            <button class="order-del-btn" data-order-id="${o.id}" title="מחיקה">${CATALOG_TRASH_SVG}</button>
           </div>
         </div>
       `).join('');
@@ -4280,7 +4299,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function buildClientCard(c, routeNumber, moveHandlers, showSkipToggle, isTempContext){
     if(editingClientId === c.id) return buildClientEditCard(c);
     const card = document.createElement('div');
-    card.className = 'client-card' + (openClientCards.has(c.id) ? ' card-open' : '') + (c.skipRoute ? ' skipped-today' : '') + (c.handled ? ' handled' : '') + (c.inactive ? ' client-inactive' : '');
+    card.className = 'client-card' + (openClientCards.has(c.id) ? ' card-open' : '') + (c.skipRoute ? ' skipped-today' : '') + (c.handled ? ' handled' : '') + (c.inactive ? ' client-inactive' : '') + (c.testClient ? ' client-test' : '');
     card.dataset.clientId = c.id;
     if(moveHandlers){
       card.draggable = true;
@@ -4295,6 +4314,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           ${c.callBefore ? `<span class="call-before-dot" title="להתקשר לפני ההגעה"></span>` : ""}
           ${c.collectPayment ? `<span class="collect-payment-dot" title="לגבות תשלום"></span>` : ""}
           <a href="javascript:void(0)" class="cname-link" title="לחצו לצפייה/הוספה של הזמנה">${c.business ? escapeHtml(c.business) : escapeHtml(c.name)}</a>
+          ${c.testClient ? `<span class="test-badge" title="לקוח בדיקה — ההזמנות שלו לא נספרות באף סיכום">בדיקה</span>` : ""}
         </div>
         <div class="card-summary-left">
           ${(!c.inactive && !c.skipRoute) ? `
@@ -4470,6 +4490,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           ${MENU_LINE_SVG}
           <button type="button" class="more-opt-inactive"><span class="mo-ico">${EYE_ICON_SVG}</span><span>${c.inactive ? 'החזר לפעיל' : 'לקוח לא פעיל'}</span></button>
           ${MENU_LINE_SVG}
+          <button type="button" class="more-opt-test"><span class="mo-ico">${TEST_ICON_SVG}</span><span>${c.testClient ? 'בטל סימון לקוח בדיקה' : 'סמן כלקוח בדיקה'}</span></button>
+          ${MENU_LINE_SVG}
           <button type="button" class="more-opt-delete"><span class="mo-ico">${DELETE_ICON_SVG}</span><span>מחיקת כרטיס לקוח</span></button>
         `;
         menu.addEventListener('click', e2=>e2.stopPropagation());
@@ -4484,6 +4506,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         menu.querySelector('.more-opt-inactive').addEventListener('click', ()=>{
           menu.remove();
           c.inactive = !c.inactive;
+          saveData();
+          renderAll();
+        });
+        menu.querySelector('.more-opt-test').addEventListener('click', ()=>{
+          menu.remove();
+          c.testClient = !c.testClient; // test client: its orders are excluded from every tally (מלאי, מלאי רכב, דוחות, חשבוניות)
           saveData();
           renderAll();
         });
@@ -4920,6 +4948,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       let orderCount = 0;
       let total = 0;
       clients.forEach(c=>{
+        if(c.testClient) return; // test-client orders excluded from the daily report
         (c.orders || []).forEach(o=>{
           if(o.date >= fromDate && o.date <= toDate && (o.total || 0) > 0){
             orderCount++;
@@ -5159,6 +5188,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         function refreshInvoiceSummary(){
           const chosenDate = summaryDateInput.value;
           const total = members.reduce((sum, m)=>{
+            if(m.testClient) return sum; // test-client invoices excluded from the summary
             if(m.lastInvoiceDate === chosenDate){
               const val = parseFloat(m.lastInvoice);
               if(!isNaN(val)) return sum + val;
@@ -5181,6 +5211,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           let orderCount = 0;
           let total = 0;
           members.forEach(m=>{
+            if(m.testClient) return; // test-client orders excluded from the folder daily report
             (m.orders || []).forEach(o=>{
               if(o.date === chosenDate && (o.total || 0) > 0){
                 orderCount++;
