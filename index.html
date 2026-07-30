@@ -2625,9 +2625,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         grabOffset = tStartY - card.getBoundingClientRect().top;
         card.classList.add('touch-dragging'); // shadow + #4394f7 border signal the lift
         card._dragClip = unclipDragAncestors(card); // lift overflow:hidden clips so the 110% card isn't cut at the sides
-        card.style.transition = 'transform .16s cubic-bezier(.2,.85,.25,1)'; // smooth grow into 110% on grab
+        card.style.transition = 'transform .2s cubic-bezier(.42,0,1,1)'; // grow into 110% with the same ease-in speed as the buttons
         card.style.transform = 'translateY(0) scale(1.1)';
-        setTimeout(()=>{ if(card.classList.contains('touch-dragging')) card.style.transition = ''; }, 170); // then let followFinger move it instantly
+        setTimeout(()=>{ if(card.classList.contains('touch-dragging')) card.style.transition = ''; }, 210); // then let followFinger move it instantly
         if(navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){ } }
       }, HOLD_MS);
     }, { passive:true });
@@ -2661,7 +2661,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const card = tCard;
         settling = true;
         // glide from wherever the finger left it back down into its slot, then persist
-        card.style.transition = 'transform .26s cubic-bezier(.2,.85,.25,1), box-shadow .26s ease';
+        card.style.transition = 'transform .2s cubic-bezier(.42,0,1,1), box-shadow .2s ease'; // shrink back to 100% with the same ease-in speed as the buttons
         card.style.transform = 'translateY(0) scale(1)'; // glide down AND shrink back to 100% on release
         const ids = [...bodyEl.querySelectorAll('.client-card')].map(el => el.dataset.clientId);
         let done = false;
@@ -2674,7 +2674,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           persistFn(ids);
         };
         card.addEventListener('transitionend', function te(ev){ if(ev.propertyName==='transform'){ card.removeEventListener('transitionend', te); finish(); } });
-        setTimeout(finish, 340); // safety net if transitionend doesn't fire
+        setTimeout(finish, 260); // safety net if transitionend doesn't fire
       }
       tCard = null; tDragging = false;
     };
@@ -2751,9 +2751,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         grabOffset = startY - item.getBoundingClientRect().top;
         item.classList.add('touch-dragging');
         item._dragClip = unclipDragAncestors(item); // lift overflow:hidden clips so the 110% item isn't cut at the sides
-        item.style.transition = 'transform .16s cubic-bezier(.2,.85,.25,1)'; // smooth grow into 110% on grab
+        item.style.transition = 'transform .2s cubic-bezier(.42,0,1,1)'; // grow into 110% with the same ease-in speed as the buttons
         item.style.transform = 'translateY(0) scale(1.1)';
-        setTimeout(()=>{ if(item.classList.contains('touch-dragging')) item.style.transition = ''; }, 170); // then let followFinger move it instantly
+        setTimeout(()=>{ if(item.classList.contains('touch-dragging')) item.style.transition = ''; }, 210); // then let followFinger move it instantly
         // let elementFromPoint see the folder UNDER the lifted product, not the product itself
         if(cfg.crossFolder) item.style.pointerEvents = 'none';
         if(navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){ } }
@@ -2806,7 +2806,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(dragging && held){
         const item = held;
         settling = true;
-        item.style.transition = 'transform .26s cubic-bezier(.2,.85,.25,1), box-shadow .26s ease';
+        item.style.transition = 'transform .2s cubic-bezier(.42,0,1,1), box-shadow .2s ease'; // shrink back to 100% with the same ease-in speed as the buttons
         item.style.transform = 'translateY(0) scale(1)'; // glide down AND shrink back to 100% on release
         const els = [...container.querySelectorAll(itemSelector)].filter(el=>el.parentElement===container);
         let done = false;
@@ -2820,7 +2820,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           persistFn(els);
         };
         item.addEventListener('transitionend', function te(ev){ if(ev.propertyName==='transform'){ item.removeEventListener('transitionend', te); finish(); } });
-        setTimeout(finish, 340); // safety net if transitionend doesn't fire
+        setTimeout(finish, 260); // safety net if transitionend doesn't fire
       }
       if(cfg.crossFolder) setCatalogDropHighlight(null);
       held = null; dragging = false;
