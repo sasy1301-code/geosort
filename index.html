@@ -867,11 +867,9 @@
   .order-modal, .photo-modal-box{ animation:modalPopIn .6s cubic-bezier(.25,.8,.35,1) backwards; }
   .order-modal-overlay.modal-closing, .photo-modal-overlay.modal-closing{ animation:overlayFadeOut .3s ease forwards; }
   .order-modal-overlay.modal-closing .order-modal, .photo-modal-overlay.modal-closing .photo-modal-box{ animation:modalPopOut .3s cubic-bezier(.4,0,.6,1) forwards; }
-  /* tactile press feedback: on every button press the button lifts a touch, then eases back —
-     elegant and flowing, not a hard bounce. `both` isn't used so no transform lingers. */
-  @keyframes btnPressLift{ 0%{ transform:scale(1); } 45%{ transform:scale(1.05); } 100%{ transform:scale(1); } }
-  button.btn-press-anim{ animation:btnPressLift .32s cubic-bezier(.33,0,.24,1); }
-  @media (prefers-reduced-motion: reduce){ button.btn-press-anim{ animation:none; } .order-modal, .photo-modal-box, .order-modal-overlay, .photo-modal-overlay{ animation:none; } }
+  /* tactile press feedback (scale up while held, ease back on release) is driven from JS via
+     inline transform, so it applies to every button without clobbering existing transitions. */
+  @media (prefers-reduced-motion: reduce){ .order-modal, .photo-modal-box, .order-modal-overlay, .photo-modal-overlay{ animation:none; } }
   .order-modal-overlay{
     position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:2000;
     display:flex; align-items:center; justify-content:center; padding:20px;
@@ -3453,20 +3451,54 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     setTimeout(()=>{ try{ overlay.remove(); }catch(_){} }, 320);
   }
 
-  // tactile press feedback for every button: on press, replay the full lift-and-return
-  // animation (driven from pointerdown so a quick tap still completes smoothly, not cut off).
+  // tactile press feedback for every button: it grows to 110% and STAYS there while the finger
+  // is held down, then eases smoothly back to 100% only when released. driven via inline styles
+  // so it works on every button (incl. the customer-card action buttons) without touching CSS.
+  const _reduceMotion = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  let _pressedBtn = null;
   document.addEventListener('pointerdown', (e)=>{
+    if(_reduceMotion) return;
     const btn = (e.target && e.target.closest) ? e.target.closest('button') : null;
     if(!btn || btn.disabled) return;
-    btn.classList.remove('btn-press-anim');
-    void btn.offsetWidth; // restart the animation cleanly on each press
-    btn.classList.add('btn-press-anim');
-  }, true);
-  document.addEventListener('animationend', (e)=>{
-    if(e.animationName === 'btnPressLift' && e.target && e.target.classList){
-      e.target.classList.remove('btn-press-anim');
+    _pressedBtn = btn;
+    // let the growing button escape any overflow:hidden "frame" so its corners aren't clipped.
+    // we only lift the clip on non-scroll ancestors and restore everything after it shrinks back.
+    const clipped = [];
+    let el = btn.parentElement, depth = 0;
+    while(el && el !== document.body && depth < 10){
+      const cs = getComputedStyle(el);
+      const ov = cs.overflow + ' ' + cs.overflowX + ' ' + cs.overflowY;
+      if((ov.indexOf('hidden') >= 0 || ov.indexOf('clip') >= 0) && ov.indexOf('auto') < 0 && ov.indexOf('scroll') < 0){
+        clipped.push([el, el.style.overflow]);
+        el.style.overflow = 'visible';
+      }
+      el = el.parentElement; depth++;
     }
+    btn._pressClip = clipped;
+    btn._pressPrevPos = btn.style.position;
+    btn._pressPrevZ = btn.style.zIndex;
+    if(getComputedStyle(btn).position === 'static') btn.style.position = 'relative';
+    btn.style.zIndex = '30'; // render above neighbours while enlarged
+    btn.style.transition = 'transform .2s cubic-bezier(.42,0,1,1)';
+    btn.style.transform = 'scale(1.1)';
   }, true);
+  function _releasePressedBtn(){
+    const btn = _pressedBtn; _pressedBtn = null;
+    if(!btn) return;
+    btn.style.transform = 'scale(1)'; // ease back to real size on release
+    const clear = ()=>{
+      // restore the clip only AFTER the button has shrunk back, so it never clips on the way down
+      (btn._pressClip || []).forEach(([el, prev])=>{ el.style.overflow = prev; });
+      btn._pressClip = null;
+      btn.style.transition = ''; btn.style.transform = '';
+      btn.style.position = btn._pressPrevPos || ''; btn.style.zIndex = btn._pressPrevZ || '';
+      btn.removeEventListener('transitionend', clear);
+    };
+    btn.addEventListener('transitionend', clear);
+    setTimeout(clear, 320); // fallback in case the transitionend doesn't fire (e.g. re-render)
+  }
+  document.addEventListener('pointerup', _releasePressedBtn, true);
+  document.addEventListener('pointercancel', _releasePressedBtn, true);
 
   function openPhotoModal(photoDataUrl){
     closePhotoModal();
