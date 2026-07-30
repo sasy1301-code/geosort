@@ -185,6 +185,16 @@
   .ord-saved-flash{ background:rgba(59,211,50,.14); border:1px solid rgba(59,211,50,.5); color:#8ff08a; border-radius:12px; padding:10px 12px; font-size:.85rem; margin:10px 0 0; text-align:center; }
   /* product-count badge shown on each folder header in the orders-page catalog */
   .ordreg-count{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:18px; padding:0 6px; margin-inline-start:8px; border-radius:9px; background:rgba(47,124,246,.28); color:#bcd6ff; font-size:.66rem; font-weight:700; flex:0 0 auto; }
+  /* live client-search results dropdown on the orders page */
+  .ord-client-search-wrap{ position:relative; }
+  .ord-client-results{ display:none; position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:40; max-height:260px; overflow-y:auto; background:#0f1a2e; border:1px solid rgba(140,160,255,.35); border-radius:12px; box-shadow:0 12px 30px rgba(0,0,0,.45); }
+  .ord-client-results.open{ display:block; }
+  .ord-client-result{ padding:9px 12px; cursor:pointer; display:flex; flex-direction:column; gap:2px; border-bottom:1px solid rgba(255,255,255,.07); }
+  .ord-client-result:last-child{ border-bottom:none; }
+  .ord-client-result:hover, .ord-client-result.active{ background:rgba(47,124,246,.28); }
+  .ord-client-result .ocr-name{ color:#fff; font-size:.9rem; font-weight:600; }
+  .ord-client-result .ocr-sub{ color:rgba(255,255,255,.6); font-size:.72rem; }
+  .ord-client-results-empty{ padding:11px 12px; color:rgba(255,255,255,.55); font-size:.85rem; }
   /* orders-page catalog: reuses the "מוצרים ומחירים" folder design; extra bits below */
   .ord-catalog-wrap{ margin-bottom:14px; }
   #ordCatalogList{ margin-top:4px; }
@@ -192,7 +202,8 @@
      sub / sub-sub) so all the circles line up in one symmetric vertical column down the
      middle. absolute positioning keeps that column fixed regardless of the name length or
      the discount/blanket-price field beside it. scoped to the orders catalog only. */
-  #ordCatalogList .cluster-head{ position:relative; min-height:40px; box-sizing:border-box; }
+  #ordCatalogList .cluster-head{ position:relative; min-height:48px; box-sizing:border-box; }
+  #ordCatalogList .subsubcat-head{ min-height:46px; }
   #ordCatalogList .cluster-head span.count{ position:absolute; left:50%; right:auto; transform:translateX(calc(-50% - 35px)); margin:0; }
   /* category header only: pull its count to the far (left) end, 4px in — sub/sub-sub stay centred */
   #ordCatalogList .cat-head span.count{ left:4px; right:auto; transform:none; }
@@ -203,12 +214,19 @@
   .ord-head-field{ display:inline-flex; align-items:center; gap:5px; flex:0 0 auto; margin-inline-start:8px; background:transparent; border:none; padding:0; }
   .ord-head-field-lbl{ font-size:.62rem; color:rgba(255,255,255,.8); white-space:nowrap; }
   .ord-head-field input{ width:52px; padding:3px 5px; border-radius:8px; font-size:.74rem; text-align:center; background:#fff; color:#021236; border:1px solid rgba(255,255,255,.25); }
-  /* product row: catalog look, but not clickable, with a compact quantity field on the end */
-  #ordCatalogList .ord-prod-row{ cursor:default; padding-top:3px; padding-bottom:3px; }
+  /* product row: catalog look, but not clickable (same height as the products page) */
+  #ordCatalogList .ord-prod-row{ cursor:default; }
   .ord-prod-row:hover{ background:rgba(255,255,255,.06); }
-  .ord-prod-qty{ flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:2px; }
-  .ord-prod-qty-lbl{ font-size:.62rem; color:rgba(255,255,255,.65); }
-  .ord-prod-qty input{ width:60px; padding:5px 4px; border-radius:10px; font-size:.82rem; text-align:center; background:#fff; color:#021236; border:1px solid rgba(255,255,255,.25); }
+  /* quantity stepper: a number field with − / + buttons on its sides */
+  .ord-prod-qty{ flex:0 0 auto; direction:ltr; display:inline-flex; align-items:center; }
+  .ord-qty-btn{ width:28px; height:32px; padding:0; border:1px solid rgba(4,15,30,.18); background:#f2f5fb; color:#021236; font-size:1.15rem; font-weight:700; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; user-select:none; }
+  .ord-qty-btn:hover{ background:#e2e8f5; }
+  .ord-qty-btn:active{ background:#d2dcef; }
+  .ord-qty-minus{ border-radius:10px 0 0 10px; border-right:none; }
+  .ord-qty-plus{ border-radius:0 10px 10px 0; border-left:none; }
+  .ord-prod-qty input.ordreg-qty{ width:42px; height:32px; box-sizing:border-box; padding:0 2px; border-radius:0; border:1px solid rgba(4,15,30,.18); text-align:center; font-size:.9rem; background:#fff; color:#021236; }
+  .ord-prod-qty input.ordreg-qty::-webkit-outer-spin-button, .ord-prod-qty input.ordreg-qty::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .ord-prod-qty input.ordreg-qty{ -moz-appearance:textfield; appearance:textfield; }
   .ord-prod-price .ordreg-price-old{ color:rgba(251,176,59,.6); }
   .ord-prod-price .ordreg-price-new{ color:#3bd332; }
   /* ---- catalog screen: categories reuse .cluster-group/.cluster-head; product rows below ---- */
@@ -1458,9 +1476,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </div>
 
         <label class="ord-field-label" for="ordClientSearch">שם לקוח</label>
-        <div class="search-box" style="margin-top:0">
-          <input type="text" id="ordClientSearch" placeholder="חפש לפי שם, שם חשבונית או ח.פ/ת.ז...">
-          <svg viewBox="0 0 24 24" fill="none" stroke="#5B6B6A" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <div class="ord-client-search-wrap">
+          <div class="search-box" style="margin-top:0">
+            <input type="text" id="ordClientSearch" autocomplete="off" placeholder="חפש לפי שם, שם חשבונית או ח.פ/ת.ז...">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#5B6B6A" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <div id="ordClientResults" class="ord-client-results"></div>
         </div>
         <select id="ordClientSelect" style="margin-top:8px"><option value="">— בחר לקוח —</option></select>
 
@@ -5640,6 +5661,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const ordAgentSelect = document.getElementById('ordAgentSelect');
   const ordAddAgentBtn = document.getElementById('ordAddAgentBtn');
   const ordClientSearch = document.getElementById('ordClientSearch');
+  const ordClientResults = document.getElementById('ordClientResults');
   const ordClientSelect = document.getElementById('ordClientSelect');
   const ordFormHost = document.getElementById('ordFormHost');
   let ordSelectedClientId = null;
@@ -5671,8 +5693,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <span class="catalog-prod-meta"><span class="ord-prod-price" data-pid="${pr.id}" data-base="${escapeHtml(base)}" data-ssid="${ssid}">${ordPriceInner(c, pr)}</span>${unitTxt?` · ${unitTxt}`:''}</span>
       </div>
       <div class="ord-prod-qty">
-        <span class="ord-prod-qty-lbl">כמות</span>
+        <button type="button" class="ord-qty-btn ord-qty-minus" data-pid="${pr.id}" title="הפחת כמות" tabindex="-1">−</button>
         <input type="number" class="ordreg-qty" data-pid="${pr.id}" min="0" step="1" placeholder="0" title="כמות להזמנה">
+        <button type="button" class="ord-qty-btn ord-qty-plus" data-pid="${pr.id}" title="הוסף כמות" tabindex="-1">+</button>
       </div>
     </div>`;
   }
@@ -5744,26 +5767,54 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(cur && agents.includes(cur)) ordAgentSelect.value = cur;
   }
 
+  // the "בחר לקוח" dropdown lists every client (for browsing); the search box below drives a
+  // live results list. both funnel through selectOrderClient().
   function populateClientSelect(){
-    const q = normalizeSearchText(ordClientSearch.value || '');
-    const list = clients.slice()
-      .filter(c => !q ||
-        normalizeSearchText(c.business).includes(q) ||
-        normalizeSearchText(c.name).includes(q) ||
-        normalizeSearchText(c.businessId).includes(q))
-      .sort((a,b)=> clientDisplayName(a).localeCompare(clientDisplayName(b), 'he'));
+    const list = clients.slice().sort((a,b)=> clientDisplayName(a).localeCompare(clientDisplayName(b), 'he'));
     ordClientSelect.innerHTML = '<option value="">— בחר לקוח —</option>' +
       list.map(c=>{
         const idTxt = c.businessId ? ` (ח.פ/ת.ז ${escapeHtml(c.businessId)})` : '';
         return `<option value="${c.id}">${escapeHtml(clientDisplayName(c))}${idTxt}</option>`;
       }).join('');
-    // keep the current selection if it's still in the filtered list, else clear the form
-    if(ordSelectedClientId && list.some(c=>c.id===ordSelectedClientId)){
-      ordClientSelect.value = ordSelectedClientId;
-    } else if(ordSelectedClientId){
-      ordSelectedClientId = null;
-      renderOrdersForm(null);
+    if(ordSelectedClientId) ordClientSelect.value = ordSelectedClientId;
+  }
+  // live search: as the user types, show every client whose business name / invoice name /
+  // tax-id starts with (ranked first) or contains the typed text — updated on every keystroke.
+  function renderClientResults(){
+    const q = normalizeSearchText(ordClientSearch.value || '');
+    if(!q){ ordClientResults.classList.remove('open'); ordClientResults.innerHTML = ''; return; }
+    const scored = [];
+    clients.forEach(c=>{
+      const fields = [normalizeSearchText(c.business), normalizeSearchText(c.name), normalizeSearchText(c.businessId)].filter(Boolean);
+      let rank = 99;
+      for(const f of fields){
+        if(f.startsWith(q)) rank = Math.min(rank, 0);       // starts-with → top
+        else if(f.includes(q)) rank = Math.min(rank, 1);    // contains → after
+      }
+      if(rank < 99) scored.push({ c, rank });
+    });
+    scored.sort((a,b)=> a.rank - b.rank || clientDisplayName(a.c).localeCompare(clientDisplayName(b.c), 'he'));
+    if(!scored.length){
+      ordClientResults.innerHTML = '<div class="ord-client-results-empty">לא נמצאו לקוחות תואמים.</div>';
+      ordClientResults.classList.add('open');
+      return;
     }
+    ordClientResults.innerHTML = scored.slice(0, 60).map(({c})=>{
+      // always show the invoice name and the address under the client name (plus ח.פ/ת.ז when present)
+      const l1 = [];
+      if(c.name) l1.push('שם לחשבונית: ' + c.name);
+      if(c.businessId) l1.push('ח.פ/ת.ז ' + c.businessId);
+      const line1 = l1.join(' · ');
+      const line2 = c.address ? ('כתובת: ' + c.address) : '';
+      return `<div class="ord-client-result" data-id="${c.id}"><span class="ocr-name">${escapeHtml(clientDisplayName(c))}</span>${line1?`<span class="ocr-sub">${escapeHtml(line1)}</span>`:''}${line2?`<span class="ocr-sub">${escapeHtml(line2)}</span>`:''}</div>`;
+    }).join('');
+    ordClientResults.classList.add('open');
+  }
+  function selectOrderClient(id){
+    ordSelectedClientId = id || null;
+    const c = id ? clients.find(x=>x.id===id) : null;
+    if(ordClientSelect) ordClientSelect.value = id || '';
+    renderOrdersForm(c || null);
   }
 
   // pricing for a single catalog line — MIRRORS ordregLine() inside openOrderModal so the
@@ -5843,6 +5894,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     host.querySelectorAll('.ordreg-qty').forEach(qi=>{
       qi.addEventListener('input', recalcTotal);
       qi.addEventListener('change', recalcTotal);
+    });
+    // the − / + stepper buttons decrement/increment the quantity field beside them
+    host.querySelectorAll('.ord-qty-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const inp = btn.parentElement.querySelector('.ordreg-qty');
+        if(!inp) return;
+        let v = parseInt(inp.value, 10) || 0;
+        v = btn.classList.contains('ord-qty-plus') ? v + 1 : Math.max(0, v - 1);
+        inp.value = v === 0 ? '' : String(v);
+        recalcTotal();
+      });
     });
     host.querySelectorAll('.ordreg-subdisc').forEach(inp=>{
       inp.addEventListener('click', e=>e.stopPropagation());
@@ -5958,6 +6020,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function renderOrdersView(){
     populateAgentSelect();
     populateClientSelect();
+    ordClientResults.classList.remove('open'); // start clean on entry
     if(ordSelectedClientId){
       const c = clients.find(x=>x.id===ordSelectedClientId);
       renderOrdersForm(c || null);
@@ -5975,11 +6038,29 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     populateAgentSelect();
     ordAgentSelect.value = name;
   });
-  ordClientSearch.addEventListener('input', populateClientSelect);
+  // live search as the user types
+  ordClientSearch.addEventListener('input', renderClientResults);
+  ordClientSearch.addEventListener('focus', ()=>{ if(ordClientSearch.value.trim()) renderClientResults(); });
+  // pick a client from the live results list
+  ordClientResults.addEventListener('click', (e)=>{
+    const item = e.target.closest('.ord-client-result');
+    if(!item) return;
+    const c = clients.find(x=>x.id===item.dataset.id);
+    ordClientSearch.value = c ? clientDisplayName(c) : '';
+    ordClientResults.classList.remove('open');
+    selectOrderClient(item.dataset.id);
+  });
+  // or pick from the full dropdown
   ordClientSelect.addEventListener('change', ()=>{
-    ordSelectedClientId = ordClientSelect.value || null;
-    const c = ordSelectedClientId ? clients.find(x=>x.id===ordSelectedClientId) : null;
-    renderOrdersForm(c || null);
+    ordClientResults.classList.remove('open');
+    ordClientSearch.value = '';
+    selectOrderClient(ordClientSelect.value || null);
+  });
+  // close the live results when clicking anywhere outside the search box / list
+  document.addEventListener('click', (e)=>{
+    if(ordClientResults && !ordClientResults.contains(e.target) && e.target !== ordClientSearch){
+      ordClientResults.classList.remove('open');
+    }
   });
 
   // ---- catalog screen (categories → products) ----
