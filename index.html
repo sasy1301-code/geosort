@@ -183,6 +183,7 @@
   .ord-notes-row label{ display:block; font-size:.8rem; color:rgba(255,255,255,.72); margin:0 0 4px; }
   .ord-notes-row textarea{ width:100%; box-sizing:border-box; min-height:60px; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px; font-size:.9rem; background:#fff; color:#021236; font-family:inherit; resize:vertical; }
   .ord-saved-flash{ background:rgba(59,211,50,.14); border:1px solid rgba(59,211,50,.5); color:#8ff08a; border-radius:12px; padding:10px 12px; font-size:.85rem; margin:10px 0 0; text-align:center; }
+  .ord-edit-banner{ background:rgba(251,176,59,.16); border:1px solid rgba(251,176,59,.5); color:#ffcf8a; border-radius:12px; padding:9px 12px; font-size:.82rem; margin:0 0 12px; text-align:center; }
   /* product-count badge shown on each folder header in the orders-page catalog */
   .ordreg-count{ display:inline-flex; align-items:center; justify-content:center; min-width:20px; height:18px; padding:0 6px; margin-inline-start:8px; border-radius:9px; background:rgba(47,124,246,.28); color:#bcd6ff; font-size:.66rem; font-weight:700; flex:0 0 auto; }
   /* live client-search results dropdown on the orders page */
@@ -850,6 +851,27 @@
     font-weight:600; font-size:.87rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
 
+  /* calm, flowing pop for popups: a single smooth spring that eases up to real size with only
+     a whisper of overshoot (no visible bounce/wobble). `backwards` fill means no transform
+     lingers afterwards (keeps sticky headers working). */
+  @keyframes modalPopIn{
+    0%{ transform:scale(.92); opacity:0; }
+    60%{ transform:scale(1.02); opacity:1; }   /* gentle grow past real size */
+    82%{ transform:scale(.995); }              /* barely-there settle-back */
+    100%{ transform:scale(1); }
+  }
+  @keyframes modalPopOut{ from{ transform:scale(1); opacity:1; } to{ transform:scale(.965); opacity:0; } }
+  @keyframes overlayFadeIn{ from{ opacity:0; } to{ opacity:1; } }
+  @keyframes overlayFadeOut{ from{ opacity:1; } to{ opacity:0; } }
+  .order-modal-overlay, .photo-modal-overlay{ animation:overlayFadeIn .4s ease backwards; }
+  .order-modal, .photo-modal-box{ animation:modalPopIn .6s cubic-bezier(.25,.8,.35,1) backwards; }
+  .order-modal-overlay.modal-closing, .photo-modal-overlay.modal-closing{ animation:overlayFadeOut .3s ease forwards; }
+  .order-modal-overlay.modal-closing .order-modal, .photo-modal-overlay.modal-closing .photo-modal-box{ animation:modalPopOut .3s cubic-bezier(.4,0,.6,1) forwards; }
+  /* tactile press feedback: on every button press the button lifts a touch, then eases back —
+     elegant and flowing, not a hard bounce. `both` isn't used so no transform lingers. */
+  @keyframes btnPressLift{ 0%{ transform:scale(1); } 45%{ transform:scale(1.05); } 100%{ transform:scale(1); } }
+  button.btn-press-anim{ animation:btnPressLift .32s cubic-bezier(.33,0,.24,1); }
+  @media (prefers-reduced-motion: reduce){ button.btn-press-anim{ animation:none; } .order-modal, .photo-modal-box, .order-modal-overlay, .photo-modal-overlay{ animation:none; } }
   .order-modal-overlay{
     position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:2000;
     display:flex; align-items:center; justify-content:center; padding:20px;
@@ -3426,8 +3448,25 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   function closePhotoModal(){
     const overlay = document.getElementById('photoModalOverlay');
-    if(overlay) overlay.remove();
+    if(!overlay || overlay.classList.contains('modal-closing')) return;
+    overlay.classList.add('modal-closing'); // play the calm fade-out, then remove
+    setTimeout(()=>{ try{ overlay.remove(); }catch(_){} }, 320);
   }
+
+  // tactile press feedback for every button: on press, replay the full lift-and-return
+  // animation (driven from pointerdown so a quick tap still completes smoothly, not cut off).
+  document.addEventListener('pointerdown', (e)=>{
+    const btn = (e.target && e.target.closest) ? e.target.closest('button') : null;
+    if(!btn || btn.disabled) return;
+    btn.classList.remove('btn-press-anim');
+    void btn.offsetWidth; // restart the animation cleanly on each press
+    btn.classList.add('btn-press-anim');
+  }, true);
+  document.addEventListener('animationend', (e)=>{
+    if(e.animationName === 'btnPressLift' && e.target && e.target.classList){
+      e.target.classList.remove('btn-press-anim');
+    }
+  }, true);
 
   function openPhotoModal(photoDataUrl){
     closePhotoModal();
@@ -3549,9 +3588,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   function closeOrderModal(){
-    const overlay = document.getElementById('orderModalOverlay');
-    if(overlay) overlay.remove();
     orderModalEditingId = null;
+    const overlay = document.getElementById('orderModalOverlay');
+    if(!overlay || overlay.classList.contains('modal-closing')) return;
+    overlay.classList.add('modal-closing'); // play the calm fade-out, then remove
+    setTimeout(()=>{ try{ overlay.remove(); }catch(_){} }, 320);
   }
 
   // keep c.lastInvoice / c.lastInvoiceDate in sync with the client's most recent saved order.
@@ -3880,8 +3921,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         btn.addEventListener('click', ()=>{
           const order = (c.orders||[]).find(o => o.id === btn.dataset.orderId);
           if(!order) return;
-          orderModalEditingId = order.id;
-          renderForm(order.items, order.noOrder, order.noOrderReason, order.discountPercent);
+          // editing now happens on the Orders page (where the catalog lives): open it there with
+          // this client selected and this order loaded for editing.
+          closeOrderModal();
+          ordSelectedClientId = c.id;
+          ordEditingOrderId = order.id;
+          try{ if(ordClientSearch) ordClientSearch.value = clientDisplayName(c); }catch(_){}
+          switchView('orders');
         });
       });
       listEl.querySelectorAll('.order-del-btn').forEach(btn=>{
@@ -5684,7 +5730,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
   viewCustomersItem.addEventListener('click', ()=>{ switchView('customers'); closeSideMenu(); });
   viewProductsItem.addEventListener('click', ()=>{ switchView('products'); closeSideMenu(); });
-  viewOrdersItem.addEventListener('click', ()=>{ switchView('orders'); closeSideMenu(); });
+  viewOrdersItem.addEventListener('click', ()=>{ ordEditingOrderId = null; switchView('orders'); closeSideMenu(); });
   updateActiveViewItem();
 
   // ================= ORDERS PAGE =================
@@ -5700,6 +5746,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const ordClientSelect = document.getElementById('ordClientSelect');
   const ordFormHost = document.getElementById('ordFormHost');
   let ordSelectedClientId = null;
+  let ordEditingOrderId = null; // when set, the orders form edits this existing order instead of creating a new one
   // open/closed state of the orders-page catalog folders, kept across re-renders
   const ordOpenCat = new Set(), ordOpenSub = new Set(), ordOpenSubsub = new Set();
 
@@ -5846,6 +5893,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     ordClientResults.classList.add('open');
   }
   function selectOrderClient(id){
+    ordEditingOrderId = null; // picking a client manually starts a fresh order
     ordSelectedClientId = id || null;
     const c = id ? clients.find(x=>x.id===id) : null;
     if(ordClientSelect) ordClientSelect.value = id || '';
@@ -5876,10 +5924,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       ordFormHost.innerHTML = `<div class="ord-placeholder">בחר לקוח כדי להתחיל הזמנה.</div>`;
       return;
     }
-    const prefDisc = (c.defaultDiscount !== undefined && c.defaultDiscount !== null && c.defaultDiscount !== '')
-      ? c.defaultDiscount : (c.discountPercent || '');
+    // when editing an existing order, load its values instead of starting fresh
+    const editOrder = (ordEditingOrderId && Array.isArray(c.orders)) ? c.orders.find(o=>o.id===ordEditingOrderId) : null;
+    const prefDisc = editOrder
+      ? (editOrder.discountPercent || '')
+      : ((c.defaultDiscount !== undefined && c.defaultDiscount !== null && c.defaultDiscount !== '') ? c.defaultDiscount : (c.discountPercent || ''));
+    const prefNote = editOrder ? (editOrder.note || '') : '';
     ordFormHost.innerHTML = `
       <div class="order-modal-body">
+        ${editOrder ? `<div class="ord-edit-banner">✎ עריכת הזמנה מ-${escapeHtml(editOrder.date||'')} — עדכן ולחץ "עדכן הזמנה"</div>` : ''}
         <div class="ord-catalog-wrap">${ordCatalogHtml(c)}</div>
         <div class="no-order-row">
           <label>
@@ -5897,7 +5950,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </div>
         <div class="ord-notes-row">
           <label>הערות (לא חובה)</label>
-          <textarea class="ord-note-input" placeholder="הערה להזמנה הזו..."></textarea>
+          <textarea class="ord-note-input" placeholder="הערה להזמנה הזו...">${escapeHtml(prefNote)}</textarea>
         </div>
         <div class="order-total-row">
           סה״כ: <b class="order-total-amount">₪0.00</b>
@@ -5905,7 +5958,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <div class="order-total-row order-total-vat-row">
           סה״כ כולל מע״מ (${Math.round(VAT_RATE*100)}%): <b class="order-total-amount-vat">₪0.00</b>
         </div>
-        <button class="order-save-btn ord-generate-btn">הפק הזמנה</button>
+        <button class="order-save-btn ord-generate-btn">${editOrder ? 'עדכן הזמנה' : 'הפק הזמנה'}</button>
         <div class="ord-saved-host"></div>
       </div>`;
 
@@ -6038,7 +6091,32 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       });
       setTotals(catTotal);
     }
-    recalcTotal();
+    // when editing an existing order, load its quantities / no-order / agent into the form
+    if(editOrder){
+      (editOrder.items || []).forEach(it=>{
+        if(it.productId == null) return;
+        const qi = host.querySelector(`.ordreg-qty[data-pid="${CSS.escape(String(it.productId))}"]`);
+        if(qi){ qi.value = String(it.qty); syncRowSelected(qi.closest('.ord-prod-row')); }
+      });
+      // open every folder that contains an ordered product so it's visible on entry
+      host.querySelectorAll('.ord-prod-row.selected').forEach(row=>{
+        let el = row.parentElement;
+        while(el && el.id !== 'ordCatalogList'){
+          if(el.classList && el.classList.contains('cluster-body')){ el.classList.add('is-open'); el.style.maxHeight = 'none'; }
+          el = el.parentElement;
+        }
+      });
+      if(editOrder.noOrder){
+        noOrderCheckbox.checked = true;
+        host.querySelectorAll('#ordCatalogList input').forEach(el=>{ el.disabled = true; });
+        noOrderReasonWrap.style.display = 'block';
+        const rEl = host.querySelector('.no-order-reason'); if(rEl) rEl.value = editOrder.noOrderReason || '';
+      }
+      if(editOrder.agent && Array.from(ordAgentSelect.options).some(o=>o.value===editOrder.agent)){
+        ordAgentSelect.value = editOrder.agent;
+      }
+      recalcTotal();
+    }
 
     host.querySelector('.ord-generate-btn').addEventListener('click', (e)=>{
       const saveBtn = e.currentTarget;
@@ -6068,22 +6146,35 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const total = noOrder ? 0 : catTotal;
       c.discountPercent = discountPct || '';
       c.orders = c.orders || [];
-      c.orders.push({
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-        date: localDateString(),
-        items, total, discountPercent: discountPct, noOrder, noOrderReason,
-        agent, note
-      });
-      // the order's total becomes this client's "last invoice" too, exactly like the popup
-      c.lastInvoice = total.toFixed(2);
-      c.lastInvoiceDate = localDateString();
+      const wasEditing = !!ordEditingOrderId;
+      if(wasEditing){
+        // update the existing order in place instead of adding a new one
+        const existing = c.orders.find(o=>o.id===ordEditingOrderId);
+        if(existing){
+          existing.items = items; existing.total = total; existing.discountPercent = discountPct;
+          existing.date = localDateString(); existing.noOrder = noOrder; existing.noOrderReason = noOrderReason;
+          existing.agent = agent; existing.note = note;
+        }
+        ordEditingOrderId = null;
+        recomputeLastInvoice(c); // editing may change the most-recent order's total
+      } else {
+        c.orders.push({
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
+          date: localDateString(),
+          items, total, discountPercent: discountPct, noOrder, noOrderReason,
+          agent, note
+        });
+        // the new order's total becomes this client's "last invoice" too, exactly like the popup
+        c.lastInvoice = total.toFixed(2);
+        c.lastInvoiceDate = localDateString();
+      }
       saveData();
       renderAll();
       // confirmation, then reset the form for the next order to the same client
       renderOrdersForm(c);
       const flashHost = ordFormHost.querySelector('.ord-saved-host');
       if(flashHost){
-        flashHost.innerHTML = `<div class="ord-saved-flash">✓ ההזמנה נשמרה בכרטיס הלקוח (₪${total.toFixed(2)}${agent?` · סוכן: ${escapeHtml(agent)}`:''}).</div>`;
+        flashHost.innerHTML = `<div class="ord-saved-flash">✓ ${wasEditing?'ההזמנה עודכנה':'ההזמנה נשמרה בכרטיס הלקוח'} (₪${total.toFixed(2)}${agent?` · סוכן: ${escapeHtml(agent)}`:''}).</div>`;
       }
     });
   }
