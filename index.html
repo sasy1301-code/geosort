@@ -2490,6 +2490,24 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   document.addEventListener('touchend', clearTouchDragActive, { passive:true, capture:true });
   document.addEventListener('touchcancel', clearTouchDragActive, { passive:true, capture:true });
 
+  // during a drag we enlarge the held element to 110%; these let it show fully by lifting the
+  // overflow clip on its (non-scroll) ancestors, then restoring it exactly on drop.
+  function unclipDragAncestors(el){
+    const clipped = [];
+    let a = el.parentElement, depth = 0;
+    while(a && a !== document.body && depth < 10){
+      const cs = getComputedStyle(a);
+      const ov = cs.overflow + ' ' + cs.overflowX + ' ' + cs.overflowY;
+      if((ov.indexOf('hidden') >= 0 || ov.indexOf('clip') >= 0) && ov.indexOf('auto') < 0 && ov.indexOf('scroll') < 0){
+        clipped.push([a, a.style.overflow]);
+        a.style.overflow = 'visible';
+      }
+      a = a.parentElement; depth++;
+    }
+    return clipped;
+  }
+  function reclipDragAncestors(list){ (list || []).forEach(([a, prev])=>{ a.style.overflow = prev; }); }
+
   // returns the card element that the dragged card should be placed BEFORE,
   // based on the mouse's vertical position within the container (null = place last)
   function getDragAfterElement(container, y, selector){
@@ -2587,9 +2605,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     // slide the held card so its top edge tracks (fingerY - grabOffset), regardless of
     // which slot it now occupies in the DOM
     function followFinger(fingerY){
-      const naturalTop = tCard.getBoundingClientRect().top - curTranslate; // rect includes current transform
+      const naturalTop = tCard.getBoundingClientRect().top - curTranslate; // rect includes current transform (translate only; scale doesn't shift top)
       curTranslate = (fingerY - grabOffset) - naturalTop;
-      tCard.style.transform = `translateY(${curTranslate}px)`; // no scale: card keeps its width so it can't be clipped at the sides inside the folder bounds
+      tCard.style.transform = `translateY(${curTranslate}px) scale(1.1)`; // lifted 110%; ancestors are unclipped so the sides never clip
     }
 
     bodyEl.addEventListener('touchstart', (e)=>{
@@ -2605,8 +2623,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         tDragging = true;
         curTranslate = 0;
         grabOffset = tStartY - card.getBoundingClientRect().top;
-        card.classList.add('touch-dragging'); // shadow + #4394f7 border signal the lift; no scale so the sides never clip
-        card.style.transform = 'translateY(0)';
+        card.classList.add('touch-dragging'); // shadow + #4394f7 border signal the lift
+        card._dragClip = unclipDragAncestors(card); // lift overflow:hidden clips so the 110% card isn't cut at the sides
+        card.style.transition = 'transform .16s cubic-bezier(.2,.85,.25,1)'; // smooth grow into 110% on grab
+        card.style.transform = 'translateY(0) scale(1.1)';
+        setTimeout(()=>{ if(card.classList.contains('touch-dragging')) card.style.transition = ''; }, 170); // then let followFinger move it instantly
         if(navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){ } }
       }, HOLD_MS);
     }, { passive:true });
@@ -2641,13 +2662,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         settling = true;
         // glide from wherever the finger left it back down into its slot, then persist
         card.style.transition = 'transform .26s cubic-bezier(.2,.85,.25,1), box-shadow .26s ease';
-        card.style.transform = 'translateY(0)';
+        card.style.transform = 'translateY(0) scale(1)'; // glide down AND shrink back to 100% on release
         const ids = [...bodyEl.querySelectorAll('.client-card')].map(el => el.dataset.clientId);
         let done = false;
         const finish = ()=>{
           if(done) return; done = true;
           card.style.transition = ''; card.style.transform = '';
           card.classList.remove('touch-dragging');
+          reclipDragAncestors(card._dragClip); card._dragClip = null; // restore ancestor clipping
           settling = false;
           persistFn(ids);
         };
@@ -2713,7 +2735,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     function followFinger(fingerY){
       const naturalTop = held.getBoundingClientRect().top - curTranslate;
       curTranslate = (fingerY - grabOffset) - naturalTop;
-      held.style.transform = `translateY(${curTranslate}px)`;
+      held.style.transform = `translateY(${curTranslate}px) scale(1.1)`; // lifted 110%; ancestors unclipped so the sides never clip
     }
 
     container.addEventListener('touchstart', (e)=>{
@@ -2728,7 +2750,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         dragging = true; curTranslate = 0;
         grabOffset = startY - item.getBoundingClientRect().top;
         item.classList.add('touch-dragging');
-        item.style.transform = 'translateY(0)';
+        item._dragClip = unclipDragAncestors(item); // lift overflow:hidden clips so the 110% item isn't cut at the sides
+        item.style.transition = 'transform .16s cubic-bezier(.2,.85,.25,1)'; // smooth grow into 110% on grab
+        item.style.transform = 'translateY(0) scale(1.1)';
+        setTimeout(()=>{ if(item.classList.contains('touch-dragging')) item.style.transition = ''; }, 170); // then let followFinger move it instantly
         // let elementFromPoint see the folder UNDER the lifted product, not the product itself
         if(cfg.crossFolder) item.style.pointerEvents = 'none';
         if(navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){ } }
@@ -2773,6 +2798,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         setCatalogDropHighlight(null);
         held.style.pointerEvents = ''; held.style.transition = ''; held.style.transform = '';
         held.classList.remove('touch-dragging'); held.__dropTarget = null;
+        reclipDragAncestors(held._dragClip); held._dragClip = null; // restore ancestor clipping
         held = null; dragging = false;
         moveProductToFolder(pid, tgt); // re-renders the catalog
         return;
@@ -2781,7 +2807,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const item = held;
         settling = true;
         item.style.transition = 'transform .26s cubic-bezier(.2,.85,.25,1), box-shadow .26s ease';
-        item.style.transform = 'translateY(0)';
+        item.style.transform = 'translateY(0) scale(1)'; // glide down AND shrink back to 100% on release
         const els = [...container.querySelectorAll(itemSelector)].filter(el=>el.parentElement===container);
         let done = false;
         const finish = ()=>{
@@ -2789,6 +2815,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           item.style.transition = ''; item.style.transform = '';
           item.style.pointerEvents = '';
           item.classList.remove('touch-dragging');
+          reclipDragAncestors(item._dragClip); item._dragClip = null; // restore ancestor clipping
           settling = false;
           persistFn(els);
         };
