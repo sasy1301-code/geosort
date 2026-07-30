@@ -1012,6 +1012,10 @@
     display:flex; align-items:center; gap:6px; user-select:none;
   }
   .order-history-chevron{ display:inline-block; width:12px; transition:transform .15s ease; }
+  /* show the 3 most-recent orders, then scroll for the rest */
+  .order-history-list{ max-height:162px; overflow-y:auto; }
+  .order-history-list::-webkit-scrollbar{ width:6px; }
+  .order-history-list::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.25); border-radius:15px; }
   .order-history-row{
     display:flex; align-items:center; gap:8px; padding:8px; margin-bottom:6px;
     background:rgba(255,255,255,.06); border-radius:15px;
@@ -3853,7 +3857,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
     function renderHistory(){
       const listEl = modal.querySelector('.order-history-list');
-      const orders = (c.orders || []).slice().sort((a,b)=> b.date.localeCompare(a.date));
+      const orders = (c.orders || []).slice().sort((a,b)=> (b.date||'').localeCompare(a.date||'') || String(b.id).localeCompare(String(a.id)));
       if(orders.length === 0){
         listEl.innerHTML = `<div class="empty" style="padding:6px 2px">אין עדיין הזמנות שמורות ללקוח הזה.</div>`;
         return;
@@ -5941,6 +5945,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     host.querySelectorAll('.ord-prod-row').forEach(row=>{
       row.addEventListener('click', (e)=>{
         if(e.target.closest('.ord-prod-qty')) return; // the − / + / field handle quantity themselves
+        if(e.target.closest('.catalog-prod-thumb')) return; // clicking the photo enlarges it, doesn't select
         const inp = row.querySelector('.ordreg-qty');
         if(!inp) return;
         const v = parseInt(inp.value, 10) || 0;
@@ -5948,6 +5953,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         syncRowSelected(row);
         recalcTotal();
       });
+      // click the product photo to enlarge it (same viewer as the catalog page)
+      const thumbImg = row.querySelector('.catalog-prod-thumb img');
+      if(thumbImg){
+        thumbImg.style.cursor = 'zoom-in';
+        thumbImg.addEventListener('click', (e)=>{ e.stopPropagation(); openPhotoModal(thumbImg.src); });
+      }
       syncRowSelected(row); // reflect any pre-filled quantity on (re)render
     });
     // the − / + stepper buttons decrement/increment the quantity field beside them
