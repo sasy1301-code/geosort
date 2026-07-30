@@ -204,12 +204,12 @@
      the discount/blanket-price field beside it. scoped to the orders catalog only. */
   #ordCatalogList .cluster-head{ position:relative; min-height:48px; box-sizing:border-box; }
   #ordCatalogList .subsubcat-head{ min-height:46px; }
-  #ordCatalogList .cluster-head span.count{ position:absolute; left:50%; right:auto; transform:translateX(calc(-50% - 35px)); margin:0; }
-  /* category header only: pull its count to the far (left) end, 4px in — sub/sub-sub stay centred */
-  #ordCatalogList .cat-head span.count{ left:4px; right:auto; transform:none; }
+  /* header order (RTL): the folder name flush right, then every item-count circle pinned to
+     the SAME fixed column (aligned to the "מוצרי בשר" category's circle), clearing the names. */
+  #ordCatalogList .cluster-head span.count{ position:absolute; right:112px; left:auto; transform:none; margin:0; }
   /* discount % / blanket-price fields: pin them to the far left, lined up under the category
      header's count circle, so they form one clean left-aligned column when the catalog is open */
-  #ordCatalogList .cluster-head .ord-head-field{ position:absolute; left:4px; top:50%; transform:translateY(-50%); margin:0; }
+  #ordCatalogList .cluster-head .ord-head-field{ position:absolute; left:14px; top:50%; transform:translateY(-50%); margin:0; }
   /* the discount % / blanket-price fields folded into the sub / sub-sub headers */
   .ord-head-field{ display:inline-flex; align-items:center; gap:5px; flex:0 0 auto; margin-inline-start:8px; background:transparent; border:none; padding:0; }
   .ord-head-field-lbl{ font-size:.62rem; color:rgba(255,255,255,.8); white-space:nowrap; }
@@ -484,9 +484,14 @@
     outline:2px solid var(--teal); outline-offset:1px; background:#fff;
   }
   select{
-    width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px;
+    width:100%; padding:9px 10px 9px 34px; border:1px solid rgba(255,255,255,.22); border-radius:15px;
     font-size:.9rem; background:#fff; font-family:inherit; color:#021236;
+    -webkit-appearance:none; -moz-appearance:none; appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23021236' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat; background-position:left 15px center;
   }
+  /* the dropdown chevron on dark selects (product editor) must be light, not the dark default */
+  .inventory-modal select.pe-subcat{ background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>"); background-repeat:no-repeat; background-position:left 15px center; }
   select option{ color:#021236; }
   select:focus{ outline:2px solid var(--teal); outline-offset:1px; background:#fff; }
   textarea{
@@ -917,12 +922,26 @@
     font-size:.88rem; text-align:center;
   }
   .order-total-row b{ color:#3bd332; }
+  .order-total-vat-row{ margin-top:3px; padding-top:0; border-top:none; }
+  #ordFormHost input.no-order-reason{ font-size:.9rem; }
   .order-save-btn{
     width:fit-content; margin:14px auto 6px; padding:10px 22px; border:1px solid #4394f7; border-radius:23px;
     background:#4394f7; color:#fff; font-size:10pt; font-weight:400; cursor:pointer;
     display:flex; align-items:center; justify-content:center; gap:8px; white-space:nowrap;
   }
   .order-save-btn:hover{ background:#3384ea; }
+  /* card-popup launcher button: jumps to the Orders page with this client pre-selected.
+     rounded like the save button, 400px wide, centred. */
+  .order-goto-orders-btn{
+    width:400px; max-width:100%; margin:16px auto; padding:13px 22px; border:1px solid #4394f7; border-radius:23px;
+    background:#4394f7; color:#fff; font-size:12pt; font-weight:600; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; white-space:nowrap; font-family:inherit;
+  }
+  .order-goto-orders-btn:hover{ background:#3384ea; }
+  /* in the customer-card popup the ordering itself now happens on the Orders page, so the old
+     in-popup picking controls are hidden there (they stay active on the Orders page, which is
+     #ordFormHost, not .order-modal) */
+  .order-modal .no-order-row, .order-modal .order-discount-row, .order-modal .order-total-row, .order-modal .order-save-btn{ display:none; }
   .order-history{
     padding:14px 20px; border-top:1px solid rgba(255,255,255,.15); background:rgba(0,0,0,.15);
   }
@@ -3578,10 +3597,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <button class="order-modal-close" title="סגור"><svg viewBox="0 0 57.4 57.4" xmlns="http://www.w3.org/2000/svg"><path fill="#ff7bac" d="M51.8,1l-23.1,23.1L5.6,1c-1.3-1.3-3.3-1.3-4.6,0h0C-.3,2.2-.3,4.3,1,5.6l23.1,23.1L1,51.8c-1.3,1.3-1.3,3.3,0,4.6h0c1.3,1.3,3.3,1.3,4.6,0l23.1-23.1,23.1,23.1c1.3,1.3,3.3,1.3,4.6,0h0c1.3-1.3,1.3-3.3,0-4.6l-23.1-23.1L56.5,5.6c1.3-1.3,1.3-3.3,0-4.6h0c-1.3-1.3-3.3-1.3-4.6,0Z"/></svg></button>
         </div>
         <div class="order-modal-body">
-          <div class="ordreg-top">
-            <div class="order-cat-title ordreg-toplevel" data-open="0"><span class="order-cat-chevron" style="transform:rotate(0)">${CHEVRON_ICON_SVG}</span> קטלוג מוצרים</div>
-            <div class="order-cat-items animated-collapse">${regularProductsTreeHtml(c, ordregQty)}</div>
-          </div>
+          <button type="button" class="order-goto-orders-btn">לביצוע הזמנה</button>
           <div class="no-order-row">
             <label>
               <input type="checkbox" class="no-order-checkbox" ${prefillNoOrder ? 'checked' : ''}>
@@ -3608,6 +3624,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       `;
 
       modal.querySelector('.order-modal-close').addEventListener('click', closeOrderModal);
+
+      // "לביצוע הזמנה" → close this popup and open the Orders page with THIS client already
+      // selected, so the order is made from the card without searching for the client again.
+      const gotoOrdersBtn = modal.querySelector('.order-goto-orders-btn');
+      if(gotoOrdersBtn){
+        gotoOrdersBtn.addEventListener('click', ()=>{
+          closeOrderModal();
+          ordSelectedClientId = c.id;
+          try{ if(ordClientSearch) ordClientSearch.value = clientDisplayName(c); }catch(_){}
+          switchView('orders');
+        });
+      }
 
       modal.querySelectorAll('.order-cat-title').forEach(titleEl=>{
         titleEl.addEventListener('click', ()=>{
@@ -5870,6 +5898,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <div class="order-total-row">
           סה״כ: <b class="order-total-amount">₪0.00</b>
         </div>
+        <div class="order-total-row order-total-vat-row">
+          סה״כ כולל מע״מ (${Math.round(VAT_RATE*100)}%): <b class="order-total-amount-vat">₪0.00</b>
+        </div>
         <button class="order-save-btn ord-generate-btn">הפק הזמנה</button>
         <div class="ord-saved-host"></div>
       </div>`;
@@ -5978,8 +6009,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     });
     discountInput.addEventListener('input', recalcTotal);
 
+    function setTotals(sum){
+      host.querySelector('.order-total-amount').textContent = `₪${sum.toFixed(2)}`;
+      host.querySelector('.order-total-amount-vat').textContent = `₪${(sum * (1 + VAT_RATE)).toFixed(2)}`;
+    }
     function recalcTotal(){
-      if(noOrderCheckbox.checked){ host.querySelector('.order-total-amount').textContent = '₪0.00'; return; }
+      if(noOrderCheckbox.checked){ setTotals(0); return; }
       const g = Math.min(100, Math.max(0, parseFloat(discountInput.value) || 0));
       let catTotal = 0;
       host.querySelectorAll('.ordreg-qty').forEach(qi=>{
@@ -5990,7 +6025,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const { unit, disc } = ordPageLine(c, qi.dataset.pid, g);
         catTotal += unit * qty * (1 - disc/100);
       });
-      host.querySelector('.order-total-amount').textContent = `₪${catTotal.toFixed(2)}`;
+      setTotals(catTotal);
     }
     recalcTotal();
 
