@@ -566,7 +566,10 @@
   .login-title{ font-size:1.35rem; font-weight:700; color:#fff; margin-bottom:6px; }
   .login-sub{ font-size:.85rem; color:rgba(255,255,255,.6); margin-bottom:18px; }
   .login-input{ width:100%; box-sizing:border-box; padding:13px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.25); background:#fff; color:#021236; font-size:1.15rem; text-align:center; letter-spacing:.25em; }
+  .login-input-user{ letter-spacing:normal; margin-bottom:12px; }
   .login-input:focus{ outline:2px solid #2f7cf6; outline-offset:1px; }
+  .login-remember{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:12px; color:rgba(255,255,255,.75); font-size:.85rem; cursor:pointer; }
+  .login-remember input{ width:16px; height:16px; accent-color:#2f7cf6; cursor:pointer; }
   .login-btn{ width:100%; margin-top:14px; padding:13px; border:none; border-radius:14px; background:#2f7cf6; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; font-family:inherit; }
   .login-btn:hover{ background:#4d93ff; }
   .login-error{ color:#ff8a8a; font-size:.82rem; margin-top:10px; min-height:1.1em; }
@@ -1345,33 +1348,53 @@
 </head>
 <body>
 <div id="loginOverlay" class="login-overlay">
-  <div class="login-box">
+  <form class="login-box" id="loginForm" autocomplete="on">
     <div class="login-title">מרכז לקוחות</div>
-    <div class="login-sub">הזן סיסמה כדי להיכנס למערכת</div>
-    <input type="password" id="loginPassword" class="login-input" placeholder="••••" autocomplete="off" inputmode="numeric">
-    <button type="button" id="loginBtn" class="login-btn">כניסה</button>
+    <div class="login-sub">הזן שם משתמש וסיסמה כדי להיכנס למערכת</div>
+    <input type="text" id="loginUser" class="login-input login-input-user" placeholder="שם משתמש" autocomplete="username" name="username" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <input type="password" id="loginPassword" class="login-input" placeholder="••••" autocomplete="current-password" name="password" inputmode="numeric">
+    <label class="login-remember"><input type="checkbox" id="loginRemember" checked> זכור אותי במכשיר הזה</label>
+    <button type="submit" id="loginBtn" class="login-btn">כניסה</button>
     <div id="loginError" class="login-error"></div>
-  </div>
+  </form>
 </div>
 <script>
   (function(){
+    var USERNAME = 'sasy';
     var PASSWORD = '1301';
+    var REMEMBER_KEY = 'geosort_auth_v1';
     var overlay = document.getElementById('loginOverlay');
+    var form = document.getElementById('loginForm');
+    var userInput = document.getElementById('loginUser');
     var input = document.getElementById('loginPassword');
-    var btn = document.getElementById('loginBtn');
+    var remember = document.getElementById('loginRemember');
     var err = document.getElementById('loginError');
+
+    function safeGet(k){ try{ return localStorage.getItem(k); }catch(_){ return null; } }
+    function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch(_){} }
+    function safeDel(k){ try{ localStorage.removeItem(k); }catch(_){} }
+
+    function unlock(){ overlay.classList.add('unlocked'); }
+
+    // already signed in on this device? skip the gate entirely (no password on every refresh)
+    if(safeGet(REMEMBER_KEY) === '1'){ unlock(); }
+
     function tryLogin(){
-      if(input.value === PASSWORD){
-        overlay.classList.add('unlocked');
+      var u = (userInput.value || '').trim().toLowerCase();
+      if(u === USERNAME && input.value === PASSWORD){
+        if(remember.checked) safeSet(REMEMBER_KEY, '1'); else safeDel(REMEMBER_KEY);
+        err.textContent = '';
+        unlock();
       } else {
-        err.textContent = 'סיסמה שגויה, נסה שוב';
+        err.textContent = 'שם משתמש או סיסמה שגויים, נסה שוב';
         input.value = ''; input.focus();
       }
     }
-    btn.addEventListener('click', tryLogin);
-    input.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryLogin(); });
-    setTimeout(function(){ try{ input.focus(); }catch(_){} }, 120);
+    form.addEventListener('submit', function(e){ e.preventDefault(); tryLogin(); });
+    setTimeout(function(){ try{ (userInput.value ? input : userInput).focus(); }catch(_){} }, 120);
   })();
+  // expose a sign-out helper so a future "logout" button can clear the remembered session
+  window.geosortSignOut = function(){ try{ localStorage.removeItem('geosort_auth_v1'); }catch(_){} location.reload(); };
 </script>
 <div id="bgImage"></div>
 <canvas id="starfield"></canvas>
@@ -2607,7 +2630,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     function followFinger(fingerY){
       const naturalTop = tCard.getBoundingClientRect().top - curTranslate; // rect includes current transform (translate only; scale doesn't shift top)
       curTranslate = (fingerY - grabOffset) - naturalTop;
-      tCard.style.transform = `translateY(${curTranslate}px) scale(1.1)`; // lifted 110%; ancestors are unclipped so the sides never clip
+      tCard.style.transform = `translateY(${curTranslate}px) scale(1.05)`; // lifted 105%; ancestors are unclipped so the sides never clip
     }
 
     bodyEl.addEventListener('touchstart', (e)=>{
@@ -2625,8 +2648,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         grabOffset = tStartY - card.getBoundingClientRect().top;
         card.classList.add('touch-dragging'); // shadow + #4394f7 border signal the lift
         card._dragClip = unclipDragAncestors(card); // lift overflow:hidden clips so the 110% card isn't cut at the sides
-        card.style.transition = 'transform .2s cubic-bezier(.42,0,1,1)'; // grow into 110% with the same ease-in speed as the buttons
-        card.style.transform = 'translateY(0) scale(1.1)';
+        card.style.transition = 'transform .2s cubic-bezier(.42,0,1,1)'; // grow into 105% with the same ease-in speed as the buttons
+        card.style.transform = 'translateY(0) scale(1.05)';
         setTimeout(()=>{ if(card.classList.contains('touch-dragging')) card.style.transition = ''; }, 210); // then let followFinger move it instantly
         if(navigator.vibrate){ try{ navigator.vibrate(12); }catch(_){ } }
       }, HOLD_MS);
@@ -2735,7 +2758,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     function followFinger(fingerY){
       const naturalTop = held.getBoundingClientRect().top - curTranslate;
       curTranslate = (fingerY - grabOffset) - naturalTop;
-      held.style.transform = `translateY(${curTranslate}px) scale(1.1)`; // lifted 110%; ancestors unclipped so the sides never clip
+      held.style.transform = `translateY(${curTranslate}px) scale(1.05)`; // lifted 105%; ancestors unclipped so the sides never clip
     }
 
     container.addEventListener('touchstart', (e)=>{
@@ -2751,8 +2774,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         grabOffset = startY - item.getBoundingClientRect().top;
         item.classList.add('touch-dragging');
         item._dragClip = unclipDragAncestors(item); // lift overflow:hidden clips so the 110% item isn't cut at the sides
-        item.style.transition = 'transform .2s cubic-bezier(.42,0,1,1)'; // grow into 110% with the same ease-in speed as the buttons
-        item.style.transform = 'translateY(0) scale(1.1)';
+        item.style.transition = 'transform .2s cubic-bezier(.42,0,1,1)'; // grow into 105% with the same ease-in speed as the buttons
+        item.style.transform = 'translateY(0) scale(1.05)';
         setTimeout(()=>{ if(item.classList.contains('touch-dragging')) item.style.transition = ''; }, 210); // then let followFinger move it instantly
         // let elementFromPoint see the folder UNDER the lifted product, not the product itself
         if(cfg.crossFolder) item.style.pointerEvents = 'none';
