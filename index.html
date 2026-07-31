@@ -295,6 +295,15 @@
   .doc-make-btn{ -webkit-appearance:none; appearance:none; border:none; background:#2f7cf6; color:#fff; font-family:inherit; font-size:.8rem; font-weight:600; padding:8px 12px; border-radius:11px; cursor:pointer; white-space:nowrap; }
   .doc-make-btn:hover{ background:#4d93ff; }
   .doc-del-btn{ color:#ff7bac; }
+  /* per-panel document search (by date or number) */
+  .doc-search-wrap{ margin:2px 0 10px; }
+  .doc-search-input{ -webkit-appearance:none; appearance:none; width:100%; box-sizing:border-box; padding:9px 12px; border:1px solid rgba(255,255,255,.35); border-radius:12px; background:#fff; color:#021236; font-family:inherit; font-size:.85rem; }
+  .doc-search-input::placeholder{ color:#6b7a99; }
+  /* keep each list to ~3 rows, then scroll, so the page doesn't grow too tall */
+  .doc-scroll{ max-height:222px; overflow-y:auto; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
+  .doc-scroll::-webkit-scrollbar{ width:6px; }
+  .doc-scroll::-webkit-scrollbar-track{ background:transparent; }
+  .doc-scroll::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.35); border-radius:10px; }
   .ord-notes-row{ margin:12px 0 4px; }
   .ord-notes-row label{ display:block; font-size:.8rem; color:rgba(255,255,255,.72); margin:0 0 4px; }
   .ord-notes-row textarea{ width:100%; box-sizing:border-box; min-height:60px; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px; font-size:.9rem; background:#fff; color:#021236; font-family:inherit; resize:vertical; }
@@ -1863,10 +1872,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       </section>
 
       <section class="panel" id="invoicesPanel">
-        <h2 id="invoicesHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#0f1a2e;position:relative;top:5px"></span> <span style="position:relative;top:5px">חשבוניות</span>
+        <h2 id="invoicesHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#6303ed;position:relative;top:5px"></span> <span style="position:relative;top:5px">חשבוניות</span>
           <span id="invoicesChevron" style="margin-right:auto;color:#fff;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
         </h2>
         <div id="invoicesBody" class="animated-collapse">
+          <div class="doc-search-wrap" id="invDocSearchWrap" style="display:none">
+            <input type="text" id="invDocSearch" class="doc-search-input" autocomplete="off" placeholder="חיפוש לפי תאריך (30-07) או מספר (#5)">
+          </div>
           <div id="invDocHost" class="inventory-modal"></div>
         </div>
       </section>
@@ -1876,6 +1888,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <span id="receiptsChevron" style="margin-right:auto;color:#fff;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
         </h2>
         <div id="receiptsBody" class="animated-collapse">
+          <div class="doc-search-wrap" id="recDocSearchWrap" style="display:none">
+            <input type="text" id="recDocSearch" class="doc-search-input" autocomplete="off" placeholder="חיפוש לפי תאריך (30-07) או מספר (#5)">
+          </div>
           <div id="recDocHost" class="inventory-modal"></div>
         </div>
       </section>
@@ -4298,7 +4313,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       listEl.innerHTML = orders.map(o => `
         <div class="order-history-row" data-order-id="${o.id}">
           <div class="order-history-info">
-            <div class="order-history-date">${o.date}</div>
+            <div class="order-history-date">${fmtUpdateDate(o.date)}</div>
             <div class="order-history-items">${o.noOrder ? `<i>לא בוצעה הזמנה${o.noOrderReason ? ` - ${escapeHtml(o.noOrderReason)}` : ''}</i>` : (o.items || []).map(it=>`${escapeHtml(it.name||'')} ×${it.qty||0}`).join(', ')}${o.discountPercent ? ` <span style="color:var(--gold)">(הנחה ${o.discountPercent}%)</span>` : ''}</div>
           </div>
           <div class="order-history-total">₪${o.total.toFixed(2)}</div>
@@ -5227,7 +5242,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         });
       });
       const newClientsCount = clients.filter(c => !c.testClient && c.newClientSince && c.newClientSince >= fromDate && c.newClientSince <= toDate).length;
-      const rangeLabel = fromDate === toDate ? fromDate : `${fromDate} עד ${toDate}`;
+      const rangeLabel = fromDate === toDate ? fmtUpdateDate(fromDate) : `${fmtUpdateDate(fromDate)} עד ${fmtUpdateDate(toDate)}`;
       const report = `דוח כל התיקיות: ${rangeLabel}\nכמות הזמנות חדשות: ${orderCount}\nלקוחות חדשים: ${newClientsCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
       let waNumber = '052-3617178'.replace(/\D/g, '');
       if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
@@ -5491,7 +5506,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             });
           });
           const newClientsCount = members.filter(m => !m.testClient && m.newClientSince === chosenDate).length;
-          const report = `דוח יומי - תיקיית ${name}: ${chosenDate}\nכמות הזמנות חדשות: ${orderCount}\nלקוחות חדשים: ${newClientsCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
+          const report = `דוח יומי - תיקיית ${name}: ${fmtUpdateDate(chosenDate)}\nכמות הזמנות חדשות: ${orderCount}\nלקוחות חדשים: ${newClientsCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
           let waNumber = '052-3617178'.replace(/\D/g, '');
           if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
           window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(report)}`, '_blank');
@@ -6650,16 +6665,24 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     invoice: {
       arr: 'invoices',
       title: 'חשבוניות',
-      hostEl: 'invDocHost',
+      hostEl: 'invDocHost', searchEl: 'invDocSearch', searchWrapEl: 'invDocSearchWrap',
       makeLabel: 'הפק חשבונית', madeTitle: 'חשבוניות שהופקו', srcTitle: 'הזמנות להפקת חשבונית'
     },
     receipt: {
       arr: 'receipts',
       title: 'קבלות',
-      hostEl: 'recDocHost',
+      hostEl: 'recDocHost', searchEl: 'recDocSearch', searchWrapEl: 'recDocSearchWrap',
       makeLabel: 'הפק קבלה', madeTitle: 'קבלות שהופקו', srcTitle: 'חשבוניות לאישור והפקת קבלה'
     }
   };
+  // a document matches the search when the query appears in its date (either format) or number
+  function docMatchesQuery(doc, q){
+    if(!q) return true;
+    const ql = q.trim().toLowerCase();
+    if(!ql) return true;
+    const parts = [ formatDocDate(doc.date), (doc.date||''), (doc.num!=null ? ('#'+doc.num) : ''), (doc.num!=null ? String(doc.num) : '') ];
+    return parts.some(s => String(s).toLowerCase().includes(ql));
+  }
   // the invoices/receipts panels live inside the orders page and follow the client
   // selected there (ordSelectedClientId) — no separate client picker per section.
   function renderOrderDocs(){ renderDocsView('invoice'); renderDocsView('receipt'); }
@@ -6670,6 +6693,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     let max = 0;
     clients.forEach(c=>{ (c[key]||[]).forEach(d=>{ if(typeof d.num==='number' && d.num>max) max=d.num; }); });
     return max + 1;
+  }
+  // documents always show the date as day-month-year (e.g. 30-07-2026)
+  function formatDocDate(s){
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s || '');
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : (s || '');
   }
   function docItemsSummary(doc){
     if(doc.noOrder) return 'ללא הזמנה';
@@ -6714,7 +6742,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const numTxt = doc.num ? `#${doc.num} · ` : '';
     return `<div class="doc-row" data-id="${doc.id}">
       <div class="doc-info">
-        <div class="doc-line1">${numTxt}${escapeHtml(doc.date||'')}${doc.agent?` · סוכן: ${escapeHtml(doc.agent)}`:''}</div>
+        <div class="doc-line1">${numTxt}${formatDocDate(doc.date)}${doc.agent?` · סוכן: ${escapeHtml(doc.agent)}`:''}</div>
         <div class="doc-items">${docItemsSummary(doc)}</div>
       </div>
       <div class="doc-right">
@@ -6728,35 +6756,38 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const cfg = DOC_CFG[type];
     const host = document.getElementById(cfg.hostEl);
     if(!host) return;
+    const searchWrap = document.getElementById(cfg.searchWrapEl);
+    const searchInput = document.getElementById(cfg.searchEl);
     const c = ordSelectedClientId ? clients.find(x=>x.id===ordSelectedClientId) : null;
+    if(searchWrap) searchWrap.style.display = c ? 'block' : 'none'; // search only makes sense with a client
     if(!c){
       host.innerHTML = `<div class="ord-placeholder">בחרו לקוח בראש העמוד כדי לראות ולהפיק ${cfg.title}.</div>`;
       return;
     }
+    const q = searchInput ? searchInput.value : '';
+    // each section's rows scroll after ~3, so a long list doesn't stretch the page
+    const section = (title, rows, emptyMsg) => `<div class="doc-section-title">${title}</div>` +
+      (rows.length ? `<div class="doc-scroll">${rows.join('')}</div>` : `<div class="doc-empty">${emptyMsg}</div>`);
     let html = `<div class="doc-client-head">${escapeHtml(clientDisplayName(c))}</div>`;
 
     if(type === 'invoice'){
-      const openOrders = (c.orders||[]).filter(o=>!o.noOrder && (o.total||0) > 0 && !orderHasInvoice(c, o)).reverse(); // newest order first
-      html += `<div class="doc-section-title">${cfg.srcTitle}</div>`;
-      html += openOrders.length
-        ? openOrders.map(o=>docRowHtml(o, `<button type="button" class="doc-make-btn" data-make="${o.id}">${cfg.makeLabel}</button>`)).join('')
-        : `<div class="doc-empty">אין הזמנות שממתינות לחשבונית.</div>`;
-      const made = (c.invoices||[]).slice().sort((a,b)=>(b.num||0)-(a.num||0));
-      html += `<div class="doc-section-title">${cfg.madeTitle}</div>`;
-      html += made.length
-        ? made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`)).join('')
-        : `<div class="doc-empty">עדיין לא הופקו חשבוניות ללקוח זה.</div>`;
+      const openOrders = (c.orders||[]).filter(o=>!o.noOrder && (o.total||0) > 0 && !orderHasInvoice(c, o)).reverse().filter(o=>docMatchesQuery(o, q));
+      const made = (c.invoices||[]).slice().sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
+      html += section(cfg.srcTitle,
+        openOrders.map(o=>docRowHtml(o, `<button type="button" class="doc-make-btn" data-make="${o.id}">${cfg.makeLabel}</button>`)),
+        q ? 'אין הזמנות תואמות לחיפוש.' : 'אין הזמנות שממתינות לחשבונית.');
+      html += section(cfg.madeTitle,
+        made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`)),
+        q ? 'אין חשבוניות תואמות לחיפוש.' : 'עדיין לא הופקו חשבוניות ללקוח זה.');
     } else {
-      const openInvoices = (c.invoices||[]).filter(inv=>!invoiceHasReceipt(c, inv)).sort((a,b)=>(b.num||0)-(a.num||0)); // newest invoice first
-      html += `<div class="doc-section-title">${cfg.srcTitle}</div>`;
-      html += openInvoices.length
-        ? openInvoices.map(inv=>docRowHtml(inv, `<button type="button" class="doc-make-btn" data-make="${inv.id}">${cfg.makeLabel}</button>`)).join('')
-        : `<div class="doc-empty">אין חשבוניות שממתינות לקבלה.</div>`;
-      const made = (c.receipts||[]).slice().sort((a,b)=>(b.num||0)-(a.num||0));
-      html += `<div class="doc-section-title">${cfg.madeTitle}</div>`;
-      html += made.length
-        ? made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`)).join('')
-        : `<div class="doc-empty">עדיין לא הופקו קבלות ללקוח זה.</div>`;
+      const openInvoices = (c.invoices||[]).filter(inv=>!invoiceHasReceipt(c, inv)).sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
+      const made = (c.receipts||[]).slice().sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
+      html += section(cfg.srcTitle,
+        openInvoices.map(inv=>docRowHtml(inv, `<button type="button" class="doc-make-btn" data-make="${inv.id}">${cfg.makeLabel}</button>`)),
+        q ? 'אין חשבוניות תואמות לחיפוש.' : 'אין חשבוניות שממתינות לקבלה.');
+      html += section(cfg.madeTitle,
+        made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`)),
+        q ? 'אין קבלות תואמות לחיפוש.' : 'עדיין לא הופקו קבלות ללקוח זה.');
     }
     host.innerHTML = html;
 
@@ -6789,6 +6820,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   document.getElementById('receiptsHeader').addEventListener('click', ()=>{
     toggleAnimatedCollapse(document.getElementById('receiptsBody'), document.getElementById('receiptsChevron'));
   });
+  // per-panel document search (by date or number) — re-renders only its own list
+  document.getElementById('invDocSearch').addEventListener('input', ()=>renderDocsView('invoice'));
+  document.getElementById('recDocSearch').addEventListener('input', ()=>renderDocsView('receipt'));
 
   // pricing for a single catalog line — MIRRORS ordregLine() inside openOrderModal so the
   // page and the popup price every product identically (blanket sub-sub price wins; else base
@@ -6822,7 +6856,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const prefNote = editOrder ? (editOrder.note || '') : '';
     ordFormHost.innerHTML = `
       <div class="order-modal-body">
-        ${editOrder ? `<div class="ord-edit-banner">✎ עריכת הזמנה מ-${escapeHtml(editOrder.date||'')} — עדכן ולחץ "עדכן הזמנה"</div>` : ''}
+        ${editOrder ? `<div class="ord-edit-banner">✎ עריכת הזמנה מ-${escapeHtml(fmtUpdateDate(editOrder.date))} — עדכן ולחץ "עדכן הזמנה"</div>` : ''}
         <div class="ord-catalog-wrap">${ordCatalogHtml(c)}</div>
         <div class="no-order-row">
           <label>
