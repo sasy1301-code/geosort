@@ -75,9 +75,10 @@
   .app{
     height:100vh;
     box-sizing:border-box;
-    /* keep content clear of the iPhone status bar / home indicator in standalone (home-screen) mode */
+    /* keep content clear of the iPhone status bar in standalone (home-screen) mode.
+       the bottom home-indicator clearance is handled by footer.note itself, so the
+       footer's grey background reaches the very bottom edge instead of floating. */
     padding-top:env(safe-area-inset-top);
-    padding-bottom:env(safe-area-inset-bottom);
     display:flex;
     flex-direction:column;
     position:relative;
@@ -1418,9 +1419,10 @@
   .leaflet-popup-content{ font-family:inherit; direction:rtl; }
 
   footer.note{
-    flex:0 0 auto; background:var(--ink); color:var(--paper-2); font-size:.72rem;
-    padding:6px 20px; text-align:center; opacity:.85;
-    padding-bottom:calc(6px + env(safe-area-inset-bottom)); /* clear the iPhone home-bar */
+    flex:0 0 auto; background:var(--ink); color:var(--paper-2); font-size:.72rem; line-height:1.25;
+    padding:4px 20px 2px; text-align:center; opacity:.85;
+    /* grey reaches the very bottom edge; keep the text just clear of the iPhone home-bar */
+    padding-bottom:calc(2px + env(safe-area-inset-bottom));
   }
   footer.note b{ color:var(--gold); }
 
