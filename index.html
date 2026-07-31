@@ -227,6 +227,13 @@
   .settings-agent-name{ color:#fff; font-size:.95rem; }
   .settings-agent-user{ color:#8fb7ff; font-size:.76rem; }
   .settings-agent-nologin{ color:rgba(255,255,255,.4); }
+  /* manager-only: reveal + reset another user's password */
+  .settings-agent-pass{ display:flex; align-items:center; gap:7px; color:#8fb7ff; font-size:.76rem; margin-top:1px; }
+  .settings-pass-val{ font-family:inherit; letter-spacing:.5px; color:#d8e4ff; }
+  .settings-pass-toggle{ -webkit-appearance:none; appearance:none; border:none; background:transparent; color:#5fa2ff; font-size:.74rem; font-family:inherit; padding:0; cursor:pointer; text-decoration:underline; }
+  .settings-agent-actions{ display:flex; align-items:center; gap:8px; }
+  .settings-pass-reset{ -webkit-appearance:none; appearance:none; border:1px solid rgba(140,160,255,.4); background:#13203a; color:#bcd2ff; font-size:.75rem; font-family:inherit; padding:6px 10px; border-radius:10px; cursor:pointer; white-space:nowrap; }
+  .settings-pass-reset:hover{ background:#1b2c4d; }
   /* trash button uses the shared sys-icon-disc standard; only its colour is bespoke (salmon) */
   .settings-agent-del{ color:#ff7bac; }
   .settings-agent-empty{ color:rgba(255,255,255,.55); font-size:.86rem; text-align:center; padding:18px 10px; border:1px dashed rgba(140,160,255,.35); border-radius:14px; }
@@ -237,7 +244,9 @@
   .settings-autobackup{ margin-top:16px; background:#0f1a2e; border:1px solid rgba(140,160,255,.28); border-radius:14px; padding:14px; }
   .settings-autobackup-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .settings-autobackup-title{ color:#fff; font-size:.95rem; font-weight:600; }
-  .settings-autobackup input[type=time]{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.22); background:#fff; color:#021236; font-size:1rem; }
+  .settings-autobackup input[type=time]{ -webkit-appearance:none; appearance:none; display:block; width:100%; box-sizing:border-box; min-width:0; margin:0; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.22); background:#fff; color:#021236; font-size:1rem; font-family:inherit; text-align:center; }
+  .settings-autobackup input[type=time]::-webkit-date-and-time-value{ text-align:center; margin:0; }
+  .settings-autobackup input[type=time]::-webkit-calendar-picker-indicator{ margin:0; }
   .settings-folder-btn{ -webkit-appearance:none; appearance:none; width:100%; margin-top:10px; padding:12px; border:none; border-radius:15px; background:#fff; color:#021236; font-size:.92rem; font-weight:500; font-family:inherit; cursor:pointer; }
   .settings-folder-btn:hover{ background:#eef2f7; }
   .settings-folder-btn:disabled{ opacity:.55; cursor:not-allowed; }
@@ -1479,7 +1488,19 @@
     function unlock(){ overlay.classList.add('unlocked'); }
 
     // already signed in on this device? skip the gate entirely (no password on every refresh)
-    if(safeGet(REMEMBER_KEY) === '1'){ unlock(); }
+    if(safeGet(REMEMBER_KEY) === '1'){
+      unlock();
+      // heal legacy remembered sessions that predate role tracking: a device that
+      // remembered a login before roles existed is the owner's (admin) device.
+      var storedUser = safeGet('geosort_user');
+      var needsHeal = true;
+      if(storedUser){ try{ var pu = JSON.parse(storedUser); if(pu && pu.role){ needsHeal = false; } }catch(_){ } }
+      if(needsHeal){
+        var healed = { name: 'מנהל', role: 'admin' };
+        safeSet('geosort_user', JSON.stringify(healed));
+        if(typeof window.__applyUser === 'function'){ try{ window.__applyUser(healed); }catch(_){} }
+      }
+    }
 
     function tryLogin(){
       var u = (userInput.value || '').trim();
@@ -6126,20 +6147,69 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const settingsManagerPass = document.getElementById('settingsManagerPass');
   const settingsAddManagerBtn = document.getElementById('settingsAddManagerBtn');
   const settingsManagerList = document.getElementById('settingsManagerList');
+  // shared row markup for managers/agents. password reveal + reset shown to managers only.
+  function settingsUserRowHtml(a, i, delTitle){
+    const canManage = isManagerUser() && !!a.username;
+    const userLine = a.username
+      ? `<span class="settings-agent-user">כניסה: ${escapeHtml(a.username)}</span>`
+      : `<span class="settings-agent-user settings-agent-nologin">ללא כניסה למערכת</span>`;
+    const passLine = canManage
+      ? `<span class="settings-agent-pass" data-pass="${escapeHtml(a.password||'')}">
+           <span class="settings-pass-label">סיסמה:</span>
+           <span class="settings-pass-val" data-shown="0">••••••</span>
+           <button type="button" class="settings-pass-toggle">הצג</button>
+         </span>`
+      : '';
+    const resetBtn = canManage
+      ? `<button type="button" class="settings-pass-reset">אפס סיסמה</button>`
+      : '';
+    return `
+      <div class="settings-agent-row" data-idx="${i}">
+        <div class="settings-agent-info">
+          <span class="settings-agent-name">${escapeHtml(a.name)}</span>
+          ${userLine}
+          ${passLine}
+        </div>
+        <div class="settings-agent-actions">
+          ${resetBtn}
+          <button type="button" class="settings-agent-del sys-icon-disc" title="${delTitle}">${CATALOG_TRASH_SVG}</button>
+        </div>
+      </div>`;
+  }
+  // wire the manager-only reveal toggle + password reset for a rendered list
+  function wireSettingsPassControls(listEl, arr, persist, rerender){
+    listEl.querySelectorAll('.settings-pass-toggle').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const wrap = btn.closest('.settings-agent-pass');
+        const val = wrap.querySelector('.settings-pass-val');
+        const shown = val.dataset.shown === '1';
+        if(shown){ val.textContent = '••••••'; val.dataset.shown='0'; btn.textContent='הצג'; }
+        else { val.textContent = wrap.dataset.pass || '(ריק)'; val.dataset.shown='1'; btn.textContent='הסתר'; }
+      });
+    });
+    listEl.querySelectorAll('.settings-pass-reset').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = parseInt(btn.closest('.settings-agent-row').dataset.idx, 10);
+        const rec = arr[idx];
+        if(rec == null) return;
+        const np = prompt(`סיסמה חדשה עבור "${rec.name}":`, '');
+        if(np == null) return; // cancelled
+        const pw = np.trim();
+        if(!pw){ alert('לא הוזנה סיסמה.'); return; }
+        rec.password = pw;
+        persist();
+        rerender();
+      });
+    });
+  }
   function renderSettingsAgents(){
     if(!settingsAgentList) return;
     if(!agents.length){
       settingsAgentList.innerHTML = '<div class="settings-agent-empty">אין עדיין סוכנים. הוסיפו סוכן כדי שיופיע ברשימת הבחירה בעמוד ההזמנות.</div>';
       return;
     }
-    settingsAgentList.innerHTML = agents.map((a,i)=>`
-      <div class="settings-agent-row" data-idx="${i}">
-        <div class="settings-agent-info">
-          <span class="settings-agent-name">${escapeHtml(a.name)}</span>
-          ${a.username ? `<span class="settings-agent-user">כניסה: ${escapeHtml(a.username)}</span>` : `<span class="settings-agent-user settings-agent-nologin">ללא כניסה למערכת</span>`}
-        </div>
-        <button type="button" class="settings-agent-del sys-icon-disc" title="מחק סוכן">${CATALOG_TRASH_SVG}</button>
-      </div>`).join('');
+    settingsAgentList.innerHTML = agents.map((a,i)=>settingsUserRowHtml(a,i,'מחק סוכן')).join('');
+    wireSettingsPassControls(settingsAgentList, agents, ()=>{ saveAgents(); syncAgentCreds(); }, renderSettingsAgents);
     settingsAgentList.querySelectorAll('.settings-agent-del').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const row = btn.closest('.settings-agent-row');
@@ -6179,14 +6249,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       settingsManagerList.innerHTML = '<div class="settings-agent-empty">אין עדיין מנהלים.</div>';
       return;
     }
-    settingsManagerList.innerHTML = managers.map((a,i)=>`
-      <div class="settings-agent-row" data-idx="${i}">
-        <div class="settings-agent-info">
-          <span class="settings-agent-name">${escapeHtml(a.name)}</span>
-          ${a.username ? `<span class="settings-agent-user">כניסה: ${escapeHtml(a.username)}</span>` : `<span class="settings-agent-user settings-agent-nologin">ללא כניסה למערכת</span>`}
-        </div>
-        <button type="button" class="settings-agent-del sys-icon-disc" title="מחק מנהל">${CATALOG_TRASH_SVG}</button>
-      </div>`).join('');
+    settingsManagerList.innerHTML = managers.map((a,i)=>settingsUserRowHtml(a,i,'מחק מנהל')).join('');
+    wireSettingsPassControls(settingsManagerList, managers, ()=>{ saveManagers(); syncAgentCreds(); }, renderSettingsManagers);
     settingsManagerList.querySelectorAll('.settings-agent-del').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const idx = parseInt(btn.closest('.settings-agent-row').dataset.idx, 10);
@@ -6323,6 +6387,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   // ===== logged-in user greeting at the top of the side menu =====
   function currentLoginUser(){ try{ return JSON.parse(localStorage.getItem('geosort_user') || 'null'); }catch(_){ return null; } }
+  // only a manager (or the main admin) may see/reset other people's passwords
+  function isManagerUser(){ const u = currentLoginUser(); return !!(u && (u.role === 'manager' || u.role === 'admin')); }
   function applyUserGreeting(user){
     const el = document.getElementById('sideMenuGreeting');
     if(!el) return;
