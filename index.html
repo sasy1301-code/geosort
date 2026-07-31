@@ -76,8 +76,7 @@
     height:100vh;
     box-sizing:border-box;
     /* keep content clear of the iPhone status bar in standalone (home-screen) mode.
-       the bottom home-indicator clearance is handled by footer.note itself, so the
-       footer's grey background reaches the very bottom edge instead of floating. */
+       the bottom home-indicator clearance is handled by the sidebar's scroll padding. */
     padding-top:env(safe-area-inset-top);
     display:flex;
     flex-direction:column;
@@ -157,7 +156,7 @@
   /* only the chevron flips (to the close direction) with an animation when the drawer is open */
   .side-menu-tab .chev{ transform-box:fill-box; transform-origin:center; transition:transform .35s ease; }
   .side-menu.open .side-menu-tab .chev{ transform:scaleX(-1); }
-  .side-menu-greeting{ color:#fff; font-size:15pt; font-weight:600; margin:0 0 12px; padding:0 2px; min-height:1.2em; -webkit-font-smoothing:antialiased; }
+  .side-menu-greeting{ color:#fff; font-size:12pt; font-weight:600; margin:0 0 12px; padding:0 2px; min-height:1.2em; -webkit-font-smoothing:antialiased; }
   .side-menu-greeting:empty{ display:none; margin:0; }
   .side-menu-items{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
   .side-menu-item{
@@ -518,7 +517,7 @@
   .sidebar .scroll{
     flex:1 1 auto;
     overflow-y:auto;
-    padding:16px 16px 90px;
+    padding:16px 16px calc(24px + env(safe-area-inset-bottom));
     scrollbar-width:thin;
     scrollbar-color:#0277fb transparent;
     overscroll-behavior:contain; /* keep scroll momentum inside the sidebar, no page-level bounce */
@@ -1418,13 +1417,6 @@
   .map-actions button.ghost:hover{ background:rgba(15,26,46,.06); }
   .leaflet-popup-content{ font-family:inherit; direction:rtl; }
 
-  footer.note{
-    flex:0 0 auto; background:var(--ink); color:var(--paper-2); font-size:.72rem; line-height:1.25;
-    padding:4px 20px 2px; text-align:center; opacity:.85;
-    /* grey reaches the very bottom edge; keep the text just clear of the iPhone home-bar */
-    padding-bottom:calc(2px + env(safe-area-inset-bottom));
-  }
-  footer.note b{ color:var(--gold); }
 
   /* on desktop, drop the whole panel stack (add-client / search / folders / clustering)
      10px lower together so it clears the menu tab on the right edge */
@@ -1518,9 +1510,10 @@
       // remembered a login before roles existed is the owner's (admin) device.
       var storedUser = safeGet('geosort_user');
       var needsHeal = true;
-      if(storedUser){ try{ var pu = JSON.parse(storedUser); if(pu && pu.role){ needsHeal = false; } }catch(_){ } }
+      // a healthy session has BOTH a role and the username (so we can resolve the display name)
+      if(storedUser){ try{ var pu = JSON.parse(storedUser); if(pu && pu.role && pu.username){ needsHeal = false; } }catch(_){ } }
       if(needsHeal){
-        var healed = { name: 'מנהל', role: 'admin' };
+        var healed = { name: 'מנהל', role: 'admin', username: USERNAME };
         safeSet('geosort_user', JSON.stringify(healed));
         if(typeof window.__applyUser === 'function'){ try{ window.__applyUser(healed); }catch(_){} }
       }
@@ -1532,13 +1525,13 @@
       var pw = input.value;
       var matched = null;
       if(ul === USERNAME && pw === PASSWORD){
-        matched = { name: 'מנהל', role: 'admin' };
+        matched = { name: 'מנהל', role: 'admin', username: u };
       } else {
         // managers + agents added in Settings; the app publishes their creds to window.__agentCreds
         var list = window.__agentCreds || [];
         for(var i = 0; i < list.length; i++){
           if(list[i].username && String(list[i].username).toLowerCase() === ul && String(list[i].password) === pw){
-            matched = { name: list[i].name, role: list[i].role || 'agent' };
+            matched = { name: list[i].name, role: list[i].role || 'agent', username: list[i].username };
             break;
           }
         }
@@ -1710,9 +1703,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </section>
 
       </div>
-      <footer class="note">
-        הנתונים כאן נשמרים <b>בעננים</b> ומסונכרנים בין כל המכשירים/דפדפנים שנכנסים לקישור הזה עם המפתח הזה.
-      </footer>
     </div>
 
     <div class="map-wrap">
@@ -6413,10 +6403,22 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function currentLoginUser(){ try{ return JSON.parse(localStorage.getItem('geosort_user') || 'null'); }catch(_){ return null; } }
   // only a manager (or the main admin) may see/reset other people's passwords
   function isManagerUser(){ const u = currentLoginUser(); return !!(u && (u.role === 'manager' || u.role === 'admin')); }
+  // resolve the display name: prefer the manager/agent record that matches the login
+  // username (so "sasy" shows "ששי לוי"), and fall back to whatever name was stored.
+  function resolveDisplayName(user){
+    if(!user) return '';
+    const un = (user.username || '').trim().toLowerCase();
+    if(un){
+      const pools = [].concat(Array.isArray(managers)?managers:[], Array.isArray(agents)?agents:[]);
+      const rec = pools.find(r => r && r.username && String(r.username).trim().toLowerCase() === un);
+      if(rec && rec.name) return rec.name;
+    }
+    return (user.name) || '';
+  }
   function applyUserGreeting(user){
     const el = document.getElementById('sideMenuGreeting');
     if(!el) return;
-    const name = (user && user.name) || '';
+    const name = resolveDisplayName(user);
     el.textContent = name ? ('שלום, ' + name) : '';
   }
   window.__applyUser = applyUserGreeting;           // called by the login gate on a fresh login
@@ -8014,6 +8016,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   (async function init(){
     await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers()]);
     backfillDefaultWhatsappMessages();
+    // managers/agents are loaded now, so the greeting can resolve the real name (e.g. sasy → ששי לוי)
+    applyUserGreeting(currentLoginUser());
     openFolderNames.clear();
     openClusterNames.clear();
     const bounds = renderAll();
