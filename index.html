@@ -279,6 +279,22 @@
   #ordFormHost:empty{ margin-top:0; }
   #ordFormHost .ord-placeholder{ color:rgba(255,255,255,.55); font-size:.86rem; text-align:center; padding:26px 10px; border:1px dashed rgba(140,160,255,.35); border-radius:14px; }
   #ordFormHost .order-modal-body{ padding:0; }
+  /* invoices / receipts document lists */
+  #invDocHost, #recDocHost{ margin-top:14px; }
+  #invDocHost .ord-placeholder, #recDocHost .ord-placeholder{ color:rgba(255,255,255,.55); font-size:.86rem; text-align:center; padding:26px 10px; border:1px dashed rgba(140,160,255,.35); border-radius:14px; }
+  .doc-client-head{ color:#fff; font-size:1rem; font-weight:600; margin:2px 2px 10px; }
+  .doc-section-title{ color:#8fb7ff; font-size:.82rem; font-weight:600; margin:16px 2px 8px; }
+  .doc-empty{ color:rgba(255,255,255,.5); font-size:.82rem; text-align:center; padding:14px 10px; border:1px dashed rgba(140,160,255,.28); border-radius:12px; }
+  .doc-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; background:#0f1a2e; border:1px solid rgba(140,160,255,.28); border-radius:14px; padding:10px 14px; margin-bottom:8px; }
+  .doc-info{ flex:1 1 auto; min-width:0; }
+  .doc-line1{ color:rgba(255,255,255,.62); font-size:.74rem; }
+  .doc-items{ color:#fff; font-size:.8rem; margin-top:2px; word-break:break-word; }
+  .doc-right{ display:flex; align-items:center; gap:10px; flex:0 0 auto; }
+  .doc-total{ color:#3bd332; font-weight:700; font-size:.9rem; white-space:nowrap; }
+  .doc-actions{ display:flex; align-items:center; gap:8px; }
+  .doc-make-btn{ -webkit-appearance:none; appearance:none; border:none; background:#2f7cf6; color:#fff; font-family:inherit; font-size:.8rem; font-weight:600; padding:8px 12px; border-radius:11px; cursor:pointer; white-space:nowrap; }
+  .doc-make-btn:hover{ background:#4d93ff; }
+  .doc-del-btn{ color:#ff7bac; }
   .ord-notes-row{ margin:12px 0 4px; }
   .ord-notes-row label{ display:block; font-size:.8rem; color:rgba(255,255,255,.72); margin:0 0 4px; }
   .ord-notes-row textarea{ width:100%; box-sizing:border-box; min-height:60px; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px; font-size:.9rem; background:#fff; color:#021236; font-family:inherit; resize:vertical; }
@@ -562,6 +578,11 @@
     border:1px solid rgba(140,160,255,.35);
   }
   #foldersPanel{ background:#007aff; }
+  #invoicesPanel{ background:#0277fb; }
+  #receiptsPanel{ background:#6303ed; }
+  /* readable section titles on the saturated invoice/receipt panels */
+  #invoicesPanel .doc-section-title, #receiptsPanel .doc-section-title{ color:rgba(255,255,255,.92); }
+  #invoicesPanel .doc-empty, #receiptsPanel .doc-empty{ color:rgba(255,255,255,.7); border-color:rgba(255,255,255,.35); }
   #addFolderBtn{ background:#021236; border:1px solid transparent; box-sizing:border-box; }
   #addFolderBtn:hover{ background:#04205e; }
   #searchPanel{ background:linear-gradient(180deg, #5d03ef 0%, #007aff 100%); }
@@ -1818,24 +1839,45 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   <div class="products-view orders-view view-hidden" id="ordersView">
     <div class="products-inner">
       <section class="panel" id="ordersPanel">
-        <h2 style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">הזמנות</span></h2>
-
-        <label class="ord-field-label" for="ordAgentSelect">שם סוכן</label>
-        <div class="ord-agent-row">
-          <select id="ordAgentSelect"><option value="">— בחר סוכן —</option></select>
-        </div>
-
-        <label class="ord-field-label" for="ordClientSearch">שם לקוח</label>
-        <div class="ord-client-search-wrap">
-          <div class="search-box" style="margin-top:0">
-            <input type="text" id="ordClientSearch" autocomplete="off" placeholder="חפש לפי שם, שם חשבונית או ח.פ/ת.ז...">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#5B6B6A" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <h2 id="ordersHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">הזמנות</span>
+          <span id="ordersChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(90deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
+        </h2>
+        <div id="ordersBody" class="animated-collapse is-open" style="max-height:none;overflow:visible">
+          <label class="ord-field-label" for="ordAgentSelect">שם סוכן</label>
+          <div class="ord-agent-row">
+            <select id="ordAgentSelect"><option value="">— בחר סוכן —</option></select>
           </div>
-          <div id="ordClientResults" class="ord-client-results"></div>
-        </div>
-        <select id="ordClientSelect" style="margin-top:8px"><option value="">— בחר לקוח —</option></select>
 
-        <div id="ordFormHost" class="inventory-modal"></div>
+          <label class="ord-field-label" for="ordClientSearch">שם לקוח</label>
+          <div class="ord-client-search-wrap">
+            <div class="search-box" style="margin-top:0">
+              <input type="text" id="ordClientSearch" autocomplete="off" placeholder="חפש לפי שם, שם חשבונית או ח.פ/ת.ז...">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#5B6B6A" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div id="ordClientResults" class="ord-client-results"></div>
+          </div>
+          <select id="ordClientSelect" style="margin-top:8px"><option value="">— בחר לקוח —</option></select>
+
+          <div id="ordFormHost" class="inventory-modal"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="invoicesPanel">
+        <h2 id="invoicesHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#0f1a2e;position:relative;top:5px"></span> <span style="position:relative;top:5px">חשבוניות</span>
+          <span id="invoicesChevron" style="margin-right:auto;color:#fff;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
+        </h2>
+        <div id="invoicesBody" class="animated-collapse">
+          <div id="invDocHost" class="inventory-modal"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="receiptsPanel">
+        <h2 id="receiptsHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#fbb03b;position:relative;top:5px"></span> <span style="position:relative;top:5px">קבלות</span>
+          <span id="receiptsChevron" style="margin-right:auto;color:#fff;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
+        </h2>
+        <div id="receiptsBody" class="animated-collapse">
+          <div id="recDocHost" class="inventory-modal"></div>
+        </div>
       </section>
     </div>
   </div>
@@ -4989,8 +5031,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       head.addEventListener('click', (e)=>{
         if(e.target.closest('.rename-cluster') || e.target.closest('.reset-cluster-name') || e.target.closest('.route-toggle')) return;
         toggleClusterOpen(cl.key);
-        body.style.display = openClusterNames.has(cl.key) ? 'block' : 'none';
-        body.style.maxHeight = 'none'; // region bodies open via display, never clamp their height
+        toggleAnimatedCollapse(body, null); // smooth open/close, exactly like folders
         const bounds = filteredMembers.map(m=>[clients[m].lat, clients[m].lon]);
         fitOrCenter(bounds, 14, 40);
       });
@@ -5013,9 +5054,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       }
 
       const body = document.createElement('div');
-      body.className = 'cluster-body cluster-region-body';
-      body.style.maxHeight = 'none'; // region body height is controlled by display, not the collapse max-height
-      body.style.display = openClusterNames.has(cl.key) ? 'block' : 'none';
+      // same smooth open/close animation as folder bodies (animated-collapse + toggleAnimatedCollapse)
+      body.className = 'cluster-body cluster-region-body animated-collapse';
+      if(openClusterNames.has(cl.key)){
+        body.classList.add('is-open');
+        body.style.maxHeight = 'none'; // reflecting existing open state on render, not an animated action
+      }
       const activeMembers = filteredMembers.filter(m => !clients[m].skipRoute && !clients[m].inactive);
       const skippedMembers = filteredMembers.filter(m => clients[m].skipRoute && !clients[m].inactive);
       const inactiveMembers = filteredMembers.filter(m => clients[m].inactive);
@@ -5815,6 +5859,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       // closing: lock in the current height, drop is-open (starts the padding/opacity
       // transitions from the committed state), then on the next frame animate down to 0.
       // one rAF (not two) so the collapse starts immediately with no "stuck" pause.
+      bodyEl.style.overflow = 'hidden'; // re-clip while collapsing (was 'visible' once fully open)
       bodyEl.style.maxHeight = bodyEl.scrollHeight + 'px';
       void bodyEl.offsetHeight; // force reflow so this starting value is registered
       bodyEl.classList.remove('is-open');
@@ -5839,7 +5884,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const release = ()=>{
         if(released) return;
         released = true;
-        if(bodyEl.classList.contains('is-open')) bodyEl.style.maxHeight = 'none';
+        // once fully open, stop clipping so absolutely-positioned children (e.g. the client
+        // search dropdown in the orders panel) aren't cut off by the collapse's overflow.
+        if(bodyEl.classList.contains('is-open')){ bodyEl.style.maxHeight = 'none'; bodyEl.style.overflow = 'visible'; }
         bodyEl.removeEventListener('transitionend', onEnd);
       };
       const onEnd = (e)=>{ if(e.propertyName === 'max-height') release(); };
@@ -6590,7 +6637,158 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const c = id ? clients.find(x=>x.id===id) : null;
     if(ordClientSelect) ordClientSelect.value = id || '';
     renderOrdersForm(c || null);
+    renderOrderDocs(); // the invoices/receipts panels follow the selected client
   }
+
+  /* =====================================================================
+     Documents: invoices + receipts (each kept separately per client).
+     Flow: an order → "הפק חשבונית" makes an invoice; an invoice → "הפק קבלה"
+     makes a receipt. Every document lives on the client object (c.invoices /
+     c.receipts), so it's saved with clients_data and shows under the client.
+     ===================================================================== */
+  const DOC_CFG = {
+    invoice: {
+      arr: 'invoices',
+      title: 'חשבוניות',
+      hostEl: 'invDocHost',
+      makeLabel: 'הפק חשבונית', madeTitle: 'חשבוניות שהופקו', srcTitle: 'הזמנות להפקת חשבונית'
+    },
+    receipt: {
+      arr: 'receipts',
+      title: 'קבלות',
+      hostEl: 'recDocHost',
+      makeLabel: 'הפק קבלה', madeTitle: 'קבלות שהופקו', srcTitle: 'חשבוניות לאישור והפקת קבלה'
+    }
+  };
+  // the invoices/receipts panels live inside the orders page and follow the client
+  // selected there (ordSelectedClientId) — no separate client picker per section.
+  function renderOrderDocs(){ renderDocsView('invoice'); renderDocsView('receipt'); }
+
+  function genDocId(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function nextDocNumber(type){
+    const key = DOC_CFG[type].arr;
+    let max = 0;
+    clients.forEach(c=>{ (c[key]||[]).forEach(d=>{ if(typeof d.num==='number' && d.num>max) max=d.num; }); });
+    return max + 1;
+  }
+  function docItemsSummary(doc){
+    if(doc.noOrder) return 'ללא הזמנה';
+    return (doc.items||[]).map(it=>`${escapeHtml(it.name||'')} ×${it.qty||0}`).join(', ') || '—';
+  }
+  function orderHasInvoice(c, order){ return (c.invoices||[]).some(inv=>inv.sourceOrderId===order.id); }
+  function invoiceHasReceipt(c, inv){ return (c.receipts||[]).some(r=>r.sourceInvoiceId===inv.id); }
+
+  function createInvoiceFromOrder(c, order){
+    c.invoices = c.invoices || [];
+    if(orderHasInvoice(c, order)) return;
+    c.invoices.push({
+      id: genDocId(), num: nextDocNumber('invoice'), date: localDateString(),
+      items: (order.items||[]).map(it=>Object.assign({}, it)),
+      total: order.total || 0, discountPercent: order.discountPercent || '',
+      agent: order.agent || '', note: order.note || '',
+      sourceOrderId: order.id
+    });
+    saveData();
+    renderOrderDocs();
+  }
+  function createReceiptFromInvoice(c, inv){
+    c.receipts = c.receipts || [];
+    if(invoiceHasReceipt(c, inv)) return;
+    c.receipts.push({
+      id: genDocId(), num: nextDocNumber('receipt'), date: localDateString(),
+      items: (inv.items||[]).map(it=>Object.assign({}, it)),
+      total: inv.total || 0, agent: inv.agent || '', note: inv.note || '',
+      sourceInvoiceId: inv.id
+    });
+    saveData();
+    renderOrderDocs();
+  }
+  function deleteDoc(c, type, id){
+    const key = DOC_CFG[type].arr;
+    c[key] = (c[key]||[]).filter(d=>d.id!==id);
+    saveData();
+    renderOrderDocs();
+  }
+
+  function docRowHtml(doc, actionsHtml){
+    const numTxt = doc.num ? `#${doc.num} · ` : '';
+    return `<div class="doc-row" data-id="${doc.id}">
+      <div class="doc-info">
+        <div class="doc-line1">${numTxt}${escapeHtml(doc.date||'')}${doc.agent?` · סוכן: ${escapeHtml(doc.agent)}`:''}</div>
+        <div class="doc-items">${docItemsSummary(doc)}</div>
+      </div>
+      <div class="doc-right">
+        <div class="doc-total">₪${(doc.total||0).toFixed(2)}</div>
+        <div class="doc-actions">${actionsHtml}</div>
+      </div>
+    </div>`;
+  }
+
+  function renderDocsView(type){
+    const cfg = DOC_CFG[type];
+    const host = document.getElementById(cfg.hostEl);
+    if(!host) return;
+    const c = ordSelectedClientId ? clients.find(x=>x.id===ordSelectedClientId) : null;
+    if(!c){
+      host.innerHTML = `<div class="ord-placeholder">בחרו לקוח בראש העמוד כדי לראות ולהפיק ${cfg.title}.</div>`;
+      return;
+    }
+    let html = `<div class="doc-client-head">${escapeHtml(clientDisplayName(c))}</div>`;
+
+    if(type === 'invoice'){
+      const openOrders = (c.orders||[]).filter(o=>!o.noOrder && (o.total||0) > 0 && !orderHasInvoice(c, o)).reverse(); // newest order first
+      html += `<div class="doc-section-title">${cfg.srcTitle}</div>`;
+      html += openOrders.length
+        ? openOrders.map(o=>docRowHtml(o, `<button type="button" class="doc-make-btn" data-make="${o.id}">${cfg.makeLabel}</button>`)).join('')
+        : `<div class="doc-empty">אין הזמנות שממתינות לחשבונית.</div>`;
+      const made = (c.invoices||[]).slice().sort((a,b)=>(b.num||0)-(a.num||0));
+      html += `<div class="doc-section-title">${cfg.madeTitle}</div>`;
+      html += made.length
+        ? made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`)).join('')
+        : `<div class="doc-empty">עדיין לא הופקו חשבוניות ללקוח זה.</div>`;
+    } else {
+      const openInvoices = (c.invoices||[]).filter(inv=>!invoiceHasReceipt(c, inv)).sort((a,b)=>(b.num||0)-(a.num||0)); // newest invoice first
+      html += `<div class="doc-section-title">${cfg.srcTitle}</div>`;
+      html += openInvoices.length
+        ? openInvoices.map(inv=>docRowHtml(inv, `<button type="button" class="doc-make-btn" data-make="${inv.id}">${cfg.makeLabel}</button>`)).join('')
+        : `<div class="doc-empty">אין חשבוניות שממתינות לקבלה.</div>`;
+      const made = (c.receipts||[]).slice().sort((a,b)=>(b.num||0)-(a.num||0));
+      html += `<div class="doc-section-title">${cfg.madeTitle}</div>`;
+      html += made.length
+        ? made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`)).join('')
+        : `<div class="doc-empty">עדיין לא הופקו קבלות ללקוח זה.</div>`;
+    }
+    host.innerHTML = html;
+
+    host.querySelectorAll('[data-make]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const srcId = btn.dataset.make;
+        if(type === 'invoice'){
+          const o = (c.orders||[]).find(x=>x.id===srcId);
+          if(o) createInvoiceFromOrder(c, o);
+        } else {
+          const inv = (c.invoices||[]).find(x=>x.id===srcId);
+          if(inv) createReceiptFromInvoice(c, inv);
+        }
+      });
+    });
+    host.querySelectorAll('[data-del]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        if(confirm('למחוק את המסמך?')) deleteDoc(c, type, btn.dataset.del);
+      });
+    });
+  }
+
+  // the orders + invoices + receipts panels open/close like the settings/inventory panels
+  document.getElementById('ordersHeader').addEventListener('click', ()=>{
+    toggleAnimatedCollapse(document.getElementById('ordersBody'), document.getElementById('ordersChevron'));
+  });
+  document.getElementById('invoicesHeader').addEventListener('click', ()=>{
+    toggleAnimatedCollapse(document.getElementById('invoicesBody'), document.getElementById('invoicesChevron'));
+  });
+  document.getElementById('receiptsHeader').addEventListener('click', ()=>{
+    toggleAnimatedCollapse(document.getElementById('receiptsBody'), document.getElementById('receiptsChevron'));
+  });
 
   // pricing for a single catalog line — MIRRORS ordregLine() inside openOrderModal so the
   // page and the popup price every product identically (blanket sub-sub price wins; else base
@@ -6883,6 +7081,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     } else {
       renderOrdersForm(null);
     }
+    renderOrderDocs(); // keep the invoices/receipts panels in sync with the selected client
   }
 
   // agents are added/removed on the Settings page now; the orders page only picks from the list
