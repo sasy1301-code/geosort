@@ -134,9 +134,9 @@
   /* only the chevron flips (to the close direction) with an animation when the drawer is open */
   .side-menu-tab .chev{ transform-box:fill-box; transform-origin:center; transition:transform .35s ease; }
   .side-menu.open .side-menu-tab .chev{ transform:scaleX(-1); }
-  .side-menu-items{ display:flex; flex-direction:column; gap:26px; margin-top:8px; }
+  .side-menu-items{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
   .side-menu-item{
-    display:flex; align-items:center; justify-content:flex-start; gap:30px; width:100%;
+    display:flex; align-items:center; justify-content:flex-start; gap:23px; width:100%;
     background:none; border:none; cursor:pointer; text-decoration:none;
     color:#fff; font-family:inherit; font-size:12pt; font-weight:400; padding:0;
     -webkit-text-size-adjust:100%; text-size-adjust:100%; /* keep every item at exactly 12pt on mobile */
@@ -225,6 +225,20 @@
   /* trash button uses the shared sys-icon-disc standard; only its colour is bespoke (salmon) */
   .settings-agent-del{ color:#ff7bac; }
   .settings-agent-empty{ color:rgba(255,255,255,.55); font-size:.86rem; text-align:center; padding:18px 10px; border:1px dashed rgba(140,160,255,.35); border-radius:14px; }
+  /* settings › data backup */
+  .settings-sep{ height:1px; background:rgba(255,255,255,.16); margin:20px 2px; }
+  .settings-backup-now{ width:100%; margin:6px 0 0; padding:12px; border:none; border-radius:15px; background:#2f7cf6; color:#fff; font-size:.95rem; font-weight:600; font-family:inherit; cursor:pointer; }
+  .settings-backup-now:hover{ background:#4d93ff; }
+  .settings-autobackup{ margin-top:16px; background:#0f1a2e; border:1px solid rgba(140,160,255,.28); border-radius:14px; padding:14px; }
+  .settings-autobackup-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .settings-autobackup-title{ color:#fff; font-size:.95rem; font-weight:600; }
+  .settings-autobackup input[type=time]{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.22); background:#fff; color:#021236; font-size:1rem; }
+  .settings-folder-btn{ width:100%; margin-top:10px; padding:11px; border:1px solid #2f7cf6; border-radius:14px; background:transparent; color:#7fb0ff; font-size:.9rem; font-family:inherit; cursor:pointer; }
+  .settings-folder-btn:hover{ background:rgba(47,124,246,.12); }
+  .settings-folder-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .settings-backup-folder{ margin-top:8px; font-size:.84rem; color:#8ff08a; word-break:break-all; }
+  .settings-backup-status{ margin-top:6px; font-size:.82rem; color:rgba(255,255,255,.8); }
+  .settings-backup-note{ margin-top:10px; font-size:.74rem; line-height:1.5; color:rgba(255,255,255,.5); }
   #ordFormHost{ margin-top:14px; }
   #ordFormHost:empty{ margin-top:0; }
   #ordFormHost .ord-placeholder{ color:rgba(255,255,255,.55); font-size:.86rem; text-align:center; padding:26px 10px; border:1px dashed rgba(140,160,255,.35); border-radius:14px; }
@@ -834,6 +848,15 @@
     display:inline-block; font-size:.62rem; font-weight:700; color:#0f1a2e; background:#fbb03b;
     padding:1px 7px; border-radius:15px; margin-inline-start:6px; vertical-align:middle; white-space:nowrap;
   }
+  /* "new client" — counted once in the daily report; green pill next to the name */
+  .new-badge{
+    display:inline-block; font-size:.62rem; font-weight:700; color:#04210a; background:#3bd332;
+    padding:1px 7px; border-radius:15px; margin-inline-start:6px; vertical-align:middle; white-space:nowrap;
+  }
+  /* "new client" toggle row inside the edit form */
+  .edit-newclient-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:12px 0 2px; }
+  .edit-newclient-label{ font-size:.9rem; color:#fff; }
+  .edit-newclient-hint{ font-size:.72rem; color:rgba(255,255,255,.55); margin:0 0 4px; }
   .call-before-dot{
     display:inline-block; width:12px; height:12px; border-radius:50%; flex:0 0 auto;
     background:#36ff36; box-shadow:0 0 6px rgba(54,255,54,.9);
@@ -910,7 +933,8 @@
     left:2.8px; top:1.8px; background:red;
     transition:transform .22s ease, background .22s ease;
   }
-  .handled-checkbox:checked + .handled-slider::before{ transform:translateX(20.6px); background:#7ae61d; }
+  .handled-checkbox:checked + .handled-slider::before,
+  .edit-newclient:checked + .handled-slider::before{ transform:translateX(20.6px); background:#7ae61d; }
   .client-card .card-chevron{ color:#fff; flex:0 0 auto; display:inline-block; transition:transform .15s ease; }
   .client-card .card-details{ cursor:default; margin-top:0; }
   /* when the card is open, push the whole details block (billing name, photo, WhatsApp
@@ -1491,8 +1515,6 @@
       <button class="side-menu-item" id="vehicleStockMenuItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m19.5,7h-2.5v-.5c0-2.054-1.388-3.847-3.375-4.358-.264-.068-.54.092-.609.359-.069.268.092.54.36.609,1.545.397,2.625,1.792,2.625,3.39v12.5H3.5c-1.378,0-2.5-1.121-2.5-2.5v-4c0-.276-.224-.5-.5-.5s-.5.224-.5.5v4c0,1.499.952,2.771,2.28,3.268-.179.387-.28.802-.28,1.232,0,1.654,1.346,3,3,3s3-1.346,3-3c0-.344-.064-.68-.18-1h8.359c-.116.32-.18.656-.18,1,0,1.654,1.346,3,3,3s3-1.346,3-3c0-.429-.101-.844-.28-1.232,1.328-.498,2.28-1.769,2.28-3.268v-5c0-2.481-2.019-4.5-4.5-4.5Zm0,1c1.93,0,3.5,1.57,3.5,3.5v1.5h-6v-5h2.5Zm-12.5,13c0,1.103-.897,2-2,2s-2-.897-2-2c0-.361.122-.705.314-1.019.063.003.122.019.186.019h3.196c.185.309.304.646.304,1Zm14,0c0,1.103-.897,2-2,2s-2-.897-2-2c0-.354.119-.691.304-1h3.196c.064,0,.123-.015.186-.019.192.314.314.657.314,1.019Zm-.5-2h-3.5v-5h6v2.5c0,1.379-1.122,2.5-2.5,2.5ZM2.5,10h6c1.378,0,2.5-1.121,2.5-2.5V2.5c0-1.379-1.122-2.5-2.5-2.5H2.5C1.122,0,0,1.121,0,2.5v5c0,1.379,1.122,2.5,2.5,2.5ZM1,2.5c0-.827.673-1.5,1.5-1.5h6c.827,0,1.5.673,1.5,1.5v5c0,.827-.673,1.5-1.5,1.5H2.5c-.827,0-1.5-.673-1.5-1.5V2.5Zm3,1c0-.276.224-.5.5-.5h2c.276,0,.5.224.5.5s-.224.5-.5.5h-2c-.276,0-.5-.224-.5-.5Z"/></svg></span><span class="txt">מלאי רכב</span></button>
       <a class="side-menu-item" href="./order/" target="_blank"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m9,12c3.309,0,6-2.691,6-6S12.309,0,9,0,3,2.691,3,6s2.691,6,6,6Zm0-11c2.757,0,5,2.243,5,5s-2.243,5-5,5-5-2.243-5-5S6.243,1,9,1Zm1.5,13.5c0,.276-.224.5-.5.5h-.5c-4.687,0-8.5,3.813-8.5,8.5,0,.276-.224.5-.5.5s-.5-.224-.5-.5c0-5.238,4.262-9.5,9.5-9.5h.5c.276,0,.5.224.5.5Zm13.414,2.259c-.203-.557-.738-.931-1.331-.931h-2.398l-.856-2.406c-.206-.551-.739-.922-1.328-.922s-1.122.371-1.33.929l-.854,2.399h-2.398c-.592,0-1.126.373-1.33.927-.205.556-.039,1.187.421,1.576l1.912,1.556-.757,2.272c-.179.573.023,1.2.503,1.558.243.183.545.283.849.283.282,0,.555-.083.788-.239l2.208-1.478,2.248,1.464c.504.326,1.16.301,1.639-.065.476-.367.668-.996.477-1.576l-.781-2.227,1.903-1.55c.453-.382.621-1.013.418-1.569Zm-1.056.799l-2.169,1.767c-.164.133-.227.354-.156.553l.895,2.55c.056.168,0,.354-.14.46-.143.108-.336.116-.484.02l-2.524-1.644c-.167-.109-.384-.107-.551.003l-2.482,1.662c-.143.095-.342.092-.48-.014-.142-.105-.201-.29-.15-.451l.862-2.591c.065-.197.002-.415-.159-.545l-2.172-1.767c-.132-.112-.181-.297-.12-.461.06-.164.217-.273.391-.273h2.751c.212,0,.4-.133.471-.332l.971-2.725c.121-.325.662-.318.779-.007l.973,2.731c.07.199.259.332.471.332h2.751c.175,0,.332.11.392.274.06.164.01.35-.116.457Z"/></svg></span><span class="txt">כניסת לקוחות</span></a>
       <button class="side-menu-item" id="dedupeOrdersMenuItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m2 6h2c1.103 0 2-.897 2-2v-.5h2c.551 0 1 .449 1 1v.5c0 .276.224.5.5.5s.5-.224.5-.5v-.5c0-1.103-.897-2-2-2h-2v-.5c0-1.103-.897-2-2-2h-2c-1.103 0-2 .897-2 2v2c0 1.103.897 2 2 2zm-1-4c0-.551.449-1 1-1h2c.551 0 1 .449 1 1v2c0 .551-.449 1-1 1h-2c-.551 0-1-.449-1-1zm21-2h-2c-1.103 0-2 .897-2 2v.5h-2c-1.103 0-2 .897-2 2v.5c0 .276.224.5.5.5s.5-.224.5-.5v-.5c0-.551.448-1 1-1h2v.5c0 1.103.897 2 2 2h2c1.103 0 2-.897 2-2v-2c0-1.103-.897-2-2-2zm1 4c0 .551-.448 1-1 1h-2c-.552 0-1-.449-1-1v-2c0-.551.448-1 1-1h2c.552 0 1 .449 1 1zm-1 14h-2c-1.103 0-2 .897-2 2v.5h-2c-.552 0-1-.449-1-1v-.5c0-.276-.224-.5-.5-.5s-.5.224-.5.5v.5c0 1.103.897 2 2 2h2v.5c0 1.103.897 2 2 2h2c1.103 0 2-.897 2-2v-2c0-1.103-.897-2-2-2zm1 4c0 .551-.448 1-1 1h-2c-.552 0-1-.449-1-1v-2c0-.551.448-1 1-1h2c.552 0 1 .449 1 1zm-6.002-8.146v-3.186c-.003-.898-.498-1.727-1.27-2.177l-2.504-1.414c-.76-.43-1.703-.43-2.461 0l-2.496 1.414c-.782.443-1.268 1.276-1.268 2.175v3.129c0 .895.482 1.726 1.259 2.17l2.515 1.437c.754.431 1.695.437 2.454.016l2.484-1.379c.794-.44 1.287-1.278 1.287-2.186zm-5.743-5.906c.456-.257 1.022-.258 1.477 0 0 0 2.611 1.495 2.664 1.536l-3.396 1.941-3.399-1.943c.053-.04 2.654-1.534 2.654-1.534zm-2.501 7.15c-.466-.267-.755-.766-.755-1.302v-3.129c0-.12.019-.237.047-.351l3.452 1.973v4.34c-.078-.028-2.744-1.531-2.744-1.531zm6.472.067s-2.645 1.448-2.728 1.476v-4.35l3.453-1.973c.027.114.047.23.047.35v3.186c0 .545-.296 1.047-.772 1.312zm-5.726 3.335c-.276 0-.5.224-.5.5v.5c0 .551-.449 1-1 1h-2v-.5c0-1.103-.897-2-2-2h-2c-1.103 0-2 .897-2 2v2c0 1.103.897 2 2 2h2c1.103 0 2-.897 2-2v-.5h2c1.103 0 2-.897 2-2v-.5c0-.276-.224-.5-.5-.5zm-4.5 3.5c0 .551-.449 1-1 1h-2c-.551 0-1-.449-1-1v-2c0-.551.449-1 1-1h2c.551 0 1 .449 1 1z"/></svg></span><span class="txt">ניקוי הזמנות כפולות</span></button>
-      <div class="side-menu-sep" aria-hidden="true"></div>
-      <button class="side-menu-item" id="backupDataMenuItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2v9.67z"/></svg></span><span class="txt">גיבוי נתונים (הורדה)</span></button>
     </nav>
   </div>
 
@@ -1543,6 +1565,14 @@
             <option value="__new__">+ תיקייה חדשה...</option>
           </select>
           <input type="text" id="f-folder-new" placeholder="שם התיקייה החדשה (למשל: ראשון לציון, צפון)" style="display:none; margin-top:6px">
+          <div class="edit-newclient-row">
+            <span class="edit-newclient-label">לקוח חדש</span>
+            <label class="handled-switch">
+              <input type="checkbox" id="f-newclient" class="edit-newclient">
+              <span class="handled-slider"></span>
+            </label>
+          </div>
+          <div class="edit-newclient-hint">מסומן = נספר בדו״ח היומי כלקוח חדש. יורד אוטומטית לאחר ההזמנה הראשונה.</div>
           <label for="f-notes">הערות</label>
           <textarea id="f-notes" placeholder="הערות חופשיות..."></textarea>
           <label for="f-whatsapp-msg">הודעת וואטסאפ מוכנה מראש</label>
@@ -1651,14 +1681,45 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   <div class="products-view settings-view view-hidden" id="settingsView">
     <div class="products-inner">
       <section class="panel" id="settingsPanel">
-        <h2 style="display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">סוכנים</span></h2>
-        <div class="settings-section">
-          <label class="ord-field-label" for="settingsAgentInput">הוספת סוכן חדש</label>
-          <div class="settings-add-row">
-            <input type="text" id="settingsAgentInput" autocomplete="off" placeholder="שם הסוכן">
-            <button type="button" class="primary" id="settingsAddAgentBtn">+ הוסף</button>
+        <h2 id="settingsAgentsHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">סוכנים</span>
+          <span id="settingsAgentsChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
+        </h2>
+        <div id="settingsAgentsBody" class="animated-collapse">
+          <div class="settings-section">
+            <label class="ord-field-label" for="settingsAgentInput">הוספת סוכן חדש</label>
+            <div class="settings-add-row">
+              <input type="text" id="settingsAgentInput" autocomplete="off" placeholder="שם הסוכן">
+              <button type="button" class="primary" id="settingsAddAgentBtn">+ הוסף</button>
+            </div>
+            <div id="settingsAgentList" class="settings-agent-list"></div>
           </div>
-          <div id="settingsAgentList" class="settings-agent-list"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="settingsBackupPanel">
+        <h2 id="settingsBackupHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">גיבוי נתונים</span>
+          <span id="settingsBackupChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
+        </h2>
+        <div id="settingsBackupBody" class="animated-collapse">
+          <div class="settings-section settings-backup">
+          <button type="button" id="settingsBackupNowBtn" class="settings-backup-now">הורדת קובץ גיבוי עכשיו</button>
+
+          <div class="settings-autobackup">
+            <div class="settings-autobackup-head">
+              <span class="settings-autobackup-title">גיבוי אוטומטי יומי</span>
+              <label class="handled-switch">
+                <input type="checkbox" id="autoBackupEnabled" class="edit-newclient">
+                <span class="handled-slider"></span>
+              </label>
+            </div>
+            <label class="ord-field-label" for="autoBackupTime">שעה יומית לגיבוי</label>
+            <input type="time" id="autoBackupTime" value="20:00">
+            <button type="button" id="autoBackupFolderBtn" class="settings-folder-btn">בחר תיקיית גיבוי</button>
+            <div id="autoBackupFolderName" class="settings-backup-folder"></div>
+            <div id="autoBackupStatus" class="settings-backup-status"></div>
+            <div class="settings-backup-note">הגיבוי האוטומטי עובד ב‑Chrome/Edge במחשב, רק כשהאפליקציה פתוחה בשעה שנקבעה. הקובץ נשמר לתיקייה שבחרת בשם geosort-backup_&lt;תאריך&gt;.json.</div>
+          </div>
+          </div>
         </div>
       </section>
     </div>
@@ -4100,6 +4161,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             items, total, discountPercent: discountPct, noOrder, noOrderReason
           });
         }
+        // a real (non-"no order") order means this client has now been serviced — drop the "new client" flag
+        if(!noOrder) c.newClient = false;
         // the order's total becomes this client's "last invoice amount" too, dated today
         c.lastInvoice = total.toFixed(2);
         c.lastInvoiceDate = localDateString();
@@ -4202,6 +4265,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       <input type="email" class="edit-email" value="${escapeHtml(c.email||'')}">
       <label>מחיר ליחידה</label>
       <input type="number" class="edit-price" value="${escapeHtml(c.price||'')}" step="0.01" min="0">
+      <div class="edit-newclient-row">
+        <span class="edit-newclient-label">לקוח חדש</span>
+        <label class="handled-switch">
+          <input type="checkbox" class="edit-newclient" ${c.newClient ? 'checked' : ''}>
+          <span class="handled-slider"></span>
+        </label>
+      </div>
+      <div class="edit-newclient-hint">מסומן = נספר בדו״ח היומי כלקוח חדש. יורד אוטומטית לאחר ההזמנה הראשונה.</div>
       <label>עיר</label>
       <input type="text" class="edit-city" value="${escapeHtml(origCity)}">
       <label>רחוב</label>
@@ -4289,6 +4360,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       c.price = card.querySelector('.edit-price').value.trim();
       c.notes = card.querySelector('.edit-notes').value.trim();
       c.whatsappMessage = card.querySelector('.edit-whatsapp-msg').value.trim();
+      // "new client" toggle: when switched on, stamp the date so the daily report can count it
+      // once (on that date). the flag itself drops automatically after the first real order.
+      const wantNew = card.querySelector('.edit-newclient').checked;
+      if(wantNew && !c.newClient) c.newClientSince = localDateString();
+      c.newClient = wantNew;
     }
 
     function finishSave(){
@@ -4394,6 +4470,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           ${c.collectPayment ? `<span class="collect-payment-dot" title="לגבות תשלום"></span>` : ""}
           <a href="javascript:void(0)" class="cname-link" title="לחצו לצפייה/הוספה של הזמנה">${c.business ? escapeHtml(c.business) : escapeHtml(c.name)}</a>
           ${c.testClient ? `<span class="test-badge" title="לקוח בדיקה — ההזמנות שלו לא נספרות באף סיכום">בדיקה</span>` : ""}
+          ${c.newClient ? `<span class="new-badge" title="לקוח חדש — נספר בדו״ח היומי; יורד לאחר ההזמנה הראשונה">לקוח חדש</span>` : ""}
         </div>
         <div class="card-summary-left">
           ${(!c.inactive && !c.skipRoute) ? `
@@ -5035,8 +5112,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           }
         });
       });
+      const newClientsCount = clients.filter(c => !c.testClient && c.newClientSince && c.newClientSince >= fromDate && c.newClientSince <= toDate).length;
       const rangeLabel = fromDate === toDate ? fromDate : `${fromDate} עד ${toDate}`;
-      const report = `דוח כל התיקיות: ${rangeLabel}\nכמות הזמנות חדשות: ${orderCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
+      const report = `דוח כל התיקיות: ${rangeLabel}\nכמות הזמנות חדשות: ${orderCount}\nלקוחות חדשים: ${newClientsCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
       let waNumber = '052-3617178'.replace(/\D/g, '');
       if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
       window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(report)}`, '_blank');
@@ -5298,7 +5376,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
               }
             });
           });
-          const report = `דוח יומי - תיקיית ${name}: ${chosenDate}\nכמות הזמנות חדשות: ${orderCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
+          const newClientsCount = members.filter(m => !m.testClient && m.newClientSince === chosenDate).length;
+          const report = `דוח יומי - תיקיית ${name}: ${chosenDate}\nכמות הזמנות חדשות: ${orderCount}\nלקוחות חדשים: ${newClientsCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
           let waNumber = '052-3617178'.replace(/\D/g, '');
           if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
           window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(report)}`, '_blank');
@@ -5487,10 +5566,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   function finalizeAdd(data){
+    // "new client" toggle from the add form: stamp today's date so the daily report counts it once
+    const isNew = !!(document.getElementById('f-newclient') && document.getElementById('f-newclient').checked);
     clients.push({
       id: Date.now().toString(36) + Math.random().toString(36).slice(2,7),
       business: data.business || "", businessId: data.businessId || "", name: data.name, contact: data.contact || "", phone: data.phone || "", email: data.email || "", price: data.price || "", houseNumber: data.houseNumber || "", address: data.address, notes: data.notes || "", whatsappMessage: data.whatsappMessage || "",
-      folder: data.folder || "", lat: data.lat, lon: data.lon, city: data.city || ""
+      folder: data.folder || "", lat: data.lat, lon: data.lon, city: data.city || "",
+      newClient: isNew, newClientSince: isNew ? localDateString() : ""
     });
     saveData();
     renderAll();
@@ -5507,6 +5589,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     document.getElementById('f-folder').value = '';
     document.getElementById('f-folder-new').style.display = 'none';
     document.getElementById('f-folder-new').value = '';
+    { const nc = document.getElementById('f-newclient'); if(nc) nc.checked = false; }
     selectedGeo = null;
   }
 
@@ -5700,6 +5783,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
   document.getElementById('foldersHeader').addEventListener('click', ()=>{
     toggleAnimatedCollapse(document.getElementById('foldersListBody'), document.getElementById('foldersChevron'));
+  });
+  document.getElementById('settingsAgentsHeader').addEventListener('click', ()=>{
+    toggleAnimatedCollapse(document.getElementById('settingsAgentsBody'), document.getElementById('settingsAgentsChevron'));
+  });
+  document.getElementById('settingsBackupHeader').addEventListener('click', ()=>{
+    toggleAnimatedCollapse(document.getElementById('settingsBackupBody'), document.getElementById('settingsBackupChevron'));
   });
 
   document.getElementById('clustersHeader').addEventListener('click', ()=>{
@@ -6029,6 +6118,85 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
   settingsAddAgentBtn.addEventListener('click', addAgentFromSettings);
   settingsAgentInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); addAgentFromSettings(); } });
+
+  // ===== settings › data backup (manual download + daily auto-backup to a chosen folder) =====
+  const AUTO_BACKUP_LS = 'geosort_autobackup_cfg';
+  const fsaSupported = (typeof window.showDirectoryPicker === 'function');
+  let autoBackupDirHandle = null;
+  function abLoadCfg(){ try{ return JSON.parse(localStorage.getItem(AUTO_BACKUP_LS) || '{}') || {}; }catch(_){ return {}; } }
+  function abSaveCfg(cfg){ try{ localStorage.setItem(AUTO_BACKUP_LS, JSON.stringify(cfg)); }catch(_){} }
+  // directory handles aren't JSON-serialisable, but they survive structured-clone in IndexedDB
+  function abIdb(){ return new Promise((res,rej)=>{ let r; try{ r = indexedDB.open('geosort_backup',1); }catch(e){ return rej(e); } r.onupgradeneeded=()=>{ try{ r.result.createObjectStore('h'); }catch(_){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+  async function abIdbSet(k,v){ const db=await abIdb(); return new Promise((res,rej)=>{ const t=db.transaction('h','readwrite'); t.objectStore('h').put(v,k); t.oncomplete=()=>res(); t.onerror=()=>rej(t.error); }); }
+  async function abIdbGet(k){ const db=await abIdb(); return new Promise((res,rej)=>{ const t=db.transaction('h','readonly'); const q=t.objectStore('h').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>rej(q.error); }); }
+  async function abEnsurePermission(interactive){
+    if(!autoBackupDirHandle) return false;
+    try{ const opts={mode:'readwrite'}; let perm=await autoBackupDirHandle.queryPermission(opts); if(perm!=='granted' && interactive) perm=await autoBackupDirHandle.requestPermission(opts); return perm==='granted'; }catch(_){ return false; }
+  }
+  async function abWrite(){
+    if(!autoBackupDirHandle) throw new Error('לא נבחרה תיקייה');
+    if(!(await abEnsurePermission(false))) throw new Error('אין הרשאת כתיבה לתיקייה');
+    const fileName = `geosort-backup_${backupDateStamp()}.json`;
+    const fh = await autoBackupDirHandle.getFileHandle(fileName, { create:true });
+    const w = await fh.createWritable(); await w.write(backupJson()); await w.close();
+    return fileName;
+  }
+  const abEnabledEl = document.getElementById('autoBackupEnabled');
+  const abTimeEl = document.getElementById('autoBackupTime');
+  const abFolderBtn = document.getElementById('autoBackupFolderBtn');
+  const abFolderNameEl = document.getElementById('autoBackupFolderName');
+  const abStatusEl = document.getElementById('autoBackupStatus');
+  const backupNowBtn = document.getElementById('settingsBackupNowBtn');
+  function abSetStatus(m){ if(abStatusEl) abStatusEl.textContent = m || ''; }
+  function abRenderFolder(){ if(abFolderNameEl) abFolderNameEl.textContent = autoBackupDirHandle ? ('תיקייה: ' + (autoBackupDirHandle.name || '(נבחרה)')) : 'לא נבחרה תיקייה עדיין.'; }
+  async function abInit(){
+    const cfg = abLoadCfg();
+    if(abTimeEl) abTimeEl.value = cfg.time || '20:00';
+    if(abEnabledEl) abEnabledEl.checked = !!cfg.enabled;
+    if(!fsaSupported){
+      if(abFolderBtn) abFolderBtn.disabled = true;
+      if(abEnabledEl) abEnabledEl.disabled = true;
+      abSetStatus('גיבוי אוטומטי לתיקייה נתמך רק ב‑Chrome/Edge במחשב. במכשיר הזה אפשר להשתמש בכפתור ההורדה הידני.');
+      abRenderFolder(); return;
+    }
+    try{ const h = await abIdbGet('dir'); if(h) autoBackupDirHandle = h; }catch(_){}
+    abRenderFolder();
+    if(autoBackupDirHandle && !(await abEnsurePermission(false))) abSetStatus('לחץ "בחר תיקיית גיבוי" כדי לאשר גישה מחדש (הדפדפן מבקש אישור בכל הפעלה).');
+  }
+  if(backupNowBtn) backupNowBtn.addEventListener('click', ()=>{ try{ downloadBackupFile(); }catch(err){ alert('שגיאה ביצירת הגיבוי: ' + err.message); } });
+  if(abFolderBtn) abFolderBtn.addEventListener('click', async ()=>{
+    if(!fsaSupported) return;
+    try{
+      const handle = await window.showDirectoryPicker({ mode:'readwrite' });
+      autoBackupDirHandle = handle;
+      abRenderFolder(); abSetStatus('✓ התיקייה נבחרה. הגיבוי יישמר לכאן בשעה שנקבעה.');
+      try{ await abIdbSet('dir', handle); }catch(_){}  // persist best-effort (survives reloads)
+      await abEnsurePermission(true);
+    }catch(err){ if(err && err.name === 'AbortError') return; abSetStatus('שגיאה בבחירת תיקייה: ' + (err && err.message || err)); }
+  });
+  if(abEnabledEl) abEnabledEl.addEventListener('change', ()=>{
+    const cfg = abLoadCfg(); cfg.enabled = abEnabledEl.checked; cfg.time = (abTimeEl && abTimeEl.value) || '20:00'; abSaveCfg(cfg);
+    if(cfg.enabled && !autoBackupDirHandle) abSetStatus('בחר תיקיית גיבוי כדי שהגיבוי האוטומטי יעבוד.');
+    else if(cfg.enabled) abSetStatus('✓ גיבוי אוטומטי פעיל — בכל יום בשעה ' + cfg.time + ' כשהאפליקציה פתוחה.');
+    else abSetStatus('הגיבוי האוטומטי כבוי.');
+  });
+  if(abTimeEl) abTimeEl.addEventListener('change', ()=>{ const cfg = abLoadCfg(); cfg.time = abTimeEl.value || '20:00'; abSaveCfg(cfg); if(cfg.enabled) abSetStatus('✓ השעה עודכנה ל‑' + cfg.time + '.'); });
+  async function abTick(){
+    const cfg = abLoadCfg();
+    if(!cfg.enabled || !cfg.time || !autoBackupDirHandle) return;
+    const today = backupDateStamp();
+    if(cfg.lastRun === today) return;
+    const n = new Date(); const p = x => String(x).padStart(2,'0');
+    if(`${p(n.getHours())}:${p(n.getMinutes())}` < cfg.time) return; // not yet today
+    try{ const name = await abWrite(); cfg.lastRun = today; abSaveCfg(cfg); abSetStatus('✓ גובה אוטומטית היום: ' + name); }
+    catch(err){ abSetStatus('⚠ הגיבוי האוטומטי לא רץ: ' + (err && err.message || err) + ' — פתח את ההגדרות ולחץ "בחר תיקיית גיבוי".'); }
+  }
+  abInit();
+  setInterval(abTick, 60000);
+  setTimeout(abTick, 4000); // catch-up shortly after load if the app opened after the set time
+  // also catch up whenever the tab regains focus (e.g. the app was in the background at the set time)
+  window.addEventListener('focus', ()=>{ abTick(); });
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) abTick(); });
 
   updateActiveViewItem();
 
@@ -6466,6 +6634,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         c.lastInvoice = total.toFixed(2);
         c.lastInvoiceDate = localDateString();
       }
+      // a real (non-"no order") order means this client has now been serviced — drop the "new client" flag
+      if(!noOrder) c.newClient = false;
       saveData();
       renderAll();
       // confirmation, then reset the form for the next order to the same client
@@ -7490,38 +7660,39 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
   });
   // ---- full data backup (download a JSON snapshot of everything on this device) ----
-  document.getElementById('backupDataMenuItem').addEventListener('click', ()=>{
-    closeSideMenu();
-    try{
-      const now = new Date();
-      const pad = n => String(n).padStart(2,'0');
-      const stamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}`;
-      const backup = {
-        _type: "geosort-backup",
-        _version: 1,
-        _savedAt: now.toISOString(),
-        clients: clients,
-        folders: folders,
-        catalog: catalog,
-        vehicleStockBaseline: vehicleStockBaseline,
-        inventoryCountFrom: inventoryCountFrom,
-        clusterNames: clusterNames,
-        clusterOrder: clusterOrder
-      };
-      const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `geosort-backup_${stamp}.json`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(()=>URL.revokeObjectURL(url), 4000);
-    }catch(err){
-      console.error('backup error', err);
-      alert('שגיאה ביצירת הגיבוי: ' + err.message);
-    }
-  });
+  // ---- shared backup builders (used by the manual button AND the auto-backup) ----
+  function buildBackupObject(){
+    return {
+      _type: "geosort-backup",
+      _version: 1,
+      _savedAt: new Date().toISOString(),
+      clients: clients,
+      folders: folders,
+      catalog: catalog,
+      vehicleStockBaseline: vehicleStockBaseline,
+      inventoryCountFrom: inventoryCountFrom,
+      clusterNames: clusterNames,
+      clusterOrder: clusterOrder
+    };
+  }
+  function backupJson(){ return JSON.stringify(buildBackupObject(), null, 2); }
+  function backupDateStamp(){ const n=new Date(); const p=x=>String(x).padStart(2,'0'); return `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}`; }
+  function downloadBackupFile(){
+    const n = new Date(); const p = x => String(x).padStart(2,'0');
+    const stamp = `${backupDateStamp()}_${p(n.getHours())}-${p(n.getMinutes())}`;
+    const blob = new Blob([backupJson()], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `geosort-backup_${stamp}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 4000);
+  }
+  { const _bkMenu = document.getElementById('backupDataMenuItem'); // moved into Settings › גיבוי נתונים
+    if(_bkMenu) _bkMenu.addEventListener('click', ()=>{
+      closeSideMenu();
+      try{ downloadBackupFile(); }
+      catch(err){ console.error('backup error', err); alert('שגיאה ביצירת הגיבוי: ' + err.message); }
+    }); }
   document.addEventListener('click', (e)=>{
     document.querySelectorAll('.share-choice-menu').forEach(m=>{
       if(!m.contains(e.target) && !e.target.closest('.share-card-btn')) m.remove();
