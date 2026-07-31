@@ -74,10 +74,23 @@
   }
   .app{
     height:100vh;
+    box-sizing:border-box;
+    /* keep content clear of the iPhone status bar / home indicator in standalone (home-screen) mode */
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
     display:flex;
     flex-direction:column;
     position:relative;
     z-index:1;
+  }
+  /* paint the status-bar strip navy so the white clock/battery stay readable in full-screen app mode */
+  body::before{
+    content:'';
+    position:fixed; top:0; left:0; right:0;
+    height:env(safe-area-inset-top);
+    background:#091321;
+    z-index:99998;
+    pointer-events:none;
   }
   header{
     background:transparent;
@@ -106,7 +119,7 @@
     transform:translateX(calc(100% - 6px));
     /* transform is driven by the open/close keyframes below (with an 8px overshoot bounce) */
     transition:box-shadow .55s ease;
-    box-sizing:border-box; padding:56px 30px 30px;
+    box-sizing:border-box; padding:calc(56px + env(safe-area-inset-top)) 30px calc(30px + env(safe-area-inset-bottom));
     /* keep every label a clean Regular (400), rendered antialiased so it never looks heavy */
     font-weight:400; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
   }
