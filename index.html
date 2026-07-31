@@ -134,6 +134,8 @@
   /* only the chevron flips (to the close direction) with an animation when the drawer is open */
   .side-menu-tab .chev{ transform-box:fill-box; transform-origin:center; transition:transform .35s ease; }
   .side-menu.open .side-menu-tab .chev{ transform:scaleX(-1); }
+  .side-menu-greeting{ color:#fff; font-size:15pt; font-weight:600; margin:0 0 12px; padding:0 2px; min-height:1.2em; -webkit-font-smoothing:antialiased; }
+  .side-menu-greeting:empty{ display:none; margin:0; }
   .side-menu-items{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
   .side-menu-item{
     display:flex; align-items:center; justify-content:flex-start; gap:23px; width:100%;
@@ -215,13 +217,16 @@
   /* ---- settings page ---- */
   .settings-section{ margin-top:8px; }
   .settings-section-title{ font-size:1rem; font-weight:600; color:#fff; margin:6px 0 2px; }
-  .settings-add-row{ display:flex; gap:8px; align-items:stretch; }
-  .settings-add-row input{ flex:1 1 auto; }
-  #settingsAddAgentBtn{ flex:0 0 auto; width:auto; margin-top:0; padding:9px 16px; border-radius:15px; background:#2f7cf6; color:#fff; border:1px solid transparent; font-family:inherit; font-size:.9rem; cursor:pointer; white-space:nowrap; }
-  #settingsAddAgentBtn:hover{ background:#4d93ff; }
+  .settings-line-input{ width:100%; box-sizing:border-box; margin:0 0 8px; padding:11px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.22); background:#fff; color:#021236; font-size:.95rem; font-family:inherit; }
+  .settings-add-btn{ width:100%; margin:2px 0 0; padding:11px; border:none; border-radius:14px; background:#2f7cf6; color:#fff; font-size:.92rem; font-weight:600; font-family:inherit; cursor:pointer; }
+  .settings-add-btn:hover{ background:#4d93ff; }
   .settings-agent-list{ margin-top:14px; display:flex; flex-direction:column; gap:8px; }
+  .settings-agent-list:empty{ margin-top:0; }
   .settings-agent-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; background:#0f1a2e; border:1px solid rgba(140,160,255,.28); border-radius:14px; padding:10px 14px; }
+  .settings-agent-info{ display:flex; flex-direction:column; gap:2px; }
   .settings-agent-name{ color:#fff; font-size:.95rem; }
+  .settings-agent-user{ color:#8fb7ff; font-size:.76rem; }
+  .settings-agent-nologin{ color:rgba(255,255,255,.4); }
   /* trash button uses the shared sys-icon-disc standard; only its colour is bespoke (salmon) */
   .settings-agent-del{ color:#ff7bac; }
   .settings-agent-empty{ color:rgba(255,255,255,.55); font-size:.86rem; text-align:center; padding:18px 10px; border:1px dashed rgba(140,160,255,.35); border-radius:14px; }
@@ -233,9 +238,9 @@
   .settings-autobackup-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .settings-autobackup-title{ color:#fff; font-size:.95rem; font-weight:600; }
   .settings-autobackup input[type=time]{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.22); background:#fff; color:#021236; font-size:1rem; }
-  .settings-folder-btn{ width:100%; margin-top:10px; padding:11px; border:1px solid #2f7cf6; border-radius:14px; background:transparent; color:#7fb0ff; font-size:.9rem; font-family:inherit; cursor:pointer; }
-  .settings-folder-btn:hover{ background:rgba(47,124,246,.12); }
-  .settings-folder-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .settings-folder-btn{ width:100%; margin-top:10px; padding:12px; border:none; border-radius:15px; background:#fff; color:#021236; font-size:.92rem; font-weight:500; font-family:inherit; cursor:pointer; }
+  .settings-folder-btn:hover{ background:#eef2f7; }
+  .settings-folder-btn:disabled{ opacity:.55; cursor:not-allowed; }
   .settings-backup-folder{ margin-top:8px; font-size:.84rem; color:#8ff08a; word-break:break-all; }
   .settings-backup-status{ margin-top:6px; font-size:.82rem; color:rgba(255,255,255,.8); }
   .settings-backup-note{ margin-top:10px; font-size:.74rem; line-height:1.5; color:rgba(255,255,255,.5); }
@@ -1477,11 +1482,28 @@
     if(safeGet(REMEMBER_KEY) === '1'){ unlock(); }
 
     function tryLogin(){
-      var u = (userInput.value || '').trim().toLowerCase();
-      if(u === USERNAME && input.value === PASSWORD){
+      var u = (userInput.value || '').trim();
+      var ul = u.toLowerCase();
+      var pw = input.value;
+      var matched = null;
+      if(ul === USERNAME && pw === PASSWORD){
+        matched = { name: 'מנהל', role: 'admin' };
+      } else {
+        // managers + agents added in Settings; the app publishes their creds to window.__agentCreds
+        var list = window.__agentCreds || [];
+        for(var i = 0; i < list.length; i++){
+          if(list[i].username && String(list[i].username).toLowerCase() === ul && String(list[i].password) === pw){
+            matched = { name: list[i].name, role: list[i].role || 'agent' };
+            break;
+          }
+        }
+      }
+      if(matched){
         if(remember.checked) safeSet(REMEMBER_KEY, '1'); else safeDel(REMEMBER_KEY);
+        safeSet('geosort_user', JSON.stringify(matched));
         err.textContent = '';
         unlock();
+        if(typeof window.__applyUser === 'function'){ try{ window.__applyUser(matched); }catch(_){} }
       } else {
         err.textContent = 'שם משתמש או סיסמה שגויים, נסה שוב';
         input.value = ''; input.focus();
@@ -1491,7 +1513,7 @@
     setTimeout(function(){ try{ (userInput.value ? input : userInput).focus(); }catch(_){} }, 120);
   })();
   // expose a sign-out helper so a future "logout" button can clear the remembered session
-  window.geosortSignOut = function(){ try{ localStorage.removeItem('geosort_auth_v1'); }catch(_){} location.reload(); };
+  window.geosortSignOut = function(){ try{ localStorage.removeItem('geosort_auth_v1'); localStorage.removeItem('geosort_user'); }catch(_){} location.reload(); };
 </script>
 <div id="bgImage"></div>
 <canvas id="starfield"></canvas>
@@ -1504,6 +1526,7 @@
         <path class="chev" fill="#2f7cf6" d="M35.9,98.3l.8.8-11.5,11.5c-.1.1-.2.2-.2.4s0,.3.2.4l11.5,11.5-.8.8-11.5-11.5c-.3-.3-.5-.7-.5-1.1s.2-.8.5-1.1l11.5-11.5Z"/>
       </svg>
     </button>
+    <div class="side-menu-greeting" id="sideMenuGreeting"></div>
     <nav class="side-menu-items">
       <button class="side-menu-item" id="settingsMenuItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></span><span class="txt">הגדרות</span></button>
       <div class="side-menu-sep" aria-hidden="true"></div>
@@ -1681,16 +1704,27 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   <div class="products-view settings-view view-hidden" id="settingsView">
     <div class="products-inner">
       <section class="panel" id="settingsPanel">
-        <h2 id="settingsAgentsHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">סוכנים</span>
+        <h2 id="settingsAgentsHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">מנהלים וסוכנים</span>
           <span id="settingsAgentsChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
         </h2>
         <div id="settingsAgentsBody" class="animated-collapse">
           <div class="settings-section">
-            <label class="ord-field-label" for="settingsAgentInput">הוספת סוכן חדש</label>
-            <div class="settings-add-row">
-              <input type="text" id="settingsAgentInput" autocomplete="off" placeholder="שם הסוכן">
-              <button type="button" class="primary" id="settingsAddAgentBtn">+ הוסף</button>
-            </div>
+            <label class="ord-field-label">הוספת מנהל ראשי</label>
+            <input type="text" id="settingsManagerInput" autocomplete="off" placeholder="שם המנהל" class="settings-line-input">
+            <input type="text" id="settingsManagerUser" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="שם משתמש לכניסה" class="settings-line-input">
+            <input type="text" id="settingsManagerPass" autocomplete="off" placeholder="סיסמה לכניסה" class="settings-line-input">
+            <button type="button" class="settings-add-btn" id="settingsAddManagerBtn">+ הוסף מנהל</button>
+            <div id="settingsManagerList" class="settings-agent-list"></div>
+          </div>
+
+          <div class="settings-sep" aria-hidden="true"></div>
+
+          <div class="settings-section">
+            <label class="ord-field-label">הוספת סוכן חדש</label>
+            <input type="text" id="settingsAgentInput" autocomplete="off" placeholder="שם הסוכן" class="settings-line-input">
+            <input type="text" id="settingsAgentUser" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="שם משתמש לכניסה (רשות)" class="settings-line-input">
+            <input type="text" id="settingsAgentPass" autocomplete="off" placeholder="סיסמה לכניסה (רשות)" class="settings-line-input">
+            <button type="button" class="settings-add-btn" id="settingsAddAgentBtn">+ הוסף סוכן</button>
             <div id="settingsAgentList" class="settings-agent-list"></div>
           </div>
         </div>
@@ -1931,6 +1965,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const CLUSTER_ORDER_KEY = "cluster_order_map";
   const CATALOG_KEY = "catalog"; // separate app_storage key so saving the catalog never rewrites the clients blob
   const AGENTS_KEY = "agents_list"; // manager-curated list of sales-agent names used on the orders page
+  const MANAGERS_KEY = "managers_list"; // main managers — like agents, but with elevated (future) access
   // { categories:[{id,name,order}], subcategories:[{id,categoryId,name,order}],
   //   products:[{id,categoryId,subcategoryId,name,sku,unit,price,imageUrl,note,active,trackStock,order}] }
   let catalog = { categories: [], subcategories: [], subsubcategories: [], products: [] };
@@ -1943,7 +1978,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   let vehicleStockBaseline = { anchors: {} }; // per-product: { qty: <stock level set at this point>, cumulative: <cumulative orders total at that moment> } - lets the driver set any starting quantity, not just 50
   let inventoryCountFrom = ""; // general-inventory running tally start date ("" = never reset → defaults to today)
   let folders = []; // manually-created folder names, e.g. "ראשון לציון" or "צפון"
-  let agents = []; // manager-curated sales-agent names (array of strings), chosen on the orders page
+  let agents = []; // sales agents: [{name, username, password}] — chosen on the orders page
+  let managers = []; // main managers: [{name, username, password}] — elevated access (future)
   let clusterNames = {}; // custom overrides for automatic cluster names, keyed by dominant-city/geo key
   let clusterOrder = {}; // manual up/down ordering of addresses within a cluster, keyed the same way
   let threshold = 12;
@@ -2202,6 +2238,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // agent names deleted here (on the settings page). the merge-safe saveAgents folds in any
   // server names missing locally, which would otherwise resurrect a just-deleted agent.
   const recentlyDeletedAgents = new Set();
+  const recentlyDeletedManagers = new Set();
   // clients whose "last invoice" was intentionally blanked here (e.g. their last order was
   // deleted). the merge-safe save below restores blank fields from the server, which would
   // otherwise resurrect a deleted order's total as the last invoice - so skip that for these.
@@ -2359,31 +2396,64 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
   }
 
+  // agents are objects { name, username, password }; username+password are optional (for login)
+  function normalizeAgent(a){
+    if(typeof a === 'string') return { name:a, username:'', password:'' };
+    return { name:(a && a.name) || '', username:(a && a.username) || '', password:(a && a.password) || '' };
+  }
+  // expose manager + agent login credentials to the (separate) login-gate script (with role)
+  function syncAgentCreds(){
+    try{
+      const list = [];
+      (managers || []).forEach(a => { if(a && a.username && a.password) list.push({ name:a.name, username:a.username, password:a.password, role:'manager' }); });
+      (agents || []).forEach(a => { if(a && a.username && a.password) list.push({ name:a.name, username:a.username, password:a.password, role:'agent' }); });
+      window.__agentCreds = list;
+    }catch(_){ window.__agentCreds = []; }
+  }
   async function loadAgents(){
     try{
       const raw = await sbGet(AGENTS_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
-      // stored as plain name strings; migrate any {name} objects just in case
-      agents = parsed.map(a => typeof a === 'string' ? a : (a && a.name) || '').filter(Boolean);
+      agents = parsed.map(normalizeAgent).filter(a => a.name);
     }catch(e){
       agents = [];
     }
+    syncAgentCreds();
   }
   async function saveAgents(){
     try{
-      // merge-safe like folders: fold in any names another device added so we never wipe them
+      // merge-safe like folders: fold in any agents another device added so we never wipe them
       let serverAgents = [];
       try{
         const raw = await sbGet(AGENTS_KEY);
         const parsed = raw ? JSON.parse(raw) : [];
-        serverAgents = parsed.map(a => typeof a === 'string' ? a : (a && a.name) || '').filter(Boolean);
+        serverAgents = parsed.map(normalizeAgent).filter(a => a.name);
       }catch(e){ /* fetch failed - proceed with local only */ }
-      const have = new Set(agents);
-      serverAgents.forEach(n=>{ if(!have.has(n) && !recentlyDeletedAgents.has(n)){ agents.push(n); have.add(n); } });
+      const have = new Set(agents.map(a => a.name));
+      serverAgents.forEach(a=>{ if(!have.has(a.name) && !recentlyDeletedAgents.has(a.name)){ agents.push(a); have.add(a.name); } });
       await sbSet(AGENTS_KEY, JSON.stringify(agents));
+      syncAgentCreds();
     }catch(e){
       console.error("שגיאת שמירת סוכנים", e);
     }
+  }
+  async function loadManagers(){
+    try{
+      const raw = await sbGet(MANAGERS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      managers = parsed.map(normalizeAgent).filter(a => a.name);
+    }catch(e){ managers = []; }
+    syncAgentCreds();
+  }
+  async function saveManagers(){
+    try{
+      let serverList = [];
+      try{ const raw = await sbGet(MANAGERS_KEY); const parsed = raw ? JSON.parse(raw) : []; serverList = parsed.map(normalizeAgent).filter(a => a.name); }catch(e){}
+      const have = new Set(managers.map(a => a.name));
+      serverList.forEach(a=>{ if(!have.has(a.name) && !recentlyDeletedManagers.has(a.name)){ managers.push(a); have.add(a.name); } });
+      await sbSet(MANAGERS_KEY, JSON.stringify(managers));
+      syncAgentCreds();
+    }catch(e){ console.error("שגיאת שמירת מנהלים", e); }
   }
 
   async function loadCatalog(){
@@ -5832,7 +5902,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
 
   document.getElementById('refreshBtn').addEventListener('click', async ()=>{
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers()]);
     renderAll();
   });
 
@@ -6040,6 +6110,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(view === 'settings'){
       hideAllViews();
       settingsViewEl.classList.remove('view-hidden');
+      renderSettingsManagers(); // build the managers list on entry
       renderSettingsAgents(); // build the agents list on entry
     } else if(view === 'products'){
       mainViewEl.classList.add('view-hidden');
@@ -6077,29 +6148,39 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   // ---- settings page: agents management ----
   const settingsAgentInput = document.getElementById('settingsAgentInput');
+  const settingsAgentUser = document.getElementById('settingsAgentUser');
+  const settingsAgentPass = document.getElementById('settingsAgentPass');
   const settingsAddAgentBtn = document.getElementById('settingsAddAgentBtn');
   const settingsAgentList = document.getElementById('settingsAgentList');
+  const settingsManagerInput = document.getElementById('settingsManagerInput');
+  const settingsManagerUser = document.getElementById('settingsManagerUser');
+  const settingsManagerPass = document.getElementById('settingsManagerPass');
+  const settingsAddManagerBtn = document.getElementById('settingsAddManagerBtn');
+  const settingsManagerList = document.getElementById('settingsManagerList');
   function renderSettingsAgents(){
     if(!settingsAgentList) return;
     if(!agents.length){
       settingsAgentList.innerHTML = '<div class="settings-agent-empty">אין עדיין סוכנים. הוסיפו סוכן כדי שיופיע ברשימת הבחירה בעמוד ההזמנות.</div>';
       return;
     }
-    settingsAgentList.innerHTML = agents.map((n,i)=>`
+    settingsAgentList.innerHTML = agents.map((a,i)=>`
       <div class="settings-agent-row" data-idx="${i}">
-        <span class="settings-agent-name">${escapeHtml(n)}</span>
+        <div class="settings-agent-info">
+          <span class="settings-agent-name">${escapeHtml(a.name)}</span>
+          ${a.username ? `<span class="settings-agent-user">כניסה: ${escapeHtml(a.username)}</span>` : `<span class="settings-agent-user settings-agent-nologin">ללא כניסה למערכת</span>`}
+        </div>
         <button type="button" class="settings-agent-del sys-icon-disc" title="מחק סוכן">${CATALOG_TRASH_SVG}</button>
       </div>`).join('');
     settingsAgentList.querySelectorAll('.settings-agent-del').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const row = btn.closest('.settings-agent-row');
         const idx = parseInt(row.dataset.idx, 10);
-        const name = agents[idx];
-        if(name == null) return;
-        if(!confirm(`למחוק את הסוכן "${name}" מהרשימה?`)) return;
+        const ag = agents[idx];
+        if(ag == null) return;
+        if(!confirm(`למחוק את הסוכן "${ag.name}" מהרשימה?`)) return;
         agents.splice(idx, 1);
-        recentlyDeletedAgents.add(name); // block the merge-safe save from resurrecting it
-        saveAgents();
+        recentlyDeletedAgents.add(ag.name); // block the merge-safe save from resurrecting it
+        saveAgents(); syncAgentCreds();
         renderSettingsAgents();
         if(typeof populateAgentSelect === 'function') populateAgentSelect(); // keep the orders dropdown in sync
       });
@@ -6108,16 +6189,64 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function addAgentFromSettings(){
     const name = (settingsAgentInput.value || '').trim();
     if(!name) return;
-    if(agents.includes(name)){ settingsAgentInput.value = ''; return; }
-    agents.push(name);
+    const username = (settingsAgentUser.value || '').trim();
+    const password = (settingsAgentPass.value || '').trim();
+    const clearInputs = ()=>{ settingsAgentInput.value=''; settingsAgentUser.value=''; settingsAgentPass.value=''; };
+    if(agents.some(a=>a.name===name)){ clearInputs(); return; }
+    agents.push({ name, username, password });
     recentlyDeletedAgents.delete(name); // re-adding a previously deleted name clears the guard
-    saveAgents();
-    settingsAgentInput.value = '';
+    saveAgents(); syncAgentCreds();
+    clearInputs();
     renderSettingsAgents();
     if(typeof populateAgentSelect === 'function') populateAgentSelect(); // keep the orders dropdown in sync
   }
   settingsAddAgentBtn.addEventListener('click', addAgentFromSettings);
-  settingsAgentInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); addAgentFromSettings(); } });
+  settingsAgentPass.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); addAgentFromSettings(); } });
+  settingsAgentInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); settingsAgentUser.focus(); } });
+
+  function renderSettingsManagers(){
+    if(!settingsManagerList) return;
+    if(!managers.length){
+      settingsManagerList.innerHTML = '<div class="settings-agent-empty">אין עדיין מנהלים.</div>';
+      return;
+    }
+    settingsManagerList.innerHTML = managers.map((a,i)=>`
+      <div class="settings-agent-row" data-idx="${i}">
+        <div class="settings-agent-info">
+          <span class="settings-agent-name">${escapeHtml(a.name)}</span>
+          ${a.username ? `<span class="settings-agent-user">כניסה: ${escapeHtml(a.username)}</span>` : `<span class="settings-agent-user settings-agent-nologin">ללא כניסה למערכת</span>`}
+        </div>
+        <button type="button" class="settings-agent-del sys-icon-disc" title="מחק מנהל">${CATALOG_TRASH_SVG}</button>
+      </div>`).join('');
+    settingsManagerList.querySelectorAll('.settings-agent-del').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const idx = parseInt(btn.closest('.settings-agent-row').dataset.idx, 10);
+        const mg = managers[idx];
+        if(mg == null) return;
+        if(!confirm(`למחוק את המנהל "${mg.name}"?`)) return;
+        managers.splice(idx, 1);
+        recentlyDeletedManagers.add(mg.name);
+        saveManagers(); syncAgentCreds();
+        renderSettingsManagers();
+      });
+    });
+  }
+  function addManagerFromSettings(){
+    const name = (settingsManagerInput.value || '').trim();
+    if(!name) return;
+    const username = (settingsManagerUser.value || '').trim();
+    const password = (settingsManagerPass.value || '').trim();
+    const clear = ()=>{ settingsManagerInput.value=''; settingsManagerUser.value=''; settingsManagerPass.value=''; };
+    if(managers.some(a=>a.name===name)){ clear(); return; }
+    managers.push({ name, username, password });
+    recentlyDeletedManagers.delete(name);
+    saveManagers(); syncAgentCreds();
+    clear();
+    renderSettingsManagers();
+  }
+  settingsAddManagerBtn.addEventListener('click', addManagerFromSettings);
+  settingsManagerPass.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); addManagerFromSettings(); } });
+  settingsManagerInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); settingsManagerUser.focus(); } });
 
   // ===== settings › data backup (manual download + daily auto-backup to a chosen folder) =====
   const AUTO_BACKUP_LS = 'geosort_autobackup_cfg';
@@ -6148,20 +6277,43 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const abStatusEl = document.getElementById('autoBackupStatus');
   const backupNowBtn = document.getElementById('settingsBackupNowBtn');
   function abSetStatus(m){ if(abStatusEl) abStatusEl.textContent = m || ''; }
-  function abRenderFolder(){ if(abFolderNameEl) abFolderNameEl.textContent = autoBackupDirHandle ? ('תיקייה: ' + (autoBackupDirHandle.name || '(נבחרה)')) : 'לא נבחרה תיקייה עדיין.'; }
+  // shared config (enabled + time + chosen folder name) syncs across devices via Supabase, so a phone
+  // shows what was set up on the computer. the folder HANDLE itself stays device-local (IndexedDB);
+  // only the computer that holds the handle actually writes, so there's never a double backup.
+  const AB_SYNC_KEY = 'autobackup_config';
+  let abShared = { enabled:false, time:'20:00', folderName:'' };
+  async function abLoadShared(){
+    try{ const raw = await sbGet(AB_SYNC_KEY); const s = raw ? JSON.parse(raw) : null; if(s) abShared = { enabled:!!s.enabled, time:s.time||'20:00', folderName:s.folderName||'' }; }catch(_){}
+  }
+  async function abSaveShared(){ try{ await sbSet(AB_SYNC_KEY, JSON.stringify(abShared)); }catch(_){} }
+  function abRenderFolder(){
+    if(!abFolderNameEl) return;
+    abFolderNameEl.textContent = autoBackupDirHandle ? ('תיקייה: ' + (autoBackupDirHandle.name || '(נבחרה)'))
+      : (abShared.folderName ? ('תיקייה: ' + abShared.folderName) : 'לא נבחרה תיקייה עדיין.');
+  }
   async function abInit(){
-    const cfg = abLoadCfg();
-    if(abTimeEl) abTimeEl.value = cfg.time || '20:00';
-    if(abEnabledEl) abEnabledEl.checked = !!cfg.enabled;
+    await abLoadShared(); // reflect the setup that may have been done on another device (the computer)
+    if(abTimeEl) abTimeEl.value = abShared.time || '20:00';
+    if(abEnabledEl) abEnabledEl.checked = !!abShared.enabled;
     if(!fsaSupported){
+      // this device can't run a folder backup, but show what's already configured (no "no folder" if one was chosen)
       if(abFolderBtn) abFolderBtn.disabled = true;
       if(abEnabledEl) abEnabledEl.disabled = true;
-      abSetStatus('גיבוי אוטומטי לתיקייה נתמך רק ב‑Chrome/Edge במחשב. במכשיר הזה אפשר להשתמש בכפתור ההורדה הידני.');
-      abRenderFolder(); return;
+      abRenderFolder();
+      if(abShared.enabled && abShared.folderName)
+        abSetStatus('✓ גיבוי אוטומטי פעיל (מוגדר במחשב) — כל יום בשעה ' + abShared.time + ' לתיקייה "' + abShared.folderName + '". במכשיר הזה משתמשים בהורדה הידנית.');
+      else
+        abSetStatus('גיבוי אוטומטי לתיקייה נתמך רק ב‑Chrome/Edge במחשב. במכשיר הזה אפשר להשתמש בכפתור ההורדה הידני.');
+      return;
     }
     try{ const h = await abIdbGet('dir'); if(h) autoBackupDirHandle = h; }catch(_){}
     abRenderFolder();
-    if(autoBackupDirHandle && !(await abEnsurePermission(false))) abSetStatus('לחץ "בחר תיקיית גיבוי" כדי לאשר גישה מחדש (הדפדפן מבקש אישור בכל הפעלה).');
+    if(autoBackupDirHandle){
+      if(!(await abEnsurePermission(false))) abSetStatus('לחץ "בחר תיקיית גיבוי" כדי לאשר גישה מחדש (הדפדפן מבקש אישור בכל הפעלה).');
+      else if(abShared.enabled) abSetStatus('✓ גיבוי אוטומטי פעיל — כל יום בשעה ' + abShared.time + '.');
+    } else if(abShared.folderName && abShared.enabled){
+      abSetStatus('גיבוי אוטומטי מוגדר (תיקייה "' + abShared.folderName + '"). כדי שירוץ ממחשב זה, לחץ "בחר תיקיית גיבוי".');
+    }
   }
   if(backupNowBtn) backupNowBtn.addEventListener('click', ()=>{ try{ downloadBackupFile(); }catch(err){ alert('שגיאה ביצירת הגיבוי: ' + err.message); } });
   if(abFolderBtn) abFolderBtn.addEventListener('click', async ()=>{
@@ -6169,26 +6321,28 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     try{
       const handle = await window.showDirectoryPicker({ mode:'readwrite' });
       autoBackupDirHandle = handle;
+      abShared.folderName = handle.name || 'גיבוי';
       abRenderFolder(); abSetStatus('✓ התיקייה נבחרה. הגיבוי יישמר לכאן בשעה שנקבעה.');
       try{ await abIdbSet('dir', handle); }catch(_){}  // persist best-effort (survives reloads)
+      abSaveShared();
       await abEnsurePermission(true);
     }catch(err){ if(err && err.name === 'AbortError') return; abSetStatus('שגיאה בבחירת תיקייה: ' + (err && err.message || err)); }
   });
   if(abEnabledEl) abEnabledEl.addEventListener('change', ()=>{
-    const cfg = abLoadCfg(); cfg.enabled = abEnabledEl.checked; cfg.time = (abTimeEl && abTimeEl.value) || '20:00'; abSaveCfg(cfg);
-    if(cfg.enabled && !autoBackupDirHandle) abSetStatus('בחר תיקיית גיבוי כדי שהגיבוי האוטומטי יעבוד.');
-    else if(cfg.enabled) abSetStatus('✓ גיבוי אוטומטי פעיל — בכל יום בשעה ' + cfg.time + ' כשהאפליקציה פתוחה.');
+    abShared.enabled = abEnabledEl.checked; abShared.time = (abTimeEl && abTimeEl.value) || '20:00'; abSaveShared();
+    if(abShared.enabled && !autoBackupDirHandle && !abShared.folderName) abSetStatus('בחר תיקיית גיבוי כדי שהגיבוי האוטומטי יעבוד.');
+    else if(abShared.enabled) abSetStatus('✓ גיבוי אוטומטי פעיל — בכל יום בשעה ' + abShared.time + ' כשהאפליקציה פתוחה במחשב.');
     else abSetStatus('הגיבוי האוטומטי כבוי.');
   });
-  if(abTimeEl) abTimeEl.addEventListener('change', ()=>{ const cfg = abLoadCfg(); cfg.time = abTimeEl.value || '20:00'; abSaveCfg(cfg); if(cfg.enabled) abSetStatus('✓ השעה עודכנה ל‑' + cfg.time + '.'); });
+  if(abTimeEl) abTimeEl.addEventListener('change', ()=>{ abShared.time = abTimeEl.value || '20:00'; abSaveShared(); if(abShared.enabled) abSetStatus('✓ השעה עודכנה ל‑' + abShared.time + '.'); });
   async function abTick(){
-    const cfg = abLoadCfg();
-    if(!cfg.enabled || !cfg.time || !autoBackupDirHandle) return;
+    if(!abShared.enabled || !abShared.time || !autoBackupDirHandle) return;
     const today = backupDateStamp();
-    if(cfg.lastRun === today) return;
+    const local = abLoadCfg();
+    if(local.lastRun === today) return;       // lastRun is device-local so each computer backs up at most once/day
     const n = new Date(); const p = x => String(x).padStart(2,'0');
-    if(`${p(n.getHours())}:${p(n.getMinutes())}` < cfg.time) return; // not yet today
-    try{ const name = await abWrite(); cfg.lastRun = today; abSaveCfg(cfg); abSetStatus('✓ גובה אוטומטית היום: ' + name); }
+    if(`${p(n.getHours())}:${p(n.getMinutes())}` < abShared.time) return; // not yet today
+    try{ const name = await abWrite(); local.lastRun = today; abSaveCfg(local); abSetStatus('✓ גובה אוטומטית היום: ' + name); }
     catch(err){ abSetStatus('⚠ הגיבוי האוטומטי לא רץ: ' + (err && err.message || err) + ' — פתח את ההגדרות ולחץ "בחר תיקיית גיבוי".'); }
   }
   abInit();
@@ -6197,6 +6351,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // also catch up whenever the tab regains focus (e.g. the app was in the background at the set time)
   window.addEventListener('focus', ()=>{ abTick(); });
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) abTick(); });
+
+  // ===== logged-in user greeting at the top of the side menu =====
+  function currentLoginUser(){ try{ return JSON.parse(localStorage.getItem('geosort_user') || 'null'); }catch(_){ return null; } }
+  function applyUserGreeting(user){
+    const el = document.getElementById('sideMenuGreeting');
+    if(!el) return;
+    const name = (user && user.name) || '';
+    el.textContent = name ? ('שלום, ' + name) : '';
+  }
+  window.__applyUser = applyUserGreeting;           // called by the login gate on a fresh login
+  applyUserGreeting(currentLoginUser());            // and on load, for a remembered session
 
   updateActiveViewItem();
 
@@ -6311,8 +6476,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function populateAgentSelect(){
     const cur = ordAgentSelect.value;
     ordAgentSelect.innerHTML = '<option value="">— בחר סוכן —</option>' +
-      agents.map(n=>`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`).join('');
-    if(cur && agents.includes(cur)) ordAgentSelect.value = cur;
+      agents.map(a=>`<option value="${escapeHtml(a.name)}">${escapeHtml(a.name)}</option>`).join('');
+    if(cur && agents.some(a=>a.name===cur)) ordAgentSelect.value = cur;
   }
 
   // the "בחר לקוח" dropdown lists every client (for browsing); the search box below drives a
@@ -7805,7 +7970,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   (async function init(){
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers()]);
     backfillDefaultWhatsappMessages();
     openFolderNames.clear();
     openClusterNames.clear();
