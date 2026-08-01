@@ -715,6 +715,14 @@
   section.panel h2 .dot{ width:9px;height:9px;border-radius:50%;background:var(--teal); }
   /* בעמוד ההגדרות בלבד: כותרות הכרטיסים במשקל Regular (לא בולד) */
   #settingsView section.panel h2{ font-weight:400; }
+  /* ידית גרירה לסידור מחדש של כרטיסי ההגדרות */
+  .panel-drag-handle{ display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; margin-left:-2px; color:#9aa4bd; cursor:grab; touch-action:none; position:relative; top:5px; flex:0 0 auto; border-radius:8px; transition:background .15s ease,color .15s ease; }
+  .panel-drag-handle:hover{ color:#2f7cf6; background:rgba(47,124,246,.12); }
+  .panel-drag-handle:active{ cursor:grabbing; }
+  .panel-drag-handle svg{ display:block; width:17px; height:17px; }
+  #settingsView section.panel{ transition:box-shadow .15s ease, transform .06s linear; }
+  #settingsView section.panel.panel-dragging{ box-shadow:0 14px 34px rgba(0,0,0,.34); position:relative; z-index:40; opacity:.98; }
+  #settingsView section.panel.panel-dragging .panel-drag-handle{ cursor:grabbing; color:#2f7cf6; }
   label{ display:block; font-size:.76rem; color:rgba(255,255,255,.62); margin:8px 0 4px; }
   input[type=text], input[type=tel], input[type=number], input[type=date], input[type=email]{
     width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px;
@@ -1978,7 +1986,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   <div class="products-view settings-view view-hidden" id="settingsView">
     <div class="products-inner">
       <section class="panel" id="settingsBusinessPanel">
-        <h2 id="settingsBusinessHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">פרטי העסק שלי</span>
+        <h2 id="settingsBusinessHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="panel-drag-handle" title="גרור לסידור" aria-label="גרור לסידור"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span> <span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">פרטי העסק שלי</span>
           <span id="settingsBusinessChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
         </h2>
         <div id="settingsBusinessBody" class="animated-collapse">
@@ -2014,7 +2022,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       </section>
 
       <section class="panel" id="settingsWhatsappPanel">
-        <h2 id="settingsWhatsappHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">הודעת וואטסאפ כללית</span>
+        <h2 id="settingsWhatsappHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="panel-drag-handle" title="גרור לסידור" aria-label="גרור לסידור"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span> <span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">הודעת וואטסאפ כללית</span>
           <span id="settingsWhatsappChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
         </h2>
         <div id="settingsWhatsappBody" class="animated-collapse">
@@ -2028,7 +2036,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       </section>
 
       <section class="panel" id="settingsPanel">
-        <h2 id="settingsAgentsHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">מנהלים וסוכנים</span>
+        <h2 id="settingsAgentsHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="panel-drag-handle" title="גרור לסידור" aria-label="גרור לסידור"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span> <span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">מנהלים וסוכנים</span>
           <span id="settingsAgentsChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
         </h2>
         <div id="settingsAgentsBody" class="animated-collapse">
@@ -2055,7 +2063,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       </section>
 
       <section class="panel" id="settingsBackupPanel">
-        <h2 id="settingsBackupHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">גיבוי נתונים</span>
+        <h2 id="settingsBackupHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="panel-drag-handle" title="גרור לסידור" aria-label="גרור לסידור"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span> <span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">גיבוי נתונים</span>
           <span id="settingsBackupChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
         </h2>
         <div id="settingsBackupBody" class="animated-collapse">
@@ -6408,6 +6416,76 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
   })();
 
+  /* ===== סידור מחדש (גרירה) של כרטיסי ההגדרות ===== */
+  const SETTINGS_ORDER_KEY = 'settings_panel_order';
+  let settingsPanelOrder = [];
+  async function loadSettingsPanelOrder(){
+    try{ const v = await sbGet(SETTINGS_ORDER_KEY); if(Array.isArray(v)) settingsPanelOrder = v.slice(); else if(typeof v==='string'){ try{ const a=JSON.parse(v); if(Array.isArray(a)) settingsPanelOrder=a; }catch(_){} } }
+    catch(_){}
+  }
+  function saveSettingsPanelOrder(){ try{ sbSet(SETTINGS_ORDER_KEY, settingsPanelOrder); }catch(_){} }
+  function settingsPanelContainer(){ const v=document.getElementById('settingsView'); return v ? v.querySelector('.products-inner') : null; }
+  function settingsPanels(){ const cont=settingsPanelContainer(); return cont ? Array.from(cont.children).filter(el=>el.matches && el.matches('section.panel')) : []; }
+  function applySettingsPanelOrder(){
+    const cont = settingsPanelContainer();
+    if(!cont || !settingsPanelOrder.length) return;
+    settingsPanelOrder.forEach(id=>{ const el=document.getElementById(id); if(el && el.parentElement===cont) cont.appendChild(el); });
+  }
+  function captureSettingsPanelOrder(){ settingsPanelOrder = settingsPanels().map(el=>el.id).filter(Boolean); }
+  (function initSettingsSortable(){
+    const cont = settingsPanelContainer();
+    if(!cont) return;
+    let drag = null;
+    cont.addEventListener('pointerdown', (e)=>{
+      const handle = e.target.closest && e.target.closest('.panel-drag-handle');
+      if(!handle || !cont.contains(handle)) return;
+      const el = handle.closest('section.panel');
+      if(!el) return;
+      e.preventDefault(); e.stopPropagation();
+      drag = { el, pointerId:e.pointerId, grabY:e.clientY, moved:false };
+      try{ handle.setPointerCapture(e.pointerId); }catch(_){}
+      el.classList.add('panel-dragging');
+      document.body.style.userSelect='none';
+      const onMove=(ev)=>{
+        if(!drag || ev.pointerId!==drag.pointerId) return;
+        const dy = ev.clientY - drag.grabY;
+        if(Math.abs(dy)>3) drag.moved=true;
+        drag.el.style.transform = `translateY(${dy}px)`;
+        const elRect = drag.el.getBoundingClientRect();
+        const mid = elRect.top + elRect.height/2;
+        const sibs = settingsPanels().filter(x=>x!==drag.el);
+        for(const s of sibs){
+          const r = s.getBoundingClientRect();
+          if(mid > r.top && mid < r.bottom){
+            const before = drag.el.getBoundingClientRect().top;
+            if(mid < r.top + r.height/2) cont.insertBefore(drag.el, s);
+            else cont.insertBefore(drag.el, s.nextSibling);
+            const after = drag.el.getBoundingClientRect().top;
+            drag.grabY += (after - before); // FLIP — הכרטיס נשאר צמוד לאצבע/עכבר
+            break;
+          }
+        }
+      };
+      const onUp=(ev)=>{
+        if(!drag || ev.pointerId!==drag.pointerId) return;
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+        window.removeEventListener('pointercancel', onUp);
+        drag.el.style.transform='';
+        drag.el.classList.remove('panel-dragging');
+        document.body.style.userSelect='';
+        try{ handle.releasePointerCapture(drag.pointerId); }catch(_){}
+        if(drag.moved){ captureSettingsPanelOrder(); saveSettingsPanelOrder(); }
+        drag=null;
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+    });
+    // מניעת פתיחה/סגירה של הכרטיס בעת לחיצה על הידית
+    cont.addEventListener('click', (e)=>{ if(e.target.closest && e.target.closest('.panel-drag-handle')){ e.stopPropagation(); } }, true);
+  })();
+
   document.getElementById('vehicleStockHeader').addEventListener('click', ()=>{
     toggleAnimatedCollapse(document.getElementById('vehicleStockBody'), document.getElementById('vehicleStockChevron'));
   });
@@ -6456,8 +6534,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
 
   document.getElementById('refreshBtn').addEventListener('click', async ()=>{
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder()]);
     populateBusinessDetails();
+    applySettingsPanelOrder();
     renderAll();
   });
 
@@ -9265,8 +9344,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   (async function init(){
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder()]);
     populateBusinessDetails();
+    applySettingsPanelOrder();
     backfillDefaultWhatsappMessages();
     // managers/agents are loaded now, so the greeting can resolve the real name (e.g. sasy → ששי לוי)
     applyUserGreeting(currentLoginUser());
