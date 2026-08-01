@@ -846,8 +846,10 @@
   .cluster-group{ margin-bottom:10px; }
   .cluster-group[draggable="true"] > .cluster-head{ cursor:grab; }
   .cluster-group.dragging{ opacity:.4; }
-  /* הרמה במגע (iPhone) — צל + z-index כמו בקטלוג, כדי שהתיקייה המורמת תרחף מעל השאר ולא תסתתר מאחוריהן */
-  .cluster-group.touch-dragging{ position:relative; z-index:60; will-change:transform; box-shadow:0 12px 28px rgba(0,0,0,.5); transition:box-shadow .18s ease; }
+  /* הרמה במגע (iPhone): מרימים רק את כרטיס הכותרת המעוגל (.cluster-head), לא את המיכל המרובע.
+     הצל מונח על הכרטיס העגול עצמו — בדיוק כמו בכרטיסי ההגדרות ובכרטיסי המוצרים בקטלוג. */
+  .cluster-group.touch-dragging{ position:relative; z-index:60; will-change:transform; }
+  .cluster-group.touch-dragging > .cluster-head{ box-shadow:0 12px 28px rgba(0,0,0,.5); border-color:#4394f7; transition:box-shadow .18s ease; }
   .cluster-head{
     display:flex; align-items:center; gap:3px; padding:8px 10px; border-radius:15px;
     background:rgba(255,255,255,.06); cursor:pointer; border:1px solid rgba(255,255,255,.14); color:#fff;
