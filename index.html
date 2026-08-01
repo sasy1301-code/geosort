@@ -263,6 +263,11 @@
   .settings-sep{ height:1px; background:rgba(255,255,255,.16); margin:20px 2px; }
   .settings-backup-now{ -webkit-appearance:none; appearance:none; width:100%; margin:6px 0 0; padding:12px; border:none; border-radius:15px; background:#2f7cf6; color:#fff; font-size:.95rem; font-weight:600; font-family:inherit; cursor:pointer; }
   .settings-backup-now:hover{ background:#4d93ff; }
+  .settings-reset{ margin-top:2px; }
+  .settings-reset-title{ color:#ff8a8a; font-size:.95rem; font-weight:600; margin-bottom:2px; }
+  .settings-reset-btn{ -webkit-appearance:none; appearance:none; width:100%; margin-top:10px; padding:12px; border:1px solid rgba(255,90,90,.5); border-radius:15px; background:rgba(192,57,43,.16); color:#ff6b6b; font-size:.9rem; font-weight:600; font-family:inherit; cursor:pointer; line-height:1.35; }
+  .settings-reset-btn:hover{ background:rgba(192,57,43,.3); }
+  .settings-reset-btn:disabled{ opacity:.6; cursor:default; }
   .settings-autobackup{ margin-top:16px; background:#0f1a2e; border:1px solid rgba(140,160,255,.28); border-radius:14px; padding:14px; }
   .settings-autobackup-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .settings-autobackup-title{ color:#fff; font-size:.95rem; font-weight:600; }
@@ -302,7 +307,10 @@
   .sigdoc-head{ flex:0 0 auto; display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
   .sigdoc-title{ color:#fff; font-size:1rem; font-weight:600; }
   .sigdoc-close{ margin-right:auto; -webkit-appearance:none; appearance:none; border:none; background:rgba(255,255,255,.1); color:#fff; width:34px; height:34px; border-radius:50%; font-size:1.1rem; cursor:pointer; line-height:1; }
-  .sigdoc-body{ padding:16px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; -webkit-overflow-scrolling:touch; flex:1 1 auto; min-height:0; }
+  /* כל החלון גולל כיחידה אחת (זו הצורה שבה הפקת ה-PDF עבדה תקין). לוח החתימה
+     והכפתורים הוקטנו כדי שהחשבונית תתפוס יותר מקום גלוי, בלי אזור גלילה פנימי
+     שגרם ל-html2canvas ב-Safari לצלם רק את החלק הגלוי. */
+  .sigdoc-body{ padding:14px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; -webkit-overflow-scrolling:touch; flex:1 1 auto; min-height:0; }
   .sigdoc-doc-wrap{ display:flex; justify-content:center; background:#e9edf4; border-radius:12px; padding:14px; overflow-x:auto; }
   /* המסמך עצמו — לבן, מתכוונן לרוחב, אותה שפה עיצובית כמו קבצי ה-PDF */
   .gdoc{ width:100%; max-width:720px; background:#fff; color:#1c1c1c; direction:rtl; padding:30px 26px 26px; font-family:'Google Sans',"Noto Sans Hebrew",sans-serif; box-shadow:0 2px 10px rgba(0,0,0,.12); }
@@ -334,15 +342,18 @@
   .gdoc .g-sign-empty{ color:#aaa; font-size:.72rem; padding-bottom:6px; }
   .gdoc .g-sign-meta{ font-size:.62rem; color:#888; margin-top:4px; }
   /* אזור החתימה (pad) */
-  .sigpad-wrap{ background:#0f1a2e; border:1px solid rgba(140,160,255,.25); border-radius:14px; padding:12px; }
-  .sigpad-title{ color:#fff; font-size:.86rem; font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
-  .sigpad-canvas{ width:100%; height:170px; background:#fff; border-radius:10px; border:1px dashed #9fb0d6; touch-action:none; display:block; }
-  .sigpad-hint{ color:rgba(255,255,255,.5); font-size:.72rem; margin-top:6px; text-align:center; }
-  .sigpad-row{ display:flex; gap:8px; margin-top:10px; }
+  .sigpad-wrap{ flex:0 0 auto; background:#0f1a2e; border:1px solid rgba(140,160,255,.25); border-radius:14px; padding:10px; }
+  .sigpad-title{ color:#fff; font-size:.82rem; font-weight:600; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+  .sigpad-canvas{ width:100%; height:96px; background:#fff; border-radius:10px; border:1px dashed #9fb0d6; touch-action:none; display:block; }
+  .sigpad-hint{ color:rgba(255,255,255,.5); font-size:.68rem; margin-top:5px; text-align:center; }
+  .sigpad-row{ display:flex; gap:8px; margin-top:8px; }
   .sigpad-btn{ -webkit-appearance:none; appearance:none; flex:1 1 auto; border:none; border-radius:12px; padding:11px; font-family:inherit; font-size:.86rem; font-weight:600; cursor:pointer; }
   .sigpad-clear{ background:rgba(255,255,255,.12); color:#fff; flex:0 0 40%; }
   .sigpad-save{ background:#2f7cf6; color:#fff; }
-  .sigdoc-actions{ display:flex; flex-direction:column; gap:10px; }
+  .sigdoc-actions{ flex:0 0 auto; display:flex; flex-direction:column; gap:9px; }
+  .sigdoc-send-row{ display:flex; gap:8px; }
+  .sigdoc-send-row .sigdoc-act{ flex:1 1 0; min-width:0; padding:12px 4px; font-size:.82rem; gap:6px; }
+  .sigdoc-send-row .sigdoc-act svg{ width:18px; height:18px; }
   .sigdoc-act{ -webkit-appearance:none; appearance:none; width:100%; border:none; border-radius:13px; padding:13px; font-family:inherit; font-size:.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
   .sigdoc-act svg{ width:20px; height:20px; display:block; flex:0 0 auto; }
   .sigdoc-wa{ background:#73dd5c; color:#021236; }
@@ -2007,6 +2018,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             <div id="autoBackupFolderName" class="settings-backup-folder"></div>
             <div id="autoBackupStatus" class="settings-backup-status"></div>
             <div class="settings-backup-note">הגיבוי האוטומטי עובד ב‑Chrome/Edge במחשב, רק כשהאפליקציה פתוחה בשעה שנקבעה. הקובץ נשמר לתיקייה שבחרת בשם geosort-backup_&lt;תאריך&gt;.json.</div>
+          </div>
+
+          <div class="settings-sep" aria-hidden="true"></div>
+          <div class="settings-reset">
+            <div class="settings-reset-title">איפוס מערכת</div>
+            <div class="settings-backup-note">מוחק לצמיתות את כל ההזמנות, החשבוניות, הקבלות, מלאי הרכב וספירת "כמות פריטים שנמכרו", ומתחיל לספור מאפס. הלקוחות והתיקיות (וכל פרטיהם) נשמרים. מומלץ מאוד להוריד קובץ גיבוי לפני האיפוס.</div>
+            <button type="button" id="resetSystemBtn" class="settings-reset-btn">איפוס מערכת — מחיקת הזמנות / חשבוניות / קבלות / מלאי</button>
+            <div id="resetSystemStatus" class="settings-backup-status"></div>
           </div>
           </div>
         </div>
@@ -4646,6 +4665,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         renderForm(null);
         renderHistory();
         renderAll();
+        try{ renderOrderDocs(); }catch(_){} // רענון פאנל החשבוניות/קבלות
       });
 
       renderHistory();
@@ -6823,6 +6843,40 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
   }
   if(backupNowBtn) backupNowBtn.addEventListener('click', ()=>{ try{ downloadBackupFile(); }catch(err){ alert('שגיאה ביצירת הגיבוי: ' + err.message); } });
+
+  // איפוס מערכת: מחיקת כל ההזמנות/חשבוניות/קבלות/מלאי/כמויות, ושמירת הלקוחות והתיקיות בלבד.
+  // כתיבה ישירה לשרת עוקפת את מנגנון ה-merge כדי שההזמנות לא "יחזרו" מהשרת.
+  async function resetSystemData(){
+    clients.forEach(c=>{
+      (c.orders||[]).forEach(o=>{ if(o && o.id) recentlyDeletedOrderIds.add(o.id); });
+      recentlyClearedInvoiceClientIds.add(c.id); // שלא ימלא בחזרה lastInvoice מהשרת
+      c.orders = []; c.invoices = []; c.receipts = [];
+      c.lastInvoice = ""; c.lastInvoiceDate = "";
+    });
+    vehicleStockBaseline = { anchors: {} };
+    inventoryCountFrom = localDateString(); // ספירת "כמות פריטים שנמכרו" מתחילה מהיום
+    await sbSet(STORAGE_KEY, JSON.stringify(clients)); // overwrite ישיר, בלי merge
+    await saveVehicleStockBaseline();
+    await saveInventoryCountFrom();
+    renderAll();
+  }
+  const resetSystemBtn = document.getElementById('resetSystemBtn');
+  if(resetSystemBtn) resetSystemBtn.addEventListener('click', async ()=>{
+    const status = document.getElementById('resetSystemStatus');
+    if(!confirm('איפוס מערכת:\nהפעולה תמחק לצמיתות את כל ההזמנות, החשבוניות, הקבלות, מלאי הרכב וספירת הכמויות — ותתחיל לספור מאפס.\nהלקוחות והתיקיות יישמרו.\n\nמומלץ להוריד קובץ גיבוי לפני שממשיכים. להמשיך?')) return;
+    if(!confirm('אישור אחרון ⚠️\nלא ניתן לשחזר את הנתונים לאחר האיפוס (אלא מקובץ גיבוי).\nלמחוק עכשיו את כל ההזמנות / החשבוניות / הקבלות / המלאי?')) return;
+    resetSystemBtn.disabled = true; const prev = resetSystemBtn.textContent; resetSystemBtn.textContent = 'מאפס...';
+    if(status){ status.style.color='rgba(255,255,255,.8)'; status.textContent='מאפס את המערכת...'; }
+    try{
+      await resetSystemData();
+      if(status){ status.style.color='#73dd5c'; status.textContent='המערכת אופסה — מתחילים לספור מאפס ✓ (הלקוחות והתיקיות נשמרו).'; }
+    }catch(e){
+      console.error('resetSystem', e);
+      if(status){ status.style.color='#ff8a8a'; status.textContent='שגיאה באיפוס — נסה שוב (ודא חיבור לאינטרנט).'; }
+    }finally{
+      resetSystemBtn.disabled = false; resetSystemBtn.textContent = prev;
+    }
+  });
   if(abFolderBtn) abFolderBtn.addEventListener('click', async ()=>{
     if(!fsaSupported) return;
     try{
@@ -7316,9 +7370,63 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   // ממיר את אלמנט המסמך ל-PDF (Blob) בעזרת html2canvas + jsPDF
+  // CSS של מסמך החשבונית — מוזרק ל-iframe המבודד (חייב להיות עצמאי מהאפליקציה)
+  const GDOC_CSS = `
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{margin:0;background:#fff}
+    .gdoc{ width:720px; max-width:720px; background:#fff; color:#1c1c1c; direction:rtl; padding:30px 26px 26px; font-family:'Google Sans',"Noto Sans Hebrew",sans-serif; }
+    .gdoc .g-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+    .gdoc .g-kavod .k1{ font-weight:700; font-size:.9rem; }
+    .gdoc .g-kavod .k2{ font-size:.78rem; margin-top:6px; color:#333; }
+    .gdoc .g-biz{ text-align:right; font-size:.72rem; line-height:1.7; color:#3a3a3a; }
+    .gdoc .g-biz .b1{ font-weight:700; font-size:.82rem; color:#111; }
+    .gdoc .g-titlerow{ display:flex; justify-content:space-between; align-items:flex-end; margin-top:26px; }
+    .gdoc .g-bigtitle{ font-weight:700; font-size:2rem; line-height:1; color:#111; }
+    .gdoc .g-subtitle{ font-size:.78rem; color:#777; margin-top:4px; }
+    .gdoc .g-dates{ text-align:right; font-size:.76rem; color:#444; line-height:1.7; }
+    .gdoc table{ width:100%; border-collapse:collapse; margin-top:18px; font-size:.76rem; table-layout:fixed; }
+    .gdoc th{ background:#8f8f8f; color:#fff; font-weight:600; padding:8px 10px; text-align:right; }
+    .gdoc td{ padding:9px 10px; text-align:right; vertical-align:middle; word-break:break-word; }
+    .gdoc .c-qty{ width:10%; } .gdoc .c-desc{ width:42%; } .gdoc .c-price{ width:24%; } .gdoc .c-total{ width:24%; }
+    .gdoc td.price,.gdoc td.total,.gdoc td.sumlabel{ white-space:nowrap; }
+    .gdoc td.desc,.gdoc td.price,.gdoc td.total{ font-weight:700; color:#111; }
+    .gdoc tbody tr:nth-child(even) td{ background:#f2f2f2; }
+    .gdoc tr.sum td{ background:#fff; } .gdoc tr.sum.shade td{ background:#f2f2f2; }
+    .gdoc td.sumlabel{ color:#333; font-weight:400; }
+    .gdoc .g-foot{ display:flex; justify-content:space-between; align-items:flex-end; margin-top:28px; gap:16px; }
+    .gdoc .g-regards{ font-size:.74rem; color:#555; line-height:1.7; }
+    .gdoc .g-regards .fn{ font-weight:700; color:#333; }
+    .gdoc .g-sign{ text-align:center; min-width:180px; }
+    .gdoc .g-sign-label{ font-size:.72rem; color:#555; margin-bottom:4px; }
+    .gdoc .g-sign-box{ border-bottom:1.5px solid #111; min-height:56px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:2px; }
+    .gdoc .g-sign-box img{ max-height:70px; max-width:100%; display:block; }
+    .gdoc .g-sign-empty{ color:#aaa; font-size:.72rem; padding-bottom:6px; }
+    .gdoc .g-sign-meta{ font-size:.62rem; color:#888; margin-top:4px; }`;
+
   async function docToPdfBlob(overlay){
-    const el = overlay.querySelector('#gdocRender');
-    const canvas = await html2canvas(el, { scale: 2, backgroundColor:'#ffffff', useCORS:true, logging:false });
+    if(typeof html2canvas === 'undefined' || !window.jspdf){ throw new Error('PDF libs not loaded'); }
+    const src = overlay.querySelector('#gdocRender');
+    // מרנדרים את החשבונית בתוך iframe מבודד שמכיל *רק* אותה. אחרת html2canvas משכפל את
+    // כל ה-DOM של האפליקציה (מפת Leaflet + אריחים חוצי-מקור + כרטיסים) — מה שתקע את הדסקטופ.
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('aria-hidden','true');
+    iframe.style.cssText = 'position:fixed;left:0;top:0;width:760px;height:20px;border:0;opacity:0;pointer-events:none;z-index:-1;';
+    document.body.appendChild(iframe);
+    let canvas;
+    try{
+      const idoc = iframe.contentDocument;
+      idoc.open();
+      idoc.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"><style>${GDOC_CSS}</style></head><body>${src.outerHTML}</body></html>`);
+      idoc.close();
+      const target = idoc.getElementById('gdocRender');
+      // המתנה לטעינת תמונת החתימה בתוך ה-iframe (data URL — נטען מהר, עם גיבוי timeout)
+      await Promise.all([...idoc.images].map(img => img.complete ? Promise.resolve() : new Promise(res=>{ img.onload = img.onerror = res; setTimeout(res, 3000); })));
+      iframe.style.height = (target.scrollHeight + 40) + 'px';
+      await new Promise(r=>setTimeout(r, 30));
+      canvas = await html2canvas(target, { scale: 1.6, backgroundColor:'#ffffff', useCORS:true, logging:false, imageTimeout: 8000 });
+    } finally { iframe.remove(); }
+    // הגנה: קנבס ריק/לא תקין → זריקת שגיאה במקום חישוב Infinity שתקע את הדף בלולאה אינסופית
+    if(!canvas || !canvas.width || !canvas.height){ throw new Error('empty canvas'); }
     const imgData = canvas.toDataURL('image/jpeg', 0.92);
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p','mm','a4');
@@ -7326,9 +7434,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const ph = pdf.internal.pageSize.getHeight();
     const imgW = pw;
     const imgH = canvas.height * (pw / canvas.width);
-    let heightLeft = imgH, position = 0;
+    if(!isFinite(imgH) || imgH <= 0){ throw new Error('bad image height'); }
+    let heightLeft = imgH, position = 0, guard = 0;
     pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH); heightLeft -= ph;
-    while(heightLeft > 0){ position -= ph; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH); heightLeft -= ph; }
+    while(heightLeft > 0 && guard < 60){ position -= ph; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH); heightLeft -= ph; guard++; }
     return pdf.output('blob');
   }
 
@@ -7415,9 +7524,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             </div>
           </div>` : (type === 'receipt' ? `<div class="sigpad-hint" style="text-align:center">החתימה עוברת אוטומטית מהחשבונית שממנה הופקה הקבלה.</div>` : '')}
           <div class="sigdoc-actions">
-            <button type="button" class="sigdoc-act sigdoc-wa">${WHATSAPP_ICON_SVG}<span>שליחה בוואטסאפ</span></button>
-            <button type="button" class="sigdoc-act sigdoc-mail">שליחה במייל</button>
-            <button type="button" class="sigdoc-act sigdoc-dl">הורדת PDF</button>
+            <div class="sigdoc-send-row">
+              <button type="button" class="sigdoc-act sigdoc-wa">${WHATSAPP_ICON_SVG}<span>וואטסאפ</span></button>
+              <button type="button" class="sigdoc-act sigdoc-mail">מייל</button>
+              <button type="button" class="sigdoc-act sigdoc-dl">PDF</button>
+            </div>
             <div class="sigdoc-status" id="sigdocStatus"></div>
             <button type="button" class="sigdoc-act sigdoc-confirm">אישור</button>
           </div>
@@ -7771,6 +7882,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(!noOrder) c.newClient = false;
       saveData();
       renderAll();
+      renderOrderDocs(); // רענון פאנל החשבוניות/קבלות — ההזמנה נכנסת ל"הזמנות להפקת חשבונית"
       // confirmation, then reset the form for the next order to the same client
       renderOrdersForm(c);
       const flashHost = ordFormHost.querySelector('.ord-saved-host');
