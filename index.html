@@ -304,11 +304,12 @@
   /* ===== סטטיסטיקת לקוח (טבעת הזמנות/חשבוניות/קבלות) ===== */
   #clientStatsHost{ margin-top:14px; }
   .cstats-card{ background:#eef1f8; border-radius:20px; padding:16px 20px 34px; overflow:hidden; }
-  .cstats-title{ text-align:center; color:#22304f; font-size:.9rem; font-weight:600; margin-bottom:8px; }
-  .cstats-legend{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 16px; margin-bottom:24px; }
+  .cstats-title{ text-align:center; color:#22304f; font-size:.9rem; font-weight:600; margin-bottom:8px; position:relative; z-index:2; }
+  .cstats-legend{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 16px; margin-bottom:24px; position:relative; z-index:2; }
   .cstats-leg{ display:flex; align-items:center; gap:6px; font-size:.8rem; color:#22304f; }
   .cstats-leg .dot{ width:11px; height:11px; border-radius:50%; flex:0 0 auto; }
-  .cstats-wrap{ position:relative; width:100%; max-width:360px; margin:0 auto 6px; aspect-ratio:1; }
+  /* isolation:isolate — כל העיגולים הנזרקים נשארים בשכבת ה-wrap ולא עולים מעל הכותרת/מקרא */
+  .cstats-wrap{ position:relative; z-index:0; isolation:isolate; width:100%; max-width:360px; margin:0 auto 6px; aspect-ratio:1; }
   .cstats-wrap svg{ width:100%; height:100%; display:block; overflow:visible; position:relative; z-index:1; }
   .cstats-bub{ position:absolute; border-radius:50%; transform:translate(calc(-50% + var(--px,0px)), calc(-50% + var(--py,0px))); transition:transform .5s cubic-bezier(.22,.61,.36,1); will-change:transform; pointer-events:none; z-index:0; }
   .cstats-bub-inner{ width:100%; height:100%; border-radius:50%; opacity:.92; animation:cstatsBubFloat0 var(--dur,6s) ease-in-out infinite; animation-delay:var(--delay,0s); }
@@ -7421,7 +7422,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const dt = _cstatsLastBurst ? (now - _cstatsLastBurst) : 600;
     _cstatsLastBurst = now;
     const t = Math.max(0, Math.min(1, (dt - 90) / 700)); // 0=מהיר, 1=איטי
-    const count = Math.round(28 - t * 22);               // 28 מהיר .. 6 איטי
+    const count = Math.round(16 - t * 12);               // 16 מהיר .. 4 איטי (עדין ואלגנטי)
     const speedF = 1.15 - t * 0.5;                        // מהיר יותר בלחיצה מהירה
     const px = clientX - rect.left, py = clientY - rect.top;
     const pal = (colors && colors.length) ? colors : ['#16224d','#2f7cf6','#6a2fe0'];
@@ -7439,7 +7440,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       spark.style.transform = 'translate(0px,0px)';
       wrap.appendChild(spark);
       const ang = (i/count)*Math.PI*2 + (Math.random()-0.5)*0.7; // פיזור לכל הכיוונים
-      const v0 = base * (0.85 + Math.random()*0.55) * speedF;     // מהירות התחלתית = 100%
+      const v0 = base * (0.85 + Math.random()*0.55) * speedF * 0.8; // מהירות התחלתית ~80% (זריקה עדינה)
       _cstatsSparks.push({
         el: spark, x:0, y:0,
         ox: px, oy: py,           // מיקום ההולדה בתוך ה-wrap
