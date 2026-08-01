@@ -7221,13 +7221,16 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const host = document.getElementById('clientStatsHost');
     if(!host) return;
     const c = ordSelectedClientId ? clients.find(x=>x.id===ordSelectedClientId) : null;
-    if(!c){ host.innerHTML = ''; return; }
-    const orders = (c.orders||[]).filter(o=>!o.noOrder && (o.total||0) > 0);
-    const ordersCount = orders.length;
-    const invoicesCount = (c.invoices||[]).length;
-    const receiptsCount = (c.receipts||[]).length;
-    let sub = 0, qty = 0;
-    orders.forEach(o=>{ sub += (o.total||0); (o.items||[]).forEach(it=>{ qty += (it.qty||0); }); });
+    // כשלא נבחר לקוח — סטטיסטיקה כללית של כל הלקוחות במערכת
+    const srcClients = c ? [c] : (clients || []);
+    let ordersCount = 0, invoicesCount = 0, receiptsCount = 0, sub = 0, qty = 0;
+    srcClients.forEach(cl=>{
+      const orders = (cl.orders||[]).filter(o=>!o.noOrder && (o.total||0) > 0);
+      ordersCount += orders.length;
+      invoicesCount += (cl.invoices||[]).length;
+      receiptsCount += (cl.receipts||[]).length;
+      orders.forEach(o=>{ sub += (o.total||0); (o.items||[]).forEach(it=>{ qty += (it.qty||0); }); });
+    });
     const incl = sub * (1 + VAT_RATE);
 
     const segs = [
@@ -7238,9 +7241,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const total = segs.reduce((s,x)=>s+x.count,0);
     const legend = `<div class="cstats-legend">${segs.map(s=>`<span class="cstats-leg"><span class="dot" style="background:${s.color}"></span>${s.label} · ${s.count}</span>`).join('')}</div>`;
 
-    const statsTitle = escapeHtml(c.name || 'סטטיסטיקת הלקוח');
+    const statsTitle = c ? ('סטטיסטיקת ' + escapeHtml(c.name || 'הלקוח')) : 'סטטיסטיקה כללית';
     if(total === 0){
-      host.innerHTML = `<div class="cstats-card"><div class="cstats-title">${statsTitle}</div>${legend}<div class="cstats-empty">אין עדיין הזמנות / חשבוניות / קבלות ללקוח זה.</div></div>`;
+      const emptyMsg = c ? 'אין עדיין הזמנות / חשבוניות / קבלות ללקוח זה.' : 'אין עדיין הזמנות / חשבוניות / קבלות במערכת.';
+      host.innerHTML = `<div class="cstats-card"><div class="cstats-title">${statsTitle}</div>${legend}<div class="cstats-empty">${emptyMsg}</div></div>`;
       return;
     }
     const cx=170, cy=170, Ro=120, Ri=86;
