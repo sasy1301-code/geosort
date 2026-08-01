@@ -1207,9 +1207,9 @@
   .vs-name{ flex:0 0 auto; color:var(--ink); font-weight:400; font-size:.7rem; line-height:1.2; text-align:right; white-space:normal; }
   .vs-div{ flex:0 0 auto; align-self:center; display:flex; align-items:center; }
   .vs-div svg{ height:34px; width:1.5px; display:block; fill:#d6dbe2; }
-  /* המפריד שבין "ירד" ל"נותר" — 4px מכל צד (מקטין את מרווח ה-gap של 8px ל-4px) */
-  .vs-div-mid{ margin:0 -4px; }
-  .vs-initial{ flex:0 0 auto; display:flex; align-items:center; gap:4px; transform:translateX(-3px); }
+  /* הקו שאחרי שם המוצר — 2px מכל צד (מקטין את מרווח ה-gap של 8px ל-2px) */
+  .vs-div-name{ margin:0 -6px; }
+  .vs-initial{ flex:0 0 auto; display:flex; align-items:center; gap:4px; }
   .vs-initial-label{ color:var(--ink); font-weight:400; font-size:.7rem; line-height:1.15; text-align:right; }
   input.vs-box{
     width:52px; height:42px; padding:0; border:none; border-radius:10px;
@@ -3864,19 +3864,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
                     <span class="vs-dot-slot">${isLow ? `<span class="vs-low-dot" title="המלאי ברכב עומד להיגמר"></span>` : ""}</span>
                     <div class="vs-thumb">${thumb}</div>
                     <div class="vs-name">${nameHtml}</div>
-                    <span class="vs-div">${LINE_SVG}</span>
+                    <span class="vs-div vs-div-name">${LINE_SVG}</span>
                     <div class="vs-initial">
                       <span class="vs-initial-label">כמות<br>כללית</span>
                       <input type="number" class="vs-box vs-qty-input" data-name="${escapeHtml(name)}" value="${anchorQty}" min="0" title="הכמות ההתחלתית שנטענה לרכב — הקלד ולחץ Enter">
                     </div>
                     <div class="vs-stat vs-drop">
-                      <span class="vs-stat-label">ירד</span>
+                      <span class="vs-stat-label">חסר</span>
                       <span class="vs-stat-num">${usedSinceAnchor}</span>
-                    </div>
-                    <span class="vs-div vs-div-mid">${LINE_SVG}</span>
-                    <div class="vs-stat vs-left">
-                      <span class="vs-stat-label">נותר</span>
-                      <span class="vs-stat-num">${remaining}</span>
                     </div>
                   </div>
                   <button type="button" class="vs-reset" data-name="${escapeHtml(name)}" title="אפס מוצר זה לכמות ההתחלתית">
