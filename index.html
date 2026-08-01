@@ -4626,8 +4626,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             existing.date = localDateString();
             existing.noOrder = noOrder;
             existing.noOrderReason = noOrderReason;
-            // ודא שגם להזמנה שנערכה יש חשבונית (נוצרת רק אם עדיין אין אחת)
-            if(!noOrder && total > 0) createInvoiceFromOrder(c, existing);
           }
         } else {
           const newOrder = {
@@ -4636,8 +4634,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             items, total, discountPercent: discountPct, noOrder, noOrderReason
           };
           c.orders.push(newOrder);
-          // ההזמנה נכנסת אוטומטית גם לחשבוניות — לא רק להיסטוריית ההזמנות בכרטיס הלקוח
-          if(!noOrder && total > 0) createInvoiceFromOrder(c, newOrder);
+          // ההזמנה נכנסת להיסטוריה ול"הזמנות להפקת חשבונית" — החשבונית מופקת רק בחתימה.
         }
         // a real (non-"no order") order means this client has now been serviced — drop the "new client" flag
         if(!noOrder) c.newClient = false;
@@ -7073,7 +7070,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       arr: 'receipts',
       title: 'קבלות',
       hostEl: 'recDocHost', searchEl: 'recDocSearch', searchWrapEl: 'recDocSearchWrap',
-      makeLabel: 'הפק קבלה', madeTitle: 'קבלות שהופקו', srcTitle: 'חשבוניות לאישור והפקת קבלה'
+      makeLabel: 'הפק קבלה', madeTitle: 'קבלות שהופקו', srcTitle: 'חשבוניות מאושרות להפקת קבלה'
     }
   };
   // a document matches the search when the query appears in its date (either format) or number
@@ -7107,18 +7104,24 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function orderHasInvoice(c, order){ return (c.invoices||[]).some(inv=>inv.sourceOrderId===order.id); }
   function invoiceHasReceipt(c, inv){ return (c.receipts||[]).some(r=>r.sourceInvoiceId===inv.id); }
 
+  // חשבונית שנוצרה מהזמנה אך עדיין לא נחתמה נחשבת "לא מאושרת".
+  function orderHasSignedInvoice(c, order){ return (c.invoices||[]).some(inv=>inv.sourceOrderId===order.id && inv.signature); }
+  // מפיק (או מחזיר קיימת) חשבונית מהזמנה, ומחזיר את אובייקט החשבונית כדי שאפשר לצרף חתימה.
   function createInvoiceFromOrder(c, order){
     c.invoices = c.invoices || [];
-    if(orderHasInvoice(c, order)) return;
-    c.invoices.push({
+    const existing = (c.invoices||[]).find(inv=>inv.sourceOrderId===order.id);
+    if(existing) return existing;
+    const inv = {
       id: genDocId(), num: nextDocNumber('invoice'), date: localDateString(),
       items: (order.items||[]).map(it=>Object.assign({}, it)),
       total: order.total || 0, discountPercent: order.discountPercent || '',
       agent: order.agent || '', note: order.note || '',
-      sourceOrderId: order.id
-    });
+      sourceOrderId: order.id, signature: '', signedAt: ''
+    };
+    c.invoices.push(inv);
     saveData();
     renderOrderDocs();
+    return inv;
   }
   function createReceiptFromInvoice(c, inv){
     c.receipts = c.receipts || [];
@@ -7175,20 +7178,23 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     let html = `<div class="doc-client-head">${escapeHtml(clientDisplayName(c))}</div>`;
 
     if(type === 'invoice'){
-      const openOrders = (c.orders||[]).filter(o=>!o.noOrder && (o.total||0) > 0 && !orderHasInvoice(c, o)).reverse().filter(o=>docMatchesQuery(o, q));
-      const made = (c.invoices||[]).slice().sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
+      // "הזמנות להפקת חשבונית": הזמנות שעדיין אין להן חשבונית *חתומה* (החתימה מפיקה את החשבונית).
+      const openOrders = (c.orders||[]).filter(o=>!o.noOrder && (o.total||0) > 0 && !orderHasSignedInvoice(c, o)).reverse().filter(o=>docMatchesQuery(o, q));
+      // "חשבוניות שהופקו": רק חשבוניות חתומות (מאושרות) — חתימת הלקוח היא ההפקה בפועל.
+      const made = (c.invoices||[]).filter(d=>d.signature).slice().sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
       html += section(cfg.srcTitle,
         openOrders.map(o=>docRowHtml(o, `<button type="button" class="doc-make-btn" data-make="${o.id}">${cfg.makeLabel}</button>`, 'order')),
         q ? 'אין הזמנות תואמות לחיפוש.' : 'אין הזמנות שממתינות לחשבונית.');
       html += section(cfg.madeTitle,
         made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`, 'invoice')),
-        q ? 'אין חשבוניות תואמות לחיפוש.' : 'עדיין לא הופקו חשבוניות ללקוח זה.');
+        q ? 'אין חשבוניות תואמות לחיפוש.' : 'עדיין לא הופקו חשבוניות חתומות ללקוח זה.');
     } else {
-      const openInvoices = (c.invoices||[]).filter(inv=>!invoiceHasReceipt(c, inv)).sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
+      // "חשבוניות מאושרות להפקת קבלה": רק חשבוניות חתומות שאין להן עדיין קבלה.
+      const openInvoices = (c.invoices||[]).filter(inv=>inv.signature && !invoiceHasReceipt(c, inv)).sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
       const made = (c.receipts||[]).slice().sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
       html += section(cfg.srcTitle,
         openInvoices.map(inv=>docRowHtml(inv, `<button type="button" class="doc-make-btn" data-make="${inv.id}">${cfg.makeLabel}</button>`, 'invoice')),
-        q ? 'אין חשבוניות תואמות לחיפוש.' : 'אין חשבוניות שממתינות לקבלה.');
+        q ? 'אין חשבוניות תואמות לחיפוש.' : 'אין חשבוניות מאושרות שממתינות לקבלה.');
       html += section(cfg.madeTitle,
         made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`, 'receipt')),
         q ? 'אין קבלות תואמות לחיפוש.' : 'עדיין לא הופקו קבלות ללקוח זה.');
@@ -7199,8 +7205,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       btn.addEventListener('click', ()=>{
         const srcId = btn.dataset.make;
         if(type === 'invoice'){
+          // "הפק חשבונית" פותח את מסמך החשבונית לחתימה — החשבונית מופקת בפועל רק בחתימה+אישור.
           const o = (c.orders||[]).find(x=>x.id===srcId);
-          if(o) createInvoiceFromOrder(c, o);
+          if(o) openInvoiceDraftForSigning(c, o);
         } else {
           const inv = (c.invoices||[]).find(x=>x.id===srcId);
           if(inv) createReceiptFromInvoice(c, inv);
@@ -7370,8 +7377,24 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
   }
 
+  // "הפק חשבונית" — פותח מסמך חשבונית *טיוטה* מתוך ההזמנה לחתימה. החשבונית נוצרת בפועל
+  // רק כשהלקוח חותם ומאשר (זרימה מבוקרת-חתימה).
+  function openInvoiceDraftForSigning(c, order){
+    const existing = (c.invoices||[]).find(inv=>inv.sourceOrderId===order.id);
+    if(existing){ openSignableDoc(c, 'invoice', existing); return; } // כבר קיימת — פשוט פותחים אותה לחתימה
+    const draft = {
+      id: null, num: nextDocNumber('invoice'), date: localDateString(),
+      items: (order.items||[]).map(it=>Object.assign({}, it)),
+      total: order.total || 0, discountPercent: order.discountPercent || '',
+      agent: order.agent || '', note: order.note || '',
+      sourceOrderId: order.id, signature: '', signedAt: ''
+    };
+    openSignableDoc(c, 'invoice', draft, { draftOrder: order });
+  }
+
   // פותח את המסמך בחלון מלא: צפייה, חתימה דיגיטלית, שמירה ושליחה
-  function openSignableDoc(c, type, doc){
+  function openSignableDoc(c, type, doc, opts){
+    opts = opts || {};
     const overlay = document.createElement('div');
     overlay.className = 'sigdoc-overlay';
     overlay.innerHTML = `
@@ -7430,13 +7453,24 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       overlay.querySelector('.sigpad-clear').addEventListener('click', ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); hasInk=false; });
       overlay.querySelector('.sigpad-save').addEventListener('click', ()=>{
         if(!hasInk){ alert('אין חתימה — חתום/י תחילה על המשבצת הלבנה.'); return; }
-        doc.signature = canvas.toDataURL('image/png');
-        doc.signedAt = new Date().toLocaleString('he-IL');
-        // אם כבר הופקה קבלה מהחשבונית הזו — עדכן גם אותה עם החתימה
-        (c.receipts||[]).forEach(r=>{ if(r.sourceInvoiceId === doc.id && !r.signature){ r.signature = doc.signature; r.signedAt = doc.signedAt; } });
-        saveData();
+        const sigData = canvas.toDataURL('image/png');
+        const sigTime = new Date().toLocaleString('he-IL');
+        const st = overlay.querySelector('#sigdocStatus');
+        if(opts.draftOrder){
+          // הפקת החשבונית בפועל: נוצרת עכשיו, עם החתימה — ועוברת ל"חשבוניות שהופקו"
+          const created = createInvoiceFromOrder(c, opts.draftOrder);
+          if(created){ created.signature = sigData; created.signedAt = sigTime; doc = created; }
+          opts.draftOrder = null;
+          saveData();
+          st.style.color='#73dd5c'; st.textContent='החשבונית הופקה ונחתמה ✓';
+        } else {
+          doc.signature = sigData; doc.signedAt = sigTime;
+          // אם כבר הופקה קבלה מהחשבונית הזו — עדכן גם אותה עם החתימה
+          (c.receipts||[]).forEach(r=>{ if(r.sourceInvoiceId === doc.id && !r.signature){ r.signature = sigData; r.signedAt = sigTime; } });
+          saveData();
+          st.style.color='#73dd5c'; st.textContent='החתימה נשמרה על המסמך ✓';
+        }
         rerenderDoc();
-        const st = overlay.querySelector('#sigdocStatus'); st.style.color='#73dd5c'; st.textContent='החתימה נשמרה על המסמך ✓';
         try{ renderOrderDocs(); }catch(_){}
       });
     }
@@ -7716,8 +7750,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           existing.items = items; existing.total = total; existing.discountPercent = discountPct;
           existing.date = localDateString(); existing.noOrder = noOrder; existing.noOrderReason = noOrderReason;
           existing.agent = agent; existing.note = note;
-          // ודא שגם להזמנה שנערכה יש חשבונית (נוצרת רק אם עדיין אין אחת)
-          if(!noOrder && total > 0) createInvoiceFromOrder(c, existing);
         }
         ordEditingOrderId = null;
         recomputeLastInvoice(c); // editing may change the most-recent order's total
@@ -7729,8 +7761,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           agent, note
         };
         c.orders.push(newOrder);
-        // ההזמנה נכנסת אוטומטית גם לחשבוניות — לא רק להיסטוריית ההזמנות בכרטיס הלקוח
-        if(!noOrder && total > 0) createInvoiceFromOrder(c, newOrder);
+        // ההזמנה נכנסת להיסטוריית ההזמנות ול"הזמנות להפקת חשבונית". החשבונית עצמה
+        // מופקת רק כשחותמים עליה (זרימה מבוקרת-חתימה).
         // the new order's total becomes this client's "last invoice" too, exactly like the popup
         c.lastInvoice = total.toFixed(2);
         c.lastInvoiceDate = localDateString();
