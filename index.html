@@ -720,9 +720,10 @@
   .panel-drag-handle:hover{ color:#2f7cf6; background:rgba(47,124,246,.12); }
   .panel-drag-handle:active{ cursor:grabbing; }
   .panel-drag-handle svg{ display:block; width:17px; height:17px; }
-  #settingsView section.panel{ transition:box-shadow .15s ease, transform .06s linear; }
-  #settingsView section.panel.panel-dragging{ box-shadow:0 14px 34px rgba(0,0,0,.34); position:relative; z-index:40; opacity:.98; }
-  #settingsView section.panel.panel-dragging .panel-drag-handle{ cursor:grabbing; color:#2f7cf6; }
+  #settingsView section.panel[draggable="true"] .panel-drag-handle{ cursor:grab; }
+  #settingsView section.panel.dragging{ opacity:.35; }
+  #settingsView section.panel.touch-dragging{ position:relative; z-index:60; will-change:transform; box-shadow:0 14px 34px rgba(0,0,0,.5); transition:box-shadow .18s ease; }
+  #settingsView section.panel.touch-dragging .panel-drag-handle{ cursor:grabbing; color:#2f7cf6; }
   label{ display:block; font-size:.76rem; color:rgba(255,255,255,.62); margin:8px 0 4px; }
   input[type=text], input[type=tel], input[type=number], input[type=date], input[type=email]{
     width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px;
@@ -845,6 +846,8 @@
   .cluster-group{ margin-bottom:10px; }
   .cluster-group[draggable="true"] > .cluster-head{ cursor:grab; }
   .cluster-group.dragging{ opacity:.4; }
+  /* הרמה במגע (iPhone) — צל + z-index כמו בקטלוג, כדי שהתיקייה המורמת תרחף מעל השאר ולא תסתתר מאחוריהן */
+  .cluster-group.touch-dragging{ position:relative; z-index:60; will-change:transform; box-shadow:0 12px 28px rgba(0,0,0,.5); transition:box-shadow .18s ease; }
   .cluster-head{
     display:flex; align-items:center; gap:3px; padding:8px 10px; border-radius:15px;
     background:rgba(255,255,255,.06); cursor:pointer; border:1px solid rgba(255,255,255,.14); color:#fff;
@@ -6431,59 +6434,21 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(!cont || !settingsPanelOrder.length) return;
     settingsPanelOrder.forEach(id=>{ const el=document.getElementById(id); if(el && el.parentElement===cont) cont.appendChild(el); });
   }
-  function captureSettingsPanelOrder(){ settingsPanelOrder = settingsPanels().map(el=>el.id).filter(Boolean); }
+  // סידור מחדש של כרטיסי ההגדרות — אותו מנגנון מוכח כמו בקטלוג (HTML5 בעכבר, לחיצה-ארוכה+גרירה במגע)
   (function initSettingsSortable(){
     const cont = settingsPanelContainer();
     if(!cont) return;
-    let drag = null;
-    cont.addEventListener('pointerdown', (e)=>{
-      const handle = e.target.closest && e.target.closest('.panel-drag-handle');
-      if(!handle || !cont.contains(handle)) return;
-      const el = handle.closest('section.panel');
-      if(!el) return;
-      e.preventDefault(); e.stopPropagation();
-      drag = { el, pointerId:e.pointerId, grabY:e.clientY, moved:false };
-      try{ handle.setPointerCapture(e.pointerId); }catch(_){}
-      el.classList.add('panel-dragging');
-      document.body.style.userSelect='none';
-      const onMove=(ev)=>{
-        if(!drag || ev.pointerId!==drag.pointerId) return;
-        const dy = ev.clientY - drag.grabY;
-        if(Math.abs(dy)>3) drag.moved=true;
-        drag.el.style.transform = `translateY(${dy}px)`;
-        const elRect = drag.el.getBoundingClientRect();
-        const mid = elRect.top + elRect.height/2;
-        const sibs = settingsPanels().filter(x=>x!==drag.el);
-        for(const s of sibs){
-          const r = s.getBoundingClientRect();
-          if(mid > r.top && mid < r.bottom){
-            const before = drag.el.getBoundingClientRect().top;
-            if(mid < r.top + r.height/2) cont.insertBefore(drag.el, s);
-            else cont.insertBefore(drag.el, s.nextSibling);
-            const after = drag.el.getBoundingClientRect().top;
-            drag.grabY += (after - before); // FLIP — הכרטיס נשאר צמוד לאצבע/עכבר
-            break;
-          }
-        }
-      };
-      const onUp=(ev)=>{
-        if(!drag || ev.pointerId!==drag.pointerId) return;
-        window.removeEventListener('pointermove', onMove);
-        window.removeEventListener('pointerup', onUp);
-        window.removeEventListener('pointercancel', onUp);
-        drag.el.style.transform='';
-        drag.el.classList.remove('panel-dragging');
-        document.body.style.userSelect='';
-        try{ handle.releasePointerCapture(drag.pointerId); }catch(_){}
-        if(drag.moved){ captureSettingsPanelOrder(); saveSettingsPanelOrder(); }
-        drag=null;
-      };
-      window.addEventListener('pointermove', onMove);
-      window.addEventListener('pointerup', onUp);
-      window.addEventListener('pointercancel', onUp);
-    });
-    // מניעת פתיחה/סגירה של הכרטיס בעת לחיצה על הידית
+    // מונע מלחיצה על הידית לפתוח/לסגור את הכרטיס
     cont.addEventListener('click', (e)=>{ if(e.target.closest && e.target.closest('.panel-drag-handle')){ e.stopPropagation(); } }, true);
+    wireCatalogReorder(cont, {
+      itemSelector: 'section.panel',
+      handleSelector: '.panel-drag-handle',
+      ignoreSelector: 'input, textarea, select, button, a, label, .handled-switch',
+      persistFn: (els)=>{
+        settingsPanelOrder = els.map(el=>el.id).filter(Boolean);
+        saveSettingsPanelOrder();
+      }
+    });
   })();
 
   document.getElementById('vehicleStockHeader').addEventListener('click', ()=>{
