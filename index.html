@@ -7127,7 +7127,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       id: genDocId(), num: nextDocNumber('receipt'), date: localDateString(),
       items: (inv.items||[]).map(it=>Object.assign({}, it)),
       total: inv.total || 0, agent: inv.agent || '', note: inv.note || '',
-      sourceInvoiceId: inv.id
+      sourceInvoiceId: inv.id,
+      // הקבלה יורשת את חתימת החשבונית — חותמים רק על החשבונית
+      signature: inv.signature || '', signedAt: inv.signedAt || ''
     });
     saveData();
     renderOrderDocs();
@@ -7262,9 +7264,23 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const incl = sub + vat;
     const vatPct = Math.round(VAT_RATE*100);
 
-    const signHtml = doc.signature
-      ? `<div class="g-sign-box"><img src="${doc.signature}" alt="חתימת הלקוח"></div>${doc.signedAt?`<div class="g-sign-meta">נחתם דיגיטלית · ${escapeHtml(doc.signedAt)}</div>`:''}`
-      : `<div class="g-sign-box"><span class="g-sign-empty">— טרם נחתם —</span></div>`;
+    // חתימה: רק חשבונית וקבלה מציגות אזור חתימה. חותמים על החשבונית בלבד —
+    // הקבלה יורשת את חתימת החשבונית שממנה הופקה (גם אם נחתמה אחרי הפקת הקבלה).
+    let effSignature = '', effSignedAt = '';
+    if(type === 'invoice'){ effSignature = doc.signature || ''; effSignedAt = doc.signedAt || ''; }
+    else if(type === 'receipt'){
+      effSignature = doc.signature || ''; effSignedAt = doc.signedAt || '';
+      if(!effSignature && doc.sourceInvoiceId){
+        const srcInv = (c.invoices||[]).find(i=>i.id===doc.sourceInvoiceId);
+        if(srcInv && srcInv.signature){ effSignature = srcInv.signature; effSignedAt = srcInv.signedAt || ''; }
+      }
+    }
+    const showSign = (type === 'invoice' || type === 'receipt');
+    const signBlock = !showSign ? '' : `<div class="g-sign"><div class="g-sign-label">חתימת הלקוח</div>${
+      effSignature
+        ? `<div class="g-sign-box"><img src="${effSignature}" alt="חתימת הלקוח"></div>${effSignedAt?`<div class="g-sign-meta">נחתם דיגיטלית · ${escapeHtml(effSignedAt)}</div>`:''}`
+        : `<div class="g-sign-box"><span class="g-sign-empty">— טרם נחתם —</span></div>`
+    }</div>`;
 
     return `<div class="gdoc" id="gdocRender">
       <div class="g-top">
@@ -7287,7 +7303,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       ${doc.note?`<div style="margin-top:14px;font-size:.74rem;color:#444">הערה: ${escapeHtml(doc.note)}</div>`:''}
       <div class="g-foot">
         <div class="g-regards">בברכה,<div class="fn">${escapeHtml(bizName)}</div></div>
-        <div class="g-sign"><div class="g-sign-label">חתימת הלקוח</div>${signHtml}</div>
+        ${signBlock}
       </div>
     </div>`;
   }
@@ -7361,7 +7377,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </div>
         <div class="sigdoc-body">
           <div class="sigdoc-doc-wrap" id="sigdocWrap">${buildDocInnerHtml(c, doc, type)}</div>
-          <div class="sigpad-wrap">
+          ${type === 'invoice' ? `<div class="sigpad-wrap">
             <div class="sigpad-title">חתימת הלקוח</div>
             <canvas class="sigpad-canvas" id="sigpadCanvas"></canvas>
             <div class="sigpad-hint">חתום/י כאן באצבע, ואז "שמור חתימה"</div>
@@ -7369,7 +7385,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
               <button type="button" class="sigpad-btn sigpad-clear">נקה</button>
               <button type="button" class="sigpad-btn sigpad-save">שמור חתימה</button>
             </div>
-          </div>
+          </div>` : (type === 'receipt' ? `<div class="sigpad-hint" style="text-align:center">החתימה עוברת אוטומטית מהחשבונית שממנה הופקה הקבלה.</div>` : '')}
           <div class="sigdoc-actions">
             <button type="button" class="sigdoc-act sigdoc-wa full">${WHATSAPP_ICON_SVG}<span>שליחה בוואטסאפ</span></button>
             <button type="button" class="sigdoc-act sigdoc-mail">שליחה במייל</button>
@@ -7384,36 +7400,40 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     overlay.addEventListener('click', e=>{ if(e.target === overlay) close(); });
     function rerenderDoc(){ overlay.querySelector('#sigdocWrap').innerHTML = buildDocInnerHtml(c, doc, type); }
 
-    // --- לוח חתימה ---
+    // --- לוח חתימה (רק בחשבונית) ---
     const canvas = overlay.querySelector('#sigpadCanvas');
-    const ctx = canvas.getContext('2d');
-    let drawing=false, hasInk=false, last=null;
-    function sizeCanvas(){
-      const rect = canvas.getBoundingClientRect();
-      if(!rect.width) return;
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.round(rect.width*dpr); canvas.height = Math.round(rect.height*dpr);
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-      ctx.lineWidth=2.4; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#0b1e3a';
-    }
-    requestAnimationFrame(sizeCanvas);
-    function pos(e){ const r=canvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return { x:t.clientX-r.left, y:t.clientY-r.top }; }
-    function start(e){ e.preventDefault(); drawing=true; last=pos(e); }
-    function move(e){ if(!drawing) return; e.preventDefault(); const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; hasInk=true; }
-    function stop(){ drawing=false; }
-    canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move); window.addEventListener('mouseup',stop);
-    canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); canvas.addEventListener('touchend',stop);
+    if(canvas){
+      const ctx = canvas.getContext('2d');
+      let drawing=false, hasInk=false, last=null;
+      function sizeCanvas(){
+        const rect = canvas.getBoundingClientRect();
+        if(!rect.width) return;
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = Math.round(rect.width*dpr); canvas.height = Math.round(rect.height*dpr);
+        ctx.setTransform(dpr,0,0,dpr,0,0);
+        ctx.lineWidth=2.4; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#0b1e3a';
+      }
+      requestAnimationFrame(sizeCanvas);
+      function pos(e){ const r=canvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return { x:t.clientX-r.left, y:t.clientY-r.top }; }
+      function start(e){ e.preventDefault(); drawing=true; last=pos(e); }
+      function move(e){ if(!drawing) return; e.preventDefault(); const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; hasInk=true; }
+      function stop(){ drawing=false; }
+      canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move); window.addEventListener('mouseup',stop);
+      canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); canvas.addEventListener('touchend',stop);
 
-    overlay.querySelector('.sigpad-clear').addEventListener('click', ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); hasInk=false; });
-    overlay.querySelector('.sigpad-save').addEventListener('click', ()=>{
-      if(!hasInk){ alert('אין חתימה — חתום/י תחילה על המשבצת הלבנה.'); return; }
-      doc.signature = canvas.toDataURL('image/png');
-      doc.signedAt = new Date().toLocaleString('he-IL');
-      saveData();
-      rerenderDoc();
-      const st = overlay.querySelector('#sigdocStatus'); st.style.color='#73dd5c'; st.textContent='החתימה נשמרה על המסמך ✓';
-      try{ renderOrderDocs(); }catch(_){}
-    });
+      overlay.querySelector('.sigpad-clear').addEventListener('click', ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); hasInk=false; });
+      overlay.querySelector('.sigpad-save').addEventListener('click', ()=>{
+        if(!hasInk){ alert('אין חתימה — חתום/י תחילה על המשבצת הלבנה.'); return; }
+        doc.signature = canvas.toDataURL('image/png');
+        doc.signedAt = new Date().toLocaleString('he-IL');
+        // אם כבר הופקה קבלה מהחשבונית הזו — עדכן גם אותה עם החתימה
+        (c.receipts||[]).forEach(r=>{ if(r.sourceInvoiceId === doc.id && !r.signature){ r.signature = doc.signature; r.signedAt = doc.signedAt; } });
+        saveData();
+        rerenderDoc();
+        const st = overlay.querySelector('#sigdocStatus'); st.style.color='#73dd5c'; st.textContent='החתימה נשמרה על המסמך ✓';
+        try{ renderOrderDocs(); }catch(_){}
+      });
+    }
 
     // --- שליחה ---
     overlay.querySelector('.sigdoc-wa').addEventListener('click', ()=>shareSignedDoc(c, type, doc, overlay, 'whatsapp'));
