@@ -7175,9 +7175,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     document.body.appendChild(layer);
     const w = layer.clientWidth || window.innerWidth, h = layer.clientHeight || window.innerHeight;
     const balls = [];
-    // 8 עיגולים רגילים + 5 עיגולים קטנים יותר = 13
-    for(let i=0;i<13;i++){
-      const r = (i < 8) ? (13 + Math.random()*23) : (6 + Math.random()*8); // גדולים 13..36, קטנים 6..14
+    // 8 גדולים + 5 קטנים + עוד 20 בגדלים מעורבים = 33
+    for(let i=0;i<33;i++){
+      const r = (i < 8) ? (13 + Math.random()*23)          // גדולים 13..36
+              : (i < 13) ? (6 + Math.random()*8)            // קטנים 6..14
+              : (6 + Math.random()*29);                     // 20 הנוספים: גדלים מעורבים 6..35
       const el = document.createElement('div');
       el.className = 'inv-ball';
       el.style.width = el.style.height = (r*2) + 'px';
@@ -7189,7 +7191,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         y: -r - 20 - Math.random()*60,               // מתחילים ממש מעל המסך
         vx: (Math.random()*2 - 1)*1.2,
         vy: 0,
-        delay: Math.random()*1700                     // כל עיגול נופל בזמן משלו (0..1.7ש)
+        delay: Math.random()*2600                     // כל עיגול נופל בזמן משלו (0..2.6ש)
       });
     }
     _invBalls = { layer, balls, raf:0, t0:null, gx:0, gy:0.6, G:0.6, REST:0.62, WALL:0.66, FRICTION:0.992, REST_V:0.4 };
