@@ -303,7 +303,7 @@
   .doc-open-btn{ color:#8fb7ff; }
   /* ===== סטטיסטיקת לקוח (טבעת הזמנות/חשבוניות/קבלות) ===== */
   #clientStatsHost{ margin-top:14px; }
-  .cstats-card{ background:#eef1f8; border-radius:20px; padding:16px 20px 34px; }
+  .cstats-card{ background:#eef1f8; border-radius:20px; padding:16px 20px 34px; overflow:hidden; }
   .cstats-title{ text-align:center; color:#22304f; font-size:.9rem; font-weight:600; margin-bottom:8px; }
   .cstats-legend{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 16px; margin-bottom:24px; }
   .cstats-leg{ display:flex; align-items:center; gap:6px; font-size:.8rem; color:#22304f; }
@@ -324,12 +324,17 @@
   @keyframes cstatsBubFloat3{ 0%,100%{ transform:translate(0,0);} 30%{ transform:translate(3px,5px);} 60%{ transform:translate(-4px,-3px);} 85%{ transform:translate(-2px,4px);} }
   @keyframes cstatsBubFloat4{ 0%,100%{ transform:translate(0,0);} 45%{ transform:translate(5px,-4px);} 75%{ transform:translate(-3px,-4px);} }
   @keyframes cstatsBubFloat5{ 0%,100%{ transform:translate(0,0);} 20%{ transform:translate(-4px,3px);} 50%{ transform:translate(4px,4px);} 75%{ transform:translate(-3px,-4px);} }
-  .cstats-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none; padding:0 22%; }
+  .cstats-center{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; pointer-events:none; padding:0 22%; z-index:2; }
   .cstats-center .l1, .cstats-center .l2{ color:#33405e; font-size:.86rem; line-height:1.5; }
   .cstats-center .l1 b, .cstats-center .l2 b{ color:#12224a; font-weight:600; }
   .cstats-center .l3{ color:#12224a; font-size:.9rem; font-weight:600; margin-top:14px; }
   .cstats-center .l3 b{ font-size:1.3rem; display:block; margin-top:1px; }
   .cstats-empty{ text-align:center; color:#6b7794; font-size:.85rem; padding:22px 10px; }
+  /* פיצוץ עיגולים בלחיצה על הטבעת */
+  .cstats-wrap{ cursor:pointer; }
+  .cstats-spark{ position:absolute; border-radius:50%; pointer-events:none; z-index:0; opacity:.96; will-change:transform,opacity; box-shadow:0 2px 7px rgba(0,0,0,.18); }
+  .cstats-wrap svg.cstats-pulse{ animation:cstatsPulse .32s ease-out; }
+  @keyframes cstatsPulse{ 0%{ transform:scale(1);} 40%{ transform:scale(1.045);} 100%{ transform:scale(1);} }
   /* ===== מסמך חתימה דיגיטלית (חשבונית/הזמנה/קבלה) ===== */
   .sigdoc-overlay{ position:fixed; inset:0; z-index:1200; background:rgba(2,7,22,.82); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 14px) 12px calc(env(safe-area-inset-bottom,0px) + 14px); }
   .sigdoc-box{ width:100%; max-width:840px; max-height:100%; background:#0b1428; border:1px solid rgba(140,160,255,.25); border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,.55); display:flex; flex-direction:column; overflow:hidden; }
@@ -375,17 +380,19 @@
   .gdoc .g-sign-box.g-sign-drawbox{ display:block; height:92px; padding:0; border:1.5px dashed #b7bdc9; border-bottom:1.6px solid #111; border-radius:8px 8px 0 0; background:#fcfcff; }
   .gdoc .g-sign-canvas{ width:100%; height:100%; display:block; touch-action:none; cursor:crosshair; }
   /* בקרות חתימה מתחת למסמך */
-  .sign-ctrls{ flex:0 0 auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
-  .sign-ctrls-hint{ flex:1 1 auto; color:rgba(255,255,255,.6); font-size:.76rem; }
-  .sign-ctrls-btns{ display:flex; gap:8px; flex:0 0 auto; }
+  .sign-ctrls{ flex:0 0 auto; display:flex; flex-direction:column; gap:9px; }
+  .sign-ctrls-hint{ text-align:center; color:rgba(255,255,255,.6); font-size:.76rem; }
+  .sign-ctrls-btns{ display:flex; gap:8px; }
   /* אזור החתימה (pad) */
   .sigpad-wrap{ flex:0 0 auto; background:#0f1a2e; border:1px solid rgba(140,160,255,.25); border-radius:14px; padding:10px; }
   .sigpad-title{ color:#fff; font-size:.82rem; font-weight:600; margin-bottom:6px; display:flex; align-items:center; gap:8px; }
   .sigpad-canvas{ width:100%; height:96px; background:#fff; border-radius:10px; border:1px dashed #9fb0d6; touch-action:none; display:block; }
   .sigpad-hint{ color:rgba(255,255,255,.5); font-size:.68rem; margin-top:5px; text-align:center; }
   .sigpad-row{ display:flex; gap:8px; margin-top:8px; }
-  .sigpad-btn{ -webkit-appearance:none; appearance:none; flex:1 1 auto; border:none; border-radius:999px; padding:12px; font-family:inherit; font-size:.86rem; font-weight:600; cursor:pointer; }
-  .sigpad-clear{ background:rgba(255,255,255,.12); color:#fff; flex:0 0 40%; }
+  /* כפתורי "נקה" / "שמור חתימה" — pill רחב באותו סגנון כמו כפתור "שליחת דו״ח יומי" ושאר הכפתורים */
+  .sigpad-btn{ -webkit-appearance:none; appearance:none; flex:1 1 0; min-width:0; border:none; border-radius:999px; padding:13px; font-family:inherit; font-size:.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .sigpad-btn svg{ width:17px; height:17px; display:block; }
+  .sigpad-clear{ background:rgba(255,255,255,.12); color:#fff; }
   .sigpad-save{ background:#2f7cf6; color:#fff; }
   .sigdoc-actions{ flex:0 0 auto; display:flex; flex-direction:column; gap:9px; }
   .sigdoc-send-row{ display:flex; gap:8px; }
@@ -7371,6 +7378,81 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // טבעת מלאה: דיסקה חיצונית פחות דיסקה פנימית (fill-rule:evenodd) — לשימוש כשסוג יחיד ממלא 100%
   function _statRing(cx,cy,Ro,Ri){ return _statCircle(cx,cy,Ro) + ' ' + _statCircle(cx,cy,Ri); }
   function _statMoney(n){ return '₪' + Math.round(Number(n)||0).toLocaleString('he-IL'); }
+  // פיצוץ עיגולים בלחיצה על הטבעת — מספר וכוח הזריקה תלויים בקצב הלחיצות.
+  // תנועה: יוצא במהירות מלאה (100%), מאט עד 30% ולא נעצר — ממשיך עד שהוא יוצא
+  // לגמרי מהפריים הלבן (הכרטיס חותך אותו). ללא פייד.
+  let _cstatsLastBurst = 0;
+  const _cstatsSparks = [];
+  let _cstatsRAF = 0, _cstatsPrev = 0;
+  function _cstatsTick(now){
+    const dt = _cstatsPrev ? Math.min(40, now - _cstatsPrev) : 16.7;
+    _cstatsPrev = now;
+    const step = dt / 16.7; // יחסית ל-60fps
+    for(let i=_cstatsSparks.length-1; i>=0; i--){
+      const s = _cstatsSparks[i];
+      const sp = Math.hypot(s.vx, s.vy);
+      if(sp > s.minSpeed){                 // מאט עד 30% מהמהירות ההתחלתית, ואז שומר על 30%
+        const k = Math.pow(0.955, step);
+        let nvx = s.vx*k, nvy = s.vy*k;
+        const nsp = Math.hypot(nvx, nvy);
+        if(nsp < s.minSpeed){ const f = s.minSpeed/(nsp||1); nvx*=f; nvy*=f; }
+        s.vx = nvx; s.vy = nvy;
+      }
+      s.x += s.vx*step; s.y += s.vy*step;
+      s.el.style.transform = `translate(${s.x.toFixed(1)}px, ${s.y.toFixed(1)}px)`;
+      const ax = s.ox + s.x, ay = s.oy + s.y; // מיקום מוחלט בתוך הכרטיס
+      if(ax < s.minX || ax > s.maxX || ay < s.minY || ay > s.maxY){
+        s.el.remove(); _cstatsSparks.splice(i,1);
+      }
+    }
+    if(_cstatsSparks.length){ _cstatsRAF = requestAnimationFrame(_cstatsTick); }
+    else { _cstatsRAF = 0; _cstatsPrev = 0; }
+  }
+  function spawnCstatsBurst(wrap, clientX, clientY, colors){
+    const rect = wrap.getBoundingClientRect();
+    if(!rect.width) return;
+    const card = wrap.closest('.cstats-card') || wrap;
+    const cardRect = card.getBoundingClientRect();
+    // גבולות הכרטיס ביחס לפינה השמאלית-עליונה של ה-wrap
+    const bMinX = cardRect.left - rect.left, bMaxX = bMinX + cardRect.width;
+    const bMinY = cardRect.top  - rect.top,  bMaxY = bMinY + cardRect.height;
+    // קצב לחיצה: לחיצה מהירה → הרבה עיגולים ומהירות גבוהה; לחיצה איטית → מעט
+    const now = Date.now();
+    const dt = _cstatsLastBurst ? (now - _cstatsLastBurst) : 600;
+    _cstatsLastBurst = now;
+    const t = Math.max(0, Math.min(1, (dt - 90) / 700)); // 0=מהיר, 1=איטי
+    const count = Math.round(28 - t * 22);               // 28 מהיר .. 6 איטי
+    const speedF = 1.15 - t * 0.5;                        // מהיר יותר בלחיצה מהירה
+    const px = clientX - rect.left, py = clientY - rect.top;
+    const pal = (colors && colors.length) ? colors : ['#16224d','#2f7cf6','#6a2fe0'];
+    const svg = wrap.querySelector('svg');
+    if(svg){ svg.classList.remove('cstats-pulse'); void svg.offsetWidth; svg.classList.add('cstats-pulse'); }
+    const base = rect.width / 26; // מהירות בסיס (פיקסלים לפריים ב-60fps)
+    for(let i=0;i<count;i++){
+      const spark = document.createElement('div');
+      spark.className = 'cstats-spark';
+      const size = 5 + Math.random()*14;
+      spark.style.width = size+'px'; spark.style.height = size+'px';
+      spark.style.left = (px - size/2)+'px';
+      spark.style.top  = (py - size/2)+'px';
+      spark.style.background = pal[(Math.random()*pal.length)|0];
+      spark.style.transform = 'translate(0px,0px)';
+      wrap.appendChild(spark);
+      const ang = (i/count)*Math.PI*2 + (Math.random()-0.5)*0.7; // פיזור לכל הכיוונים
+      const v0 = base * (0.85 + Math.random()*0.55) * speedF;     // מהירות התחלתית = 100%
+      _cstatsSparks.push({
+        el: spark, x:0, y:0,
+        ox: px, oy: py,           // מיקום ההולדה בתוך ה-wrap
+        vx: Math.cos(ang)*v0, vy: Math.sin(ang)*v0,
+        minSpeed: v0 * 0.30,      // לא יורד מתחת ל-30% מהמהירות ההתחלתית
+        minX: bMinX - size, maxX: bMaxX + size,
+        minY: bMinY - size, maxY: bMaxY + size
+      });
+      // גיבוי ניקוי אם עיגול מסיבה כלשהי לא יצא מהפריים
+      setTimeout(()=>{ const idx=_cstatsSparks.findIndex(z=>z.el===spark); if(idx>=0){ _cstatsSparks.splice(idx,1); } spark.remove(); }, 5000);
+    }
+    if(!_cstatsRAF){ _cstatsPrev = 0; _cstatsRAF = requestAnimationFrame(_cstatsTick); }
+  }
   function renderClientStats(){
     const host = document.getElementById('clientStatsHost');
     if(!host) return;
@@ -7447,7 +7529,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       ${legend}
       <div class="cstats-wrap">
         ${bubbles}
-        <svg viewBox="0 0 340 340">${paths}</svg>
+        <svg viewBox="0 0 340 340"><circle cx="${cx}" cy="${cy}" r="${Ro}" fill="#ffffff"/>${paths}</svg>
         <div class="cstats-center">
           <div class="l1">סה״כ: <b>${_statMoney(sub)}</b></div>
           <div class="l2">כולל מע״מ: <b>${_statMoney(incl)}</b></div>
@@ -7467,6 +7549,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         bubs.forEach(b=>{ const d = parseFloat(b.dataset.depth)||8; const kx=parseFloat(b.dataset.dx)||1, ky=parseFloat(b.dataset.dy)||1; b.style.setProperty('--px', (mx*d*kx).toFixed(1)+'px'); b.style.setProperty('--py', (my*d*ky).toFixed(1)+'px'); });
       });
       wrap.addEventListener('pointerleave', ()=>{ bubs.forEach(b=>{ b.style.setProperty('--px','0px'); b.style.setProperty('--py','0px'); }); });
+      // לחיצה על הטבעת → פיצוץ עיגולים כלפי חוץ (עוצמה לפי קצב הלחיצה)
+      const burstColors = (active && active.length) ? active.map(r=>r.s.color) : segs.map(s=>s.color);
+      wrap.addEventListener('pointerdown', (e)=>{ spawnCstatsBurst(wrap, e.clientX, e.clientY, burstColors); });
     }
   }
 
