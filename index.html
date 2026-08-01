@@ -609,6 +609,8 @@
     display:flex; align-items:center; gap:8px;
   }
   section.panel h2 .dot{ width:9px;height:9px;border-radius:50%;background:var(--teal); }
+  /* בעמוד ההגדרות בלבד: כותרות הכרטיסים במשקל Regular (לא בולד) */
+  #settingsView section.panel h2{ font-weight:400; }
   label{ display:block; font-size:.76rem; color:rgba(255,255,255,.62); margin:8px 0 4px; }
   input[type=text], input[type=tel], input[type=number], input[type=date], input[type=email]{
     width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px;
@@ -1855,6 +1857,52 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   <div class="products-view settings-view view-hidden" id="settingsView">
     <div class="products-inner">
+      <section class="panel" id="settingsBusinessPanel">
+        <h2 id="settingsBusinessHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">פרטי העסק שלי</span>
+          <span id="settingsBusinessChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
+        </h2>
+        <div id="settingsBusinessBody" class="animated-collapse">
+          <div class="settings-section">
+            <label class="ord-field-label" for="bizName">שם העסק</label>
+            <input type="text" id="bizName" class="settings-line-input" autocomplete="off" placeholder="שם העסק">
+
+            <label class="ord-field-label" for="bizInvoiceName">שם על גבי החשבונית</label>
+            <input type="text" id="bizInvoiceName" class="settings-line-input" autocomplete="off" placeholder="השם שיופיע על החשבונית">
+
+            <label class="ord-field-label" for="bizTaxId">ח.פ / ת.ז</label>
+            <input type="text" id="bizTaxId" class="settings-line-input" autocomplete="off" inputmode="numeric" dir="ltr" style="text-align:right" placeholder="ח.פ / ת.ז">
+
+            <label class="ord-field-label" for="bizEmail">אימייל</label>
+            <input type="email" id="bizEmail" class="settings-line-input" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="email" dir="ltr" style="text-align:right" placeholder="name@example.com">
+
+            <label class="ord-field-label" for="bizAddress">כתובת</label>
+            <input type="text" id="bizAddress" class="settings-line-input" autocomplete="off" placeholder="רחוב, מספר, עיר">
+
+            <label class="ord-field-label" for="bizPhone">טלפון</label>
+            <input type="tel" id="bizPhone" class="settings-line-input" autocomplete="off" inputmode="tel" dir="ltr" style="text-align:right" placeholder="טלפון קווי">
+
+            <label class="ord-field-label" for="bizMobile">נייד</label>
+            <input type="tel" id="bizMobile" class="settings-line-input" autocomplete="off" inputmode="tel" dir="ltr" style="text-align:right" placeholder="טלפון נייד">
+
+            <label class="ord-field-label" for="bizDailyReportMobile">מספר נייד לקבלת דו״ח יומי</label>
+            <input type="tel" id="bizDailyReportMobile" class="settings-line-input" autocomplete="off" inputmode="tel" dir="ltr" style="text-align:right" placeholder="הנייד שאליו יישלח הדו״ח היומי">
+
+            <button type="button" class="settings-add-btn" id="bizSaveBtn">שמור פרטי עסק</button>
+            <div id="bizSaveStatus" class="settings-backup-status"></div>
+          </div>
+
+          <div class="settings-sep" aria-hidden="true"></div>
+
+          <div class="settings-section">
+            <label class="ord-field-label" for="bizWhatsappGeneral">הודעת וואטסאפ כללי</label>
+            <div class="settings-backup-note" style="margin:0 0 8px">הודעת וואטסאפ מוכנה מראש. לחיצה על "החל על כל הלקוחות" תרשום אותה באופן גורף לכל הלקוחות הקיימים במערכת (מחליפה את ההודעה האישית הקיימת אצל כל לקוח).</div>
+            <textarea id="bizWhatsappGeneral" class="settings-line-input" style="min-height:150px;resize:vertical;line-height:1.5" placeholder="כתוב כאן את הודעת הוואטסאפ הכללית..."></textarea>
+            <button type="button" class="settings-add-btn" id="bizWaApplyAllBtn" style="background:#73dd5c;color:#021236">החל על כל הלקוחות (גורף)</button>
+            <div id="bizWaStatus" class="settings-backup-status"></div>
+          </div>
+        </div>
+      </section>
+
       <section class="panel" id="settingsPanel">
         <h2 id="settingsAgentsHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">מנהלים וסוכנים</span>
           <span id="settingsAgentsChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
@@ -2167,6 +2215,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const CATALOG_KEY = "catalog"; // separate app_storage key so saving the catalog never rewrites the clients blob
   const AGENTS_KEY = "agents_list"; // manager-curated list of sales-agent names used on the orders page
   const MANAGERS_KEY = "managers_list"; // main managers — like agents, but with elevated (future) access
+  const BUSINESS_DETAILS_KEY = "business_details"; // "פרטי העסק שלי" — פרטי העסק של המשתמש שמפעיל את המערכת
   // { categories:[{id,name,order}], subcategories:[{id,categoryId,name,order}],
   //   products:[{id,categoryId,subcategoryId,name,sku,unit,price,imageUrl,note,active,trackStock,order}] }
   let catalog = { categories: [], subcategories: [], subsubcategories: [], products: [] };
@@ -2181,6 +2230,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   let folders = []; // manually-created folder names, e.g. "ראשון לציון" or "צפון"
   let agents = []; // sales agents: [{name, username, password}] — chosen on the orders page
   let managers = []; // main managers: [{name, username, password}] — elevated access (future)
+  // פרטי העסק של המשתמש (עמוד הגדרות → "פרטי העסק שלי"). משפיע על אופציות במערכת
+  // (למשל: מספר הנייד לקבלת הדו״ח היומי) והודעת וואטסאפ כללית מוכנה מראש.
+  let businessDetails = { name:"", invoiceName:"", taxId:"", email:"", address:"", phone:"", mobile:"", dailyReportMobile:"", whatsappGeneral:"" };
   let clusterNames = {}; // custom overrides for automatic cluster names, keyed by dominant-city/geo key
   let clusterOrder = {}; // manual up/down ordering of addresses within a cluster, keyed the same way
   let threshold = 12;
@@ -2655,6 +2707,26 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       await sbSet(MANAGERS_KEY, JSON.stringify(managers));
       syncAgentCreds();
     }catch(e){ console.error("שגיאת שמירת מנהלים", e); }
+  }
+
+  // ===== פרטי העסק שלי =====
+  async function loadBusinessDetails(){
+    try{
+      const raw = await sbGet(BUSINESS_DETAILS_KEY);
+      const p = raw ? JSON.parse(raw) : null;
+      if(p && typeof p === 'object'){
+        businessDetails = {
+          name: p.name || "", invoiceName: p.invoiceName || "", taxId: p.taxId || "",
+          email: p.email || "", address: p.address || "", phone: p.phone || "",
+          mobile: p.mobile || "", dailyReportMobile: p.dailyReportMobile || "",
+          whatsappGeneral: p.whatsappGeneral || ""
+        };
+      }
+    }catch(e){ /* שומרים על ברירת המחדל הריקה */ }
+  }
+  async function saveBusinessDetails(){
+    try{ await sbSet(BUSINESS_DETAILS_KEY, JSON.stringify(businessDetails)); }
+    catch(e){ console.error("שגיאת שמירת פרטי עסק", e); throw e; }
   }
 
   async function loadCatalog(){
@@ -3648,6 +3720,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     let digits = (phone || "").replace(/\D/g, "");
     if(digits.startsWith("0")) digits = "972" + digits.slice(1);
     return `https://wa.me/${digits}`;
+  }
+
+  // מספר הוואטסאפ שאליו נשלח הדו״ח היומי/הכללי. נלקח מ"פרטי העסק שלי" בהגדרות
+  // (businessDetails.dailyReportMobile); אם לא הוגדר — נשמר על המספר הישן כברירת מחדל
+  // כדי שהדו״ח לעולם לא יישבר. מוחזר בפורמט בינ״ל (972...) לקישור wa.me.
+  const DAILY_REPORT_FALLBACK_NUMBER = '052-3617178';
+  function dailyReportWaNumber(){
+    const raw = (businessDetails && String(businessDetails.dailyReportMobile || '').trim())
+      ? businessDetails.dailyReportMobile : DAILY_REPORT_FALLBACK_NUMBER;
+    let waNumber = String(raw).replace(/\D/g, '');
+    if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
+    return waNumber;
   }
 
   // normalizes a phone number to a comparable local-Israeli-format string (e.g.
@@ -5448,9 +5532,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const newClientsCount = clients.filter(c => !c.testClient && c.newClientSince && c.newClientSince >= fromDate && c.newClientSince <= toDate).length;
       const rangeLabel = fromDate === toDate ? fmtUpdateDate(fromDate) : `${fmtUpdateDate(fromDate)} עד ${fmtUpdateDate(toDate)}`;
       const report = `דוח כל התיקיות: ${rangeLabel}\nכמות הזמנות חדשות: ${orderCount}\nלקוחות חדשים: ${newClientsCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
-      let waNumber = '052-3617178'.replace(/\D/g, '');
-      if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
-      window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(report)}`, '_blank');
+      window.open(`https://wa.me/${dailyReportWaNumber()}?text=${encodeURIComponent(report)}`, '_blank');
     });
   }
 
@@ -5711,9 +5793,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           });
           const newClientsCount = members.filter(m => !m.testClient && m.newClientSince === chosenDate).length;
           const report = `דוח יומי - תיקיית ${name}: ${fmtUpdateDate(chosenDate)}\nכמות הזמנות חדשות: ${orderCount}\nלקוחות חדשים: ${newClientsCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total * (1 + VAT_RATE)).toFixed(2)}`;
-          let waNumber = '052-3617178'.replace(/\D/g, '');
-          if(waNumber.startsWith('0')) waNumber = '972' + waNumber.slice(1);
-          window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(report)}`, '_blank');
+          window.open(`https://wa.me/${dailyReportWaNumber()}?text=${encodeURIComponent(report)}`, '_blank');
         });
         body.appendChild(folderReportBtn);
       }
@@ -6126,6 +6206,59 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   document.getElementById('settingsBackupHeader').addEventListener('click', ()=>{
     toggleAnimatedCollapse(document.getElementById('settingsBackupBody'), document.getElementById('settingsBackupChevron'));
   });
+
+  // ===== פרטי העסק שלי — פתיחה/סגירה, מילוי השדות, שמירה, והחלה גורפת של הודעת וואטסאפ =====
+  document.getElementById('settingsBusinessHeader').addEventListener('click', ()=>{
+    toggleAnimatedCollapse(document.getElementById('settingsBusinessBody'), document.getElementById('settingsBusinessChevron'));
+  });
+  const BIZ_FIELD_MAP = { bizName:'name', bizInvoiceName:'invoiceName', bizTaxId:'taxId', bizEmail:'email',
+    bizAddress:'address', bizPhone:'phone', bizMobile:'mobile', bizDailyReportMobile:'dailyReportMobile',
+    bizWhatsappGeneral:'whatsappGeneral' };
+  function populateBusinessDetails(){
+    Object.entries(BIZ_FIELD_MAP).forEach(([id,key])=>{ const el=document.getElementById(id); if(el) el.value = businessDetails[key] || ''; });
+  }
+  function readBusinessInputs(){
+    const g = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+    businessDetails = {
+      name: g('bizName').trim(), invoiceName: g('bizInvoiceName').trim(), taxId: g('bizTaxId').trim(),
+      email: g('bizEmail').trim(), address: g('bizAddress').trim(), phone: g('bizPhone').trim(),
+      mobile: g('bizMobile').trim(), dailyReportMobile: g('bizDailyReportMobile').trim(),
+      whatsappGeneral: g('bizWhatsappGeneral') // שומרים את העיצוב/שורות כפי שהן
+    };
+  }
+  (function wireBusinessDetails(){
+    const saveBtn = document.getElementById('bizSaveBtn');
+    const saveStatus = document.getElementById('bizSaveStatus');
+    const waBtn = document.getElementById('bizWaApplyAllBtn');
+    const waStatus = document.getElementById('bizWaStatus');
+    if(saveBtn){
+      saveBtn.addEventListener('click', async ()=>{
+        readBusinessInputs();
+        saveBtn.disabled = true; const prev = saveBtn.textContent; saveBtn.textContent = 'שומר...';
+        try{ await saveBusinessDetails(); saveStatus.textContent = 'הפרטים נשמרו ✓'; saveStatus.style.color = '#73dd5c'; }
+        catch(e){ saveStatus.textContent = 'שגיאה בשמירה, נסה שוב'; saveStatus.style.color = '#ff8a8a'; }
+        finally{ saveBtn.disabled = false; saveBtn.textContent = prev; setTimeout(()=>{ saveStatus.textContent=''; }, 4000); }
+      });
+    }
+    if(waBtn){
+      waBtn.addEventListener('click', async ()=>{
+        readBusinessInputs(); // מקבע גם את שאר השדות שאולי נערכו
+        const msg = businessDetails.whatsappGeneral || '';
+        if(!msg.trim()){ alert('קודם כתוב הודעת וואטסאפ כללית.'); return; }
+        const n = clients.length;
+        if(!confirm('להחיל את ההודעה הכללית על כל ' + n + ' הלקוחות?\nזה יחליף את הודעת הוואטסאפ האישית הקיימת אצל כל לקוח.')) return;
+        waBtn.disabled = true; const prev = waBtn.textContent; waBtn.textContent = 'מחיל...';
+        try{
+          clients.forEach(c=>{ c.whatsappMessage = msg; });
+          await Promise.all([saveBusinessDetails(), saveData()]);
+          try{ renderAll(); }catch(_){}
+          waStatus.textContent = 'ההודעה עודכנה אצל ' + n + ' לקוחות ✓'; waStatus.style.color = '#73dd5c';
+        }catch(e){ waStatus.textContent = 'שגיאה בהחלה, נסה שוב'; waStatus.style.color = '#ff8a8a'; }
+        finally{ waBtn.disabled = false; waBtn.textContent = prev; setTimeout(()=>{ waStatus.textContent=''; }, 6000); }
+      });
+    }
+  })();
+
   document.getElementById('vehicleStockHeader').addEventListener('click', ()=>{
     toggleAnimatedCollapse(document.getElementById('vehicleStockBody'), document.getElementById('vehicleStockChevron'));
   });
@@ -6174,7 +6307,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
 
   document.getElementById('refreshBtn').addEventListener('click', async ()=>{
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails()]);
+    populateBusinessDetails();
     renderAll();
   });
 
@@ -8490,7 +8624,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   (async function init(){
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails()]);
+    populateBusinessDetails();
     backfillDefaultWhatsappMessages();
     // managers/agents are loaded now, so the greeting can resolve the real name (e.g. sasy → ששי לוי)
     applyUserGreeting(currentLoginUser());
