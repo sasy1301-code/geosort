@@ -1208,6 +1208,9 @@
      in-popup picking controls are hidden there (they stay active on the Orders page, which is
      #ordFormHost, not .order-modal) */
   .order-modal .no-order-row, .order-modal .order-discount-row, .order-modal .order-total-row, .order-modal .order-save-btn{ display:none; }
+  /* בעורך המוצר (מוצר חדש/עריכה) כפתור השמירה חייב להיות גלוי — הכלל שמעל הסתיר אותו
+     בטעות (הוא נועד רק להסתיר את כפתור ההזמנה בפופאפ הלקוח). pill כמו כפתור הדו״ח היומי. */
+  .order-modal .pe-save{ display:flex; width:fit-content; margin:18px auto 8px; padding:12px 26px; border-radius:23px; }
   .order-history{
     padding:14px 20px; border-top:1px solid rgba(255,255,255,.15); background:rgba(0,0,0,.15);
   }
