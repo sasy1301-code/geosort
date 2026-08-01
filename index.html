@@ -6775,7 +6775,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     cont.addEventListener('click', (e)=>{ if(e.target.closest && e.target.closest('.panel-drag-handle')){ e.stopPropagation(); } }, true);
     wireCatalogReorder(cont, {
       itemSelector: 'section.panel',
-      handleSelector: '.panel-drag-handle',
+      handleSelector: 'h2', /* מובייל: לתפוס את כל הסטריפ (הכותרת) בלחיצה ארוכה — לא רק את 6 הנקודות */
       ignoreSelector: 'input, textarea, select, button, a, label, .handled-switch',
       persistFn: (els)=>{
         settingsPanelOrder = els.map(el=>el.id).filter(Boolean);
@@ -6805,7 +6805,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     cont.addEventListener('click', (e)=>{ if(e.target.closest && e.target.closest('.panel-drag-handle')){ e.stopPropagation(); } }, true);
     wireCatalogReorder(cont, {
       itemSelector: 'section.panel',
-      handleSelector: '.panel-drag-handle',
+      handleSelector: 'h2', /* מובייל: לתפוס את כל הסטריפ (הכותרת) בלחיצה ארוכה — לא רק את 6 הנקודות */
       ignoreSelector: 'input, textarea, select, button, a, label',
       persistFn: (els)=>{
         inventoryPanelOrder = els.map(el=>el.id).filter(Boolean);
@@ -7109,16 +7109,40 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       bind(); // אנדרואיד/דסקטופ — ללא בקשת הרשאה
     }
   }
+  // התנגשות עיגול-בעיגול: מעביר תנע לפי חוזק הפגיעה. עיגול נאחז (grabbed) = מסה אינסופית (דוחף ולא נדחף).
+  function _invResolve(a, b){
+    let dx = b.x - a.x, dy = b.y - a.y;
+    let dist = Math.hypot(dx, dy);
+    const minD = a.r + b.r;
+    if(dist >= minD) return;
+    if(dist < 0.0001){ dx = (Math.random()-0.5); dy = (Math.random()-0.5); dist = Math.hypot(dx,dy) || 0.0001; } // חופפים בדיוק — הזזה זעירה
+    const nx = dx/dist, ny = dy/dist;
+    const overlap = minD - dist;
+    const imA = a.grabbed ? 0 : 1/(a.r*a.r);   // 1/מסה (מסה ~ שטח)
+    const imB = b.grabbed ? 0 : 1/(b.r*b.r);
+    const tot = imA + imB;
+    if(tot === 0) return;                       // שניהם נאחזים
+    // מפרידים כדי שלא יחפפו
+    a.x -= nx*overlap*(imA/tot); a.y -= ny*overlap*(imA/tot);
+    b.x += nx*overlap*(imB/tot); b.y += ny*overlap*(imB/tot);
+    // מהירות יחסית לאורך הנורמל
+    const vn = (b.vx - a.vx)*nx + (b.vy - a.vy)*ny;
+    if(vn > 0) return;                          // כבר מתרחקים
+    const e = 0.78;                              // אלסטיות ההתנגשות
+    const j = -(1 + e) * vn / tot;              // עוצמת הפגיעה
+    a.vx -= j*imA*nx; a.vy -= j*imA*ny;
+    b.vx += j*imB*nx; b.vy += j*imB*ny;
+  }
   function _invTick(now){
     if(!_invBalls) return;
     if(_invBalls.t0 == null) _invBalls.t0 = now;
     const elapsed = now - _invBalls.t0;
     const layer = _invBalls.layer, ww = layer.clientWidth, hh = layer.clientHeight;
     const { REST, WALL, FRICTION, REST_V } = _invBalls;
-    _invBalls.balls.forEach(b=>{
-      if(b.grabbed){ b.el.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`; return; } // נאחז ע״י האצבע
-      // כל עיגול מתחיל ליפול בזמן משלו — לא כולם יחד
-      if(elapsed < b.delay){ b.el.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`; return; }
+    const balls = _invBalls.balls;
+    // 1) אינטגרציה + דפנות (עיגול נאחז/טרם-נפל לא זז כאן)
+    balls.forEach(b=>{
+      if(b.grabbed || elapsed < b.delay) return;
       b.vx += _invBalls.gx; b.vy += _invBalls.gy;
       b.vx *= FRICTION; b.vy *= FRICTION;
       b.x += b.vx; b.y += b.vy;
@@ -7126,6 +7150,20 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(b.y - b.r < 0){ b.y = b.r; b.vy = -b.vy * REST; }
       if(b.x - b.r < 0){ b.x = b.r; b.vx = -b.vx * WALL; }
       if(b.x + b.r > ww){ b.x = ww - b.r; b.vx = -b.vx * WALL; }
+    });
+    // 2) התנגשויות בין העיגולים (כמה מעברים ליציבות) — רק עיגולים שכבר נפלו
+    const active = balls.filter(b=> b.grabbed || elapsed >= b.delay);
+    for(let pass=0; pass<3; pass++){
+      for(let i=0;i<active.length;i++){
+        for(let j=i+1;j<active.length;j++){ _invResolve(active[i], active[j]); }
+      }
+    }
+    // 3) שמירה בתוך הדפנות אחרי ההתנגשויות + ציור
+    balls.forEach(b=>{
+      if(!b.grabbed && elapsed >= b.delay){
+        if(b.x - b.r < 0) b.x = b.r; if(b.x + b.r > ww) b.x = ww - b.r;
+        if(b.y + b.r > hh) b.y = hh - b.r; if(b.y - b.r < 0) b.y = b.r;
+      }
       b.el.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
     });
     _invBalls.raf = requestAnimationFrame(_invTick);
