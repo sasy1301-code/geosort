@@ -334,8 +334,16 @@
   /* פיצוץ עיגולים בלחיצה על הטבעת */
   .cstats-wrap{ cursor:pointer; }
   .cstats-spark{ position:absolute; border-radius:50%; pointer-events:none; z-index:0; opacity:.96; will-change:transform,opacity; box-shadow:0 2px 7px rgba(0,0,0,.18); }
-  .cstats-wrap svg.cstats-pulse{ animation:cstatsPulse .32s ease-out; }
-  @keyframes cstatsPulse{ 0%{ transform:scale(1);} 40%{ transform:scale(1.045);} 100%{ transform:scale(1);} }
+  .cstats-wrap svg{ transform-origin:50% 50%; }
+  /* לחיצה על הטבעת: קופצת מעט וחוזרת — בכל לחיצה מחדש */
+  @keyframes cstatsBounce{ 0%{ transform:scale(1);} 35%{ transform:scale(1.06);} 100%{ transform:scale(1);} }
+  /* זוהר: בכל לחיצה יוצא פייד של צבע אחד שנזרק החוצה (מתרחב) ודועך, מתחלף לפי סדר הצבעים */
+  .cstats-glow{ position:absolute; left:50%; top:50%; width:84%; aspect-ratio:1; border-radius:50%; transform:translate(-50%,-50%) scale(.85); pointer-events:none; z-index:0; opacity:0; will-change:transform,opacity; }
+  @keyframes cstatsGlowFade{
+    0%{   opacity:.7;  transform:translate(-50%,-50%) scale(.9); }
+    12%{  opacity:1;   transform:translate(-50%,-50%) scale(1.02); }
+    100%{ opacity:0;   transform:translate(-50%,-50%) scale(1.28); }
+  }
   /* ===== מסמך חתימה דיגיטלית (חשבונית/הזמנה/קבלה) ===== */
   .sigdoc-overlay{ position:fixed; inset:0; z-index:1200; background:rgba(2,7,22,.82); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 14px) 12px calc(env(safe-area-inset-bottom,0px) + 14px); }
   .sigdoc-box{ width:100%; max-width:840px; max-height:100%; background:#0b1428; border:1px solid rgba(140,160,255,.25); border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,.55); display:flex; flex-direction:column; overflow:hidden; }
@@ -1415,6 +1423,9 @@
   .bs-add{ flex:0 0 auto; width:34px; height:34px; border-radius:50%; border:none; background:#0277fb; color:#fff; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:transform .15s ease, background .15s ease; }
   .bs-add:hover{ background:#2f7cf6; transform:scale(1.08); }
   .bs-add svg{ width:17px; height:17px; display:block; }
+  /* אותו אייקון בדיוק כמו הכפתור בכרטיס (פלוס לבן בעיגול כחול) בתוך המלל שמתחת לכותרת */
+  .bs-hint-plus{ display:inline-flex; align-items:center; justify-content:center; width:11px; height:11px; border-radius:50%; background:#0277fb; color:#fff; vertical-align:-1px; margin:0 3px; flex:0 0 auto; }
+  .bs-hint-plus svg{ width:7px; height:7px; display:block; }
   /* פופאפ יומן רכש (משתמש בפלטת המלאי הכהה) */
   .bs-pop-summary{ display:flex; justify-content:center; gap:18px; margin:2px 0 14px; flex-wrap:wrap; }
   .bs-pop-summary .bs-sum{ text-align:center; }
@@ -4616,7 +4627,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function renderBusinessStockPanel(host){
     if(!host) return;
     host.innerHTML = `
-      <div class="vehicle-stock-hint">רשמו לכל מוצר כמה נרכש מהספק (יומן רכש). "נמכר" מתעדכן לבד לפי חשבוניות חתומות, ו"נותר" = נרכש פחות נמכר — המלאי המדויק בעסק בכל רגע. לחצו על ➕ ליד מוצר כדי לרשום רכישה ולראות את היומן.</div>
+      <div class="vehicle-stock-hint">רשמו לכל מוצר כמה נרכש מהספק (יומן רכש). "נמכר" מתעדכן לבד לפי חשבוניות חתומות, ו"נותר" = נרכש פחות נמכר - המלאי המדויק בעסק בכל רגע. לחצו על <span class="bs-hint-plus">${BS_PLUS_SVG}</span> ליד מוצר כדי לרשום רכישה ולראות את היומן.</div>
       <div class="inventory-list"></div>`;
     const listEl = host.querySelector('.inventory-list');
     const LINE_SVG = `<svg viewBox="0 0 1.4 26.9" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M.7.8c.3,8.1.3,17,0,25-.3-8.1-.3-17,0-25h0Z"/></svg>`;
@@ -7625,6 +7636,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // תנועה: יוצא במהירות מלאה (100%), מאט עד 30% ולא נעצר — ממשיך עד שהוא יוצא
   // לגמרי מהפריים הלבן (הכרטיס חותך אותו). ללא פייד.
   let _cstatsLastBurst = 0;
+  let _cstatsGlowIdx = 0;
+  const CSTATS_GLOW = ['#0f1a2e', '#0277fb', '#6303ed']; // סדר הזוהר — צבע אחד בכל לחיצה
   const _cstatsSparks = [];
   let _cstatsRAF = 0, _cstatsPrev = 0;
   function _cstatsTick(now){
@@ -7668,8 +7681,34 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const speedF = 1.15 - t * 0.5;                        // מהיר יותר בלחיצה מהירה
     const px = clientX - rect.left, py = clientY - rect.top;
     const pal = (colors && colors.length) ? colors : ['#16224d','#2f7cf6','#6a2fe0'];
+    // הטבעת קופצת מעט וחוזרת בכל לחיצה + זוהר של צבע אחד לפי הסדר — מהירות לפי קצב הלחיצה
+    const pressDur = Math.round(340 + t * 300); // מהיר בלחיצה מהירה, איטי בלחיצה איטית
+    // הקפיצה והזוהר חולקים בדיוק את אותו משך (pressDur) → קופצים יחד באותה מהירות בכל לחיצה.
+    // עקומת האטה: יוצא מהר (~80%) ומסתיים לאט (~20%).
+    const EASE = 'cubic-bezier(.12,.62,.28,1)';
     const svg = wrap.querySelector('svg');
-    if(svg){ svg.classList.remove('cstats-pulse'); void svg.offsetWidth; svg.classList.add('cstats-pulse'); }
+    if(svg){
+      // Web Animations API — מתחיל אנימציה חדשה בכל לחיצה (אמין באייפון, לא רק בלחיצה הראשונה)
+      if(svg.animate){
+        svg.animate(
+          [ { transform:'scale(1)' }, { transform:'scale(1.06)', offset:.35 }, { transform:'scale(1)' } ],
+          { duration: pressDur, easing: EASE }
+        );
+      } else {
+        svg.style.animation = 'none'; void svg.offsetWidth;
+        svg.style.animation = `cstatsBounce ${pressDur}ms ${EASE}`;
+      }
+    }
+    // זוהר: בכל לחיצה נזרק החוצה הצבע עצמו (ללא ליבה לבנה) ודועך, מתחלף לפי סדר הצבעים.
+    // רקע = radial-gradient של הצבע שדועך לשקוף באותו גוון — כך אין "לבן" באמצע.
+    const glow = document.createElement('div');
+    glow.className = 'cstats-glow';
+    const gc = CSTATS_GLOW[_cstatsGlowIdx % CSTATS_GLOW.length]; _cstatsGlowIdx++;
+    const gh = gc.replace('#',''); const gr=parseInt(gh.slice(0,2),16), gg=parseInt(gh.slice(2,4),16), gb=parseInt(gh.slice(4,6),16);
+    glow.style.background = `radial-gradient(circle, rgba(${gr},${gg},${gb},1) 0%, rgba(${gr},${gg},${gb},.9) 45%, rgba(${gr},${gg},${gb},.35) 70%, rgba(${gr},${gg},${gb},0) 100%)`;
+    glow.style.animation = `cstatsGlowFade ${pressDur}ms ${EASE}`;
+    wrap.appendChild(glow);
+    setTimeout(()=>{ try{ glow.remove(); }catch(_){} }, pressDur + 100);
     const base = rect.width / 26; // מהירות בסיס (פיקסלים לפריים ב-60fps)
     for(let i=0;i<count;i++){
       const spark = document.createElement('div');
