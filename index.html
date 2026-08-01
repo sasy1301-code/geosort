@@ -295,6 +295,61 @@
   .doc-make-btn{ -webkit-appearance:none; appearance:none; border:none; background:#2f7cf6; color:#fff; font-family:inherit; font-size:.8rem; font-weight:600; padding:8px 12px; border-radius:11px; cursor:pointer; white-space:nowrap; }
   .doc-make-btn:hover{ background:#4d93ff; }
   .doc-del-btn{ color:#ff7bac; }
+  .doc-open-btn{ color:#8fb7ff; }
+  /* ===== מסמך חתימה דיגיטלית (חשבונית/הזמנה/קבלה) ===== */
+  .sigdoc-overlay{ position:fixed; inset:0; z-index:1200; background:rgba(2,7,22,.82); backdrop-filter:blur(3px); display:flex; align-items:flex-start; justify-content:center; padding:16px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .sigdoc-box{ width:100%; max-width:840px; background:#0b1428; border:1px solid rgba(140,160,255,.25); border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,.55); display:flex; flex-direction:column; margin:auto; overflow:hidden; }
+  .sigdoc-head{ display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
+  .sigdoc-title{ color:#fff; font-size:1rem; font-weight:600; }
+  .sigdoc-close{ margin-right:auto; -webkit-appearance:none; appearance:none; border:none; background:rgba(255,255,255,.1); color:#fff; width:34px; height:34px; border-radius:50%; font-size:1.1rem; cursor:pointer; line-height:1; }
+  .sigdoc-body{ padding:16px; display:flex; flex-direction:column; gap:16px; }
+  .sigdoc-doc-wrap{ display:flex; justify-content:center; background:#e9edf4; border-radius:12px; padding:14px; overflow-x:auto; }
+  /* המסמך עצמו — לבן, מתכוונן לרוחב, אותה שפה עיצובית כמו קבצי ה-PDF */
+  .gdoc{ width:100%; max-width:720px; background:#fff; color:#1c1c1c; direction:rtl; padding:30px 26px 26px; font-family:'Google Sans',"Noto Sans Hebrew",sans-serif; box-shadow:0 2px 10px rgba(0,0,0,.12); }
+  .gdoc .g-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:16px; }
+  .gdoc .g-kavod .k1{ font-weight:700; font-size:.9rem; }
+  .gdoc .g-kavod .k2{ font-size:.78rem; margin-top:6px; color:#333; }
+  .gdoc .g-biz{ text-align:right; font-size:.72rem; line-height:1.7; color:#3a3a3a; }
+  .gdoc .g-biz .b1{ font-weight:700; font-size:.82rem; color:#111; }
+  .gdoc .g-titlerow{ display:flex; justify-content:space-between; align-items:flex-end; margin-top:26px; }
+  .gdoc .g-bigtitle{ font-weight:700; font-size:2rem; line-height:1; color:#111; }
+  .gdoc .g-subtitle{ font-size:.78rem; color:#777; margin-top:4px; }
+  .gdoc .g-dates{ text-align:right; font-size:.76rem; color:#444; line-height:1.7; }
+  .gdoc table{ width:100%; border-collapse:collapse; margin-top:18px; font-size:.76rem; table-layout:fixed; }
+  .gdoc th{ background:#8f8f8f; color:#fff; font-weight:600; padding:8px 10px; text-align:right; }
+  .gdoc td{ padding:9px 10px; text-align:right; vertical-align:middle; word-break:break-word; }
+  .gdoc .c-qty{ width:10%; } .gdoc .c-desc{ width:42%; } .gdoc .c-price{ width:24%; } .gdoc .c-total{ width:24%; }
+  .gdoc td.price, .gdoc td.total, .gdoc td.sumlabel{ white-space:nowrap; }
+  .gdoc td.desc, .gdoc td.price, .gdoc td.total{ font-weight:700; color:#111; }
+  .gdoc tbody tr:nth-child(even) td{ background:#f2f2f2; }
+  .gdoc tr.sum td{ background:#fff; } .gdoc tr.sum.shade td{ background:#f2f2f2; }
+  .gdoc td.sumlabel{ color:#333; font-weight:400; }
+  .gdoc .g-foot{ display:flex; justify-content:space-between; align-items:flex-end; margin-top:28px; gap:16px; }
+  .gdoc .g-regards{ font-size:.74rem; color:#555; line-height:1.7; }
+  .gdoc .g-regards .fn{ font-weight:700; color:#333; }
+  .gdoc .g-sign{ text-align:center; min-width:180px; }
+  .gdoc .g-sign-label{ font-size:.72rem; color:#555; margin-bottom:4px; }
+  .gdoc .g-sign-box{ border-bottom:1.5px solid #111; min-height:56px; display:flex; align-items:flex-end; justify-content:center; padding-bottom:2px; }
+  .gdoc .g-sign-box img{ max-height:70px; max-width:100%; display:block; }
+  .gdoc .g-sign-empty{ color:#aaa; font-size:.72rem; padding-bottom:6px; }
+  .gdoc .g-sign-meta{ font-size:.62rem; color:#888; margin-top:4px; }
+  /* אזור החתימה (pad) */
+  .sigpad-wrap{ background:#0f1a2e; border:1px solid rgba(140,160,255,.25); border-radius:14px; padding:12px; }
+  .sigpad-title{ color:#fff; font-size:.86rem; font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+  .sigpad-canvas{ width:100%; height:170px; background:#fff; border-radius:10px; border:1px dashed #9fb0d6; touch-action:none; display:block; }
+  .sigpad-hint{ color:rgba(255,255,255,.5); font-size:.72rem; margin-top:6px; text-align:center; }
+  .sigpad-row{ display:flex; gap:8px; margin-top:10px; }
+  .sigpad-btn{ -webkit-appearance:none; appearance:none; flex:1 1 auto; border:none; border-radius:12px; padding:11px; font-family:inherit; font-size:.86rem; font-weight:600; cursor:pointer; }
+  .sigpad-clear{ background:rgba(255,255,255,.12); color:#fff; flex:0 0 40%; }
+  .sigpad-save{ background:#2f7cf6; color:#fff; }
+  .sigdoc-actions{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .sigdoc-actions .full{ grid-column:1 / -1; }
+  .sigdoc-act{ -webkit-appearance:none; appearance:none; border:none; border-radius:13px; padding:13px; font-family:inherit; font-size:.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .sigdoc-act svg{ width:20px; height:20px; display:block; flex:0 0 auto; }
+  .sigdoc-wa{ background:#73dd5c; color:#021236; }
+  .sigdoc-mail{ background:#2f7cf6; color:#fff; }
+  .sigdoc-dl{ background:rgba(255,255,255,.12); color:#fff; }
+  .sigdoc-status{ grid-column:1 / -1; text-align:center; font-size:.8rem; color:rgba(255,255,255,.8); min-height:1em; }
   /* per-panel document search (by date or number) */
   .doc-search-wrap{ margin:2px 0 10px; }
   .doc-search-input{ -webkit-appearance:none; appearance:none; width:100%; box-sizing:border-box; padding:9px 12px; border:1px solid rgba(255,255,255,.35); border-radius:12px; background:#fff; color:#021236; font-family:inherit; font-size:.85rem; }
@@ -2036,6 +2091,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<!-- הפקת PDF של מסמך חתום (חשבונית/הזמנה/קבלה) בצד הלקוח -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script>
 (function(){
   "use strict";
@@ -4568,13 +4626,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             existing.date = localDateString();
             existing.noOrder = noOrder;
             existing.noOrderReason = noOrderReason;
+            // ודא שגם להזמנה שנערכה יש חשבונית (נוצרת רק אם עדיין אין אחת)
+            if(!noOrder && total > 0) createInvoiceFromOrder(c, existing);
           }
         } else {
-          c.orders.push({
+          const newOrder = {
             id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
             date: localDateString(),
             items, total, discountPercent: discountPct, noOrder, noOrderReason
-          });
+          };
+          c.orders.push(newOrder);
+          // ההזמנה נכנסת אוטומטית גם לחשבוניות — לא רק להיסטוריית ההזמנות בכרטיס הלקוח
+          if(!noOrder && total > 0) createInvoiceFromOrder(c, newOrder);
         }
         // a real (non-"no order") order means this client has now been serviced — drop the "new client" flag
         if(!noOrder) c.newClient = false;
@@ -7076,16 +7139,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     renderOrderDocs();
   }
 
-  function docRowHtml(doc, actionsHtml){
+  function docRowHtml(doc, actionsHtml, docType){
     const numTxt = doc.num ? `#${doc.num} · ` : '';
+    const openBtn = `<button type="button" class="doc-open-btn sys-icon-disc" data-open="${doc.id}" data-doctype="${docType}" title="פתח מסמך לחתימה ושליחה">${DOC_VIEW_SVG}</button>`;
     return `<div class="doc-row" data-id="${doc.id}">
       <div class="doc-info">
-        <div class="doc-line1">${numTxt}${formatDocDate(doc.date)}${doc.agent?` · סוכן: ${escapeHtml(doc.agent)}`:''}</div>
+        <div class="doc-line1">${numTxt}${formatDocDate(doc.date)}${doc.agent?` · סוכן: ${escapeHtml(doc.agent)}`:''}${doc.signature?' · ✍️ חתום':''}</div>
         <div class="doc-items">${docItemsSummary(doc)}</div>
       </div>
       <div class="doc-right">
         <div class="doc-total">₪${(doc.total||0).toFixed(2)}</div>
-        <div class="doc-actions">${actionsHtml}</div>
+        <div class="doc-actions">${openBtn}${actionsHtml}</div>
       </div>
     </div>`;
   }
@@ -7112,19 +7176,19 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const openOrders = (c.orders||[]).filter(o=>!o.noOrder && (o.total||0) > 0 && !orderHasInvoice(c, o)).reverse().filter(o=>docMatchesQuery(o, q));
       const made = (c.invoices||[]).slice().sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
       html += section(cfg.srcTitle,
-        openOrders.map(o=>docRowHtml(o, `<button type="button" class="doc-make-btn" data-make="${o.id}">${cfg.makeLabel}</button>`)),
+        openOrders.map(o=>docRowHtml(o, `<button type="button" class="doc-make-btn" data-make="${o.id}">${cfg.makeLabel}</button>`, 'order')),
         q ? 'אין הזמנות תואמות לחיפוש.' : 'אין הזמנות שממתינות לחשבונית.');
       html += section(cfg.madeTitle,
-        made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`)),
+        made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`, 'invoice')),
         q ? 'אין חשבוניות תואמות לחיפוש.' : 'עדיין לא הופקו חשבוניות ללקוח זה.');
     } else {
       const openInvoices = (c.invoices||[]).filter(inv=>!invoiceHasReceipt(c, inv)).sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
       const made = (c.receipts||[]).slice().sort((a,b)=>(b.num||0)-(a.num||0)).filter(d=>docMatchesQuery(d, q));
       html += section(cfg.srcTitle,
-        openInvoices.map(inv=>docRowHtml(inv, `<button type="button" class="doc-make-btn" data-make="${inv.id}">${cfg.makeLabel}</button>`)),
+        openInvoices.map(inv=>docRowHtml(inv, `<button type="button" class="doc-make-btn" data-make="${inv.id}">${cfg.makeLabel}</button>`, 'invoice')),
         q ? 'אין חשבוניות תואמות לחיפוש.' : 'אין חשבוניות שממתינות לקבלה.');
       html += section(cfg.madeTitle,
-        made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`)),
+        made.map(d=>docRowHtml(d, `<button type="button" class="doc-del-btn sys-icon-disc" data-del="${d.id}" title="מחק">${CATALOG_TRASH_SVG}</button>`, 'receipt')),
         q ? 'אין קבלות תואמות לחיפוש.' : 'עדיין לא הופקו קבלות ללקוח זה.');
     }
     host.innerHTML = html;
@@ -7146,6 +7210,215 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         if(confirm('למחוק את המסמך?')) deleteDoc(c, type, btn.dataset.del);
       });
     });
+    // פתיחת המסמך לצפייה, חתימה דיגיטלית ושליחה
+    host.querySelectorAll('[data-open]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const dt = btn.dataset.doctype, id = btn.dataset.open;
+        let doc = null;
+        if(dt === 'order') doc = (c.orders||[]).find(o=>o.id===id);
+        else if(dt === 'invoice') doc = (c.invoices||[]).find(d=>d.id===id);
+        else if(dt === 'receipt') doc = (c.receipts||[]).find(d=>d.id===id);
+        if(doc) openSignableDoc(c, dt, doc);
+      });
+    });
+  }
+
+  // ===== מסמך חתימה דיגיטלית: בניית המסמך, חתימה, ושליחה כ-PDF =====
+  const DOC_VIEW_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 12h8v1.5H8V12zm0 3h6v1.5H8V15zm0-6h3v1.5H8V9z"/></svg>`;
+  function docTypeLabel(type){ return type === 'invoice' ? 'חשבונית' : type === 'receipt' ? 'קבלה' : 'הזמנה'; }
+  function gMoney(n){ return '₪' + (Number(n)||0).toLocaleString('he-IL', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
+
+  // בונה את גוף המסמך (HTML) מפרטי העסק (הגדרות) + הלקוח + פריטי המסמך
+  function buildDocInnerHtml(c, doc, type){
+    const bd = businessDetails || {};
+    const bizName = bd.invoiceName || bd.name || 'שם העסק';
+    const bizLines = [];
+    if(bd.name && bd.invoiceName && bd.name !== bd.invoiceName) bizLines.push(bd.name);
+    if(bd.taxId) bizLines.push('עוסק מורשה / ח.פ ' + bd.taxId);
+    if(bd.address) bizLines.push(bd.address);
+    if(bd.phone) bizLines.push('טלפון ' + bd.phone);
+    if(bd.mobile) bizLines.push('נייד ' + bd.mobile);
+    if(bd.email) bizLines.push(bd.email);
+    const bizHtml = `<div class="b1">${escapeHtml(bizName)}</div>` + bizLines.map(l=>`<div>${escapeHtml(l)}</div>`).join('');
+
+    const clientName = clientDisplayName(c);
+    const clientSub = c.businessId ? ('ח.פ/ת.ז ' + c.businessId) : '';
+    const title = docTypeLabel(type);
+    const numTxt = doc.num ? ('מס\' ' + doc.num) : '';
+
+    const items = (doc.items||[]);
+    let rows = items.map(it=>{
+      const qty = it.qty || 0;
+      const unit = (it.listPrice != null && it.listPrice !== '') ? Number(it.listPrice)
+        : (it.lineTotal != null && qty ? Number(it.lineTotal)/qty : null);
+      const line = (it.lineTotal != null && it.lineTotal !== '') ? Number(it.lineTotal)
+        : (unit != null ? unit*qty : null);
+      return `<tr><td class="c-qty">${qty}</td><td class="c-desc desc">${escapeHtml(it.name||'')}</td><td class="c-price price">${unit!=null?gMoney(unit):'—'}</td><td class="c-total total">${line!=null?gMoney(line):'—'}</td></tr>`;
+    }).join('');
+    if(!rows) rows = `<tr><td class="c-qty"></td><td class="c-desc">${doc.noOrder?'ללא הזמנה':'—'}</td><td class="c-price"></td><td class="c-total"></td></tr>`;
+
+    const sub = Number(doc.total)||0; // המחירים בכרטיסים נשמרים לפני מע״מ
+    const vat = sub * VAT_RATE;
+    const incl = sub + vat;
+    const vatPct = Math.round(VAT_RATE*100);
+
+    const signHtml = doc.signature
+      ? `<div class="g-sign-box"><img src="${doc.signature}" alt="חתימת הלקוח"></div>${doc.signedAt?`<div class="g-sign-meta">נחתם דיגיטלית · ${escapeHtml(doc.signedAt)}</div>`:''}`
+      : `<div class="g-sign-box"><span class="g-sign-empty">— טרם נחתם —</span></div>`;
+
+    return `<div class="gdoc" id="gdocRender">
+      <div class="g-top">
+        <div class="g-kavod"><div class="k1">לכבוד: ${escapeHtml(clientName)}</div>${clientSub?`<div class="k2">${escapeHtml(clientSub)}</div>`:''}</div>
+        <div class="g-biz">${bizHtml}</div>
+      </div>
+      <div class="g-titlerow">
+        <div><div class="g-bigtitle">${title}</div><div class="g-subtitle">מקור${numTxt?` · ${numTxt}`:''}</div></div>
+        <div class="g-dates"><div>תאריך: ${formatDocDate(doc.date)}</div>${doc.agent?`<div>סוכן: ${escapeHtml(doc.agent)}</div>`:''}</div>
+      </div>
+      <table>
+        <thead><tr><th class="c-qty">כמות</th><th class="c-desc">פירוט</th><th class="c-price">מחיר יח׳</th><th class="c-total">סה״כ</th></tr></thead>
+        <tbody>
+          ${rows}
+          <tr class="sum"><td class="c-qty"></td><td class="c-desc"></td><td class="c-price sumlabel">סה״כ לפני מע״מ</td><td class="c-total total">${gMoney(sub)}</td></tr>
+          <tr class="sum shade"><td class="c-qty"></td><td class="c-desc"></td><td class="c-price sumlabel">מע״מ ${vatPct}%</td><td class="c-total total">${gMoney(vat)}</td></tr>
+          <tr class="sum"><td class="c-qty"></td><td class="c-desc"></td><td class="c-price sumlabel">סה״כ לתשלום</td><td class="c-total total">${gMoney(incl)}</td></tr>
+        </tbody>
+      </table>
+      ${doc.note?`<div style="margin-top:14px;font-size:.74rem;color:#444">הערה: ${escapeHtml(doc.note)}</div>`:''}
+      <div class="g-foot">
+        <div class="g-regards">בברכה,<div class="fn">${escapeHtml(bizName)}</div></div>
+        <div class="g-sign"><div class="g-sign-label">חתימת הלקוח</div>${signHtml}</div>
+      </div>
+    </div>`;
+  }
+
+  // ממיר את אלמנט המסמך ל-PDF (Blob) בעזרת html2canvas + jsPDF
+  async function docToPdfBlob(overlay){
+    const el = overlay.querySelector('#gdocRender');
+    const canvas = await html2canvas(el, { scale: 2, backgroundColor:'#ffffff', useCORS:true, logging:false });
+    const imgData = canvas.toDataURL('image/jpeg', 0.92);
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p','mm','a4');
+    const pw = pdf.internal.pageSize.getWidth();
+    const ph = pdf.internal.pageSize.getHeight();
+    const imgW = pw;
+    const imgH = canvas.height * (pw / canvas.width);
+    let heightLeft = imgH, position = 0;
+    pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH); heightLeft -= ph;
+    while(heightLeft > 0){ position -= ph; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 0, position, imgW, imgH); heightLeft -= ph; }
+    return pdf.output('blob');
+  }
+
+  async function shareSignedDoc(c, type, doc, overlay, mode){
+    const st = overlay.querySelector('#sigdocStatus');
+    st.style.color = 'rgba(255,255,255,.85)'; st.textContent = 'מכין PDF...';
+    let blob;
+    try{ blob = await docToPdfBlob(overlay); }
+    catch(e){ console.error(e); st.style.color='#ff8a8a'; st.textContent='שגיאה בהפקת ה-PDF (נדרש חיבור לאינטרנט).'; return; }
+    const fname = `${docTypeLabel(type)}_${doc.num||''}_${clientDisplayName(c)}.pdf`.replace(/\s+/g,'_').replace(/[\\/:*?"<>|]/g,'');
+    const file = new File([blob], fname, { type:'application/pdf' });
+
+    if(mode === 'download'){
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 5000);
+      st.style.color='#73dd5c'; st.textContent='ה-PDF ירד למכשיר ✓';
+      return;
+    }
+    // שליחה לוואטסאפ/מייל — דרך תפריט השיתוף של המכשיר (הדרך היחידה לצרף קובץ מ-PWA)
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      try{
+        await navigator.share({ files:[file], title:fname, text:`${docTypeLabel(type)} — ${clientDisplayName(c)}` });
+        st.style.color='#73dd5c'; st.textContent = 'נפתח תפריט השיתוף — בחר/י ' + (mode==='whatsapp'?'וואטסאפ':'מייל') + ' ואת הלקוח.';
+      }catch(e){ st.textContent=''; } // המשתמש ביטל
+      return;
+    }
+    // גיבוי (דפדפן שלא תומך בשיתוף קבצים): הורדת ה-PDF + פתיחת הערוץ עם טקסט
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=fname; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    if(mode === 'whatsapp'){
+      const num = (c.phone||'').replace(/\D/g,''); const wn = num.startsWith('0') ? ('972'+num.slice(1)) : num;
+      const txt = encodeURIComponent(`${docTypeLabel(type)} — ${clientDisplayName(c)} (ה-PDF ירד למכשיר, נא לצרף להודעה)`);
+      window.open(wn ? `https://wa.me/${wn}?text=${txt}` : `https://wa.me/?text=${txt}`, '_blank');
+    } else {
+      const subj = encodeURIComponent(`${docTypeLabel(type)} — ${clientDisplayName(c)}`);
+      const body = encodeURIComponent('מצורף המסמך (ה-PDF ירד למכשיר, נא לצרף אותו להודעה).');
+      window.open(`mailto:${encodeURIComponent(c.email||'')}?subject=${subj}&body=${body}`, '_blank');
+    }
+    st.style.color='#ffd479'; st.textContent='שיתוף ישיר לא נתמך בדפדפן — ה-PDF ירד למכשיר, יש לצרף ידנית.';
+  }
+
+  // פותח את המסמך בחלון מלא: צפייה, חתימה דיגיטלית, שמירה ושליחה
+  function openSignableDoc(c, type, doc){
+    const overlay = document.createElement('div');
+    overlay.className = 'sigdoc-overlay';
+    overlay.innerHTML = `
+      <div class="sigdoc-box">
+        <div class="sigdoc-head">
+          <span class="sigdoc-title">${docTypeLabel(type)}${doc.num?` #${doc.num}`:''} — ${escapeHtml(clientDisplayName(c))}</span>
+          <button type="button" class="sigdoc-close" title="סגור">✕</button>
+        </div>
+        <div class="sigdoc-body">
+          <div class="sigdoc-doc-wrap" id="sigdocWrap">${buildDocInnerHtml(c, doc, type)}</div>
+          <div class="sigpad-wrap">
+            <div class="sigpad-title">חתימת הלקוח</div>
+            <canvas class="sigpad-canvas" id="sigpadCanvas"></canvas>
+            <div class="sigpad-hint">חתום/י כאן באצבע, ואז "שמור חתימה"</div>
+            <div class="sigpad-row">
+              <button type="button" class="sigpad-btn sigpad-clear">נקה</button>
+              <button type="button" class="sigpad-btn sigpad-save">שמור חתימה</button>
+            </div>
+          </div>
+          <div class="sigdoc-actions">
+            <button type="button" class="sigdoc-act sigdoc-wa full">${WHATSAPP_ICON_SVG}<span>שליחה בוואטסאפ</span></button>
+            <button type="button" class="sigdoc-act sigdoc-mail">שליחה במייל</button>
+            <button type="button" class="sigdoc-act sigdoc-dl">הורדת PDF</button>
+            <div class="sigdoc-status" id="sigdocStatus"></div>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const close = ()=>overlay.remove();
+    overlay.querySelector('.sigdoc-close').addEventListener('click', close);
+    overlay.addEventListener('click', e=>{ if(e.target === overlay) close(); });
+    function rerenderDoc(){ overlay.querySelector('#sigdocWrap').innerHTML = buildDocInnerHtml(c, doc, type); }
+
+    // --- לוח חתימה ---
+    const canvas = overlay.querySelector('#sigpadCanvas');
+    const ctx = canvas.getContext('2d');
+    let drawing=false, hasInk=false, last=null;
+    function sizeCanvas(){
+      const rect = canvas.getBoundingClientRect();
+      if(!rect.width) return;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(rect.width*dpr); canvas.height = Math.round(rect.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+      ctx.lineWidth=2.4; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#0b1e3a';
+    }
+    requestAnimationFrame(sizeCanvas);
+    function pos(e){ const r=canvas.getBoundingClientRect(); const t=e.touches?e.touches[0]:e; return { x:t.clientX-r.left, y:t.clientY-r.top }; }
+    function start(e){ e.preventDefault(); drawing=true; last=pos(e); }
+    function move(e){ if(!drawing) return; e.preventDefault(); const p=pos(e); ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(p.x,p.y); ctx.stroke(); last=p; hasInk=true; }
+    function stop(){ drawing=false; }
+    canvas.addEventListener('mousedown',start); canvas.addEventListener('mousemove',move); window.addEventListener('mouseup',stop);
+    canvas.addEventListener('touchstart',start,{passive:false}); canvas.addEventListener('touchmove',move,{passive:false}); canvas.addEventListener('touchend',stop);
+
+    overlay.querySelector('.sigpad-clear').addEventListener('click', ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); hasInk=false; });
+    overlay.querySelector('.sigpad-save').addEventListener('click', ()=>{
+      if(!hasInk){ alert('אין חתימה — חתום/י תחילה על המשבצת הלבנה.'); return; }
+      doc.signature = canvas.toDataURL('image/png');
+      doc.signedAt = new Date().toLocaleString('he-IL');
+      saveData();
+      rerenderDoc();
+      const st = overlay.querySelector('#sigdocStatus'); st.style.color='#73dd5c'; st.textContent='החתימה נשמרה על המסמך ✓';
+      try{ renderOrderDocs(); }catch(_){}
+    });
+
+    // --- שליחה ---
+    overlay.querySelector('.sigdoc-wa').addEventListener('click', ()=>shareSignedDoc(c, type, doc, overlay, 'whatsapp'));
+    overlay.querySelector('.sigdoc-mail').addEventListener('click', ()=>shareSignedDoc(c, type, doc, overlay, 'email'));
+    overlay.querySelector('.sigdoc-dl').addEventListener('click', ()=>shareSignedDoc(c, type, doc, overlay, 'download'));
   }
 
   // the orders + invoices + receipts panels open/close like the settings/inventory panels
@@ -7416,16 +7689,21 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           existing.items = items; existing.total = total; existing.discountPercent = discountPct;
           existing.date = localDateString(); existing.noOrder = noOrder; existing.noOrderReason = noOrderReason;
           existing.agent = agent; existing.note = note;
+          // ודא שגם להזמנה שנערכה יש חשבונית (נוצרת רק אם עדיין אין אחת)
+          if(!noOrder && total > 0) createInvoiceFromOrder(c, existing);
         }
         ordEditingOrderId = null;
         recomputeLastInvoice(c); // editing may change the most-recent order's total
       } else {
-        c.orders.push({
+        const newOrder = {
           id: Date.now().toString(36) + Math.random().toString(36).slice(2,6),
           date: localDateString(),
           items, total, discountPercent: discountPct, noOrder, noOrderReason,
           agent, note
-        });
+        };
+        c.orders.push(newOrder);
+        // ההזמנה נכנסת אוטומטית גם לחשבוניות — לא רק להיסטוריית ההזמנות בכרטיס הלקוח
+        if(!noOrder && total > 0) createInvoiceFromOrder(c, newOrder);
         // the new order's total becomes this client's "last invoice" too, exactly like the popup
         c.lastInvoice = total.toFixed(2);
         c.lastInvoiceDate = localDateString();
