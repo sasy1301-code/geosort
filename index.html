@@ -47,7 +47,11 @@
     color:var(--text);
     overflow:hidden;
     -webkit-text-size-adjust:100%; -moz-text-size-adjust:100%; text-size-adjust:100%; /* stop mobile browsers auto-inflating some text */
+    /* אין העתקת/סימון טקסט בעכבר בכל המערכת */
+    user-select:none; -webkit-user-select:none; -webkit-touch-callout:none;
   }
+  /* שדות קלט חייבים להישאר ניתנים לעריכה/סימון כדי שאפשר יהיה להקליד ולתקן */
+  input, textarea, select, [contenteditable="true"], [contenteditable=""]{ user-select:text; -webkit-user-select:text; }
   #bgImage{
     display:none;
     position:fixed; inset:-15%; z-index:-1; pointer-events:none;
@@ -7118,13 +7122,19 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(dist < 0.0001){ dx = (Math.random()-0.5); dy = (Math.random()-0.5); dist = Math.hypot(dx,dy) || 0.0001; } // חופפים בדיוק — הזזה זעירה
     const nx = dx/dist, ny = dy/dist;
     const overlap = minD - dist;
-    const imA = a.grabbed ? 0 : 1/(a.r*a.r);   // 1/מסה (מסה ~ שטח)
-    const imB = b.grabbed ? 0 : 1/(b.r*b.r);
+    // עיגול נאחז (grabbed) או "קפוא" (frozen — כבר נח בערימה) = מסה אינסופית: דוחף אך לא נדחף
+    const imA = (a.grabbed || a.frozen) ? 0 : 1/(a.r*a.r);
+    const imB = (b.grabbed || b.frozen) ? 0 : 1/(b.r*b.r);
     const tot = imA + imB;
-    if(tot === 0) return;                       // שניהם נאחזים
+    if(tot === 0) return;                       // שניהם קבועים
     // מפרידים כדי שלא יחפפו
     a.x -= nx*overlap*(imA/tot); a.y -= ny*overlap*(imA/tot);
     b.x += nx*overlap*(imB/tot); b.y += ny*overlap*(imB/tot);
+    // מצב "ערימה שקטה" (קטלוג): מסמנים עיגול שנשען על עיגול קפוא שמתחתיו — כדי שיוכל להיקפא בעצמו
+    if(_invBalls && _invBalls.stackFreeze){
+      if(a.frozen && !b.frozen && a.y > b.y) b._sup = true;
+      if(b.frozen && !a.frozen && b.y > a.y) a._sup = true;
+    }
     // מהירות יחסית לאורך הנורמל
     const vn = (b.vx - a.vx)*nx + (b.vy - a.vy)*ny;
     if(vn > 0) return;                          // כבר מתרחקים
@@ -7140,9 +7150,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const layer = _invBalls.layer, ww = layer.clientWidth, hh = layer.clientHeight;
     const { REST, WALL, FRICTION, REST_V } = _invBalls;
     const balls = _invBalls.balls;
-    // 1) אינטגרציה + דפנות (עיגול נאחז/טרם-נפל לא זז כאן)
+    // 1) אינטגרציה + דפנות (עיגול נאחז/קפוא/טרם-נפל לא זז כאן)
     balls.forEach(b=>{
-      if(b.grabbed || elapsed < b.delay) return;
+      if(b.grabbed || b.frozen || elapsed < b.delay) return;
       b.vx += _invBalls.gx; b.vy += _invBalls.gy;
       b.vx *= FRICTION; b.vy *= FRICTION;
       b.x += b.vx; b.y += b.vy;
@@ -7164,6 +7174,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           const arr=grid.get((gx+ox)+','+(gy+oy)); if(!arr) continue;
           for(let m=0;m<arr.length;m++){ const o=arr[m]; if(o._i > b._i) _invResolve(b, o); }
         }
+      }
+    }
+    // 2.5) מצב "ערימה שקטה" (קטלוג): עיגול איטי שנשען על הרצפה או על עיגול קפוא → נקפא ולא זז יותר
+    if(_invBalls.stackFreeze){
+      for(let k=0;k<active.length;k++){
+        const b = active[k];
+        if(b.frozen || b.grabbed){ b._sup = false; continue; }
+        const slow = (b.vx*b.vx + b.vy*b.vy) < 0.9;
+        const onFloor = b.y + b.r >= hh - 1.5;
+        if(slow && (onFloor || b._sup)){ b.frozen = true; b.vx = 0; b.vy = 0; }
+        b._sup = false;
       }
     }
     // 3) שמירה בתוך הדפנות אחרי ההתנגשויות + ציור
@@ -7204,11 +7225,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
     _invBalls = { layer, balls, raf:0, t0:null, gx:0,
       gy: cfg.gy || 0.6, G: cfg.gy || 0.6,
-      REST:0.62, WALL:0.66,
+      REST: (cfg.rest != null ? cfg.rest : 0.62), WALL:0.66,
       FRICTION: cfg.friction || 0.992,
       REST_V: cfg.restV || 0.4,
       e: (cfg.e != null ? cfg.e : 0.78),
       passes: cfg.passes || 3,
+      stackFreeze: !!cfg.stackFreeze,
       maxR };
     _invBalls.raf = requestAnimationFrame(_invTick);
     window.addEventListener('pointerdown', onInvGrabDown, true); // capture — לתפוס לפני התוכן
@@ -7222,8 +7244,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function startCatalogBalls(){
     const w = window.innerWidth, h = window.innerHeight;
     const count = Math.max(180, Math.min(400, Math.round(w*h/580))); // כמות שממלאת את המסך
-    startBallsScene({ count, delayMax:1900, spawnSpread:h*0.55, gy:0.27, e:0.35, passes:5, friction:0.985, restV:0.25,
-      radius:()=> 7 + Math.random()*15 }); // קטנים-בינוניים 7..22
+    // ערימה שקטה: נופלים אחד על השני ונקפאים במקום — לא דוחפים/מזיזים אחד את השני בנגיעה
+    startBallsScene({ count, delayMax:1900, spawnSpread:h*0.55, gy:0.3, e:0, passes:5, friction:0.99, rest:0.12, restV:0.6,
+      stackFreeze:true, radius:()=> 7 + Math.random()*15 }); // קטנים-בינוניים 7..22
   }
   function stopInventoryBalls(){
     if(!_invBalls) return;
@@ -7259,6 +7282,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     e.preventDefault();
     const t = e.timeStamp || performance.now();
     ball.grabbed = true;
+    ball.frozen = false;                 // מרימים עיגול קפוא — משחרר אותו לתפיסה/זריקה
     _invDrag = { ball, pointerId:e.pointerId, ox: ball.x - x, oy: ball.y - y, lastX:x, lastY:y, lastT:t, vx:0, vy:0 };
     window.addEventListener('pointermove', onInvGrabMove, { passive:false });
     window.addEventListener('pointerup', onInvGrabUp);
