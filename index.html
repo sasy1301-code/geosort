@@ -7333,10 +7333,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   async function shareSignedDoc(c, type, doc, overlay, mode){
     const st = overlay.querySelector('#sigdocStatus');
-    // וואטסאפ נשלח תמיד ישירות למספר של הלקוח מהכרטיס — בדיקה לפני שמפיקים PDF
-    if(mode === 'whatsapp' && !(c.phone||'').replace(/\D/g,'')){
-      st.style.color='#ff8a8a'; st.textContent='ללקוח אין מספר טלפון בכרטיס — הוסף/י מספר כדי לשלוח בוואטסאפ.'; return;
-    }
     st.style.color = 'rgba(255,255,255,.85)'; st.textContent = 'מכין PDF...';
     let blob;
     try{ blob = await docToPdfBlob(overlay); }
@@ -7346,30 +7342,32 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
     if(mode === 'download'){ _dlBlob(blob, fname); st.style.color='#73dd5c'; st.textContent='ה-PDF ירד למכשיר ✓'; return; }
 
-    if(mode === 'whatsapp'){
-      // פותחים ישירות את הצ׳אט של הלקוח לפי המספר בכרטיס. וואטסאפ לא מאפשר צירוף
-      // קובץ אוטומטי דרך קישור, לכן ה-PDF יורד למכשיר כדי לצרפו בלחיצה אחת (📎).
-      const digits = (c.phone||'').replace(/\D/g,'');
-      const wn = digits.startsWith('0') ? ('972'+digits.slice(1)) : digits;
-      const bizName = (businessDetails && (businessDetails.invoiceName || businessDetails.name)) || '';
-      const txt = encodeURIComponent(`שלום, מצורפת ${docTypeLabel(type)}${doc.num?` מס' ${doc.num}`:''}${bizName?` מ-${bizName}`:''}.`);
-      _dlBlob(blob, fname);
-      setTimeout(()=>{ window.open(`https://wa.me/${wn}?text=${txt}`, '_blank'); }, 600);
-      st.style.color='#73dd5c'; st.textContent='נפתח וואטסאפ ישירות לצ׳אט של הלקוח. ה-PDF ירד למכשיר — צרף/י אותו בלחיצה על 📎.';
+    // וואטסאפ/מייל: שולחים את *הקובץ עצמו* דרך תפריט השיתוף של המכשיר — זו הדרך היחידה
+    // לצרף קובץ מ-PWA. (וואטסאפ לא מאפשר לצרף קובץ אוטומטית לפי מספר דרך קישור, לכן
+    // בשליחת הקובץ בוחרים את הנמען בתפריט השיתוף.)
+    const bizName = (businessDetails && (businessDetails.invoiceName || businessDetails.name)) || '';
+    const shareText = `שלום, מצורפת ${docTypeLabel(type)}${doc.num?` מס' ${doc.num}`:''}${bizName?` מ-${bizName}`:''}.`;
+    if(navigator.canShare && navigator.canShare({ files:[file] })){
+      try{
+        await navigator.share({ files:[file], title:fname, text:shareText });
+        st.style.color='#73dd5c'; st.textContent = 'הקובץ מוכן — בחר/י ' + (mode==='whatsapp'?'וואטסאפ':'מייל') + ' ואת הלקוח בתפריט השיתוף.';
+      }catch(e){ st.textContent=''; } // המשתמש ביטל
       return;
     }
-
-    // מייל — אם יש מייל בכרטיס הלקוח נפתח ישירות לכתובת שלו, אחרת מייל ריק להשלמה ידנית.
-    // ה-PDF יורד למכשיר כדי לצרפו (מייל לא מאפשר צירוף קובץ אוטומטי דרך קישור).
+    // גיבוי (דפדפן במחשב שלא תומך בשליחת קובץ): מורידים את ה-PDF ופותחים את הערוץ עם הפרטים מהכרטיס
     _dlBlob(blob, fname);
-    const email = (c.email||'').trim();
-    const subj = encodeURIComponent(`${docTypeLabel(type)}${doc.num?` מס' ${doc.num}`:''} — ${clientDisplayName(c)}`);
-    const body = encodeURIComponent('שלום,\nמצורף המסמך (ה-PDF ירד למכשיר, נא לצרפו להודעה).');
-    window.open(`mailto:${encodeURIComponent(email)}?subject=${subj}&body=${body}`, '_blank');
-    st.style.color = email ? '#73dd5c' : '#ffd479';
-    st.textContent = email
-      ? 'נפתח מייל לכתובת של הלקוח — צרף/י את ה-PDF שירד למכשיר.'
-      : 'ללקוח אין מייל בכרטיס — נפתח מייל ריק, הוסף/י כתובת וצרף/י את ה-PDF שירד.';
+    if(mode === 'whatsapp'){
+      const digits = (c.phone||'').replace(/\D/g,''); const wn = digits.startsWith('0') ? ('972'+digits.slice(1)) : digits;
+      const txt = encodeURIComponent(shareText + ' (ה-PDF ירד למכשיר, נא לצרפו)');
+      window.open(wn ? `https://wa.me/${wn}?text=${txt}` : `https://wa.me/?text=${txt}`, '_blank');
+      st.style.color='#ffd479'; st.textContent='הדפדפן במחשב לא תומך בשליחת הקובץ ישירות — ה-PDF ירד, יש לצרפו בצ׳אט.';
+    } else {
+      const email = (c.email||'').trim();
+      const subj = encodeURIComponent(`${docTypeLabel(type)}${doc.num?` מס' ${doc.num}`:''} — ${clientDisplayName(c)}`);
+      const body = encodeURIComponent('שלום,\nמצורף המסמך (ה-PDF ירד למכשיר, נא לצרפו להודעה).');
+      window.open(`mailto:${encodeURIComponent(email)}?subject=${subj}&body=${body}`, '_blank');
+      st.style.color='#ffd479'; st.textContent='הדפדפן לא תומך בצירוף קובץ ישירות — ה-PDF ירד, יש לצרפו למייל.';
+    }
   }
 
   // פותח את המסמך בחלון מלא: צפייה, חתימה דיגיטלית, שמירה ושליחה
