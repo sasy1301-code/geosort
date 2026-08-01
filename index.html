@@ -7128,7 +7128,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     // מהירות יחסית לאורך הנורמל
     const vn = (b.vx - a.vx)*nx + (b.vy - a.vy)*ny;
     if(vn > 0) return;                          // כבר מתרחקים
-    const e = 0.78;                              // אלסטיות ההתנגשות
+    const e = (_invBalls && _invBalls.e != null) ? _invBalls.e : 0.78; // אלסטיות (לפי הסצנה)
     const j = -(1 + e) * vn / tot;              // עוצמת הפגיעה
     a.vx -= j*imA*nx; a.vy -= j*imA*ny;
     b.vx += j*imB*nx; b.vy += j*imB*ny;
@@ -7151,11 +7151,19 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(b.x - b.r < 0){ b.x = b.r; b.vx = -b.vx * WALL; }
       if(b.x + b.r > ww){ b.x = ww - b.r; b.vx = -b.vx * WALL; }
     });
-    // 2) התנגשויות בין העיגולים (כמה מעברים ליציבות) — רק עיגולים שכבר נפלו
+    // 2) התנגשויות בין העיגולים — עם רשת מרחבית (grid) כדי לתמוך במאות עיגולים ביעילות
     const active = balls.filter(b=> b.grabbed || elapsed >= b.delay);
-    for(let pass=0; pass<3; pass++){
-      for(let i=0;i<active.length;i++){
-        for(let j=i+1;j<active.length;j++){ _invResolve(active[i], active[j]); }
+    const cell = Math.max(8, (_invBalls.maxR || 36) * 2 + 2);
+    const PASSES = _invBalls.passes || 3;
+    for(let pass=0; pass<PASSES; pass++){
+      const grid = new Map();
+      for(let k=0;k<active.length;k++){ const b=active[k]; b._i=k; const gk=(Math.floor(b.x/cell))+','+(Math.floor(b.y/cell)); let arr=grid.get(gk); if(!arr){ arr=[]; grid.set(gk,arr); } arr.push(b); }
+      for(let k=0;k<active.length;k++){
+        const b=active[k]; const gx=Math.floor(b.x/cell), gy=Math.floor(b.y/cell);
+        for(let ox=-1;ox<=1;ox++) for(let oy=-1;oy<=1;oy++){
+          const arr=grid.get((gx+ox)+','+(gy+oy)); if(!arr) continue;
+          for(let m=0;m<arr.length;m++){ const o=arr[m]; if(o._i > b._i) _invResolve(b, o); }
+        }
       }
     }
     // 3) שמירה בתוך הדפנות אחרי ההתנגשויות + ציור
@@ -7168,18 +7176,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     });
     _invBalls.raf = requestAnimationFrame(_invTick);
   }
-  function startInventoryBalls(){
+  function startBallsScene(cfg){
     stopInventoryBalls();
     const layer = document.createElement('div');
     layer.id = 'inventoryBallsLayer';
     document.body.appendChild(layer);
     const w = layer.clientWidth || window.innerWidth, h = layer.clientHeight || window.innerHeight;
     const balls = [];
-    // 8 גדולים + 5 קטנים + עוד 20 בגדלים מעורבים = 33
-    for(let i=0;i<33;i++){
-      const r = (i < 8) ? (13 + Math.random()*23)          // גדולים 13..36
-              : (i < 13) ? (6 + Math.random()*8)            // קטנים 6..14
-              : (6 + Math.random()*29);                     // 20 הנוספים: גדלים מעורבים 6..35
+    let maxR = 0;
+    const spread = cfg.spawnSpread || 60;
+    for(let i=0;i<cfg.count;i++){
+      const r = cfg.radius(i);
+      maxR = Math.max(maxR, r);
       const el = document.createElement('div');
       el.className = 'inv-ball';
       el.style.width = el.style.height = (r*2) + 'px';
@@ -7188,16 +7196,34 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       balls.push({
         el, r,
         x: r + Math.random()*(w - 2*r),
-        y: -r - 20 - Math.random()*60,               // מתחילים ממש מעל המסך
+        y: -r - 20 - Math.random()*spread,           // מתחילים מעל המסך
         vx: (Math.random()*2 - 1)*1.2,
         vy: 0,
-        delay: Math.random()*2600                     // כל עיגול נופל בזמן משלו (0..2.6ש)
+        delay: Math.random()*(cfg.delayMax || 2600)
       });
     }
-    _invBalls = { layer, balls, raf:0, t0:null, gx:0, gy:0.6, G:0.6, REST:0.62, WALL:0.66, FRICTION:0.992, REST_V:0.4 };
+    _invBalls = { layer, balls, raf:0, t0:null, gx:0,
+      gy: cfg.gy || 0.6, G: cfg.gy || 0.6,
+      REST:0.62, WALL:0.66,
+      FRICTION: cfg.friction || 0.992,
+      REST_V: cfg.restV || 0.4,
+      e: (cfg.e != null ? cfg.e : 0.78),
+      passes: cfg.passes || 3,
+      maxR };
     _invBalls.raf = requestAnimationFrame(_invTick);
     window.addEventListener('pointerdown', onInvGrabDown, true); // capture — לתפוס לפני התוכן
     ensureInvMotion();
+  }
+  // עמוד מלאים: 33 עיגולים בגדלים מעורבים (אנרגטי)
+  function startInventoryBalls(){
+    startBallsScene({ count:33, delayMax:2600, radius:(i)=> (i<8) ? (13+Math.random()*23) : (i<13) ? (6+Math.random()*8) : (6+Math.random()*29) });
+  }
+  // עמוד מוצרים ומחירים: ממלא את המסך בעיגולים קטנים-בינוניים (ערימה צפופה ורגועה)
+  function startCatalogBalls(){
+    const w = window.innerWidth, h = window.innerHeight;
+    const count = Math.max(180, Math.min(400, Math.round(w*h/580))); // כמות שממלאת את המסך
+    startBallsScene({ count, delayMax:1900, spawnSpread:h*0.55, gy:0.27, e:0.35, passes:5, friction:0.985, restV:0.25,
+      radius:()=> 7 + Math.random()*15 }); // קטנים-בינוניים 7..22
   }
   function stopInventoryBalls(){
     if(!_invBalls) return;
@@ -7222,9 +7248,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const x = e.clientX, y = e.clientY;
     const ball = _invBallAt(x, y);
     if(!ball) return;
-    // תופסים רק עיגול שגלוי בפועל — לא כזה שמוסתר מאחורי סטריפ/תוכן
+    // תופסים רק עיגול שגלוי בפועל — כלומר הלחיצה על אזור ריק (מיכל), לא על כרטיס/פס/כפתור שמסתיר אותו
     const top = document.elementFromPoint(x, y);
-    if(top && top.closest && top.closest('section.panel, button, input, textarea, select, a, label, .side-menu, .order-modal-overlay, .sigdoc-overlay, .wab-overlay, .photo-modal-overlay')) return;
+    const isEmptyArea = top && (
+      top === document.body || top === document.documentElement ||
+      (top.classList && (top.classList.contains('products-view') || top.classList.contains('products-inner') || top.classList.contains('app'))) ||
+      top.id === 'inventoriesView' || top.id === 'productsView'
+    );
+    if(!isEmptyArea) return;
     e.preventDefault();
     const t = e.timeStamp || performance.now();
     ball.grabbed = true;
@@ -7267,7 +7298,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function switchView(view){
     if(!['customers','products','orders','settings','inventories'].includes(view)) return;
     currentView = view;
-    if(view !== 'inventories') stopInventoryBalls();   // עוזבים מלאים → עוצרים את הכדורים
+    if(view !== 'inventories' && view !== 'products') stopInventoryBalls(); // עוזבים עמוד עם כדורים → עוצרים
     hideAllViews();
     if(view === 'settings'){
       settingsViewEl.classList.remove('view-hidden');
@@ -7279,6 +7310,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     } else if(view === 'products'){
       productsViewEl.classList.remove('view-hidden');
       renderCatalog();
+      startCatalogBalls();                              // ממלא את המסך בעיגולים
     } else if(view === 'orders'){
       ordersViewEl.classList.remove('view-hidden');
       renderOrdersView();
