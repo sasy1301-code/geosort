@@ -355,7 +355,7 @@
   .sigpad-canvas{ width:100%; height:96px; background:#fff; border-radius:10px; border:1px dashed #9fb0d6; touch-action:none; display:block; }
   .sigpad-hint{ color:rgba(255,255,255,.5); font-size:.68rem; margin-top:5px; text-align:center; }
   .sigpad-row{ display:flex; gap:8px; margin-top:8px; }
-  .sigpad-btn{ -webkit-appearance:none; appearance:none; flex:1 1 auto; border:none; border-radius:12px; padding:11px; font-family:inherit; font-size:.86rem; font-weight:600; cursor:pointer; }
+  .sigpad-btn{ -webkit-appearance:none; appearance:none; flex:1 1 auto; border:none; border-radius:999px; padding:12px; font-family:inherit; font-size:.86rem; font-weight:600; cursor:pointer; }
   .sigpad-clear{ background:rgba(255,255,255,.12); color:#fff; flex:0 0 40%; }
   .sigpad-save{ background:#2f7cf6; color:#fff; }
   .sigdoc-actions{ flex:0 0 auto; display:flex; flex-direction:column; gap:9px; }
@@ -366,10 +366,10 @@
   .sigdoc-act{ -webkit-appearance:none; appearance:none; width:100%; border:none; border-radius:999px; padding:13px; font-family:inherit; font-size:.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
   .sigdoc-act svg{ width:20px; height:20px; display:block; flex:0 0 auto; }
   .sigdoc-wa{ background:#73dd5c; color:#021236; }
-  .sigdoc-mail{ background:#2f7cf6; color:#fff; }
+  .sigdoc-mail{ background:#2ce7d6; color:#021236; }
   .sigdoc-dl{ background:rgba(255,255,255,.12); color:#fff; }
   .sigdoc-status{ text-align:center; font-size:.8rem; color:rgba(255,255,255,.8); min-height:1em; }
-  .sigdoc-confirm{ background:#2ce7d6; color:#021236; margin-top:2px; }
+  .sigdoc-confirm{ background:#2f7cf6; color:#fff; margin-top:2px; }
   /* per-panel document search (by date or number) */
   .doc-search-wrap{ margin:2px 0 10px; }
   .doc-search-input{ -webkit-appearance:none; appearance:none; width:100%; box-sizing:border-box; padding:9px 12px; border:1px solid rgba(255,255,255,.35); border-radius:12px; background:#fff; color:#021236; font-family:inherit; font-size:.85rem; }
@@ -1973,11 +1973,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             <button type="button" class="settings-add-btn" id="bizSaveBtn">שמור פרטי עסק</button>
             <div id="bizSaveStatus" class="settings-backup-status"></div>
           </div>
+        </div>
+      </section>
 
-          <div class="settings-sep" aria-hidden="true"></div>
-
+      <section class="panel" id="settingsWhatsappPanel">
+        <h2 id="settingsWhatsappHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">הודעת וואטסאפ כללית</span>
+          <span id="settingsWhatsappChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
+        </h2>
+        <div id="settingsWhatsappBody" class="animated-collapse">
           <div class="settings-section">
-            <label class="ord-field-label" for="bizWhatsappGeneral">הודעת וואטסאפ כללי</label>
             <div class="settings-backup-note" style="margin:0 0 8px">הודעת וואטסאפ מוכנה מראש. לחיצה על "החל על כל הלקוחות" תרשום אותה באופן גורף לכל הלקוחות הקיימים במערכת (מחליפה את ההודעה האישית הקיימת אצל כל לקוח).</div>
             <textarea id="bizWhatsappGeneral" class="settings-line-input" style="min-height:150px;resize:vertical;line-height:1.5" placeholder="כתוב כאן את הודעת הוואטסאפ הכללית..."></textarea>
             <button type="button" class="settings-add-btn" id="bizWaApplyAllBtn" style="background:#73dd5c;color:#021236">החל על כל הלקוחות (גורף)</button>
@@ -6307,6 +6311,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // ===== פרטי העסק שלי — פתיחה/סגירה, מילוי השדות, שמירה, והחלה גורפת של הודעת וואטסאפ =====
   document.getElementById('settingsBusinessHeader').addEventListener('click', ()=>{
     toggleAnimatedCollapse(document.getElementById('settingsBusinessBody'), document.getElementById('settingsBusinessChevron'));
+  });
+  document.getElementById('settingsWhatsappHeader').addEventListener('click', ()=>{
+    toggleAnimatedCollapse(document.getElementById('settingsWhatsappBody'), document.getElementById('settingsWhatsappChevron'));
   });
   const BIZ_FIELD_MAP = { bizName:'name', bizInvoiceName:'invoiceName', bizTaxId:'taxId', bizEmail:'email',
     bizAddress:'address', bizPhone:'phone', bizMobile:'mobile', bizDailyReportMobile:'dailyReportMobile',
