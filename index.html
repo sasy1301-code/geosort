@@ -7262,6 +7262,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const large=(t1-t0)>180?1:0;
     return `M ${x0o.toFixed(2)} ${y0o.toFixed(2)} A ${Ro} ${Ro} 0 ${large} 1 ${x1o.toFixed(2)} ${y1o.toFixed(2)} L ${x1i.toFixed(2)} ${y1i.toFixed(2)} A ${Ri} ${Ri} 0 ${large} 0 ${x0i.toFixed(2)} ${y0i.toFixed(2)} Z`;
   }
+  // עיגול מלא (שני קשתות 180°) — יציב, לא מתנוון כמו קשת של 360°
+  function _statCircle(cx,cy,R){ return `M ${cx} ${(cy-R).toFixed(2)} A ${R} ${R} 0 1 1 ${cx} ${(cy+R).toFixed(2)} A ${R} ${R} 0 1 1 ${cx} ${(cy-R).toFixed(2)} Z`; }
+  // טבעת מלאה: דיסקה חיצונית פחות דיסקה פנימית (fill-rule:evenodd) — לשימוש כשסוג יחיד ממלא 100%
+  function _statRing(cx,cy,Ro,Ri){ return _statCircle(cx,cy,Ro) + ' ' + _statCircle(cx,cy,Ri); }
   function _statMoney(n){ return '₪' + Math.round(Number(n)||0).toLocaleString('he-IL'); }
   function renderClientStats(){
     const host = document.getElementById('clientStatsHost');
@@ -7299,10 +7303,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     // ללא רווח לבן בין הצבעים — חפיפה זעירה מבטלת קו־שיער בין החלקים
     const OVER = 0.6;
     const active = ranges.filter(r=>r.a1-r.a0>0.01);
-    const paths = active.map((r,i)=>{
-      const a0 = r.a0, a1 = (i < active.length-1 || active.length===1) ? r.a1 + OVER : r.a1;
-      return `<path d="${_statArc(cx,cy,Ro,Ri,a0,a1)}" fill="${r.s.color}"/>`;
-    }).join('');
+    let paths;
+    if(active.length === 1 && (active[0].a1 - active[0].a0) >= 359.9){
+      // סוג יחיד ממלא את כל הטבעת (למשל הזמנות בלבד, ללא חשבוניות/קבלות) — טבעת מלאה יציבה
+      paths = `<path d="${_statRing(cx,cy,Ro,Ri)}" fill="${active[0].s.color}" fill-rule="evenodd"/>`;
+    } else {
+      paths = active.map((r,i)=>{
+        // חפיפה זעירה בין החלקים כדי שלא ייווצר קו-שיער לבן; לא מוסיפים לחלק האחרון כדי לא לחרוג מ-360°
+        const a0 = r.a0, a1 = (i < active.length-1) ? r.a1 + OVER : r.a1;
+        return `<path d="${_statArc(cx,cy,Ro,Ri,a0,a1)}" fill="${r.s.color}"/>`;
+      }).join('');
+    }
     const colorAt = (tdeg)=>{ const a=((tdeg%360)+360)%360; for(const r of ranges){ if(a>=r.a0 && a<r.a1) return r.s.color; } return ranges.length?ranges[ranges.length-1].s.color:'#888'; };
     // בועות דקורטיביות מרוחקות יותר עם גדלים מגוונים — [זווית, מרחק(0..1), גודל px]
     const bubbleDefs = [
