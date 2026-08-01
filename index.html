@@ -7116,6 +7116,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const layer = _invBalls.layer, ww = layer.clientWidth, hh = layer.clientHeight;
     const { REST, WALL, FRICTION, REST_V } = _invBalls;
     _invBalls.balls.forEach(b=>{
+      if(b.grabbed){ b.el.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`; return; } // נאחז ע״י האצבע
       // כל עיגול מתחיל ליפול בזמן משלו — לא כולם יחד
       if(elapsed < b.delay){ b.el.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`; return; }
       b.vx += _invBalls.gx; b.vy += _invBalls.gy;
@@ -7155,13 +7156,72 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
     _invBalls = { layer, balls, raf:0, t0:null, gx:0, gy:0.6, G:0.6, REST:0.62, WALL:0.66, FRICTION:0.992, REST_V:0.4 };
     _invBalls.raf = requestAnimationFrame(_invTick);
+    window.addEventListener('pointerdown', onInvGrabDown, true); // capture — לתפוס לפני התוכן
     ensureInvMotion();
   }
   function stopInventoryBalls(){
     if(!_invBalls) return;
     cancelAnimationFrame(_invBalls.raf);
     try{ _invBalls.layer.remove(); }catch(_){}
+    window.removeEventListener('pointerdown', onInvGrabDown, true);
+    endInvDrag();
     _invBalls = null;                                 // המאזין נשאר אך לא עושה כלום כשאין כדורים
+  }
+
+  /* ===== תפיסה וזריקה של עיגול עם האצבע — נזרק לפי מהירות ההחלקה ===== */
+  let _invDrag = null;
+  const _invPreventScroll = (e)=>{ if(_invDrag) e.preventDefault(); };
+  function _invBallAt(x, y){
+    if(!_invBalls) return null;
+    for(let i=_invBalls.balls.length-1; i>=0; i--){ const b=_invBalls.balls[i]; const dx=x-b.x, dy=y-b.y; if(dx*dx+dy*dy <= (b.r+4)*(b.r+4)) return b; }
+    return null;
+  }
+  function onInvGrabDown(e){
+    if(!_invBalls || _invDrag) return;
+    if(e.pointerType === 'mouse' && e.button !== 0) return;
+    const x = e.clientX, y = e.clientY;
+    const ball = _invBallAt(x, y);
+    if(!ball) return;
+    // תופסים רק עיגול שגלוי בפועל — לא כזה שמוסתר מאחורי סטריפ/תוכן
+    const top = document.elementFromPoint(x, y);
+    if(top && top.closest && top.closest('section.panel, button, input, textarea, select, a, label, .side-menu, .order-modal-overlay, .sigdoc-overlay, .wab-overlay, .photo-modal-overlay')) return;
+    e.preventDefault();
+    const t = e.timeStamp || performance.now();
+    ball.grabbed = true;
+    _invDrag = { ball, pointerId:e.pointerId, ox: ball.x - x, oy: ball.y - y, lastX:x, lastY:y, lastT:t, vx:0, vy:0 };
+    window.addEventListener('pointermove', onInvGrabMove, { passive:false });
+    window.addEventListener('pointerup', onInvGrabUp);
+    window.addEventListener('pointercancel', onInvGrabUp);
+    document.addEventListener('touchmove', _invPreventScroll, { passive:false }); // נועל גלילה בזמן גרירה
+  }
+  function onInvGrabMove(e){
+    if(!_invDrag || e.pointerId !== _invDrag.pointerId) return;
+    e.preventDefault();
+    const x = e.clientX, y = e.clientY, t = e.timeStamp || performance.now();
+    const b = _invDrag.ball;
+    b.x = x + _invDrag.ox; b.y = y + _invDrag.oy;
+    const dt = Math.max(1, t - _invDrag.lastT);
+    const fx = (x - _invDrag.lastX) / dt * 16.7;   // px/frame לפי מהירות ההחלקה
+    const fy = (y - _invDrag.lastY) / dt * 16.7;
+    _invDrag.vx = _invDrag.vx*0.35 + fx*0.65;      // החלקה קלה של המהירות
+    _invDrag.vy = _invDrag.vy*0.35 + fy*0.65;
+    _invDrag.lastX = x; _invDrag.lastY = y; _invDrag.lastT = t;
+    b.el.style.transform = `translate(${(b.x-b.r).toFixed(1)}px, ${(b.y-b.r).toFixed(1)}px)`;
+  }
+  function onInvGrabUp(e){
+    if(!_invDrag || (e && e.pointerId !== _invDrag.pointerId)) return;
+    const b = _invDrag.ball, M = 65;
+    b.vx = Math.max(-M, Math.min(M, _invDrag.vx));  // נזרק לפי מהירות ההחלקה האחרונה
+    b.vy = Math.max(-M, Math.min(M, _invDrag.vy));
+    b.grabbed = false;
+    endInvDrag();
+  }
+  function endInvDrag(){
+    window.removeEventListener('pointermove', onInvGrabMove);
+    window.removeEventListener('pointerup', onInvGrabUp);
+    window.removeEventListener('pointercancel', onInvGrabUp);
+    document.removeEventListener('touchmove', _invPreventScroll, { passive:false });
+    _invDrag = null;
   }
 
   function switchView(view){
