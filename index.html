@@ -4346,7 +4346,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function renderInventoryPanel(host){
     const today = localDateString();
     host.innerHTML = `
-      <div class="invoice-summary-range" style="justify-content:center;margin-bottom:14px">
+      <div class="invoice-summary-range" style="justify-content:center;margin-top:10px;margin-bottom:14px">
         <input type="date" class="inventory-from" value="${inventoryCountFrom || today}">
         <span class="invoice-range-sep">עד</span>
         <input type="date" class="inventory-to" value="${today}">
