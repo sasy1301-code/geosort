@@ -724,6 +724,27 @@
   #settingsView section.panel.dragging{ opacity:.35; }
   #settingsView section.panel.touch-dragging{ position:relative; z-index:60; will-change:transform; box-shadow:0 14px 34px rgba(0,0,0,.5); transition:box-shadow .18s ease; }
   #settingsView section.panel.touch-dragging .panel-drag-handle{ cursor:grabbing; color:#2f7cf6; }
+  /* ===== שליחת הודעה כללית ללקוחות הפעילים — תור מודרך ===== */
+  .wab-overlay{ position:fixed; inset:0; z-index:1300; background:rgba(2,7,22,.85); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 16px) 14px calc(env(safe-area-inset-bottom,0px) + 16px); }
+  .wab-box{ width:100%; max-width:420px; background:#0b1428; border:1px solid rgba(140,160,255,.25); border-radius:20px; box-shadow:0 24px 60px rgba(0,0,0,.55); padding:18px; color:#fff; position:relative; }
+  .wab-close{ position:absolute; top:8px; left:12px; background:transparent; border:none; color:#9fb0d6; font-size:1.25rem; cursor:pointer; line-height:1; padding:4px; }
+  .wab-title{ text-align:center; font-size:1rem; font-weight:600; margin:2px 0 12px; }
+  .wab-bar-wrap{ height:6px; background:rgba(255,255,255,.12); border-radius:999px; overflow:hidden; margin-bottom:14px; }
+  .wab-bar{ height:100%; background:#2f7cf6; width:0; transition:width .25s ease; }
+  .wab-progress{ text-align:center; color:#9fb0d6; font-size:.82rem; margin-bottom:4px; }
+  .wab-name{ text-align:center; font-size:1.15rem; font-weight:600; margin-bottom:6px; word-break:break-word; }
+  .wab-phone{ text-align:center; color:#9fb0d6; font-size:.82rem; margin-bottom:14px; direction:ltr; }
+  .wab-send{ display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; background:#25D366; color:#04210f; font-weight:600; border-radius:999px; padding:13px 18px; font-size:.95rem; margin-bottom:10px; }
+  .wab-send svg{ width:20px; height:20px; display:block; }
+  .wab-send.sent{ background:#1a7a44; color:#dff7e7; }
+  .wab-actions{ display:flex; gap:10px; }
+  .wab-actions button{ flex:1 1 0; border-radius:999px; padding:11px 12px; font-size:.9rem; font-weight:600; cursor:pointer; border:1px solid transparent; }
+  .wab-skip{ background:transparent; border:1px solid rgba(255,255,255,.28); color:#cdd7ee; }
+  .wab-next{ background:#2f7cf6; color:#fff; }
+  .wab-done{ text-align:center; padding:6px 4px 4px; }
+  .wab-done .wab-check{ font-size:2.2rem; color:#25D366; line-height:1; }
+  .wab-done .wab-done-txt{ margin:8px 0 16px; font-size:.95rem; }
+  .wab-done .wab-done-close{ background:#2f7cf6; color:#fff; border:none; border-radius:999px; padding:11px 30px; font-weight:600; cursor:pointer; }
   label{ display:block; font-size:.76rem; color:rgba(255,255,255,.62); margin:8px 0 4px; }
   input[type=text], input[type=tel], input[type=number], input[type=date], input[type=email]{
     width:100%; padding:9px 10px; border:1px solid rgba(255,255,255,.22); border-radius:15px;
@@ -2027,7 +2048,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       </section>
 
       <section class="panel" id="settingsWhatsappPanel">
-        <h2 id="settingsWhatsappHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="panel-drag-handle" title="גרור לסידור" aria-label="גרור לסידור"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span> <span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">הודעת וואטסאפ כללית</span>
+        <h2 id="settingsWhatsappHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="panel-drag-handle" title="גרור לסידור" aria-label="גרור לסידור"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span> <span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">הודעות וואטסאפ</span>
           <span id="settingsWhatsappChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
         </h2>
         <div id="settingsWhatsappBody" class="animated-collapse">
@@ -2036,6 +2057,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             <textarea id="bizWhatsappGeneral" class="settings-line-input" style="min-height:150px;resize:vertical;line-height:1.5" placeholder="כתוב כאן את הודעת הוואטסאפ הכללית..."></textarea>
             <button type="button" class="settings-add-btn" id="bizWaApplyAllBtn" style="background:#73dd5c;color:#021236">החל על כל הלקוחות (גורף)</button>
             <div id="bizWaStatus" class="settings-backup-status"></div>
+
+            <div class="settings-sep" aria-hidden="true"></div>
+            <div class="settings-backup-note" style="margin:0 0 8px">הודעה נפרדת שנשלחת לכל הלקוחות <b>הפעילים</b> במערכת (לקוח שמסומן כלא פעיל לא יקבל). מתאים למבצע או להודעה חשובה לכולם. וואטסאפ אינו מאפשר שליחה קבוצתית אוטומטית, לכן תעברו לקוח־אחר־לקוח ובכל אחד ייפתח וואטסאפ עם ההודעה מוכנה — רק ללחוץ שלח.</div>
+            <textarea id="bizWaBroadcastMsg" class="settings-line-input" style="min-height:130px;resize:vertical;line-height:1.5" placeholder="כתוב כאן את ההודעה הכללית שתישלח לכל הלקוחות הפעילים (מבצע / עדכון חשוב)..."></textarea>
+            <button type="button" class="settings-add-btn" id="bizWaBroadcastBtn" style="background:#2f7cf6;color:#fff">שליחת הודעה כללית לכל הלקוחות הפעילים</button>
+            <div id="bizWaBroadcastStatus" class="settings-backup-status"></div>
           </div>
         </div>
       </section>
@@ -2388,7 +2415,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   let managers = []; // main managers: [{name, username, password}] — elevated access (future)
   // פרטי העסק של המשתמש (עמוד הגדרות → "פרטי העסק שלי"). משפיע על אופציות במערכת
   // (למשל: מספר הנייד לקבלת הדו״ח היומי) והודעת וואטסאפ כללית מוכנה מראש.
-  let businessDetails = { name:"", invoiceName:"", taxId:"", email:"", address:"", phone:"", mobile:"", dailyReportMobile:"", whatsappGeneral:"" };
+  let businessDetails = { name:"", invoiceName:"", taxId:"", email:"", address:"", phone:"", mobile:"", dailyReportMobile:"", whatsappGeneral:"", broadcastMessage:"" };
   let clusterNames = {}; // custom overrides for automatic cluster names, keyed by dominant-city/geo key
   let clusterOrder = {}; // manual up/down ordering of addresses within a cluster, keyed the same way
   let threshold = 12;
@@ -2875,7 +2902,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           name: p.name || "", invoiceName: p.invoiceName || "", taxId: p.taxId || "",
           email: p.email || "", address: p.address || "", phone: p.phone || "",
           mobile: p.mobile || "", dailyReportMobile: p.dailyReportMobile || "",
-          whatsappGeneral: p.whatsappGeneral || ""
+          whatsappGeneral: p.whatsappGeneral || "", broadcastMessage: p.broadcastMessage || ""
         };
       }
     }catch(e){ /* שומרים על ברירת המחדל הריקה */ }
@@ -6375,7 +6402,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
   const BIZ_FIELD_MAP = { bizName:'name', bizInvoiceName:'invoiceName', bizTaxId:'taxId', bizEmail:'email',
     bizAddress:'address', bizPhone:'phone', bizMobile:'mobile', bizDailyReportMobile:'dailyReportMobile',
-    bizWhatsappGeneral:'whatsappGeneral' };
+    bizWhatsappGeneral:'whatsappGeneral', bizWaBroadcastMsg:'broadcastMessage' };
   function populateBusinessDetails(){
     Object.entries(BIZ_FIELD_MAP).forEach(([id,key])=>{ const el=document.getElementById(id); if(el) el.value = businessDetails[key] || ''; });
   }
@@ -6385,7 +6412,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       name: g('bizName').trim(), invoiceName: g('bizInvoiceName').trim(), taxId: g('bizTaxId').trim(),
       email: g('bizEmail').trim(), address: g('bizAddress').trim(), phone: g('bizPhone').trim(),
       mobile: g('bizMobile').trim(), dailyReportMobile: g('bizDailyReportMobile').trim(),
-      whatsappGeneral: g('bizWhatsappGeneral') // שומרים את העיצוב/שורות כפי שהן
+      whatsappGeneral: g('bizWhatsappGeneral'), // שומרים את העיצוב/שורות כפי שהן
+      broadcastMessage: g('bizWaBroadcastMsg')
     };
   }
   (function wireBusinessDetails(){
@@ -6419,7 +6447,83 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         finally{ waBtn.disabled = false; waBtn.textContent = prev; setTimeout(()=>{ waStatus.textContent=''; }, 6000); }
       });
     }
+    // שליחת הודעה כללית לכל הלקוחות הפעילים — תור מודרך (וואטסאפ אינו מאפשר שליחה קבוצתית אוטומטית)
+    const bcBtn = document.getElementById('bizWaBroadcastBtn');
+    const bcStatus = document.getElementById('bizWaBroadcastStatus');
+    if(bcBtn){
+      bcBtn.addEventListener('click', ()=>{
+        readBusinessInputs();
+        const bcEl = document.getElementById('bizWaBroadcastMsg');
+        const msg = (bcEl && bcEl.value.trim()) ? bcEl.value.trim() : (businessDetails.broadcastMessage || '').trim();
+        if(!msg){ alert('קודם כתוב את ההודעה הכללית לשליחה בתיבה שמעל הכפתור.'); if(bcEl) bcEl.focus(); return; }
+        const list = (clients||[]).filter(c=> !c.inactive && c.phone && String(c.phone).replace(/\D/g,'').length >= 6);
+        if(!list.length){ alert('אין לקוחות פעילים עם מספר טלפון לשליחה.'); return; }
+        if(!confirm('לשלוח את ההודעה ל-' + list.length + ' הלקוחות הפעילים?\nתעברו לקוח־אחר־לקוח, ובכל אחד ייפתח וואטסאפ עם ההודעה מוכנה — רק ללחוץ שלח.')) return;
+        // שמירת ההודעה הכללית כדי שתישמר לפעם הבאה
+        saveBusinessDetails().catch(()=>{});
+        if(bcStatus){ bcStatus.textContent = 'נפתח תור שליחה ל-' + list.length + ' לקוחות פעילים…'; bcStatus.style.color = '#9fb0d6'; setTimeout(()=>{ bcStatus.textContent=''; }, 6000); }
+        openWhatsappBroadcastQueue(list, msg);
+      });
+    }
   })();
+
+  // תור השליחה המודרך: עובר לקוח־אחר־לקוח, בכל אחד פותח וואטסאפ עם ההודעה מוכנה
+  const WAB_ICON = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2Zm5.8 14.09c-.25.7-1.44 1.33-1.99 1.38-.53.05-1.02.24-3.44-.72-2.9-1.14-4.75-4.1-4.9-4.29-.14-.19-1.17-1.56-1.17-2.98 0-1.42.75-2.12 1.01-2.41.26-.29.57-.36.76-.36.19 0 .38 0 .55.01.18.01.42-.07.65.5.25.6.85 2.07.92 2.22.07.15.12.33.02.52-.09.19-.14.31-.28.48-.14.17-.29.37-.42.5-.14.14-.28.29-.12.57.16.28.71 1.17 1.53 1.9 1.05.94 1.94 1.23 2.22 1.37.28.14.44.12.6-.07.16-.19.69-.8.87-1.08.18-.28.36-.23.61-.14.25.09 1.6.75 1.87.89.28.14.46.21.53.33.07.12.07.68-.18 1.38Z"/></svg>`;
+  function openWhatsappBroadcastQueue(list, msg){
+    let idx = 0;
+    const overlay = document.createElement('div');
+    overlay.className = 'wab-overlay';
+    overlay.innerHTML =
+      `<div class="wab-box">
+        <button type="button" class="wab-close" aria-label="סגור">✕</button>
+        <div class="wab-title">שליחת הודעה כללית ללקוחות הפעילים</div>
+        <div class="wab-bar-wrap"><div class="wab-bar"></div></div>
+        <div class="wab-stage">
+          <div class="wab-progress"></div>
+          <div class="wab-name"></div>
+          <div class="wab-phone"></div>
+          <a class="wab-send" target="_blank" rel="noopener">${WAB_ICON}<span>פתח וואטסאפ ושלח</span></a>
+          <div class="wab-actions">
+            <button type="button" class="wab-skip">דלג</button>
+            <button type="button" class="wab-next">הבא ›</button>
+          </div>
+        </div>
+        <div class="wab-done" style="display:none">
+          <div class="wab-check">✓</div>
+          <div class="wab-done-txt">עברת על כל הלקוחות הפעילים 🎉</div>
+          <button type="button" class="wab-done-close">סיום</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const q = sel => overlay.querySelector(sel);
+    const sendEl = q('.wab-send'), stageEl = q('.wab-stage'), doneEl = q('.wab-done');
+    function render(){
+      if(idx >= list.length){
+        stageEl.style.display = 'none';
+        doneEl.style.display = 'block';
+        q('.wab-progress').textContent = '';
+        q('.wab-bar').style.width = '100%';
+        q('.wab-title').textContent = 'הסתיים';
+        return;
+      }
+      const c = list[idx];
+      const name = (typeof clientDisplayName === 'function' ? clientDisplayName(c) : '') || c.name || 'לקוח';
+      q('.wab-progress').textContent = 'לקוח ' + (idx+1) + ' מתוך ' + list.length;
+      q('.wab-name').textContent = name;
+      q('.wab-phone').textContent = String(c.phone || '');
+      sendEl.href = waHref(c.phone) + '?text=' + encodeURIComponent(msg);
+      sendEl.classList.remove('sent');
+      q('.wab-bar').style.width = Math.round((idx / list.length) * 100) + '%';
+    }
+    function advance(){ idx++; render(); }
+    sendEl.addEventListener('click', ()=>{ sendEl.classList.add('sent'); });
+    q('.wab-next').addEventListener('click', advance);
+    q('.wab-skip').addEventListener('click', advance);
+    q('.wab-close').addEventListener('click', ()=> overlay.remove());
+    q('.wab-done-close').addEventListener('click', ()=> overlay.remove());
+    overlay.addEventListener('click', (e)=>{ if(e.target === overlay) overlay.remove(); });
+    render();
+  }
 
   /* ===== סידור מחדש (גרירה) של כרטיסי ההגדרות ===== */
   const SETTINGS_ORDER_KEY = 'settings_panel_order';
