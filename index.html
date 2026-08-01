@@ -303,7 +303,7 @@
   .doc-open-btn{ color:#8fb7ff; }
   /* ===== סטטיסטיקת לקוח (טבעת הזמנות/חשבוניות/קבלות) ===== */
   #clientStatsHost{ margin-top:14px; }
-  .cstats-card{ background:#eef1f8; border-radius:20px; padding:16px 14px 12px; }
+  .cstats-card{ background:#eef1f8; border-radius:20px; padding:16px 20px 34px; }
   .cstats-title{ text-align:center; color:#22304f; font-size:.9rem; font-weight:600; margin-bottom:8px; }
   .cstats-legend{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px 16px; margin-bottom:24px; }
   .cstats-leg{ display:flex; align-items:center; gap:6px; font-size:.8rem; color:#22304f; }
@@ -7238,8 +7238,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const total = segs.reduce((s,x)=>s+x.count,0);
     const legend = `<div class="cstats-legend">${segs.map(s=>`<span class="cstats-leg"><span class="dot" style="background:${s.color}"></span>${s.label} · ${s.count}</span>`).join('')}</div>`;
 
+    const statsTitle = escapeHtml(c.name || 'סטטיסטיקת הלקוח');
     if(total === 0){
-      host.innerHTML = `<div class="cstats-card"><div class="cstats-title">סטטיסטיקת הלקוח</div>${legend}<div class="cstats-empty">אין עדיין הזמנות / חשבוניות / קבלות ללקוח זה.</div></div>`;
+      host.innerHTML = `<div class="cstats-card"><div class="cstats-title">${statsTitle}</div>${legend}<div class="cstats-empty">אין עדיין הזמנות / חשבוניות / קבלות ללקוח זה.</div></div>`;
       return;
     }
     const cx=170, cy=170, Ro=120, Ri=86;
@@ -7259,10 +7260,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       [150,0.97,14],[172,0.87,8],[192,0.99,20],[214,0.82,11],[236,0.95,28],[258,0.99,9],
       [278,0.84,16],[300,0.97,12],[322,0.86,24],[346,0.99,10],[52,1.02,7],[204,1.03,7]
     ];
-    const bubbles = bubbleDefs.map(([ang,df,sz],i)=>{
+    const OUT = 2.8; // ~10px נוספים החוצה מהטבעת (ביחס לרוחב 360)
+    const bubbles = bubbleDefs.map(([ang,df,sz0],i)=>{
+      const sz = Math.max(4, sz0 - 2); // קוטר קטן ב-2px לכל בועה
       const rad = ang*Math.PI/180;
-      const lx = (50 + df*50*Math.sin(rad)).toFixed(2);
-      const ty = (50 - df*50*Math.cos(rad)).toFixed(2);
+      const lx = (50 + (df*50 + OUT)*Math.sin(rad)).toFixed(2);
+      const ty = (50 - (df*50 + OUT)*Math.cos(rad)).toFixed(2);
       // כל בועה מגיבה לעכבר בעומק וכיוון משלה כדי שלא ינועו כמקשה אחת
       const depth = (4 + df*10).toFixed(1);
       const dx = (0.55 + ((i*37)%100)/100 * 0.9).toFixed(2);       // 0.55..1.45
@@ -7275,7 +7278,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }).join('');
 
     host.innerHTML = `<div class="cstats-card">
-      <div class="cstats-title">סטטיסטיקת הלקוח</div>
+      <div class="cstats-title">${statsTitle}</div>
       ${legend}
       <div class="cstats-wrap">
         ${bubbles}
