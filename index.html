@@ -732,6 +732,10 @@
   #settingsView section.panel.dragging{ opacity:.35; }
   #settingsView section.panel.touch-dragging{ position:relative; z-index:60; will-change:transform; box-shadow:0 14px 34px rgba(0,0,0,.5); transition:box-shadow .18s ease; }
   #settingsView section.panel.touch-dragging .panel-drag-handle{ cursor:grabbing; color:#2f7cf6; }
+  /* גרירת סידור גם לכרטיסי המלאים */
+  #inventoriesView section.panel.dragging{ opacity:.35; }
+  #inventoriesView section.panel.touch-dragging{ position:relative; z-index:60; will-change:transform; box-shadow:0 14px 34px rgba(0,0,0,.5); transition:box-shadow .18s ease; }
+  #inventoriesView section.panel.touch-dragging .panel-drag-handle{ cursor:grabbing; color:#2f7cf6; }
   /* ===== שליחת הודעה כללית ללקוחות הפעילים — תור מודרך ===== */
   .wab-overlay{ position:fixed; inset:0; z-index:1300; background:rgba(2,7,22,.85); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 16px) 14px calc(env(safe-area-inset-bottom,0px) + 16px); }
   .wab-box{ width:100%; max-width:420px; background:#0b1428; border:1px solid rgba(140,160,255,.25); border-radius:20px; box-shadow:0 24px 60px rgba(0,0,0,.55); padding:18px; color:#fff; position:relative; }
@@ -1397,6 +1401,47 @@
   .vs-stat-num{ font-weight:400; font-size:.7rem; line-height:1.15; }
   .vs-drop .vs-stat-num{ color:#6303ed; }
   .vs-left .vs-stat-num{ color:#2f7cf6; }
+  /* ===== מלאי כללי של העסק — נרכש / נמכר / נותר + כפתור הוספת רכש (שפת עיצוב המלאי) ===== */
+  #businessStockHost .vs-main{ padding-left:12px; gap:6px; }
+  #businessStockHost .vs-div{ margin-right:auto; }
+  #businessStockHost .vs-stat{ min-width:38px; gap:2px; }
+  #businessStockHost .vs-stat-num{ font-size:.8rem; font-weight:600; }
+  /* טקסט תת-קטגוריה ותת-תת-קטגוריה (למשל "סמאש ג׳רקי") בלבן ובמשקל Regular — בכל המלאים */
+  #businessStockHost .vs-nest-title, #vehicleStockHost .vs-nest-title, #generalInventoryHost .vs-nest-title{ color:#fff; font-weight:400; }
+  .bs-stat-purchased .vs-stat-num{ color:#12242C; }
+  .bs-stat-sold .vs-stat-num{ color:#2f7cf6; }
+  .bs-stat-remain .vs-stat-num{ color:#1a9e14; }
+  .bs-stat-remain.is-low .vs-stat-num{ color:#e11919; }
+  .bs-add{ flex:0 0 auto; width:34px; height:34px; border-radius:50%; border:none; background:#0277fb; color:#fff; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; transition:transform .15s ease, background .15s ease; }
+  .bs-add:hover{ background:#2f7cf6; transform:scale(1.08); }
+  .bs-add svg{ width:17px; height:17px; display:block; }
+  /* פופאפ יומן רכש (משתמש בפלטת המלאי הכהה) */
+  .bs-pop-summary{ display:flex; justify-content:center; gap:18px; margin:2px 0 14px; flex-wrap:wrap; }
+  .bs-pop-summary .bs-sum{ text-align:center; }
+  .bs-pop-summary .bs-sum-label{ color:rgba(255,255,255,.6); font-size:.72rem; }
+  .bs-pop-summary .bs-sum-num{ font-weight:700; font-size:1.15rem; }
+  .bs-sum.p .bs-sum-num{ color:#fff; }
+  .bs-sum.s .bs-sum-num{ color:#2ce7d6; }
+  .bs-sum.r .bs-sum-num{ color:#3bd332; }
+  .bs-sum.r.is-low .bs-sum-num{ color:#ff5c5c; }
+  .bs-add-row{ display:flex; gap:8px; align-items:stretch; margin-bottom:14px; }
+  .bs-add-row input{ background:#fff; color:#021236; border:1px solid rgba(255,255,255,.25); border-radius:15px; padding:10px; font-size:.9rem; font-family:inherit; -webkit-appearance:none; }
+  .bs-add-row .bs-date{ flex:1 1 auto; min-width:0; }
+  .bs-add-row .bs-qty{ width:78px; flex:0 0 auto; text-align:center; -moz-appearance:textfield; }
+  .bs-add-row .bs-qty::-webkit-inner-spin-button, .bs-add-row .bs-qty::-webkit-outer-spin-button{ -webkit-appearance:none; margin:0; }
+  .bs-add-row .bs-add-btn{ flex:0 0 auto; border:none; border-radius:15px; background:#2f7cf6; color:#fff; font-weight:600; font-size:.85rem; padding:0 16px; cursor:pointer; font-family:inherit; }
+  .bs-add-row .bs-add-btn:hover{ background:#3d88ff; }
+  .bs-log-title{ color:rgba(255,255,255,.75); font-size:.78rem; margin-bottom:8px; }
+  .bs-log-list{ max-height:200px; overflow-y:auto; }
+  .bs-log-list::-webkit-scrollbar{ width:6px; }
+  .bs-log-list::-webkit-scrollbar-thumb{ background:rgba(255,255,255,.25); border-radius:15px; }
+  .bs-log-row{ display:flex; align-items:center; gap:8px; padding:9px 10px; margin-bottom:6px; background:rgba(255,255,255,.06); border-radius:15px; }
+  .bs-log-date{ flex:1 1 auto; color:rgba(255,255,255,.8); font-size:.8rem; }
+  .bs-log-qty{ flex:0 0 auto; font-weight:700; color:#3bd332; font-size:.9rem; }
+  .bs-log-qty.neg{ color:#ff5c5c; }
+  .bs-log-del{ flex:0 0 auto; width:31px; height:31px; border-radius:50%; border:none; background:#091321; color:#e08b7d; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; }
+  .bs-log-del svg{ width:15px; height:15px; display:block; }
+  .bs-log-empty{ color:rgba(255,255,255,.5); font-size:.8rem; text-align:center; padding:14px 8px; }
   /* הכפתור = קובץ יחיד Reset3.svg (פינות מעוגלות בצד הכרטיס + צד קמור מימין), כרקע SVG
      בתוך אלמנט כפתור בודד — כך שכל הכפתור גדל כיחידה אחת באנימציית הלחיצה (לא חצי) */
   .vs-reset{
@@ -2148,7 +2193,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   <div class="products-view inventories-view view-hidden" id="inventoriesView">
     <div class="products-inner">
       <section class="panel" id="vehicleStockPanel">
-        <h2 id="vehicleStockHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">מלאי רכב</span>
+        <h2 id="vehicleStockHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="panel-drag-handle" title="גרור לסידור" aria-label="גרור לסידור"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span> <span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">מלאי רכב</span>
           <span id="vehicleStockChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
         </h2>
         <div id="vehicleStockBody" class="animated-collapse">
@@ -2157,11 +2202,20 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       </section>
 
       <section class="panel" id="generalInventoryPanel">
-        <h2 id="generalInventoryHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">כמות פריטים שנמכרו</span>
+        <h2 id="generalInventoryHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="panel-drag-handle" title="גרור לסידור" aria-label="גרור לסידור"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span> <span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">כמות פריטים שנמכרו</span>
           <span id="generalInventoryChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
         </h2>
         <div id="generalInventoryBody" class="animated-collapse">
           <div class="inventory-modal" id="generalInventoryHost"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="businessStockPanel">
+        <h2 id="businessStockHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px"><span class="panel-drag-handle" title="גרור לסידור" aria-label="גרור לסידור"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg></span> <span class="dot" style="background:#2f7cf6;position:relative;top:5px"></span> <span style="position:relative;top:5px">מלאי כללי של העסק</span>
+          <span id="businessStockChevron" style="margin-right:auto;color:#2f7cf6;display:inline-block;position:relative;top:5px;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
+        </h2>
+        <div id="businessStockBody" class="animated-collapse">
+          <div class="inventory-modal" id="businessStockHost"></div>
         </div>
       </section>
     </div>
@@ -2401,6 +2455,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const FOLDERS_KEY = "folders_list";
   const VEHICLE_STOCK_BASELINE_KEY = "vehicle_stock_baseline";
   const INVENTORY_COUNT_FROM_KEY = "inventory_count_from"; // date the general-inventory tally counts from
+  const BUSINESS_STOCK_KEY = "business_stock"; // "מלאי כללי של העסק" — יומן רכש (הכנסות למלאי)
   const CLUSTER_NAMES_KEY = "cluster_names_map";
   const CLUSTER_ORDER_KEY = "cluster_order_map";
   const CATALOG_KEY = "catalog"; // separate app_storage key so saving the catalog never rewrites the clients blob
@@ -2418,6 +2473,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   let clients = [];
   let vehicleStockBaseline = { anchors: {} }; // per-product: { qty: <stock level set at this point>, cumulative: <cumulative orders total at that moment> } - lets the driver set any starting quantity, not just 50
   let inventoryCountFrom = ""; // general-inventory running tally start date ("" = never reset → defaults to today)
+  let businessStock = { purchases: [] }; // מלאי כללי של העסק — יומן רכש: [{id, name, qty, date}]. נותר = סך רכש פחות נמכר (חשבוניות חתומות)
   let folders = []; // manually-created folder names, e.g. "ראשון לציון" or "צפון"
   let agents = []; // sales agents: [{name, username, password}] — chosen on the orders page
   let managers = []; // main managers: [{name, username, password}] — elevated access (future)
@@ -2962,6 +3018,16 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   async function saveInventoryCountFrom(){
     try{ await sbSet(INVENTORY_COUNT_FROM_KEY, JSON.stringify(inventoryCountFrom)); }
     catch(e){ console.error("שגיאת שמירת תאריך איפוס מלאי", e); }
+  }
+  async function loadBusinessStock(){
+    try{
+      const raw = await sbGet(BUSINESS_STOCK_KEY);
+      if(raw){ const p = JSON.parse(raw); businessStock = { purchases: Array.isArray(p && p.purchases) ? p.purchases : [] }; }
+    }catch(e){ /* none saved yet — keep empty */ }
+  }
+  async function saveBusinessStock(){
+    try{ await sbSet(BUSINESS_STOCK_KEY, JSON.stringify(businessStock)); }
+    catch(e){ console.error("שגיאת שמירת מלאי העסק", e); }
   }
   async function saveVehicleStockBaseline(){
     try{
@@ -4472,6 +4538,144 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     fromInput.addEventListener('change', refreshInventory);
     toInput.addEventListener('change', refreshInventory);
     refreshInventory();
+  }
+
+  // ===== מלאי כללי של העסק (יומן רכש + נמכר לפי חשבוניות חתומות = נותר) =====
+  const BS_PLUS_SVG  = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>`;
+  const BS_BOX_SVG   = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 3 6.5v11L12 22l9-4.5v-11L12 2Zm0 2.2 6.1 3.05L12 10.3 5.9 7.25 12 4.2ZM5 8.9l6 3v7.2l-6-3V8.9Zm14 0v7.2l-6 3v-7.2l6-3Z"/></svg>`;
+  const BS_X_SVG     = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>`;
+  const BS_TRASH_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13"/></svg>`;
+
+  function refreshBsCard(name){
+    const host = document.getElementById('businessStockHost'); if(!host) return;
+    const purchased = businessPurchasedQty(name), sold = businessSoldQty(name), remaining = purchased - sold;
+    host.querySelectorAll('.bs-add').forEach(btn=>{
+      if(btn.dataset.name !== name) return;
+      const row = btn.closest('.vs-row'); if(!row) return;
+      const p = row.querySelector('.bs-stat-purchased .vs-stat-num'); if(p) p.textContent = purchased;
+      const s = row.querySelector('.bs-stat-sold .vs-stat-num'); if(s) s.textContent = sold;
+      const rEl = row.querySelector('.bs-stat-remain'); if(rEl){ rEl.classList.toggle('is-low', remaining<=0); const n=rEl.querySelector('.vs-stat-num'); if(n) n.textContent = remaining; }
+    });
+    const gt = host.querySelector('.inventory-grand-total b');
+    if(gt){ let total=0; catalog.products.forEach(pr=>{ total += businessRemainingQty(pr.name); }); gt.textContent = total; }
+  }
+
+  function openBusinessStockPurchase(name){
+    const today = localDateString();
+    const overlay = document.createElement('div');
+    overlay.className = 'order-modal-overlay';
+    overlay.innerHTML = `<div class="order-modal inventory-modal">
+      <div class="order-modal-header"><h3><span class="inv-hdr-icon">${BS_BOX_SVG}</span> ${escapeHtml(name)}</h3><button type="button" class="order-modal-close">${BS_X_SVG}</button></div>
+      <div class="order-modal-body">
+        <div class="bs-pop-summary"></div>
+        <div class="bs-add-row">
+          <input type="date" class="bs-date" value="${today}">
+          <input type="number" class="bs-qty" placeholder="כמות" inputmode="numeric">
+          <button type="button" class="bs-add-btn">הוסף רכש</button>
+        </div>
+        <div class="bs-log-title">יומן רכש למוצר זה</div>
+        <div class="bs-log-list"></div>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    const q = s => overlay.querySelector(s);
+    function renderPop(){
+      const purchased = businessPurchasedQty(name), sold = businessSoldQty(name), remaining = purchased - sold;
+      q('.bs-pop-summary').innerHTML =
+        `<div class="bs-sum p"><div class="bs-sum-num">${purchased}</div><div class="bs-sum-label">נרכש</div></div>`+
+        `<div class="bs-sum s"><div class="bs-sum-num">${sold}</div><div class="bs-sum-label">נמכר (חשבוניות חתומות)</div></div>`+
+        `<div class="bs-sum r${remaining<=0?' is-low':''}"><div class="bs-sum-num">${remaining}</div><div class="bs-sum-label">נותר במלאי</div></div>`;
+      const entries = (businessStock.purchases||[]).filter(p=>p.name===name).slice().sort((a,b)=> String(b.date||'').localeCompare(String(a.date||'')));
+      q('.bs-log-list').innerHTML = entries.length ? entries.map(e=>{
+        const qv = Number(e.qty)||0;
+        return `<div class="bs-log-row" data-id="${e.id}"><span class="bs-log-date">${formatDocDate(e.date)}</span><span class="bs-log-qty${qv<0?' neg':''}">${qv>0?'+':''}${qv}</span><button type="button" class="bs-log-del" title="מחיקה">${BS_TRASH_SVG}</button></div>`;
+      }).join('') : `<div class="bs-log-empty">עדיין לא נרשמו רכישות למוצר זה.</div>`;
+    }
+    renderPop();
+    const close = ()=>{ overlay.classList.add('modal-closing'); setTimeout(()=>{ try{ overlay.remove(); }catch(_){} }, 500); };
+    q('.order-modal-close').addEventListener('click', close);
+    overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+    q('.bs-add-btn').addEventListener('click', ()=>{
+      const qtyEl = q('.bs-qty'), dateEl = q('.bs-date');
+      const qty = parseInt(qtyEl.value, 10);
+      if(!qty){ qtyEl.focus(); return; }
+      businessStock.purchases.push({ id: genDocId(), name, qty, date: (dateEl.value || today) });
+      saveBusinessStock();
+      qtyEl.value = '';
+      renderPop(); refreshBsCard(name);
+    });
+    q('.bs-log-list').addEventListener('click', (e)=>{
+      const del = e.target.closest('.bs-log-del'); if(!del) return;
+      const row = del.closest('.bs-log-row'); const id = row && row.dataset.id; if(!id) return;
+      businessStock.purchases = businessStock.purchases.filter(p=>p.id !== id);
+      saveBusinessStock();
+      renderPop(); refreshBsCard(name);
+    });
+  }
+
+  function renderBusinessStockPanel(host){
+    if(!host) return;
+    host.innerHTML = `
+      <div class="vehicle-stock-hint">רשמו לכל מוצר כמה נרכש מהספק (יומן רכש). "נמכר" מתעדכן לבד לפי חשבוניות חתומות, ו"נותר" = נרכש פחות נמכר — המלאי המדויק בעסק בכל רגע. לחצו על ➕ ליד מוצר כדי לרשום רכישה ולראות את היומן.</div>
+      <div class="inventory-list"></div>`;
+    const listEl = host.querySelector('.inventory-list');
+    const LINE_SVG = `<svg viewBox="0 0 1.4 26.9" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg"><path d="M.7.8c.3,8.1.3,17,0,25-.3-8.1-.3-17,0-25h0Z"/></svg>`;
+    const tree = buildFullCatalogTree();
+    if(!tree.length){
+      listEl.innerHTML = `<div class="inv-empty">אין מוצרים בקטלוג. הוסיפו מוצרים במסך "מוצרים ומחירים".</div>`;
+      return;
+    }
+    function card(pr){
+      const name = pr.name;
+      const purchased = businessPurchasedQty(name), sold = businessSoldQty(name), remaining = purchased - sold;
+      const low = remaining <= 0;
+      const thumb = pr.imageUrl ? `<img src="${escapeHtml(pr.imageUrl)}" alt="">` : '📦';
+      const parts = String(name).trim().split(/\s+/);
+      const nameHtml = parts.length <= 1 ? escapeHtml(name) : escapeHtml(parts[0]) + '<br>' + escapeHtml(parts.slice(1).join(' '));
+      return `<div class="vs-row">
+        <div class="vs-main">
+          <div class="vs-thumb">${thumb}</div>
+          <div class="vs-name">${nameHtml}</div>
+          <span class="vs-div">${LINE_SVG}</span>
+          <div class="vs-stat bs-stat-purchased"><span class="vs-stat-label">נרכש</span><span class="vs-stat-num">${purchased}</span></div>
+          <div class="vs-stat bs-stat-sold"><span class="vs-stat-label">נמכר</span><span class="vs-stat-num">${sold}</span></div>
+          <div class="vs-stat bs-stat-remain${low?' is-low':''}"><span class="vs-stat-label">נותר</span><span class="vs-stat-num">${remaining}</span></div>
+          <button type="button" class="bs-add" data-name="${escapeHtml(name)}" title="הוספת רכש / יומן">${BS_PLUS_SVG}</button>
+        </div>
+      </div>`;
+    }
+    function nestFolder(node){
+      const cls = node.level === 'sub' ? 'vs-nest-sub' : 'vs-nest-subsub';
+      return `<div class="vs-nest"><div class="vs-nest-head ${cls}"><span class="vs-nest-title">${escapeHtml(node.title)}</span><span class="vs-nest-chev">${CHEVRON_ICON_SVG}</span></div><div class="vs-nest-body animated-collapse">${nodeInner(node)}</div></div>`;
+    }
+    function nodeInner(node){ return (node.products || []).map(card).join('') + (node.children || []).map(nestFolder).join(''); }
+    let grand = 0; catalog.products.forEach(pr=>{ grand += businessRemainingQty(pr.name); });
+    listEl.innerHTML = tree.map(root=>`
+      <div class="vs-group">
+        <div class="vs-head" data-open="0"><span class="vs-head-title">${escapeHtml(root.title)}</span><span class="vs-head-chevron" style="margin-right:auto">${CHEVRON_ICON_SVG}</span></div>
+        <div class="vs-items animated-collapse">${nodeInner(root)}</div>
+      </div>`).join('') + `<div class="inventory-grand-total">סה״כ נותר במלאי: <b>${grand}</b></div>`;
+    // יישור רוחב עמודת השם (כמו בשאר המלאים)
+    function alignNames(){
+      const names = Array.from(listEl.querySelectorAll('.vs-name'));
+      if(!names.length) return;
+      names.forEach(n=>{ n.style.width = 'auto'; });
+      let max = 0; names.forEach(n=>{ max = Math.max(max, n.getBoundingClientRect().width); });
+      names.forEach(n=>{ n.style.width = Math.ceil(max) + 'px'; });
+    }
+    requestAnimationFrame(alignNames);
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(()=>requestAnimationFrame(alignNames)); }
+    // פתיחה/סגירה של תיקיות
+    listEl.querySelectorAll('.vs-head').forEach(headEl=>{
+      headEl.addEventListener('click', ()=>{ toggleAnimatedCollapse(headEl.nextElementSibling, headEl.querySelector('.vs-head-chevron')); });
+    });
+    listEl.querySelectorAll('.vs-nest-head').forEach(headEl=>{
+      headEl.addEventListener('click', (e)=>{ e.stopPropagation(); toggleAnimatedCollapse(headEl.nextElementSibling, headEl.querySelector('.vs-nest-chev')); });
+    });
+    // הוספת רכש
+    listEl.querySelectorAll('.bs-add').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{ e.stopPropagation(); openBusinessStockPurchase(btn.dataset.name); });
+    });
   }
 
   function closeOrderModal(){
@@ -6565,11 +6769,44 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     });
   })();
 
+  /* ===== סידור מחדש (גרירה) של כרטיסי המלאים — אותו מנגנון כמו בהגדרות ===== */
+  const INVENTORY_ORDER_KEY = 'inventory_panel_order';
+  let inventoryPanelOrder = [];
+  async function loadInventoryPanelOrder(){
+    try{ const v = await sbGet(INVENTORY_ORDER_KEY); if(Array.isArray(v)) inventoryPanelOrder = v.slice(); else if(typeof v==='string'){ try{ const a=JSON.parse(v); if(Array.isArray(a)) inventoryPanelOrder=a; }catch(_){} } }
+    catch(_){}
+  }
+  function saveInventoryPanelOrder(){ try{ sbSet(INVENTORY_ORDER_KEY, inventoryPanelOrder); }catch(_){} }
+  function inventoryPanelContainer(){ const v=document.getElementById('inventoriesView'); return v ? v.querySelector('.products-inner') : null; }
+  function inventoryPanels(){ const cont=inventoryPanelContainer(); return cont ? Array.from(cont.children).filter(el=>el.matches && el.matches('section.panel')) : []; }
+  function applyInventoryPanelOrder(){
+    const cont = inventoryPanelContainer();
+    if(!cont || !inventoryPanelOrder.length) return;
+    inventoryPanelOrder.forEach(id=>{ const el=document.getElementById(id); if(el && el.parentElement===cont) cont.appendChild(el); });
+  }
+  (function initInventorySortable(){
+    const cont = inventoryPanelContainer();
+    if(!cont) return;
+    cont.addEventListener('click', (e)=>{ if(e.target.closest && e.target.closest('.panel-drag-handle')){ e.stopPropagation(); } }, true);
+    wireCatalogReorder(cont, {
+      itemSelector: 'section.panel',
+      handleSelector: '.panel-drag-handle',
+      ignoreSelector: 'input, textarea, select, button, a, label',
+      persistFn: (els)=>{
+        inventoryPanelOrder = els.map(el=>el.id).filter(Boolean);
+        saveInventoryPanelOrder();
+      }
+    });
+  })();
+
   document.getElementById('vehicleStockHeader').addEventListener('click', ()=>{
     toggleAnimatedCollapse(document.getElementById('vehicleStockBody'), document.getElementById('vehicleStockChevron'));
   });
   document.getElementById('generalInventoryHeader').addEventListener('click', ()=>{
     toggleAnimatedCollapse(document.getElementById('generalInventoryBody'), document.getElementById('generalInventoryChevron'));
+  });
+  document.getElementById('businessStockHeader').addEventListener('click', ()=>{
+    toggleAnimatedCollapse(document.getElementById('businessStockBody'), document.getElementById('businessStockChevron'));
   });
 
   document.getElementById('clustersHeader').addEventListener('click', ()=>{
@@ -6613,9 +6850,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
 
   document.getElementById('refreshBtn').addEventListener('click', async ()=>{
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder()]);
     populateBusinessDetails();
     applySettingsPanelOrder();
+    applyInventoryPanelOrder();
     renderAll();
   });
 
@@ -6822,8 +7060,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     inventoriesViewEl.classList.add('view-hidden');
   }
   function renderInventoriesView(){
+    try{ applyInventoryPanelOrder(); }catch(_){}
     try{ renderVehicleStockPanel(document.getElementById('vehicleStockHost')); }catch(err){ console.error('vehicle stock render', err); }
     try{ renderInventoryPanel(document.getElementById('generalInventoryHost')); }catch(err){ console.error('inventory render', err); }
+    try{ renderBusinessStockPanel(document.getElementById('businessStockHost')); }catch(err){ console.error('business stock render', err); }
   }
   function switchView(view){
     if(!['customers','products','orders','settings','inventories'].includes(view)) return;
@@ -7081,9 +7321,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       c.lastInvoice = ""; c.lastInvoiceDate = "";
     });
     vehicleStockBaseline = { anchors: {} };
+    businessStock = { purchases: [] }; // איפוס יומן הרכש של "מלאי כללי של העסק"
     inventoryCountFrom = localDateString(); // ספירת "כמות פריטים שנמכרו" מתחילה מהיום
     await sbSet(STORAGE_KEY, JSON.stringify(clients)); // overwrite ישיר, בלי merge
     await saveVehicleStockBaseline();
+    await saveBusinessStock();
     await saveInventoryCountFrom();
     renderAll();
   }
@@ -7464,7 +7706,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     srcClients.forEach(cl=>{
       const orders = (cl.orders||[]).filter(o=>!o.noOrder && (o.total||0) > 0);
       ordersCount += orders.length;
-      invoicesCount += (cl.invoices||[]).length;
+      // סופרים רק חשבוניות *חתומות* (מופקות בפועל) — כמו בפאנל "חשבוניות שהופקו".
+      // טיוטת חשבונית שלא נחתמה לא נחשבת, כדי שלא תופיע כ"חשבונית רפאים".
+      invoicesCount += (cl.invoices||[]).filter(inv=>inv && inv.signature).length;
       receiptsCount += (cl.receipts||[]).length;
       orders.forEach(o=>{ sub += (o.total||0); (o.items||[]).forEach(it=>{ qty += (it.qty||0); }); });
     });
@@ -8498,6 +8742,53 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     return roots;
   }
 
+  // מבנה מקונן של *כל* מוצרי הקטלוג (לא רק "עוקב מלאי") — לשימוש ב"מלאי כללי של העסק".
+  // קטגוריה ← תת-קטגוריה ← תת-תת-קטגוריה, בסדר הקטלוג. מוצרים ללא שיוך → תיקיית "ללא שיוך".
+  function buildFullCatalogTree(){
+    const byOrder = (a,b)=>(a.order||0)-(b.order||0);
+    const roots = [];
+    const used = new Set();
+    catalog.categories.slice().sort(byOrder).forEach(cat=>{
+      const catDirect = catalog.products.filter(pr=>pr.categoryId===cat.id && !pr.subcategoryId && !pr.subsubcategoryId).sort(byOrder);
+      catDirect.forEach(p=>used.add(p.id));
+      const catSubs = [];
+      catalog.subcategories.filter(s=>s.categoryId===cat.id).sort(byOrder).forEach(s=>{
+        const sDirect = catalog.products.filter(pr=>pr.subcategoryId===s.id && !pr.subsubcategoryId).sort(byOrder);
+        sDirect.forEach(p=>used.add(p.id));
+        const sSubs = [];
+        catalog.subsubcategories.filter(ss=>ss.subcategoryId===s.id).sort(byOrder).forEach(ss=>{
+          const p = catalog.products.filter(pr=>pr.subsubcategoryId===ss.id).sort(byOrder);
+          p.forEach(x=>used.add(x.id));
+          if(p.length) sSubs.push({ level:'subsub', title:ss.name, products:p, children:[] });
+        });
+        if(sDirect.length || sSubs.length) catSubs.push({ level:'sub', title:s.name, products:sDirect, children:sSubs });
+      });
+      if(catDirect.length || catSubs.length) roots.push({ level:'cat', title:cat.name, products:catDirect, children:catSubs });
+    });
+    const orphans = catalog.products.filter(pr=>!used.has(pr.id)).sort(byOrder);
+    if(orphans.length) roots.push({ level:'cat', title:'ללא שיוך', products:orphans, children:[] });
+    return roots;
+  }
+
+  // ===== מלאי כללי של העסק — חישובים =====
+  // נרכש = סך יומן הרכש למוצר. נמכר = סך פריטי חשבוניות *חתומות* למוצר. נותר = נרכש − נמכר.
+  function businessPurchasedQty(name){
+    return (businessStock.purchases || []).reduce((s,p)=> s + (p.name===name ? (Number(p.qty)||0) : 0), 0);
+  }
+  function businessSoldQty(name){
+    let total = 0;
+    clients.forEach(c=>{
+      if(c.testClient) return;
+      (c.invoices || []).forEach(inv=>{
+        if(inv && inv.signature){
+          (inv.items || []).forEach(it=>{ if(it.name === name) total += (Number(it.qty)||0); });
+        }
+      });
+    });
+    return total;
+  }
+  function businessRemainingQty(name){ return businessPurchasedQty(name) - businessSoldQty(name); }
+
   // ---- drag a product INTO a folder: resolve a folder header element to a destination
   // {catId, subId, subsubId}, and move the product there (like dropping a file in a folder). ----
   function folderTargetFromEl(el){
@@ -9512,9 +9803,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   (async function init(){
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder()]);
     populateBusinessDetails();
     applySettingsPanelOrder();
+    applyInventoryPanelOrder();
     backfillDefaultWhatsappMessages();
     // managers/agents are loaded now, so the greeting can resolve the real name (e.g. sasy → ששי לוי)
     applyUserGreeting(currentLoginUser());
