@@ -338,11 +338,11 @@
   /* לחיצה על הטבעת: קופצת מעט וחוזרת — בכל לחיצה מחדש */
   @keyframes cstatsBounce{ 0%{ transform:scale(1);} 35%{ transform:scale(1.06);} 100%{ transform:scale(1);} }
   /* זוהר: בכל לחיצה יוצא פייד של צבע אחד שנזרק החוצה (מתרחב) ודועך, מתחלף לפי סדר הצבעים */
-  .cstats-glow{ position:absolute; left:50%; top:50%; width:84%; aspect-ratio:1; border-radius:50%; transform:translate(-50%,-50%) scale(.85); pointer-events:none; z-index:0; opacity:0; will-change:transform,opacity; }
+  .cstats-glow{ position:absolute; left:50%; top:50%; width:78%; aspect-ratio:1; border-radius:50%; transform:translate(-50%,-50%) scale(.85); pointer-events:none; z-index:0; opacity:0; will-change:transform,opacity; filter:blur(16px); }
   @keyframes cstatsGlowFade{
     0%{   opacity:.7;  transform:translate(-50%,-50%) scale(.9); }
     12%{  opacity:1;   transform:translate(-50%,-50%) scale(1.02); }
-    100%{ opacity:0;   transform:translate(-50%,-50%) scale(1.28); }
+    100%{ opacity:0;   transform:translate(-50%,-50%) scale(1.35); }
   }
   /* ===== מסמך חתימה דיגיטלית (חשבונית/הזמנה/קבלה) ===== */
   .sigdoc-overlay{ position:fixed; inset:0; z-index:1200; background:rgba(2,7,22,.82); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 14px) 12px calc(env(safe-area-inset-bottom,0px) + 14px); }
@@ -7688,15 +7688,19 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const EASE = 'cubic-bezier(.12,.62,.28,1)';
     const svg = wrap.querySelector('svg');
     if(svg){
-      // Web Animations API — מתחיל אנימציה חדשה בכל לחיצה (אמין באייפון, לא רק בלחיצה הראשונה)
+      // Web Animations API — מתחיל אנימציה חדשה בכל לחיצה (אמין באייפון, לא רק בלחיצה הראשונה).
+      // עולה מהר, וחוזר לאט וחלק (זורם, לא אגרסיבי).
       if(svg.animate){
+        const bounceDur = Math.round(pressDur * 1.7);
         svg.animate(
-          [ { transform:'scale(1)' }, { transform:'scale(1.06)', offset:.35 }, { transform:'scale(1)' } ],
-          { duration: pressDur, easing: EASE }
+          [ { transform:'scale(1)',     easing:'cubic-bezier(.33,.7,.5,1)' },  // עלייה מהירה
+            { transform:'scale(1.055)', offset:.22, easing:'cubic-bezier(0,0,.28,1)' }, // חזרה איטית וחלקה
+            { transform:'scale(1)' } ],
+          { duration: bounceDur }
         );
       } else {
         svg.style.animation = 'none'; void svg.offsetWidth;
-        svg.style.animation = `cstatsBounce ${pressDur}ms ${EASE}`;
+        svg.style.animation = `cstatsBounce ${Math.round(pressDur*1.7)}ms ${EASE}`;
       }
     }
     // זוהר: בכל לחיצה נזרק החוצה הצבע עצמו (ללא ליבה לבנה) ודועך, מתחלף לפי סדר הצבעים.
@@ -7705,7 +7709,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     glow.className = 'cstats-glow';
     const gc = CSTATS_GLOW[_cstatsGlowIdx % CSTATS_GLOW.length]; _cstatsGlowIdx++;
     const gh = gc.replace('#',''); const gr=parseInt(gh.slice(0,2),16), gg=parseInt(gh.slice(2,4),16), gb=parseInt(gh.slice(4,6),16);
-    glow.style.background = `radial-gradient(circle, rgba(${gr},${gg},${gb},1) 0%, rgba(${gr},${gg},${gb},.9) 45%, rgba(${gr},${gg},${gb},.35) 70%, rgba(${gr},${gg},${gb},0) 100%)`;
+    glow.style.background = `radial-gradient(circle, rgba(${gr},${gg},${gb},.95) 0%, rgba(${gr},${gg},${gb},.75) 50%, rgba(${gr},${gg},${gb},0) 100%)`;
     glow.style.animation = `cstatsGlowFade ${pressDur}ms ${EASE}`;
     wrap.appendChild(glow);
     setTimeout(()=>{ try{ glow.remove(); }catch(_){} }, pressDur + 100);
