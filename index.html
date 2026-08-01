@@ -740,6 +740,10 @@
   #settingsView section.panel.dragging{ opacity:.35; }
   #settingsView section.panel.touch-dragging{ position:relative; z-index:60; will-change:transform; box-shadow:0 14px 34px rgba(0,0,0,.5); transition:box-shadow .18s ease; }
   #settingsView section.panel.touch-dragging .panel-drag-handle{ cursor:grabbing; color:#2f7cf6; }
+  /* עמוד מלאים: שכבת עיגולים נופלים/קופצים המגיבים לתנועת הנייד */
+  /* z-index:0 — מעל רקע העמוד (#bgImage ב-z-index:-1) אך מתחת לכל תוכן ה-.app (הסטריפים) */
+  #inventoryBallsLayer{ position:fixed; inset:0; overflow:hidden; pointer-events:none; z-index:0; }
+  .inv-ball{ position:absolute; top:0; left:0; border-radius:50%; will-change:transform; }
   /* גרירת סידור גם לכרטיסי המלאים */
   #inventoriesView section.panel.dragging{ opacity:.35; }
   #inventoriesView section.panel.touch-dragging{ position:relative; z-index:60; will-change:transform; box-shadow:0 14px 34px rgba(0,0,0,.5); transition:box-shadow .18s ease; }
@@ -7076,9 +7080,94 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     try{ renderInventoryPanel(document.getElementById('generalInventoryHost')); }catch(err){ console.error('inventory render', err); }
     try{ renderBusinessStockPanel(document.getElementById('businessStockHost')); }catch(err){ console.error('business stock render', err); }
   }
+  /* ===== עמוד מלאים: 8 עיגולים נופלים וקופצים, מגיבים לתנועת/ניענוע הנייד ===== */
+  let _invBalls = null;                 // { layer, balls, raf, gx, gy }
+  let _invMotionBound = false;          // מאזין devicemotion מחובר פעם אחת
+  const INV_BALL_COLORS = ['#0f1a2e', '#0277fb', '#6303ed'];
+  function onInvMotion(e){
+    if(!_invBalls) return;
+    const a = e.acceleration || null;                 // תנועה בפועל (ניענוע) — בלי כוח הכבידה
+    const ag = e.accelerationIncludingGravity || null;// כולל כבידה — לזיהוי הטיה
+    if(a && (a.x!=null || a.y!=null)){
+      const F = 1.1;
+      const ix = Math.max(-40, Math.min(40, (a.x||0) * F));
+      const iy = Math.max(-40, Math.min(40, -(a.y||0) * F));
+      _invBalls.balls.forEach(b=>{ const k = 0.6 + b.r/50; b.vx += ix*k*0.12; b.vy += iy*k*0.12; });
+    }
+    if(ag && ag.x!=null){
+      _invBalls.gx = Math.max(-1.3, Math.min(1.3, -(ag.x||0)/9.8)) * (_invBalls.G * 1.4);
+    }
+  }
+  function ensureInvMotion(){
+    if(typeof DeviceMotionEvent === 'undefined') return;
+    const bind = ()=>{ if(!_invMotionBound){ window.addEventListener('devicemotion', onInvMotion); _invMotionBound = true; } };
+    if(typeof DeviceMotionEvent.requestPermission === 'function'){
+      if(_invMotionBound) return;
+      const ask = ()=>{ DeviceMotionEvent.requestPermission().then(st=>{ if(st==='granted') bind(); }).catch(()=>{}); };
+      document.addEventListener('pointerdown', ask, { once:true }); // iOS דורש מחווה מהמשתמש
+    } else {
+      bind(); // אנדרואיד/דסקטופ — ללא בקשת הרשאה
+    }
+  }
+  function _invTick(now){
+    if(!_invBalls) return;
+    if(_invBalls.t0 == null) _invBalls.t0 = now;
+    const elapsed = now - _invBalls.t0;
+    const layer = _invBalls.layer, ww = layer.clientWidth, hh = layer.clientHeight;
+    const { REST, WALL, FRICTION, REST_V } = _invBalls;
+    _invBalls.balls.forEach(b=>{
+      // כל עיגול מתחיל ליפול בזמן משלו — לא כולם יחד
+      if(elapsed < b.delay){ b.el.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`; return; }
+      b.vx += _invBalls.gx; b.vy += _invBalls.gy;
+      b.vx *= FRICTION; b.vy *= FRICTION;
+      b.x += b.vx; b.y += b.vy;
+      if(b.y + b.r > hh){ b.y = hh - b.r; b.vy = -b.vy * REST; b.vx *= 0.94; if(Math.abs(b.vy) < REST_V) b.vy = 0; }
+      if(b.y - b.r < 0){ b.y = b.r; b.vy = -b.vy * REST; }
+      if(b.x - b.r < 0){ b.x = b.r; b.vx = -b.vx * WALL; }
+      if(b.x + b.r > ww){ b.x = ww - b.r; b.vx = -b.vx * WALL; }
+      b.el.style.transform = `translate(${(b.x - b.r).toFixed(1)}px, ${(b.y - b.r).toFixed(1)}px)`;
+    });
+    _invBalls.raf = requestAnimationFrame(_invTick);
+  }
+  function startInventoryBalls(){
+    stopInventoryBalls();
+    const layer = document.createElement('div');
+    layer.id = 'inventoryBallsLayer';
+    document.body.appendChild(layer);
+    const w = layer.clientWidth || window.innerWidth, h = layer.clientHeight || window.innerHeight;
+    const balls = [];
+    // 8 עיגולים רגילים + 5 עיגולים קטנים יותר = 13
+    for(let i=0;i<13;i++){
+      const r = (i < 8) ? (13 + Math.random()*23) : (6 + Math.random()*8); // גדולים 13..36, קטנים 6..14
+      const el = document.createElement('div');
+      el.className = 'inv-ball';
+      el.style.width = el.style.height = (r*2) + 'px';
+      el.style.background = INV_BALL_COLORS[i % INV_BALL_COLORS.length];
+      layer.appendChild(el);
+      balls.push({
+        el, r,
+        x: r + Math.random()*(w - 2*r),
+        y: -r - 20 - Math.random()*60,               // מתחילים ממש מעל המסך
+        vx: (Math.random()*2 - 1)*1.2,
+        vy: 0,
+        delay: Math.random()*1700                     // כל עיגול נופל בזמן משלו (0..1.7ש)
+      });
+    }
+    _invBalls = { layer, balls, raf:0, t0:null, gx:0, gy:0.6, G:0.6, REST:0.62, WALL:0.66, FRICTION:0.992, REST_V:0.4 };
+    _invBalls.raf = requestAnimationFrame(_invTick);
+    ensureInvMotion();
+  }
+  function stopInventoryBalls(){
+    if(!_invBalls) return;
+    cancelAnimationFrame(_invBalls.raf);
+    try{ _invBalls.layer.remove(); }catch(_){}
+    _invBalls = null;                                 // המאזין נשאר אך לא עושה כלום כשאין כדורים
+  }
+
   function switchView(view){
     if(!['customers','products','orders','settings','inventories'].includes(view)) return;
     currentView = view;
+    if(view !== 'inventories') stopInventoryBalls();   // עוזבים מלאים → עוצרים את הכדורים
     hideAllViews();
     if(view === 'settings'){
       settingsViewEl.classList.remove('view-hidden');
@@ -7086,6 +7175,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     } else if(view === 'inventories'){
       inventoriesViewEl.classList.remove('view-hidden');
       renderInventoriesView();
+      startInventoryBalls();                            // בכניסה לעמוד — העיגולים נופלים
     } else if(view === 'products'){
       productsViewEl.classList.remove('view-hidden');
       renderCatalog();
@@ -7703,16 +7793,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         svg.style.animation = `cstatsBounce ${Math.round(pressDur*1.7)}ms ${EASE}`;
       }
     }
-    // זוהר: בכל לחיצה נזרק החוצה הצבע עצמו (ללא ליבה לבנה) ודועך, מתחלף לפי סדר הצבעים.
-    // רקע = radial-gradient של הצבע שדועך לשקוף באותו גוון — כך אין "לבן" באמצע.
-    const glow = document.createElement('div');
-    glow.className = 'cstats-glow';
-    const gc = CSTATS_GLOW[_cstatsGlowIdx % CSTATS_GLOW.length]; _cstatsGlowIdx++;
-    const gh = gc.replace('#',''); const gr=parseInt(gh.slice(0,2),16), gg=parseInt(gh.slice(2,4),16), gb=parseInt(gh.slice(4,6),16);
-    glow.style.background = `radial-gradient(circle, rgba(${gr},${gg},${gb},.95) 0%, rgba(${gr},${gg},${gb},.75) 50%, rgba(${gr},${gg},${gb},0) 100%)`;
-    glow.style.animation = `cstatsGlowFade ${pressDur}ms ${EASE}`;
-    wrap.appendChild(glow);
-    setTimeout(()=>{ try{ glow.remove(); }catch(_){} }, pressDur + 100);
     const base = rect.width / 26; // מהירות בסיס (פיקסלים לפריים ב-60fps)
     for(let i=0;i<count;i++){
       const spark = document.createElement('div');
