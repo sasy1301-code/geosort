@@ -297,12 +297,12 @@
   .doc-del-btn{ color:#ff7bac; }
   .doc-open-btn{ color:#8fb7ff; }
   /* ===== מסמך חתימה דיגיטלית (חשבונית/הזמנה/קבלה) ===== */
-  .sigdoc-overlay{ position:fixed; inset:0; z-index:1200; background:rgba(2,7,22,.82); backdrop-filter:blur(3px); display:flex; align-items:flex-start; justify-content:center; padding:16px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
-  .sigdoc-box{ width:100%; max-width:840px; background:#0b1428; border:1px solid rgba(140,160,255,.25); border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,.55); display:flex; flex-direction:column; margin:auto; overflow:hidden; }
-  .sigdoc-head{ display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
+  .sigdoc-overlay{ position:fixed; inset:0; z-index:1200; background:rgba(2,7,22,.82); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:calc(env(safe-area-inset-top,0px) + 14px) 12px calc(env(safe-area-inset-bottom,0px) + 14px); }
+  .sigdoc-box{ width:100%; max-width:840px; max-height:100%; background:#0b1428; border:1px solid rgba(140,160,255,.25); border-radius:18px; box-shadow:0 24px 60px rgba(0,0,0,.55); display:flex; flex-direction:column; overflow:hidden; }
+  .sigdoc-head{ flex:0 0 auto; display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.1); }
   .sigdoc-title{ color:#fff; font-size:1rem; font-weight:600; }
   .sigdoc-close{ margin-right:auto; -webkit-appearance:none; appearance:none; border:none; background:rgba(255,255,255,.1); color:#fff; width:34px; height:34px; border-radius:50%; font-size:1.1rem; cursor:pointer; line-height:1; }
-  .sigdoc-body{ padding:16px; display:flex; flex-direction:column; gap:16px; }
+  .sigdoc-body{ padding:16px; display:flex; flex-direction:column; gap:16px; overflow-y:auto; -webkit-overflow-scrolling:touch; flex:1 1 auto; min-height:0; }
   .sigdoc-doc-wrap{ display:flex; justify-content:center; background:#e9edf4; border-radius:12px; padding:14px; overflow-x:auto; }
   /* המסמך עצמו — לבן, מתכוונן לרוחב, אותה שפה עיצובית כמו קבצי ה-PDF */
   .gdoc{ width:100%; max-width:720px; background:#fff; color:#1c1c1c; direction:rtl; padding:30px 26px 26px; font-family:'Google Sans',"Noto Sans Hebrew",sans-serif; box-shadow:0 2px 10px rgba(0,0,0,.12); }
@@ -342,14 +342,14 @@
   .sigpad-btn{ -webkit-appearance:none; appearance:none; flex:1 1 auto; border:none; border-radius:12px; padding:11px; font-family:inherit; font-size:.86rem; font-weight:600; cursor:pointer; }
   .sigpad-clear{ background:rgba(255,255,255,.12); color:#fff; flex:0 0 40%; }
   .sigpad-save{ background:#2f7cf6; color:#fff; }
-  .sigdoc-actions{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .sigdoc-actions .full{ grid-column:1 / -1; }
-  .sigdoc-act{ -webkit-appearance:none; appearance:none; border:none; border-radius:13px; padding:13px; font-family:inherit; font-size:.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .sigdoc-actions{ display:flex; flex-direction:column; gap:10px; }
+  .sigdoc-act{ -webkit-appearance:none; appearance:none; width:100%; border:none; border-radius:13px; padding:13px; font-family:inherit; font-size:.9rem; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
   .sigdoc-act svg{ width:20px; height:20px; display:block; flex:0 0 auto; }
   .sigdoc-wa{ background:#73dd5c; color:#021236; }
   .sigdoc-mail{ background:#2f7cf6; color:#fff; }
   .sigdoc-dl{ background:rgba(255,255,255,.12); color:#fff; }
-  .sigdoc-status{ grid-column:1 / -1; text-align:center; font-size:.8rem; color:rgba(255,255,255,.8); min-height:1em; }
+  .sigdoc-status{ text-align:center; font-size:.8rem; color:rgba(255,255,255,.8); min-height:1em; }
+  .sigdoc-confirm{ background:#1e7a73; color:#fff; margin-top:2px; }
   /* per-panel document search (by date or number) */
   .doc-search-wrap{ margin:2px 0 10px; }
   .doc-search-input{ -webkit-appearance:none; appearance:none; width:100%; box-sizing:border-box; padding:9px 12px; border:1px solid rgba(255,255,255,.35); border-radius:12px; background:#fff; color:#021236; font-family:inherit; font-size:.85rem; }
@@ -7392,10 +7392,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
             </div>
           </div>` : (type === 'receipt' ? `<div class="sigpad-hint" style="text-align:center">החתימה עוברת אוטומטית מהחשבונית שממנה הופקה הקבלה.</div>` : '')}
           <div class="sigdoc-actions">
-            <button type="button" class="sigdoc-act sigdoc-wa full">${WHATSAPP_ICON_SVG}<span>שליחה בוואטסאפ</span></button>
+            <button type="button" class="sigdoc-act sigdoc-wa">${WHATSAPP_ICON_SVG}<span>שליחה בוואטסאפ</span></button>
             <button type="button" class="sigdoc-act sigdoc-mail">שליחה במייל</button>
             <button type="button" class="sigdoc-act sigdoc-dl">הורדת PDF</button>
             <div class="sigdoc-status" id="sigdocStatus"></div>
+            <button type="button" class="sigdoc-act sigdoc-confirm">אישור</button>
           </div>
         </div>
       </div>`;
@@ -7444,6 +7445,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     overlay.querySelector('.sigdoc-wa').addEventListener('click', ()=>shareSignedDoc(c, type, doc, overlay, 'whatsapp'));
     overlay.querySelector('.sigdoc-mail').addEventListener('click', ()=>shareSignedDoc(c, type, doc, overlay, 'email'));
     overlay.querySelector('.sigdoc-dl').addEventListener('click', ()=>shareSignedDoc(c, type, doc, overlay, 'download'));
+    overlay.querySelector('.sigdoc-confirm').addEventListener('click', close);
   }
 
   // the orders + invoices + receipts panels open/close like the settings/inventory panels
