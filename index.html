@@ -184,6 +184,8 @@
   .side-menu.open .side-menu-item:nth-child(5){ transition-delay:.40s; }
   .side-menu.open .side-menu-item:nth-child(6){ transition-delay:.47s; }
   .side-menu.open .side-menu-item:nth-child(7){ transition-delay:.54s; }
+  .side-menu.open .side-menu-item:nth-child(8){ transition-delay:.61s; }
+  .side-menu.open .side-menu-item:nth-child(9){ transition-delay:.68s; }
   .side-menu-item .txt{ font-size:12pt; font-weight:400; line-height:1.2; font-family:inherit; }
   /* ===== SYSTEM ICON DISC — the one reusable standard for EVERY icon in the app =====
      Put the icon in a wrapper (a <button> or <span>) with class="sys-icon-disc" holding one
@@ -1821,6 +1823,85 @@
     .client-card .phone-link{ padding:2px 0; display:inline-block; }
   }
 
+  /* ===================== יומן (Journal) ===================== */
+  #viewJournalItem .icon svg{ --ny:0px; }
+  .jr-cal-panel{ padding:0; overflow:visible; }
+  .jr-cal{ background:#fff; border-radius:18px; padding:14px 14px 16px; box-shadow:0 6px 20px rgba(9,19,33,.10); }
+  .jr-cal-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
+  .jr-cal-title{ font-size:15pt; font-weight:600; color:#0f1a2e; text-align:center; flex:1; }
+  .jr-nav{ -webkit-appearance:none; appearance:none; width:38px; height:38px; flex:0 0 auto; border:none; border-radius:50%; background:#025ffb; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s ease, transform .12s ease; }
+  .jr-nav:hover{ background:#1a72ff; } .jr-nav:active{ transform:scale(.92); }
+  .jr-nav svg{ width:22px; height:22px; display:block; }
+  .jr-cal-weekdays{ display:grid; grid-template-columns:repeat(7,1fr); direction:rtl; gap:4px; margin-bottom:6px; }
+  .jr-cal-weekday{ text-align:center; font-size:8.5pt; font-weight:600; color:#8a93a5; padding:2px 0; }
+  .jr-cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); direction:rtl; gap:5px; }
+  .jr-cal-cell{ position:relative; aspect-ratio:1/1; border:none; border-radius:12px; background:#eef2f7; color:#0f1a2e; font-size:11.5pt; font-weight:500; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .13s ease, transform .1s ease, color .13s ease; }
+  .jr-cal-cell:hover{ background:#dde6f2; }
+  .jr-cal-cell:active{ transform:scale(.93); }
+  .jr-cal-cell.empty{ background:transparent; cursor:default; }
+  .jr-cal-cell.today{ box-shadow:inset 0 0 0 2px #6303ed; }
+  .jr-cal-cell.selected{ background:#025ffb; color:#fff; }
+  .jr-cal-cell.selected.today{ box-shadow:inset 0 0 0 2px #b79bff; }
+  .jr-cal-cell .jr-dot{ position:absolute; bottom:6px; left:50%; transform:translateX(-50%); width:6px; height:6px; border-radius:50%; background:#6303ed; }
+  .jr-cal-cell.selected .jr-dot{ background:#fff; }
+
+  .jr-day-folders{ margin-top:14px; }
+  .jr-day-group{ margin-bottom:8px; }
+  .jr-day-head{ display:flex; align-items:center; gap:10px; background:#025ffb; border:1px solid #4394f7; border-radius:15px; padding:11px 13px; cursor:pointer; transition:background .13s ease; }
+  .jr-day-head:hover{ background:#1a72ff; }
+  .jr-day-head.is-today{ border-color:#b79bff; box-shadow:0 0 0 2px rgba(99,3,237,.35); }
+  .jr-day-head .jr-day-name{ flex:1; min-width:0; color:#fff; font-weight:400; font-size:11pt; }
+  .jr-day-head .jr-day-count{ background:#fff; color:#0f1a2e; min-width:26px; height:26px; border-radius:20px; padding:0 8px; display:inline-flex; align-items:center; justify-content:center; font-size:9.5pt; font-weight:600; }
+  .jr-day-head .jr-day-count.zero{ background:rgba(255,255,255,.28); color:#eaf1ff; }
+  .jr-day-head .jr-day-chev{ color:#fff; display:inline-flex; transition:transform .18s ease; }
+  .jr-day-head.open .jr-day-chev{ transform:rotate(90deg); }
+  .jr-day-body{ overflow:hidden; }
+  .jr-day-body.animated-collapse{ transition:max-height .5s cubic-bezier(.4,0,.2,1), opacity .4s ease; }
+  .jr-day-body.animated-collapse:not(.is-open){ max-height:0; opacity:0; }
+  .jr-hours{ padding:8px 4px 4px; }
+  .jr-hour-row{ display:flex; align-items:flex-start; gap:10px; padding:7px 8px; border-radius:11px; cursor:pointer; transition:background .12s ease; }
+  .jr-hour-row:hover{ background:#e9eff8; }
+  .jr-hour-row + .jr-hour-row{ border-top:1px solid #e3e8f0; }
+  .jr-hour-time{ flex:0 0 auto; width:46px; font-size:10pt; font-weight:600; color:#025ffb; padding-top:2px; text-align:center; }
+  .jr-hour-events{ flex:1; min-width:0; display:flex; flex-direction:column; gap:4px; }
+  .jr-hour-empty{ font-size:9pt; color:#b3bccb; padding-top:3px; }
+  .jr-ev-chip{ display:flex; align-items:center; gap:7px; background:#0f1a2e; color:#fff; border-radius:9px; padding:5px 9px; font-size:9.5pt; }
+  .jr-ev-chip .jr-ev-time{ color:#6db2ff; font-weight:600; flex:0 0 auto; }
+  .jr-ev-chip .jr-ev-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .jr-ev-chip .jr-ev-bell{ flex:0 0 auto; opacity:.8; display:inline-flex; }
+  .jr-ev-chip .jr-ev-bell svg{ width:12px; height:12px; display:block; }
+  .jr-hour-add{ flex:0 0 auto; color:#025ffb; opacity:.5; display:inline-flex; align-items:center; padding-top:2px; }
+  .jr-hour-row:hover .jr-hour-add{ opacity:1; }
+  .jr-hour-add svg{ width:16px; height:16px; display:block; }
+
+  /* meeting popup — reuses .order-modal-overlay/.order-modal (dark navy) */
+  .jr-modal .order-modal-body{ padding:16px 20px 20px; }
+  .jr-field{ margin-bottom:12px; }
+  .jr-field label{ display:block; font-size:.82rem; color:rgba(255,255,255,.75); margin-bottom:5px; }
+  .jr-field input, .jr-field select, .jr-field textarea{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:11px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.06); color:#fff; font-size:.9rem; font-family:inherit; }
+  .jr-field textarea{ min-height:64px; resize:vertical; }
+  .jr-field input::placeholder, .jr-field textarea::placeholder{ color:rgba(255,255,255,.4); }
+  .jr-two{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .jr-client-wrap{ position:relative; }
+  .jr-client-results{ position:absolute; top:100%; right:0; left:0; z-index:5; background:#0f1a2e; border:1px solid rgba(255,255,255,.22); border-radius:11px; margin-top:4px; max-height:200px; overflow-y:auto; display:none; }
+  .jr-client-results.show{ display:block; }
+  .jr-client-opt{ padding:9px 12px; font-size:.86rem; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.08); }
+  .jr-client-opt:hover{ background:rgba(3,95,251,.35); }
+  .jr-client-opt small{ color:rgba(255,255,255,.55); display:block; font-size:.72rem; margin-top:1px; }
+  .jr-save-btn{ -webkit-appearance:none; appearance:none; display:flex; width:100%; justify-content:center; align-items:center; gap:8px; margin-top:6px; padding:13px; border:none; border-radius:23px; background:#025ffb; color:#fff; font-size:.95rem; font-weight:600; font-family:inherit; cursor:pointer; transition:background .15s ease; }
+  .jr-save-btn:hover{ background:#1a72ff; }
+  .jr-ev-list{ margin-bottom:16px; }
+  .jr-ev-list-title{ font-size:.82rem; color:rgba(255,255,255,.6); margin-bottom:8px; }
+  .jr-ev-item{ display:flex; align-items:flex-start; gap:10px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px 12px; margin-bottom:8px; }
+  .jr-ev-item .jr-ev-item-time{ flex:0 0 auto; color:#6db2ff; font-weight:700; font-size:.92rem; padding-top:1px; }
+  .jr-ev-item .jr-ev-item-main{ flex:1; min-width:0; }
+  .jr-ev-item .jr-ev-item-name{ font-weight:600; font-size:.9rem; }
+  .jr-ev-item .jr-ev-item-meta{ font-size:.76rem; color:rgba(255,255,255,.6); margin-top:2px; word-break:break-word; }
+  .jr-ev-item .jr-ev-item-del{ flex:0 0 auto; background:transparent; border:none; color:rgba(255,140,140,.85); cursor:pointer; padding:2px; display:inline-flex; }
+  .jr-ev-item .jr-ev-item-del svg{ width:16px; height:16px; display:block; }
+  .jr-ev-empty{ font-size:.82rem; color:rgba(255,255,255,.45); padding:4px 0 12px; }
+  .jr-form-title{ font-size:.82rem; color:rgba(255,255,255,.6); margin:4px 0 10px; padding-top:12px; border-top:1px solid rgba(255,255,255,.12); }
+
 </style>
 </head>
 <body>
@@ -1922,6 +2003,7 @@
       <button class="side-menu-item view-nav-item" id="viewProductsItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg></span><span class="txt">מוצרים ומחירים</span></button>
       <button class="side-menu-item view-nav-item" id="viewOrdersItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM8 7h8c.55 0 1 .45 1 1s-.45 1-1 1H8c-.55 0-1-.45-1-1s.45-1 1-1zm3 10H8c-.55 0-1-.45-1-1s.45-1 1-1h3c.55 0 1 .45 1 1s-.45 1-1 1zm5-4H8c-.55 0-1-.45-1-1s.45-1 1-1h8c.55 0 1 .45 1 1s-.45 1-1 1z"/></svg></span><span class="txt">הזמנות</span></button>
       <button class="side-menu-item view-nav-item" id="viewInventoriesItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5zm0 2.31L18.5 8 12 11.69 5.5 8 12 4.31zM5 9.5l6 3.46v6.74l-6-3.33V9.5zm14 0v6.87l-6 3.33v-6.74l6-3.46z"/></svg></span><span class="txt">מלאים</span></button>
+      <button class="side-menu-item view-nav-item" id="viewJournalItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg></span><span class="txt">יומן</span></button>
       <div class="side-menu-sep" aria-hidden="true"></div>
       <a class="side-menu-item" href="./order/" target="_blank"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m9,12c3.309,0,6-2.691,6-6S12.309,0,9,0,3,2.691,3,6s2.691,6,6,6Zm0-11c2.757,0,5,2.243,5,5s-2.243,5-5,5-5-2.243-5-5S6.243,1,9,1Zm1.5,13.5c0,.276-.224.5-.5.5h-.5c-4.687,0-8.5,3.813-8.5,8.5,0,.276-.224.5-.5.5s-.5-.224-.5-.5c0-5.238,4.262-9.5,9.5-9.5h.5c.276,0,.5.224.5.5Zm13.414,2.259c-.203-.557-.738-.931-1.331-.931h-2.398l-.856-2.406c-.206-.551-.739-.922-1.328-.922s-1.122.371-1.33.929l-.854,2.399h-2.398c-.592,0-1.126.373-1.33.927-.205.556-.039,1.187.421,1.576l1.912,1.556-.757,2.272c-.179.573.023,1.2.503,1.558.243.183.545.283.849.283.282,0,.555-.083.788-.239l2.208-1.478,2.248,1.464c.504.326,1.16.301,1.639-.065.476-.367.668-.996.477-1.576l-.781-2.227,1.903-1.55c.453-.382.621-1.013.418-1.569Zm-1.056.799l-2.169,1.767c-.164.133-.227.354-.156.553l.895,2.55c.056.168,0,.354-.14.46-.143.108-.336.116-.484.02l-2.524-1.644c-.167-.109-.384-.107-.551.003l-2.482,1.662c-.143.095-.342.092-.48-.014-.142-.105-.201-.29-.15-.451l.862-2.591c.065-.197.002-.415-.159-.545l-2.172-1.767c-.132-.112-.181-.297-.12-.461.06-.164.217-.273.391-.273h2.751c.212,0,.4-.133.471-.332l.971-2.725c.121-.325.662-.318.779-.007l.973,2.731c.07.199.259.332.471.332h2.751c.175,0,.332.11.392.274.06.164.01.35-.116.457Z"/></svg></span><span class="txt">כניסת לקוחות</span></a>
     </nav>
@@ -2240,6 +2322,23 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     </div>
   </div>
 
+  <div class="products-view journal-view view-hidden" id="journalView">
+    <div class="products-inner">
+      <section class="panel jr-cal-panel">
+        <div class="jr-cal">
+          <div class="jr-cal-top">
+            <button type="button" class="jr-nav" id="jrPrevMonth" title="חודש קודם"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg></button>
+            <div class="jr-cal-title" id="jrCalTitle"></div>
+            <button type="button" class="jr-nav" id="jrNextMonth" title="חודש הבא"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.6 7.4 10 6l6 6-6 6-1.4-1.4L13.2 12z"/></svg></button>
+          </div>
+          <div class="jr-cal-weekdays" id="jrCalWeekdays"></div>
+          <div class="jr-cal-grid" id="jrCalGrid"></div>
+        </div>
+      </section>
+      <div id="journalDayFolders" class="jr-day-folders"></div>
+    </div>
+  </div>
+
   <div class="products-view orders-view view-hidden" id="ordersView">
     <div class="products-inner">
       <section class="panel" id="ordersPanel">
@@ -2475,6 +2574,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const VEHICLE_STOCK_BASELINE_KEY = "vehicle_stock_baseline";
   const INVENTORY_COUNT_FROM_KEY = "inventory_count_from"; // date the general-inventory tally counts from
   const BUSINESS_STOCK_KEY = "business_stock"; // "מלאי כללי של העסק" — יומן רכש (הכנסות למלאי)
+  const JOURNAL_KEY = "journal"; // יומן — פגישות/משימות לפי תאריך ושעה
   const CLUSTER_NAMES_KEY = "cluster_names_map";
   const CLUSTER_ORDER_KEY = "cluster_order_map";
   const CATALOG_KEY = "catalog"; // separate app_storage key so saving the catalog never rewrites the clients blob
@@ -2493,6 +2593,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   let vehicleStockBaseline = { anchors: {} }; // per-product: { qty: <stock level set at this point>, cumulative: <cumulative orders total at that moment> } - lets the driver set any starting quantity, not just 50
   let inventoryCountFrom = ""; // general-inventory running tally start date ("" = never reset → defaults to today)
   let businessStock = { purchases: [] }; // מלאי כללי של העסק — יומן רכש: [{id, name, qty, date}]. נותר = סך רכש פחות נמכר (חשבוניות חתומות)
+  let journal = { events: [] }; // יומן — פגישות: [{id, date:'YYYY-MM-DD', time:'HH:MM', clientName, business, phone, email, details, reminder:0|30|60, notified}]
   let folders = []; // manually-created folder names, e.g. "ראשון לציון" or "צפון"
   let agents = []; // sales agents: [{name, username, password}] — chosen on the orders page
   let managers = []; // main managers: [{name, username, password}] — elevated access (future)
@@ -3047,6 +3148,16 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   async function saveBusinessStock(){
     try{ await sbSet(BUSINESS_STOCK_KEY, JSON.stringify(businessStock)); }
     catch(e){ console.error("שגיאת שמירת מלאי העסק", e); }
+  }
+  async function loadJournal(){
+    try{
+      const raw = await sbGet(JOURNAL_KEY);
+      if(raw){ const p = JSON.parse(raw); journal = { events: Array.isArray(p && p.events) ? p.events : [] }; }
+    }catch(e){ /* none saved yet — keep empty */ }
+  }
+  async function saveJournal(){
+    try{ await sbSet(JOURNAL_KEY, JSON.stringify(journal)); }
+    catch(e){ console.error("שגיאת שמירת היומן", e); }
   }
   async function saveVehicleStockBaseline(){
     try{
@@ -6869,7 +6980,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
 
   document.getElementById('refreshBtn').addEventListener('click', async ()=>{
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal()]);
     populateBusinessDetails();
     applySettingsPanelOrder();
     applyInventoryPanelOrder();
@@ -7059,6 +7170,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const ordersViewEl = document.getElementById('ordersView');
   const settingsViewEl = document.getElementById('settingsView');
   const inventoriesViewEl = document.getElementById('inventoriesView');
+  const journalViewEl = document.getElementById('journalView');
+  const viewJournalItem = document.getElementById('viewJournalItem');
   const viewCustomersItem = document.getElementById('viewCustomersItem');
   const viewProductsItem = document.getElementById('viewProductsItem');
   const viewOrdersItem = document.getElementById('viewOrdersItem');
@@ -7069,6 +7182,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     viewProductsItem.classList.toggle('active-view', currentView === 'products');
     viewOrdersItem.classList.toggle('active-view', currentView === 'orders');
     viewInventoriesItem.classList.toggle('active-view', currentView === 'inventories');
+    viewJournalItem.classList.toggle('active-view', currentView === 'journal');
     settingsMenuItem.classList.toggle('active-view', currentView === 'settings');
   }
   function hideAllViews(){
@@ -7077,6 +7191,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     ordersViewEl.classList.add('view-hidden');
     settingsViewEl.classList.add('view-hidden');
     inventoriesViewEl.classList.add('view-hidden');
+    journalViewEl.classList.add('view-hidden');
   }
   function renderInventoriesView(){
     try{ applyInventoryPanelOrder(); }catch(_){}
@@ -7319,8 +7434,220 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     _invDrag = null;
   }
 
+  // ===================== יומן (Journal) =====================
+  const JR_MONTHS = ['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+  const JR_WEEKDAYS = ['ראשון','שני','שלישי','רביעי','חמישי','שישי','שבת'];
+  const JR_PLUS_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>`;
+  const JR_TRASH_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
+  const JR_BELL_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`;
+  let jrYear, jrMonth, jrSelectedDate = null, jrInitDone = false;
+  const jrPad = n => String(n).padStart(2,'0');
+  const jrDateStr = (y,m,d) => `${y}-${jrPad(m+1)}-${jrPad(d)}`;
+  function jrEventsFor(ds){ return (journal.events||[]).filter(e=> e && e.date===ds).slice().sort((a,b)=> String(a.time||'').localeCompare(String(b.time||''))); }
+  function jrDayLabel(y,m,d){ return `יום ${JR_WEEKDAYS[new Date(y,m,d).getDay()]}, ${d} ${JR_MONTHS[m]}`; }
+
+  function renderJournalView(){
+    if(!jrInitDone){
+      const now = new Date();
+      jrYear = now.getFullYear(); jrMonth = now.getMonth();
+      jrSelectedDate = localDateString();
+      document.getElementById('jrCalWeekdays').innerHTML = JR_WEEKDAYS.map(w=>`<div class="jr-cal-weekday">${w}</div>`).join('');
+      document.getElementById('jrPrevMonth').addEventListener('click', ()=>{ jrMonth--; if(jrMonth<0){ jrMonth=11; jrYear--; } renderJrCalendar(); });
+      document.getElementById('jrNextMonth').addEventListener('click', ()=>{ jrMonth++; if(jrMonth>11){ jrMonth=0; jrYear++; } renderJrCalendar(); });
+      jrInitDone = true;
+    }
+    renderJrCalendar();
+  }
+
+  function renderJrCalendar(){
+    document.getElementById('jrCalTitle').textContent = `${JR_MONTHS[jrMonth]} ${jrYear}`;
+    const grid = document.getElementById('jrCalGrid');
+    const firstDow = new Date(jrYear, jrMonth, 1).getDay();
+    const days = new Date(jrYear, jrMonth+1, 0).getDate();
+    const todayStr = localDateString();
+    let html = '';
+    for(let i=0;i<firstDow;i++) html += `<div class="jr-cal-cell empty"></div>`;
+    for(let d=1; d<=days; d++){
+      const ds = jrDateStr(jrYear, jrMonth, d);
+      const has = jrEventsFor(ds).length > 0;
+      const cls = ['jr-cal-cell'];
+      if(ds===todayStr) cls.push('today');
+      if(ds===jrSelectedDate) cls.push('selected');
+      html += `<button type="button" class="${cls.join(' ')}" data-date="${ds}">${d}${has?'<span class="jr-dot"></span>':''}</button>`;
+    }
+    grid.innerHTML = html;
+    grid.querySelectorAll('.jr-cal-cell[data-date]').forEach(cell=>{
+      cell.addEventListener('click', ()=>{ jrSelectedDate = cell.dataset.date; renderJrCalendar(); renderJrDayFolders(true); });
+    });
+    renderJrDayFolders(false);
+  }
+
+  function jrHoursHtml(ds){
+    const byHour = {};
+    jrEventsFor(ds).forEach(e=>{ const h = (e.time||'00:00').slice(0,2); (byHour[h]=byHour[h]||[]).push(e); });
+    let rows = '';
+    for(let h=0; h<24; h++){
+      const hh = jrPad(h);
+      const list = byHour[hh] || [];
+      const chips = list.map(e=>`<div class="jr-ev-chip"><span class="jr-ev-time">${escapeHtml(e.time||'')}</span><span class="jr-ev-name">${escapeHtml(e.business||e.clientName||'פגישה')}</span>${e.reminder?`<span class="jr-ev-bell">${JR_BELL_SVG}</span>`:''}</div>`).join('');
+      rows += `<div class="jr-hour-row" data-date="${ds}" data-hour="${hh}"><span class="jr-hour-time">${hh}:00</span><div class="jr-hour-events">${chips || '<span class="jr-hour-empty">—</span>'}</div><span class="jr-hour-add">${JR_PLUS_SVG}</span></div>`;
+    }
+    return `<div class="jr-hours">${rows}</div>`;
+  }
+  function wireJrHours(body){
+    body.querySelectorAll('.jr-hour-row').forEach(row=>{
+      row.addEventListener('click', ()=> openJrMeetingPopup(row.dataset.date, row.dataset.hour + ':00'));
+    });
+  }
+
+  function renderJrDayFolders(scrollToSelected){
+    const host = document.getElementById('journalDayFolders');
+    if(!host) return;
+    const days = new Date(jrYear, jrMonth+1, 0).getDate();
+    const todayStr = localDateString();
+    let html = '';
+    for(let d=1; d<=days; d++){
+      const ds = jrDateStr(jrYear, jrMonth, d);
+      const count = jrEventsFor(ds).length;
+      const isToday = ds===todayStr;
+      const isOpen = ds===jrSelectedDate;
+      html += `<div class="jr-day-group" data-date="${ds}">
+        <div class="jr-day-head${isOpen?' open':''}${isToday?' is-today':''}">
+          <span class="jr-day-chev">${CHEVRON_ICON_SVG}</span>
+          <span class="jr-day-name">${jrDayLabel(jrYear,jrMonth,d)}${isToday?' · היום':''}</span>
+          <span class="jr-day-count${count?'':' zero'}">${count}</span>
+        </div>
+        <div class="jr-day-body animated-collapse${isOpen?' is-open':''}">${isOpen?jrHoursHtml(ds):''}</div>
+      </div>`;
+    }
+    host.innerHTML = html;
+    host.querySelectorAll('.jr-day-group').forEach(group=>{
+      const head = group.querySelector('.jr-day-head');
+      const body = group.querySelector('.jr-day-body');
+      const ds = group.dataset.date;
+      head.addEventListener('click', ()=>{
+        const opening = !body.classList.contains('is-open');
+        if(opening && !body.innerHTML.trim()){ body.innerHTML = jrHoursHtml(ds); }
+        head.classList.toggle('open', opening);
+        toggleAnimatedCollapse(body, null);
+        if(opening){ jrSelectedDate = ds; wireJrHours(body); try{ renderJrCalendar(); }catch(_){} }
+      });
+      if(body.classList.contains('is-open')) wireJrHours(body);
+    });
+    if(scrollToSelected){
+      const sel = host.querySelector(`.jr-day-group[data-date="${jrSelectedDate}"]`);
+      if(sel) setTimeout(()=>{ try{ sel.scrollIntoView({behavior:'smooth', block:'start'}); }catch(_){} }, 60);
+    }
+  }
+
+  function openJrMeetingPopup(ds, defaultTime){
+    const overlay = document.createElement('div');
+    overlay.className = 'order-modal-overlay';
+    const [yy,mm,dd] = ds.split('-').map(Number);
+    const title = jrDayLabel(yy, mm-1, dd);
+    overlay.innerHTML = `<div class="order-modal jr-modal">
+      <div class="order-modal-header"><h3>${escapeHtml(title)}</h3><button type="button" class="order-modal-close">✕</button></div>
+      <div class="order-modal-body">
+        <div class="jr-ev-list"></div>
+        <div class="jr-form-title">הוספת פגישה חדשה</div>
+        <div class="jr-two">
+          <div class="jr-field"><label>שעה</label><input type="time" class="jr-in-time" value="${defaultTime||'09:00'}"></div>
+          <div class="jr-field"><label>תזכורת</label><select class="jr-in-reminder"><option value="0">ללא</option><option value="30">חצי שעה לפני</option><option value="60">שעה לפני</option></select></div>
+        </div>
+        <div class="jr-field jr-client-wrap"><label>לקוח / שם העסק</label><input type="text" class="jr-in-client" autocomplete="off" placeholder="חפש לקוח או הקלד שם עסק..."><div class="jr-client-results"></div></div>
+        <div class="jr-two">
+          <div class="jr-field"><label>טלפון</label><input type="tel" class="jr-in-phone" placeholder="טלפון"></div>
+          <div class="jr-field"><label>אימייל</label><input type="email" class="jr-in-email" placeholder="אימייל"></div>
+        </div>
+        <div class="jr-field"><label>פרטים נוספים</label><textarea class="jr-in-details" placeholder="נושא הפגישה, כתובת, הערות..."></textarea></div>
+        <button type="button" class="jr-save-btn">שמור פגישה</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    const q = s => overlay.querySelector(s);
+    const close = ()=>{ overlay.classList.add('modal-closing'); setTimeout(()=>{ try{ overlay.remove(); }catch(_){} }, 500); document.removeEventListener('click', outside, true); };
+    q('.order-modal-close').addEventListener('click', close);
+    overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
+
+    function renderList(){
+      const evs = jrEventsFor(ds);
+      const el = q('.jr-ev-list');
+      if(!evs.length){ el.innerHTML = `<div class="jr-ev-list-title">פגישות היום</div><div class="jr-ev-empty">אין עדיין פגישות ליום זה.</div>`; return; }
+      el.innerHTML = `<div class="jr-ev-list-title">פגישות היום (${evs.length})</div>` + evs.map(e=>{
+        const remTxt = e.reminder==60?'תזכורת שעה לפני':(e.reminder==30?'תזכורת חצי שעה לפני':'');
+        const meta = [e.phone,e.email,e.details,remTxt].filter(Boolean).map(escapeHtml).join(' · ');
+        return `<div class="jr-ev-item" data-id="${e.id}"><span class="jr-ev-item-time">${escapeHtml(e.time||'')}</span><div class="jr-ev-item-main"><div class="jr-ev-item-name">${escapeHtml(e.business||e.clientName||'פגישה')}</div>${meta?`<div class="jr-ev-item-meta">${meta}</div>`:''}</div><button type="button" class="jr-ev-item-del" title="מחיקה">${JR_TRASH_SVG}</button></div>`;
+      }).join('');
+      el.querySelectorAll('.jr-ev-item-del').forEach(btn=>{
+        btn.addEventListener('click', ()=>{ const id = btn.closest('.jr-ev-item').dataset.id; journal.events = journal.events.filter(x=>x.id!==id); saveJournal(); renderList(); try{ renderJrCalendar(); }catch(_){} });
+      });
+    }
+    renderList();
+
+    const clientInput = q('.jr-in-client'), results = q('.jr-client-results');
+    clientInput.addEventListener('input', ()=>{
+      const term = normalizeSearchText(clientInput.value.trim());
+      if(!term){ results.classList.remove('show'); results.innerHTML=''; return; }
+      const matches = clients.filter(c=> normalizeSearchText(c.business).includes(term) || normalizeSearchText(c.name).includes(term) || normalizeSearchText(c.phone).includes(term)).slice(0,8);
+      if(!matches.length){ results.classList.remove('show'); results.innerHTML=''; return; }
+      results.innerHTML = matches.map(c=>`<div class="jr-client-opt" data-id="${c.id}"><span>${escapeHtml(c.business||c.name||'')}</span>${(c.name&&c.business)?`<small>${escapeHtml(c.name)}</small>`:''}</div>`).join('');
+      results.classList.add('show');
+      results.querySelectorAll('.jr-client-opt').forEach(opt=>{
+        opt.addEventListener('click', ()=>{
+          const c = clients.find(x=>String(x.id)===String(opt.dataset.id)); if(!c) return;
+          clientInput.value = c.business || c.name || '';
+          q('.jr-in-phone').value = c.phone || ''; q('.jr-in-email').value = c.email || '';
+          results.classList.remove('show');
+        });
+      });
+    });
+    const outside = (e)=>{ if(!q('.jr-client-wrap').contains(e.target)) results.classList.remove('show'); };
+    document.addEventListener('click', outside, true);
+
+    q('.jr-save-btn').addEventListener('click', ()=>{
+      const clientName = q('.jr-in-client').value.trim();
+      if(!clientName){ q('.jr-in-client').focus(); return; }
+      const reminder = parseInt(q('.jr-in-reminder').value, 10) || 0;
+      journal.events.push({ id: genDocId(), date: ds, time: q('.jr-in-time').value || '09:00', clientName, business: clientName, phone: q('.jr-in-phone').value.trim(), email: q('.jr-in-email').value.trim(), details: q('.jr-in-details').value.trim(), reminder, notified:false });
+      saveJournal();
+      if(reminder) jrEnsureNotifyPermission();
+      q('.jr-in-client').value=''; q('.jr-in-phone').value=''; q('.jr-in-email').value=''; q('.jr-in-details').value=''; q('.jr-in-reminder').value='0';
+      renderList(); try{ renderJrCalendar(); }catch(_){}
+    });
+  }
+
+  function jrEnsureNotifyPermission(){
+    try{ if('Notification' in window && Notification.permission==='default') Notification.requestPermission(); }catch(_){}
+  }
+  function jrToast(msg){
+    let t = document.getElementById('jrToast');
+    if(!t){ t = document.createElement('div'); t.id='jrToast'; t.style.cssText='position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0f1a2e;color:#fff;padding:12px 18px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.4);z-index:99999;font-size:.9rem;max-width:90vw;text-align:center;transition:opacity .4s ease;'; document.body.appendChild(t); }
+    t.textContent = msg; t.style.opacity='1';
+    clearTimeout(t._h); t._h = setTimeout(()=>{ t.style.opacity='0'; }, 6000);
+  }
+  function jrCheckReminders(){
+    if(!journal || !Array.isArray(journal.events)) return;
+    const now = Date.now(); let changed = false;
+    journal.events.forEach(e=>{
+      if(!e || !e.reminder || e.notified) return;
+      const p = (e.date||'').split('-').map(Number); if(!p[0]) return;
+      const tp = (e.time||'00:00').split(':').map(Number);
+      const evTime = new Date(p[0], p[1]-1, p[2], tp[0]||0, tp[1]||0, 0).getTime();
+      const fireAt = evTime - e.reminder*60000;
+      if(now >= fireAt && now < evTime + 60000){
+        e.notified = true; changed = true;
+        const body = `${e.business||e.clientName||'פגישה'} בשעה ${e.time}`;
+        let shown = false;
+        try{ if('Notification' in window && Notification.permission==='granted'){ new Notification('תזכורת פגישה', { body }); shown = true; } }catch(_){}
+        if(!shown) jrToast('תזכורת פגישה — ' + body);
+      }
+    });
+    if(changed){ try{ saveJournal(); }catch(_){} }
+  }
+  setInterval(jrCheckReminders, 30000);
+
   function switchView(view){
-    if(!['customers','products','orders','settings','inventories'].includes(view)) return;
+    if(!['customers','products','orders','settings','inventories','journal'].includes(view)) return;
     currentView = view;
     if(view !== 'inventories') stopInventoryBalls(); // עוזבים עמוד עם כדורים → עוצרים
     hideAllViews();
@@ -7334,6 +7661,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     } else if(view === 'products'){
       productsViewEl.classList.remove('view-hidden');
       renderCatalog();
+    } else if(view === 'journal'){
+      journalViewEl.classList.remove('view-hidden');
+      renderJournalView();
     } else if(view === 'orders'){
       ordersViewEl.classList.remove('view-hidden');
       renderOrdersView();
@@ -7351,6 +7681,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   viewProductsItem.addEventListener('click', ()=>{ switchView('products'); closeSideMenu(); });
   viewOrdersItem.addEventListener('click', ()=>{ ordEditingOrderId = null; switchView('orders'); closeSideMenu(); });
   viewInventoriesItem.addEventListener('click', ()=>{ switchView('inventories'); closeSideMenu(); });
+  viewJournalItem.addEventListener('click', ()=>{ switchView('journal'); closeSideMenu(); });
   settingsMenuItem.addEventListener('click', ()=>{ switchView('settings'); closeSideMenu(); });
 
   // ---- settings page: agents management ----
@@ -10081,7 +10412,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   (async function init(){
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal()]);
     populateBusinessDetails();
     applySettingsPanelOrder();
     applyInventoryPanelOrder();
