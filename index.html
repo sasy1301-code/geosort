@@ -7322,7 +7322,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function switchView(view){
     if(!['customers','products','orders','settings','inventories'].includes(view)) return;
     currentView = view;
-    if(view !== 'inventories' && view !== 'products') stopInventoryBalls(); // עוזבים עמוד עם כדורים → עוצרים
+    if(view !== 'inventories') stopInventoryBalls(); // עוזבים עמוד עם כדורים → עוצרים
     hideAllViews();
     if(view === 'settings'){
       settingsViewEl.classList.remove('view-hidden');
@@ -7334,7 +7334,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     } else if(view === 'products'){
       productsViewEl.classList.remove('view-hidden');
       renderCatalog();
-      startCatalogBalls();                              // ממלא את המסך בעיגולים
     } else if(view === 'orders'){
       ordersViewEl.classList.remove('view-hidden');
       renderOrdersView();
