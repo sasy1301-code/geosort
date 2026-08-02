@@ -7214,29 +7214,45 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   let _invBalls = null;                 // { layer, balls, raf, gx, gy }
   let _invMotionBound = false;          // מאזין devicemotion מחובר פעם אחת
   const INV_BALL_COLORS = ['#0f1a2e', '#0277fb', '#6303ed'];
+  // זיהוי iOS — שם ציר ההטיה (accelerationIncludingGravity.x) מדווח בכיוון הפוך מאנדרואיד
+  const _invIsIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && (navigator.maxTouchPoints||0) > 1);
   function onInvMotion(e){
     if(!_invBalls) return;
     const a = e.acceleration || null;                 // תנועה בפועל (ניענוע) — בלי כוח הכבידה
     const ag = e.accelerationIncludingGravity || null;// כולל כבידה — לזיהוי הטיה
     if(a && (a.x!=null || a.y!=null)){
       const F = 1.1;
-      const ix = Math.max(-40, Math.min(40, (a.x||0) * F));
+      const ix = Math.max(-40, Math.min(40, (a.x||0) * F * (_invIsIOS ? -1 : 1)));
       const iy = Math.max(-40, Math.min(40, -(a.y||0) * F));
       _invBalls.balls.forEach(b=>{ const k = 0.6 + b.r/50; b.vx += ix*k*0.12; b.vy += iy*k*0.12; });
     }
     if(ag && ag.x!=null){
-      _invBalls.gx = Math.max(-1.3, Math.min(1.3, -(ag.x||0)/9.8)) * (_invBalls.G * 1.4);
+      // הטיית המכשיר → כבידה אופקית שמזיזה את העיגולים מצד לצד. iOS הפוך מאנדרואיד.
+      const raw = (ag.x||0)/9.8;
+      const dir = _invIsIOS ? raw : -raw;
+      _invBalls.gx = Math.max(-1.5, Math.min(1.5, dir)) * (_invBalls.G * 1.5);
     }
   }
+  function bindInvMotion(){ if(!_invMotionBound){ window.addEventListener('devicemotion', onInvMotion); _invMotionBound = true; } }
   function ensureInvMotion(){
     if(typeof DeviceMotionEvent === 'undefined') return;
-    const bind = ()=>{ if(!_invMotionBound){ window.addEventListener('devicemotion', onInvMotion); _invMotionBound = true; } };
+    if(_invMotionBound) return;
     if(typeof DeviceMotionEvent.requestPermission === 'function'){
-      if(_invMotionBound) return;
-      const ask = ()=>{ DeviceMotionEvent.requestPermission().then(st=>{ if(st==='granted') bind(); }).catch(()=>{}); };
-      document.addEventListener('pointerdown', ask, { once:true }); // iOS דורש מחווה מהמשתמש
+      // iOS 13+ — צריך אישור הרשאה מתוך מחווה של המשתמש. מנסים מיד (המעבר לעמוד הוא נגיעה),
+      // וגם נרשמים לנגיעות הבאות (touchend/pointerup/click) עד שהמשתמש יאשר — כדי שלא "יתפספס"
+      // המקרה שבו מטים את הטלפון עוד לפני הקשה ראשונה על המסך (באנדרואיד אין הרשאה בכלל).
+      const evs = ['touchend','pointerup','click'];
+      const detach = ()=>{ evs.forEach(ev=> document.removeEventListener(ev, ask, true)); };
+      const ask = ()=>{
+        if(_invMotionBound){ detach(); return; }
+        try{
+          DeviceMotionEvent.requestPermission().then(st=>{ if(st==='granted'){ bindInvMotion(); detach(); } }).catch(()=>{});
+        }catch(_){}
+      };
+      evs.forEach(ev=> document.addEventListener(ev, ask, true));
+      ask(); // ניסיון מיידי עם ההפעלה הנוכחית (הקשה על פריט התפריט שהביא לעמוד)
     } else {
-      bind(); // אנדרואיד/דסקטופ — ללא בקשת הרשאה
+      bindInvMotion(); // אנדרואיד/דסקטופ — ללא בקשת הרשאה
     }
   }
   // התנגשות עיגול-בעיגול: מעביר תנע לפי חוזק הפגיעה. עיגול נאחז (grabbed) = מסה אינסופית (דוחף ולא נדחף).
