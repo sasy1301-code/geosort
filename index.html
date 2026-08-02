@@ -1835,7 +1835,9 @@
   .jr-cal-weekdays{ display:grid; grid-template-columns:repeat(7,1fr); direction:rtl; gap:4px; margin-bottom:6px; }
   .jr-cal-weekday{ text-align:center; font-size:8.5pt; font-weight:600; color:#8a93a5; padding:2px 0; }
   .jr-cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); direction:rtl; gap:5px; }
-  .jr-cal-cell{ position:relative; aspect-ratio:1/1; border:none; border-radius:12px; background:#eef2f7; color:#0f1a2e; font-size:11.5pt; font-weight:500; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .13s ease, transform .1s ease, color .13s ease; }
+  /* גובה השורות נקבע ב-JS (jrSizeCalGrid) לריבוע מדויק — לא דרך aspect-ratio, שנשבר ב-iOS Safari בתוך grid */
+  .jr-cal-grid{ grid-auto-rows:46px; }
+  .jr-cal-cell{ position:relative; min-height:0; border:none; border-radius:12px; background:#eef2f7; color:#0f1a2e; font-size:11.5pt; font-weight:500; font-family:inherit; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .13s ease, transform .1s ease, color .13s ease; }
   .jr-cal-cell:hover{ background:#dde6f2; }
   .jr-cal-cell:active{ transform:scale(.93); }
   .jr-cal-cell.empty{ background:transparent; cursor:default; }
@@ -7459,9 +7461,22 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       document.getElementById('jrCalWeekdays').innerHTML = JR_WEEKDAYS.map(w=>`<div class="jr-cal-weekday">${w}</div>`).join('');
       document.getElementById('jrPrevMonth').addEventListener('click', ()=>{ jrMonth--; if(jrMonth<0){ jrMonth=11; jrYear--; } renderJrCalendar(); });
       document.getElementById('jrNextMonth').addEventListener('click', ()=>{ jrMonth++; if(jrMonth>11){ jrMonth=0; jrYear++; } renderJrCalendar(); });
+      // בסיבוב מסך / שינוי רוחב — לחשב מחדש את גובה תאי הלוח כדי שיישארו ריבועים ולא יגלשו
+      window.addEventListener('resize', ()=>{ if(currentView==='journal') jrSizeCalGrid(); });
       jrInitDone = true;
     }
     renderJrCalendar();
+  }
+
+  // קובע את גובה שורות הלוח לפי רוחב העמודה בפועל → תאים ריבועיים מדויקים בכל דפדפן,
+  // כולל iOS Safari שבו aspect-ratio בתוך grid לא תורם גובה לשורה וגורם לתאים לגלוש מהכרטיס.
+  function jrSizeCalGrid(){
+    const grid = document.getElementById('jrCalGrid');
+    if(!grid) return;
+    const first = grid.querySelector('.jr-cal-cell');
+    if(!first) return;
+    const w = first.getBoundingClientRect().width;
+    if(w > 0) grid.style.gridAutoRows = Math.round(w) + 'px';
   }
 
   function renderJrCalendar(){
@@ -7484,6 +7499,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     grid.querySelectorAll('.jr-cal-cell[data-date]').forEach(cell=>{
       cell.addEventListener('click', ()=>{ jrSelectedDate = cell.dataset.date; renderJrCalendar(); renderJrDayFolders(true); });
     });
+    requestAnimationFrame(jrSizeCalGrid);
     renderJrDayFolders(false);
   }
 
