@@ -3364,7 +3364,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   function moveFolderMember(folder, members, clientId, dir, skippedMembers){
-    const ordered = getOrderedFolderMembers(folder, members);
+    let ordered = getOrderedFolderMembers(folder, members);
+    ordered = ordered.filter(c => c && !c.handled).concat(ordered.filter(c => c && c.handled)); // "טופל" בסוף — כמו בתצוגה
     const idx = ordered.findIndex(c => c.id === clientId);
     const swapIdx = idx + dir;
     if(idx < 0 || swapIdx < 0 || swapIdx >= ordered.length) return;
@@ -3375,7 +3376,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   function moveFolderMemberToPosition(folder, members, clientId, newPos, skippedMembers){
-    const ordered = getOrderedFolderMembers(folder, members);
+    let ordered = getOrderedFolderMembers(folder, members);
+    ordered = ordered.filter(c => c && !c.handled).concat(ordered.filter(c => c && c.handled)); // "טופל" בסוף — כמו בתצוגה
     const curIdx = ordered.findIndex(c => c.id === clientId);
     if(curIdx < 0) return;
     const targetIdx = Math.min(Math.max(1, newPos), ordered.length) - 1;
@@ -6186,7 +6188,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
         // ordering (numbers + ▲▼ + drag) is always available, whether or not 🧭 is on -
         // 🧭 only decides whether the connecting route line is drawn on the map
-        const orderedMembers = getOrderedFolderMembers(folder, activeMembers); // active only, for display/position
+        let orderedMembers = getOrderedFolderMembers(folder, activeMembers); // active only, for display/position
+        // סדר בתוך הפעילים: "לא טופל" קודם, ואז "טופל" שיורד לסוף רשימת הפעילים.
+        // שמירה על הסדר היחסי בכל קבוצה (מיון יציב), בלי לשנות את סדר הבסיס השמור.
+        orderedMembers = orderedMembers.filter(c => c && !c.handled).concat(orderedMembers.filter(c => c && c.handled));
         const calcMembers = orderedMembers.filter(c => !c.handled); // for route distance/time only
         const cachedRoad = roadRouteCache[folder.name];
         const roadMatches = cachedRoad && cachedRoad.fingerprint === routeFingerprint(calcMembers);
