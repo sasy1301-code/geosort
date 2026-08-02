@@ -1853,6 +1853,8 @@
   .jr-day-group{ margin-bottom:8px; }
   .jr-day-head{ display:flex; align-items:center; gap:10px; background:#025ffb; border:1px solid #4394f7; border-radius:15px; padding:11px 13px; cursor:pointer; transition:background .13s ease; }
   .jr-day-head:hover{ background:#1a72ff; }
+  .jr-day-head.jr-weekend-day{ background:#6303ed; border-color:#7420f5; }
+  .jr-day-head.jr-weekend-day:hover{ background:#7420f5; }
   .jr-day-head.is-today{ background:#021236; border-color:#021236; box-shadow:none; }
   .jr-day-head.is-today:hover{ background:#0a1c40; }
   .jr-day-head.is-today .jr-day-count{ background:#ffab13; color:#021236; }
@@ -1936,6 +1938,24 @@
   .jr-modal .jr-ev-act.wa{ background:#e6f8ee; color:#1fb457; }
   .jr-modal .jr-cancel-edit{ border:1px solid #dce2ec; color:#5b6472; }
   .jr-modal.editing .jr-form-title{ color:#c98a00; }
+
+  /* כותרת מקטע "הודעת וואטסאפ מתוזמנת" בתוך הפופאפ */
+  .jr-wa-sec-title{ display:flex; align-items:center; gap:8px; font-size:.85rem; font-weight:600; color:#1fb457; margin:14px 0 10px; padding-top:12px; border-top:1px solid #edf1f6; }
+  .jr-wa-sec-ic{ width:18px; height:18px; display:inline-flex; }
+  .jr-wa-sec-ic svg{ width:18px; height:18px; fill:#25D366; }
+  .jr-wa-sec-opt{ color:#aab2c0; font-weight:400; font-size:.78rem; }
+
+  /* באנר פעולה שמופיע כשמגיע הזמן לשלוח וואטסאפ */
+  .jr-wa-bar{ position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px); display:none; align-items:center; gap:11px; background:#fff; color:#0f1a2e; border:1px solid #e3e8f0; border-radius:16px; padding:11px 13px; box-shadow:0 10px 34px rgba(0,0,0,.28); z-index:100000; width:min(430px,92vw); box-sizing:border-box; opacity:0; transition:opacity .3s ease, transform .3s ease; }
+  .jr-wa-bar.show{ display:flex; opacity:1; transform:translateX(-50%) translateY(0); }
+  .jr-wa-bar-ic{ flex:0 0 auto; width:40px; height:40px; border-radius:50%; background:#e6f8ee; display:flex; align-items:center; justify-content:center; }
+  .jr-wa-bar-ic svg{ width:22px; height:22px; fill:#25D366; }
+  .jr-wa-bar-main{ flex:1; min-width:0; }
+  .jr-wa-bar-t{ font-size:.9rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .jr-wa-bar-msg{ font-size:.78rem; color:#7b8494; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .jr-wa-bar-send{ flex:0 0 auto; background:#25D366; color:#fff; text-decoration:none; font-weight:600; font-size:.86rem; padding:9px 18px; border-radius:20px; }
+  .jr-wa-bar-send:hover{ background:#1fb457; }
+  .jr-wa-bar-x{ flex:0 0 auto; background:transparent; border:none; color:#9aa4b5; font-size:1rem; cursor:pointer; padding:2px 4px; }
   .jr-hour-add{ flex:0 0 auto; color:#025ffb; opacity:.5; display:inline-flex; align-items:center; padding-top:2px; }
   .jr-hour-row:hover .jr-hour-add{ opacity:1; }
   .jr-hour-add svg{ width:16px; height:16px; display:block; }
@@ -7651,8 +7671,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const count = jrEventsFor(ds).length;
       const isToday = ds===todayStr;
       const isOpen = ds===jrSelectedDate;
+      const dow = new Date(jrYear, jrMonth, d).getDay(); // 5=שישי, 6=שבת
+      const isWeekend = (dow===5 || dow===6);
       html += `<div class="jr-day-group" data-date="${ds}">
-        <div class="jr-day-head${isOpen?' open':''}${isToday?' is-today':''}">
+        <div class="jr-day-head${isOpen?' open':''}${isWeekend?' jr-weekend-day':''}${isToday?' is-today':''}">
           <span class="jr-day-name">${jrDayLabel(jrYear,jrMonth,d)}${isToday?' · היום':''}</span>
           <span class="jr-day-count${count?'':' zero'}">${count}</span>
           <span class="jr-day-chev">${CHEVRON_ICON_SVG}</span>
@@ -7704,6 +7726,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <div class="jr-field"><label>אימייל</label><input type="email" class="jr-in-email" placeholder="אימייל"></div>
         </div>
         <div class="jr-field"><label>פרטים נוספים</label><textarea class="jr-in-details" placeholder="נושא הפגישה, כתובת, הערות..."></textarea></div>
+        <div class="jr-wa-sec-title"><span class="jr-wa-sec-ic">${JR_WA_SVG}</span> הודעת וואטסאפ מתוזמנת ללקוח <span class="jr-wa-sec-opt">(לא חובה)</span></div>
+        <div class="jr-field"><label>תוכן ההודעה</label><textarea class="jr-in-wamsg" placeholder="ההודעה שתישלח לוואטסאפ של הלקוח בשעה שתבחר..."></textarea></div>
+        <div class="jr-two">
+          <div class="jr-field"><label>תאריך שליחה</label><input type="date" class="jr-in-wadate" value="${ds}"></div>
+          <div class="jr-field"><label>שעת שליחה</label><input type="time" class="jr-in-watime" value="${defaultTime||'09:00'}"></div>
+        </div>
         <button type="button" class="jr-save-btn">שמור פגישה</button>
         <button type="button" class="jr-cancel-edit">בטל עריכה</button>
       </div>
@@ -7744,6 +7772,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       q('.jr-in-phone').value = e.phone || '';
       q('.jr-in-email').value = e.email || '';
       q('.jr-in-details').value = e.details || '';
+      q('.jr-in-wamsg').value = e.waMsg || '';
+      q('.jr-in-wadate').value = e.waDate || ds;
+      q('.jr-in-watime').value = e.waTime || (e.time || '09:00');
       modalEl.classList.add('editing');
       q('.jr-form-title').textContent = 'עריכת פגישה';
       q('.jr-save-btn').textContent = 'עדכן פגישה';
@@ -7752,6 +7783,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     function resetForm(){
       editingId = null;
       q('.jr-in-client').value=''; q('.jr-in-phone').value=''; q('.jr-in-email').value=''; q('.jr-in-details').value=''; q('.jr-in-reminder').value='0';
+      q('.jr-in-wamsg').value=''; q('.jr-in-wadate').value=ds; q('.jr-in-watime').value=defaultTime||'09:00';
       modalEl.classList.remove('editing');
       q('.jr-form-title').textContent = 'הוספת פגישה חדשה';
       q('.jr-save-btn').textContent = 'שמור פגישה';
@@ -7783,15 +7815,19 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const clientName = q('.jr-in-client').value.trim();
       if(!clientName){ q('.jr-in-client').focus(); return; }
       const reminder = parseInt(q('.jr-in-reminder').value, 10) || 0;
-      const fields = { date: ds, time: q('.jr-in-time').value || '09:00', clientName, business: clientName, phone: q('.jr-in-phone').value.trim(), email: q('.jr-in-email').value.trim(), details: q('.jr-in-details').value.trim(), reminder };
+      const waMsg = q('.jr-in-wamsg').value.trim();
+      const waDate = q('.jr-in-wadate').value || ds;
+      const waTime = q('.jr-in-watime').value || '';
+      const fields = { date: ds, time: q('.jr-in-time').value || '09:00', clientName, business: clientName, phone: q('.jr-in-phone').value.trim(), email: q('.jr-in-email').value.trim(), details: q('.jr-in-details').value.trim(), reminder, waMsg, waDate, waTime };
       if(editingId){
         const ev = (journal.events||[]).find(x=>x.id===editingId);
-        if(ev){ Object.assign(ev, fields); ev.notified = false; } // זמן/תזכורת אולי השתנו — לאפשר התראה מחדש
+        if(ev){ const waChanged = (ev.waMsg!==waMsg || ev.waDate!==waDate || ev.waTime!==waTime); Object.assign(ev, fields); ev.notified = false; if(waChanged) ev.waSent = false; }
       } else {
-        journal.events.push(Object.assign({ id: genDocId(), notified:false }, fields));
+        journal.events.push(Object.assign({ id: genDocId(), notified:false, waSent:false }, fields));
       }
       saveJournal();
       if(reminder) jrEnsureNotifyPermission();
+      if(waMsg) jrEnsureNotifyPermission();
       resetForm();
       renderList(); try{ renderJrCalendar(); }catch(_){}
     });
@@ -7825,7 +7861,48 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     });
     if(changed){ try{ saveJournal(); }catch(_){} }
   }
-  setInterval(jrCheckReminders, 30000);
+
+  // ===== הודעת וואטסאפ מתוזמנת =====
+  // הערה: דפדפן/PWA לא יכול לשלוח וואטסאפ ברקע לבד. כשמגיע הזמן והאפליקציה פתוחה,
+  // מוצגת התראה + כפתור "שלח בוואטסאפ" שפותח את הצ'אט עם המספר וההודעה מוכנה — שליחה בנגיעה אחת.
+  const _jrWaPrompted = new Set(); // מזהי אירועים שכבר הוצעו לשליחה במושב הזה (שלא יחזור כל 30ש')
+  function jrWaOpenUrl(e){
+    const base = waHref(e.phone);
+    return base + (e.waMsg ? ('?text=' + encodeURIComponent(e.waMsg)) : '');
+  }
+  function jrWaPrompt(e){
+    // התראת דפדפן (לחיצה עליה פותחת את וואטסאפ)
+    try{
+      if('Notification' in window && Notification.permission==='granted'){
+        const n = new Notification('הגיע הזמן לשלוח וואטסאפ', { body: (e.business||e.clientName||'') + ' — ' + (e.waMsg||'') });
+        n.onclick = ()=>{ try{ window.open(jrWaOpenUrl(e), '_blank'); }catch(_){} e.waSent = true; try{ saveJournal(); }catch(_){} };
+      }
+    }catch(_){}
+    // באנר פעולה בתוך האפליקציה
+    let bar = document.getElementById('jrWaBar');
+    if(!bar){ bar = document.createElement('div'); bar.id='jrWaBar'; bar.className='jr-wa-bar'; document.body.appendChild(bar); }
+    bar.innerHTML =
+      `<div class="jr-wa-bar-ic">${JR_WA_SVG}</div>`+
+      `<div class="jr-wa-bar-main"><div class="jr-wa-bar-t">שליחת וואטסאפ ל${escapeHtml(e.business||e.clientName||'לקוח')}</div><div class="jr-wa-bar-msg">${escapeHtml((e.waMsg||'').slice(0,80))}</div></div>`+
+      `<a class="jr-wa-bar-send" href="${escapeHtml(jrWaOpenUrl(e))}" target="_blank" rel="noopener">שלח</a>`+
+      `<button type="button" class="jr-wa-bar-x" title="סגור">✕</button>`;
+    bar.classList.add('show');
+    bar.querySelector('.jr-wa-bar-send').addEventListener('click', ()=>{ e.waSent = true; try{ saveJournal(); }catch(_){} bar.classList.remove('show'); });
+    bar.querySelector('.jr-wa-bar-x').addEventListener('click', ()=>{ bar.classList.remove('show'); });
+  }
+  function jrCheckScheduledWa(){
+    if(!journal || !Array.isArray(journal.events)) return;
+    const now = Date.now();
+    journal.events.forEach(e=>{
+      if(!e || !e.waMsg || e.waSent || _jrWaPrompted.has(e.id)) return;
+      if(!e.phone) return;
+      const p = (e.waDate||e.date||'').split('-').map(Number); if(!p[0]) return;
+      const tp = (e.waTime||'').split(':').map(Number); if(e.waTime==='' || isNaN(tp[0])) return;
+      const sendAt = new Date(p[0], p[1]-1, p[2], tp[0]||0, tp[1]||0, 0).getTime();
+      if(now >= sendAt){ _jrWaPrompted.add(e.id); jrWaPrompt(e); }
+    });
+  }
+  setInterval(()=>{ jrCheckReminders(); jrCheckScheduledWa(); }, 30000);
 
   function switchView(view){
     if(!['customers','products','orders','settings','inventories','journal'].includes(view)) return;
