@@ -1841,6 +1841,8 @@
   .jr-cal-cell:hover{ background:#dde6f2; }
   .jr-cal-cell:active{ transform:scale(.93); }
   .jr-cal-cell.empty{ background:transparent; cursor:default; }
+  .jr-cal-cell.jr-weekend:not(.selected){ background:#c6b4e9; }
+  .jr-cal-cell.jr-weekend:not(.selected):hover{ background:#b8a3e2; }
   .jr-cal-cell.today{ box-shadow:inset 0 0 0 2px #6303ed; }
   .jr-cal-cell.selected{ background:#025ffb; color:#fff; }
   .jr-cal-cell.selected.today{ box-shadow:inset 0 0 0 2px #b79bff; }
@@ -1851,7 +1853,10 @@
   .jr-day-group{ margin-bottom:8px; }
   .jr-day-head{ display:flex; align-items:center; gap:10px; background:#025ffb; border:1px solid #4394f7; border-radius:15px; padding:11px 13px; cursor:pointer; transition:background .13s ease; }
   .jr-day-head:hover{ background:#1a72ff; }
-  .jr-day-head.is-today{ border-color:#b79bff; box-shadow:0 0 0 2px rgba(99,3,237,.35); }
+  .jr-day-head.is-today{ background:#021236; border-color:#021236; box-shadow:none; }
+  .jr-day-head.is-today:hover{ background:#0a1c40; }
+  .jr-day-head.is-today .jr-day-count{ background:#ffab13; color:#021236; }
+  .jr-day-head.is-today .jr-day-count.zero{ background:#ffab13; color:#021236; }
   .jr-day-head .jr-day-name{ flex:1; min-width:0; color:#fff; font-weight:400; font-size:11pt; }
   .jr-day-head .jr-day-count{ background:#fff; color:#0f1a2e; min-width:26px; height:26px; border-radius:20px; padding:0 8px; display:inline-flex; align-items:center; justify-content:center; font-size:9.5pt; font-weight:600; }
   .jr-day-head .jr-day-count.zero{ background:rgba(255,255,255,.28); color:#eaf1ff; }
@@ -1874,8 +1879,63 @@
   .jr-ev-chip{ display:flex; align-items:center; gap:7px; background:#0f1a2e; color:#fff; border-radius:9px; padding:5px 9px; font-size:9.5pt; }
   .jr-ev-chip .jr-ev-time{ color:#6db2ff; font-weight:600; flex:0 0 auto; }
   .jr-ev-chip .jr-ev-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .jr-ev-chip .jr-ev-bell{ flex:0 0 auto; opacity:.8; display:inline-flex; }
-  .jr-ev-chip .jr-ev-bell svg{ width:12px; height:12px; display:block; }
+  .jr-ev-chip .jr-ev-bell{ flex:0 0 auto; opacity:1; display:inline-flex; }
+  .jr-ev-chip .jr-ev-bell svg{ width:13px; height:13px; display:block; fill:#ffab13; }
+
+  /* פגישה קרובה — באנר בראש עמוד היומן */
+  .jr-upcoming{ display:none; }
+  .jr-upcoming.show{ display:flex; align-items:center; gap:12px; background:linear-gradient(135deg,#025ffb,#6303ed); color:#fff; border-radius:16px; padding:12px 14px; margin-bottom:14px; box-shadow:0 6px 20px rgba(9,19,33,.18); }
+  .jr-up-bell{ flex:0 0 auto; width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,.18); display:flex; align-items:center; justify-content:center; }
+  .jr-up-bell svg{ width:21px; height:21px; fill:#ffab13; }
+  .jr-up-main{ flex:1; min-width:0; cursor:pointer; }
+  .jr-up-label{ font-size:8pt; opacity:.85; }
+  .jr-up-title{ font-size:11.5pt; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .jr-up-when{ font-size:9pt; opacity:.92; margin-top:1px; }
+  .jr-up-actions{ flex:0 0 auto; display:flex; gap:8px; }
+  .jr-up-act{ width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,.16); display:flex; align-items:center; justify-content:center; color:#fff; text-decoration:none; transition:background .13s ease; }
+  .jr-up-act:hover{ background:rgba(255,255,255,.32); }
+  .jr-up-act svg{ width:19px; height:19px; display:block; fill:currentColor; }
+
+  /* פעולות בכרטיס פגישה ברשימת הפופאפ */
+  .jr-ev-item-name .jr-ev-item-bell{ display:inline-flex; vertical-align:-2px; margin-inline-start:6px; }
+  .jr-ev-item-name .jr-ev-item-bell svg{ width:13px; height:13px; fill:#ffab13; }
+  .jr-ev-item-actions{ flex:0 0 auto; display:flex; align-items:center; gap:5px; }
+  .jr-ev-act{ width:31px; height:31px; border-radius:50%; display:flex; align-items:center; justify-content:center; text-decoration:none; border:none; cursor:pointer; padding:0; }
+  .jr-ev-act svg{ width:15px; height:15px; display:block; fill:currentColor; }
+  .jr-ev-act.call{ background:rgba(3,95,251,.22); color:#6db2ff; }
+  .jr-ev-act.wa{ background:rgba(37,211,102,.18); color:#25D366; }
+  .jr-ev-act.edit{ background:rgba(255,255,255,.08); color:#cdd6e6; }
+  .jr-ev-act.del{ background:rgba(255,140,140,.14); color:rgba(255,140,140,.9); }
+  .jr-ev-act:hover{ filter:brightness(1.2); }
+  .jr-cancel-edit{ display:none; width:100%; margin-top:8px; padding:11px; border:1px solid rgba(255,255,255,.25); border-radius:23px; background:transparent; color:rgba(255,255,255,.8); font-size:.9rem; font-family:inherit; cursor:pointer; }
+  .jr-modal.editing .jr-cancel-edit{ display:block; }
+
+  /* פופאפ פגישה — רקע בהיר (לבן) במקום כחול כהה, קל יותר לעין */
+  .jr-modal{ background:#fff; color:#0f1a2e; border:1px solid #e3e8f0; }
+  .jr-modal .order-modal-header{ background:#fff; border-bottom:1px solid #edf1f6; }
+  .jr-modal .order-modal-header h3{ color:#0f1a2e; }
+  .jr-modal .order-modal-close{ color:#0f1a2e; }
+  .jr-modal .jr-field label{ color:#5b6472; }
+  .jr-modal .jr-field input, .jr-modal .jr-field select, .jr-modal .jr-field textarea{ background:#f3f5f9; color:#0f1a2e; border:1px solid #dce2ec; }
+  .jr-modal .jr-field input::placeholder, .jr-modal .jr-field textarea::placeholder{ color:#9aa4b5; }
+  .jr-modal .jr-client-results{ background:#fff; border:1px solid #dce2ec; }
+  .jr-modal .jr-client-opt{ border-bottom:1px solid #eef1f6; color:#0f1a2e; }
+  .jr-modal .jr-client-opt:hover{ background:#eef4ff; }
+  .jr-modal .jr-client-opt small{ color:#8a93a5; }
+  .jr-modal .jr-ev-list-title, .jr-modal .jr-form-title{ color:#7b8494; }
+  .jr-modal .jr-form-title{ border-top:1px solid #edf1f6; }
+  .jr-modal .jr-ev-empty{ color:#aab2c0; }
+  .jr-modal .jr-ev-item{ background:#f6f8fb; border:1px solid #e6ebf3; }
+  .jr-modal .jr-ev-item .jr-ev-item-name{ color:#0f1a2e; }
+  .jr-modal .jr-ev-item .jr-ev-item-time{ color:#025ffb; }
+  .jr-modal .jr-ev-item .jr-ev-item-meta{ color:#5b6472; }
+  .jr-modal .jr-ev-item-name .jr-ev-item-bell svg{ fill:#ffab13; }
+  .jr-modal .jr-ev-act.edit{ background:#eef1f6; color:#5b6472; }
+  .jr-modal .jr-ev-act.del{ background:#fdeceb; color:#e05a4f; }
+  .jr-modal .jr-ev-act.call{ background:#e7f0ff; color:#025ffb; }
+  .jr-modal .jr-ev-act.wa{ background:#e6f8ee; color:#1fb457; }
+  .jr-modal .jr-cancel-edit{ border:1px solid #dce2ec; color:#5b6472; }
+  .jr-modal.editing .jr-form-title{ color:#c98a00; }
   .jr-hour-add{ flex:0 0 auto; color:#025ffb; opacity:.5; display:inline-flex; align-items:center; padding-top:2px; }
   .jr-hour-row:hover .jr-hour-add{ opacity:1; }
   .jr-hour-add svg{ width:16px; height:16px; display:block; }
@@ -2330,12 +2390,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   <div class="products-view journal-view view-hidden" id="journalView">
     <div class="products-inner">
+      <div id="jrUpcoming" class="jr-upcoming"></div>
       <section class="panel jr-cal-panel">
         <div class="jr-cal">
           <div class="jr-cal-top">
-            <button type="button" class="jr-nav" id="jrPrevMonth" title="חודש קודם"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg></button>
+            <button type="button" class="jr-nav" id="jrPrevMonth" title="חודש קודם"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.6 7.4 10 6l6 6-6 6-1.4-1.4L13.2 12z"/></svg></button>
             <div class="jr-cal-title" id="jrCalTitle"></div>
-            <button type="button" class="jr-nav" id="jrNextMonth" title="חודש הבא"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.6 7.4 10 6l6 6-6 6-1.4-1.4L13.2 12z"/></svg></button>
+            <button type="button" class="jr-nav" id="jrNextMonth" title="חודש הבא"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg></button>
           </div>
           <div class="jr-cal-weekdays" id="jrCalWeekdays"></div>
           <div class="jr-cal-grid" id="jrCalGrid"></div>
@@ -7467,6 +7528,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const JR_PLUS_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>`;
   const JR_TRASH_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`;
   const JR_BELL_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`;
+  const JR_PEN_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>`;
+  const JR_PHONE_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>`;
+  const JR_WA_SVG = `<svg viewBox="0 0 30.667 30.667" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M30.667,14.939c0,8.25-6.74,14.938-15.056,14.938c-2.639,0-5.118-0.675-7.276-1.857L0,30.667l2.717-8.017c-1.37-2.25-2.159-4.892-2.159-7.712C0.559,6.688,7.297,0,15.613,0C23.928,0.002,30.667,6.689,30.667,14.939z M15.61,2.382c-6.979,0-12.656,5.634-12.656,12.56c0,2.748,0.896,5.292,2.411,7.362l-1.58,4.663l4.862-1.545c2,1.312,4.393,2.076,6.963,2.076c6.979,0,12.658-5.633,12.658-12.559C28.27,8.016,22.59,2.382,15.61,2.382z M23.214,18.38c-0.094-0.151-0.34-0.243-0.708-0.427c-0.367-0.184-2.184-1.069-2.521-1.189c-0.34-0.123-0.586-0.185-0.832,0.182c-0.243,0.367-0.951,1.191-1.168,1.437c-0.215,0.245-0.43,0.276-0.799,0.095c-0.369-0.186-1.559-0.57-2.969-1.817c-1.097-0.972-1.838-2.169-2.052-2.536c-0.217-0.366-0.022-0.564,0.161-0.746c0.165-0.165,0.369-0.428,0.554-0.643c0.185-0.213,0.246-0.364,0.369-0.609c0.121-0.245,0.06-0.458-0.031-0.643c-0.092-0.184-0.829-1.984-1.138-2.717c-0.307-0.732-0.614-0.611-0.83-0.611c-0.215,0-0.461-0.03-0.707-0.03S9.897,8.215,9.56,8.582s-1.291,1.252-1.291,3.054c0,1.804,1.321,3.543,1.506,3.787c0.186,0.243,2.554,4.062,6.305,5.528c3.753,1.465,3.753,0.976,4.429,0.914c0.678-0.062,2.184-0.885,2.49-1.739C23.307,19.268,23.307,18.533,23.214,18.38z"/></svg>`;
   let jrYear, jrMonth, jrSelectedDate = null, jrInitDone = false;
   const jrPad = n => String(n).padStart(2,'0');
   const jrDateStr = (y,m,d) => `${y}-${jrPad(m+1)}-${jrPad(d)}`;
@@ -7510,7 +7574,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     for(let d=1; d<=days; d++){
       const ds = jrDateStr(jrYear, jrMonth, d);
       const has = jrEventsFor(ds).length > 0;
+      const dow = new Date(jrYear, jrMonth, d).getDay(); // 5=שישי, 6=שבת
       const cls = ['jr-cal-cell'];
+      if(dow===5 || dow===6) cls.push('jr-weekend');
       if(ds===todayStr) cls.push('today');
       if(ds===jrSelectedDate) cls.push('selected');
       html += `<button type="button" class="${cls.join(' ')}" data-date="${ds}">${d}${has?'<span class="jr-dot"></span>':''}</button>`;
@@ -7521,11 +7587,39 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     });
     requestAnimationFrame(jrSizeCalGrid);
     renderJrDayFolders(false);
+    renderJrUpcoming();
   }
 
   function jrUpdateCalSelection(){
     const grid = document.getElementById('jrCalGrid'); if(!grid) return;
     grid.querySelectorAll('.jr-cal-cell[data-date]').forEach(c=> c.classList.toggle('selected', c.dataset.date===jrSelectedDate));
+  }
+
+  // מוצא את הפגישה הקרובה ביותר מעכשיו ואילך
+  function jrNextEvent(){
+    const now = Date.now(); let best=null, bestT=Infinity;
+    (journal.events||[]).forEach(e=>{
+      if(!e || !e.date) return;
+      const p=(e.date).split('-').map(Number); const tp=(e.time||'00:00').split(':').map(Number);
+      if(!p[0]) return;
+      const t=new Date(p[0],p[1]-1,p[2],tp[0]||0,tp[1]||0,0).getTime();
+      if(t>=now && t<bestT){ bestT=t; best=e; }
+    });
+    return best;
+  }
+  function renderJrUpcoming(){
+    const host=document.getElementById('jrUpcoming'); if(!host) return;
+    const e=jrNextEvent();
+    if(!e){ host.className='jr-upcoming'; host.innerHTML=''; return; }
+    const p=(e.date).split('-').map(Number);
+    const when=`${jrDayLabel(p[0],p[1]-1,p[2])} · ${escapeHtml(e.time||'')}`;
+    const name=escapeHtml(e.business||e.clientName||'פגישה');
+    const call = e.phone?`<a class="jr-up-act" href="tel:${escapeHtml(telHref(e.phone))}" title="חיוג">${JR_PHONE_SVG}</a>`:'';
+    const wa = e.phone?`<a class="jr-up-act" href="${escapeHtml(waHref(e.phone))}" target="_blank" rel="noopener" title="וואטסאפ">${JR_WA_SVG}</a>`:'';
+    host.className='jr-upcoming show';
+    host.innerHTML=`<div class="jr-up-bell">${JR_BELL_SVG}</div><div class="jr-up-main"><div class="jr-up-label">הפגישה הקרובה</div><div class="jr-up-title">${name}</div><div class="jr-up-when">${when}</div></div><div class="jr-up-actions">${call}${wa}</div>`;
+    const main=host.querySelector('.jr-up-main');
+    if(main) main.addEventListener('click', ()=>{ const p2=(e.date).split('-').map(Number); jrYear=p2[0]; jrMonth=p2[1]-1; jrSelectedDate=e.date; renderJrCalendar(); renderJrDayFolders(true); });
   }
 
   function jrHoursHtml(ds){
@@ -7611,10 +7705,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </div>
         <div class="jr-field"><label>פרטים נוספים</label><textarea class="jr-in-details" placeholder="נושא הפגישה, כתובת, הערות..."></textarea></div>
         <button type="button" class="jr-save-btn">שמור פגישה</button>
+        <button type="button" class="jr-cancel-edit">בטל עריכה</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
     const q = s => overlay.querySelector(s);
+    const modalEl = overlay.querySelector('.jr-modal');
+    let editingId = null;
     const close = ()=>{ overlay.classList.add('modal-closing'); setTimeout(()=>{ try{ overlay.remove(); }catch(_){} }, 500); document.removeEventListener('click', outside, true); };
     q('.order-modal-close').addEventListener('click', close);
     overlay.addEventListener('click', e=>{ if(e.target===overlay) close(); });
@@ -7625,13 +7722,41 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(!evs.length){ el.innerHTML = `<div class="jr-ev-list-title">פגישות היום</div><div class="jr-ev-empty">אין עדיין פגישות ליום זה.</div>`; return; }
       el.innerHTML = `<div class="jr-ev-list-title">פגישות היום (${evs.length})</div>` + evs.map(e=>{
         const remTxt = e.reminder==60?'תזכורת שעה לפני':(e.reminder==30?'תזכורת חצי שעה לפני':'');
-        const meta = [e.phone,e.email,e.details,remTxt].filter(Boolean).map(escapeHtml).join(' · ');
-        return `<div class="jr-ev-item" data-id="${e.id}"><span class="jr-ev-item-time">${escapeHtml(e.time||'')}</span><div class="jr-ev-item-main"><div class="jr-ev-item-name">${escapeHtml(e.business||e.clientName||'פגישה')}</div>${meta?`<div class="jr-ev-item-meta">${meta}</div>`:''}</div><button type="button" class="jr-ev-item-del" title="מחיקה">${JR_TRASH_SVG}</button></div>`;
+        const meta = [e.email,e.details,remTxt].filter(Boolean).map(escapeHtml).join(' · ');
+        const bell = e.reminder?`<span class="jr-ev-item-bell" title="${escapeHtml(remTxt)}">${JR_BELL_SVG}</span>`:'';
+        const call = e.phone?`<a class="jr-ev-act call" href="tel:${escapeHtml(telHref(e.phone))}" title="חיוג">${JR_PHONE_SVG}</a>`:'';
+        const wa = e.phone?`<a class="jr-ev-act wa" href="${escapeHtml(waHref(e.phone))}" target="_blank" rel="noopener" title="וואטסאפ">${JR_WA_SVG}</a>`:'';
+        const phoneLine = e.phone?`<div class="jr-ev-item-meta">${escapeHtml(e.phone)}</div>`:'';
+        return `<div class="jr-ev-item" data-id="${e.id}"><span class="jr-ev-item-time">${escapeHtml(e.time||'')}</span><div class="jr-ev-item-main"><div class="jr-ev-item-name">${escapeHtml(e.business||e.clientName||'פגישה')}${bell}</div>${phoneLine}${meta?`<div class="jr-ev-item-meta">${meta}</div>`:''}</div><div class="jr-ev-item-actions">${call}${wa}<button type="button" class="jr-ev-act edit" title="עריכה">${JR_PEN_SVG}</button><button type="button" class="jr-ev-act del" title="מחיקה">${JR_TRASH_SVG}</button></div></div>`;
       }).join('');
-      el.querySelectorAll('.jr-ev-item-del').forEach(btn=>{
-        btn.addEventListener('click', ()=>{ const id = btn.closest('.jr-ev-item').dataset.id; journal.events = journal.events.filter(x=>x.id!==id); saveJournal(); renderList(); try{ renderJrCalendar(); }catch(_){} });
+      el.querySelectorAll('.jr-ev-act.del').forEach(btn=>{
+        btn.addEventListener('click', ()=>{ const id = btn.closest('.jr-ev-item').dataset.id; journal.events = journal.events.filter(x=>x.id!==id); saveJournal(); if(editingId===id) resetForm(); renderList(); try{ renderJrCalendar(); }catch(_){} });
+      });
+      el.querySelectorAll('.jr-ev-act.edit').forEach(btn=>{
+        btn.addEventListener('click', ()=>{ const id = btn.closest('.jr-ev-item').dataset.id; const ev = (journal.events||[]).find(x=>x.id===id); if(ev) startEdit(ev); });
       });
     }
+    function startEdit(e){
+      editingId = e.id;
+      q('.jr-in-time').value = e.time || '09:00';
+      q('.jr-in-reminder').value = String(e.reminder||0);
+      q('.jr-in-client').value = e.business || e.clientName || '';
+      q('.jr-in-phone').value = e.phone || '';
+      q('.jr-in-email').value = e.email || '';
+      q('.jr-in-details').value = e.details || '';
+      modalEl.classList.add('editing');
+      q('.jr-form-title').textContent = 'עריכת פגישה';
+      q('.jr-save-btn').textContent = 'עדכן פגישה';
+      try{ q('.jr-form-title').scrollIntoView({behavior:'smooth', block:'center'}); }catch(_){}
+    }
+    function resetForm(){
+      editingId = null;
+      q('.jr-in-client').value=''; q('.jr-in-phone').value=''; q('.jr-in-email').value=''; q('.jr-in-details').value=''; q('.jr-in-reminder').value='0';
+      modalEl.classList.remove('editing');
+      q('.jr-form-title').textContent = 'הוספת פגישה חדשה';
+      q('.jr-save-btn').textContent = 'שמור פגישה';
+    }
+    q('.jr-cancel-edit').addEventListener('click', resetForm);
     renderList();
 
     const clientInput = q('.jr-in-client'), results = q('.jr-client-results');
@@ -7658,10 +7783,16 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const clientName = q('.jr-in-client').value.trim();
       if(!clientName){ q('.jr-in-client').focus(); return; }
       const reminder = parseInt(q('.jr-in-reminder').value, 10) || 0;
-      journal.events.push({ id: genDocId(), date: ds, time: q('.jr-in-time').value || '09:00', clientName, business: clientName, phone: q('.jr-in-phone').value.trim(), email: q('.jr-in-email').value.trim(), details: q('.jr-in-details').value.trim(), reminder, notified:false });
+      const fields = { date: ds, time: q('.jr-in-time').value || '09:00', clientName, business: clientName, phone: q('.jr-in-phone').value.trim(), email: q('.jr-in-email').value.trim(), details: q('.jr-in-details').value.trim(), reminder };
+      if(editingId){
+        const ev = (journal.events||[]).find(x=>x.id===editingId);
+        if(ev){ Object.assign(ev, fields); ev.notified = false; } // זמן/תזכורת אולי השתנו — לאפשר התראה מחדש
+      } else {
+        journal.events.push(Object.assign({ id: genDocId(), notified:false }, fields));
+      }
       saveJournal();
       if(reminder) jrEnsureNotifyPermission();
-      q('.jr-in-client').value=''; q('.jr-in-phone').value=''; q('.jr-in-email').value=''; q('.jr-in-details').value=''; q('.jr-in-reminder').value='0';
+      resetForm();
       renderList(); try{ renderJrCalendar(); }catch(_){}
     });
   }
