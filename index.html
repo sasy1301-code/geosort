@@ -1860,6 +1860,10 @@
   .jr-day-body{ overflow:hidden; }
   .jr-day-body.animated-collapse{ transition:max-height .5s cubic-bezier(.4,0,.2,1), opacity .4s ease; }
   .jr-day-body.animated-collapse:not(.is-open){ max-height:0; opacity:0; }
+  /* חובה: הגלובלי .animated-collapse קובע max-height:0, ו-.is-open לא מחזיר אותו (זה נעשה inline
+     ע"י toggleAnimatedCollapse). תיקיית "היום" נפתחת ישירות בלי לעבור שם — לכן צריך להחזיר גובה כאן,
+     אחרת 24 השעות נחתכות לגובה 0 ולחיצה לא עושה כלום. בזמן אנימציה ה-inline גובר על הכלל הזה. */
+  .jr-day-body.animated-collapse.is-open{ max-height:none; opacity:1; }
   .jr-hours{ padding:8px 4px 4px; }
   .jr-hour-row{ display:flex; align-items:flex-start; gap:10px; padding:7px 8px; border-radius:11px; cursor:pointer; transition:background .12s ease; }
   .jr-hour-row:hover{ background:#e9eff8; }
@@ -7497,10 +7501,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
     grid.innerHTML = html;
     grid.querySelectorAll('.jr-cal-cell[data-date]').forEach(cell=>{
-      cell.addEventListener('click', ()=>{ jrSelectedDate = cell.dataset.date; renderJrCalendar(); renderJrDayFolders(true); });
+      cell.addEventListener('click', ()=>{ jrSelectedDate = cell.dataset.date; jrUpdateCalSelection(); renderJrDayFolders(true); });
     });
     requestAnimationFrame(jrSizeCalGrid);
     renderJrDayFolders(false);
+  }
+
+  function jrUpdateCalSelection(){
+    const grid = document.getElementById('jrCalGrid'); if(!grid) return;
+    grid.querySelectorAll('.jr-cal-cell[data-date]').forEach(c=> c.classList.toggle('selected', c.dataset.date===jrSelectedDate));
   }
 
   function jrHoursHtml(ds){
@@ -7548,10 +7557,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const ds = group.dataset.date;
       head.addEventListener('click', ()=>{
         const opening = !body.classList.contains('is-open');
-        if(opening && !body.innerHTML.trim()){ body.innerHTML = jrHoursHtml(ds); }
+        if(opening){
+          if(!body.innerHTML.trim()) body.innerHTML = jrHoursHtml(ds);
+          wireJrHours(body);
+          jrSelectedDate = ds;
+        }
         head.classList.toggle('open', opening);
         toggleAnimatedCollapse(body, null);
-        if(opening){ jrSelectedDate = ds; wireJrHours(body); try{ renderJrCalendar(); }catch(_){} }
+        if(opening) jrUpdateCalSelection();
       });
       if(body.classList.contains('is-open')) wireJrHours(body);
     });
