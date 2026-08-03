@@ -1999,6 +1999,9 @@
   #docFolderList .cluster-body{ overflow:hidden; }
   /* עיגול צבע סטטי לתיקיית "גבייה" המובנית — נראה זהה ל-folder-swatch של שאר התיקיות */
   .doc-swatch-static{ width:14px; height:14px; border-radius:50%; flex:0 0 auto; border:1px solid rgba(255,255,255,.35); }
+  /* אזור לחיצה גדול יותר לעיפרון (שינוי שם) ול-X (מחיקה) בתיקיות המסמכים — כדי שבמגע לא ייפתח בטעות */
+  #docFolderList .cluster-head .rename-folder,
+  #docFolderList .cluster-head .folder-del{ padding:8px 7px; }
   /* חץ התיקייה בצד שמאל — זהה לחץ התיקיות בכל המערכת (CHEVRON_ICON_SVG), מסתובב בפתיחה */
   .dc-fchev{ display:inline-flex; color:#fff; width:12.7px; flex:0 0 auto; transition:transform .18s ease; margin-inline-start:5px; }
   .dc-fchev svg{ display:block; }
@@ -2072,8 +2075,9 @@
 
   /* רשימת קבצים בתיקייה בהתאמה אישית */
   .dc-file-list{ display:flex; flex-direction:column; gap:8px; }
-  .dc-file{ display:flex; align-items:center; gap:10px; background:#0f1a2e; border:1px solid transparent; border-radius:15px; padding:10px 12px; transition:background .15s ease; }
+  .dc-file{ display:flex; align-items:center; gap:10px; background:#0f1a2e; border:1px solid transparent; border-radius:15px; padding:10px 12px; transition:background .15s ease; cursor:pointer; }
   .dc-file:hover{ background:#040f1e; }
+  .dc-file-rename-input{ flex:1; min-width:0; box-sizing:border-box; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.3); border-radius:8px; color:#fff; font-weight:600; font-size:.9rem; padding:5px 9px; font-family:inherit; }
   .dc-file-ic{ width:34px; height:34px; flex:0 0 auto; border-radius:9px; background:rgba(2,95,251,.22); display:flex; align-items:center; justify-content:center; color:#7fb0ff; }
   .dc-file-ic svg{ width:19px; height:19px; }
   .dc-file-main{ flex:1; min-width:0; }
@@ -2083,16 +2087,17 @@
   .dc-file-btn:hover{ background:rgba(255,255,255,.1); }
   .dc-file-btn svg{ width:16px; height:16px; }
   .dc-file-btn[data-fdelfile]{ color:#ff8a8a; }
-  .dc-addfile-row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
-  .dc-addfile{ display:inline-flex; align-items:center; gap:7px; font-size:.82rem; color:#dfe7f5; cursor:pointer; padding:9px 13px; border:1px solid rgba(255,255,255,.2); border-radius:11px; background:rgba(255,255,255,.06); font-family:inherit; }
+  /* כפתורי הוספה — צורת "כדור" (pill) כמו כפתור שליחת הדו״ח היומי, בצבעים הקיימים, ובגודל שווה */
+  .dc-addfile-row{ display:flex; gap:8px; margin-top:12px; }
+  .dc-addfile{ flex:1 1 0; min-width:0; box-sizing:border-box; height:42px; margin:0; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.82rem; line-height:1; color:#dfe7f5; cursor:pointer; padding:0 12px; border:1px solid rgba(255,255,255,.2); border-radius:23px; background:rgba(255,255,255,.06); font-family:inherit; white-space:nowrap; }
   .dc-addfile:hover{ background:rgba(255,255,255,.12); }
-  .dc-addfile svg{ width:17px; height:17px; fill:currentColor; color:#7fb0ff; }
+  .dc-addfile svg{ width:17px; height:17px; fill:currentColor; color:#7fb0ff; flex:0 0 auto; }
 
   /* עורך קבצים (טבלה/מסמך) */
   .dce-overlay{ position:fixed; inset:0; z-index:9600; background:rgba(3,8,20,.72); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:16px; }
   .dce-box{ background:#0f1a2e; border:1px solid #223154; border-radius:16px; width:min(900px,100%); max-height:92vh; display:flex; flex-direction:column; overflow:hidden; }
   .dce-head{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid #223154; background:#0a1428; }
-  .dce-name{ flex:1; min-width:0; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:9px; color:#fff; font-size:.95rem; font-weight:600; padding:8px 11px; font-family:inherit; }
+  .dce-name{ flex:1; min-width:0; color:#0277fb; font-size:1.05rem; font-weight:700; padding:6px 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right; }
   .dce-folder{ font-size:.75rem; color:#9fb0d0; flex:0 0 auto; }
   .dce-head-actions{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
   .dce-save{ background:#025ffb; border:none; color:#fff; border-radius:9px; padding:8px 16px; font-weight:600; font-size:.85rem; cursor:pointer; font-family:inherit; }
@@ -2100,15 +2105,29 @@
   .dce-close{ background:transparent; border:none; color:#cdd9ef; font-size:1.1rem; cursor:pointer; padding:4px 8px; border-radius:8px; }
   .dce-close:hover{ background:rgba(255,255,255,.12); }
   .dce-toolbar{ display:flex; gap:6px; padding:9px 12px; border-bottom:1px solid #223154; flex-wrap:wrap; background:#0c1730; }
-  .dce-tb{ background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); color:#e6edf9; border-radius:8px; padding:6px 11px; font-size:.82rem; cursor:pointer; font-family:inherit; min-width:34px; }
-  .dce-tb:hover{ background:rgba(255,255,255,.16); }
+  /* כפתורי סרגל העורך — כמו כפתור שליחת הדו״ח היומי: כדור, רקע #021236, בורדר 1px #0277fb, כולם באותו גובה בדיוק */
+  .dce-tb{ background:#021236; border:1px solid #0277fb; color:#e6edf9; border-radius:23px; height:40px; padding:0 16px; margin:0; font-size:.82rem; line-height:1; cursor:pointer; font-family:inherit; min-width:34px; display:inline-flex; align-items:center; justify-content:center; gap:6px; box-sizing:border-box; }
+  .dce-tb:hover{ background:#04205e; }
   .dce-body{ flex:1; overflow:auto; padding:14px; }
   .dce-grid{ border-collapse:collapse; width:max-content; min-width:100%; direction:rtl; }
   .dce-grid th{ background:#1b2a47; color:#cdd9ef; font-size:.75rem; font-weight:600; padding:5px 8px; border:1px solid #2c3e63; position:sticky; top:0; }
-  .dce-grid .dce-rownum{ background:#16233c; }
+  .dce-grid .dce-rownum{ background:#16233c; white-space:nowrap; }
   .dce-grid td{ border:1px solid #2c3e63; padding:0; }
-  .dce-grid td input{ width:120px; border:none; background:transparent; color:#fff; padding:7px 9px; font-size:.85rem; font-family:inherit; outline:none; }
-  .dce-grid td input:focus{ background:rgba(2,95,251,.18); box-shadow:inset 0 0 0 2px #025ffb; }
+  .dce-grid td input{ width:120px; border:none; border-radius:0; background:transparent; color:#fff; padding:7px 9px; font-size:.85rem; font-family:inherit; outline:none; }
+  /* מיקוד על תא — בורדר מרובע 1px בדיוק בגודל התא (בלי פינות מעוגלות, בלי מילוי) */
+  .dce-grid td input:focus{ background:transparent; border-radius:0; box-shadow:none; outline:none; }
+  .dce-grid td:focus-within, .dce-grid td.dce-sel{ outline:1px solid #025ffb; outline-offset:-1px; position:relative; z-index:1; }
+  /* בחירת כמה תאים בגרירה — בלי סימון טקסט */
+  .dce-grid, .dce-grid td.dce-sel input{ -webkit-user-select:none; user-select:none; }
+  .dce-grid td input{ -webkit-user-select:text; user-select:text; }
+  /* בורר צבע לתא הנבחר (בסרגל הכלים) + כפתור ניקוי */
+  .dce-tb-color{ display:inline-flex; align-items:center; gap:6px; }
+  /* עיגול צבע (לא מרובע) בכפתור "צבע תא" */
+  .dce-tb-color input[type="color"]{ -webkit-appearance:none; appearance:none; width:18px; height:18px; padding:0; border:1px solid rgba(255,255,255,.5); border-radius:50%; background:transparent; cursor:pointer; flex:0 0 auto; }
+  .dce-tb-color input[type="color"]::-webkit-color-swatch-wrapper{ padding:0; }
+  .dce-tb-color input[type="color"]::-webkit-color-swatch{ border:none; border-radius:50%; }
+  .dce-tb-color input[type="color"]::-moz-color-swatch{ border:none; border-radius:50%; }
+  .dce-tb-hint{ color:#9fb0d0; font-size:.72rem; align-self:center; margin-inline-start:6px; }
   .dce-doc{ background:#fff; color:#1c1c1c; min-height:340px; border-radius:8px; padding:26px 30px; direction:rtl; line-height:1.7; font-size:1rem; outline:none; }
   .dce-doc:focus{ box-shadow:0 0 0 2px #025ffb; }
   .dce-doc h2{ font-size:1.35rem; margin:.4em 0; }
@@ -8244,30 +8263,32 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       group.appendChild(fhead); group.appendChild(fbody);
       listEl.appendChild(group);
       if(open) fhead.classList.add('open');
+      const fId = f.id;
+      const liveFolderD = () => docCollections.folders.find(x=>x.id===fId);
       const swatch = fhead.querySelector('.folder-swatch');
       swatch.addEventListener('click', e=> e.stopPropagation());
-      swatch.addEventListener('change', e=>{ f.color = e.target.value; saveDocCollections(); });
+      swatch.addEventListener('change', e=>{ const folder=liveFolderD(); if(folder){ folder.color = e.target.value; saveDocCollections(); } });
       fhead.addEventListener('click', ev=>{
         if(ev.target.closest('.folder-swatch') || ev.target.closest('.rename-folder') || ev.target.closest('.folder-del')) return;
-        const willOpen = !_dcCustomOpen.has(f.id);
-        if(willOpen) _dcCustomOpen.add(f.id); else _dcCustomOpen.delete(f.id);
+        const willOpen = !_dcCustomOpen.has(fId);
+        if(willOpen) _dcCustomOpen.add(fId); else _dcCustomOpen.delete(fId);
         fhead.classList.toggle('open', willOpen);
-        if(willOpen) renderCustomFolderBody(fbody, f.id);
+        if(willOpen) renderCustomFolderBody(fbody, fId);
         toggleAnimatedCollapse(fbody, null);
       });
       fhead.querySelector('.rename-folder').addEventListener('click', e=>{
         e.stopPropagation();
-        const nm = prompt('שם חדש לתיקייה:', f.name||''); if(nm==null) return;
-        const t = nm.trim(); if(!t) return;
-        f.name = t; saveDocCollections(); renderDocumentsView();
+        const folder = liveFolderD() || f;
+        dcStartFolderRename(fhead, folder);
       });
       fhead.querySelector('.folder-del').addEventListener('click', e=>{
         e.stopPropagation();
-        if(!confirm('למחוק את התיקייה "' + (f.name||'') + '"' + (n?(' ואת ' + n + ' הקבצים שבתוכה'):'') + '?')) return;
-        docCollections.folders = docCollections.folders.filter(x=>x.id!==f.id);
-        _dcCustomOpen.delete(f.id); saveDocCollections(); renderDocumentsView();
+        const folder = liveFolderD(); const cnt = folder ? (folder.files||[]).length : n;
+        if(!confirm('למחוק את התיקייה "' + ((folder&&folder.name)||f.name||'') + '"' + (cnt?(' ואת ' + cnt + ' הקבצים שבתוכה'):'') + '?')) return;
+        docCollections.folders = docCollections.folders.filter(x=>x.id!==fId);
+        _dcCustomOpen.delete(fId); saveDocCollections(); renderDocumentsView();
       });
-      if(open) renderCustomFolderBody(fbody, f.id);
+      if(open) renderCustomFolderBody(fbody, fId);
     });
     // ----- יצירת תיקייה חדשה (בדיוק כמו בלקוחות ואזורים: שם + עיגול צבע + הוסף) -----
     const nfInput = document.getElementById('dcNewFolderInput');
@@ -8288,6 +8309,28 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
   function cssEsc(s){ return String(s).replace(/["\\\]]/g,'\\$&'); }
 
+  // שינוי שם תיקייה בעריכה במקום (input inline) — כמו בתיקיות לקוחות ואזורים, בלי prompt (שחסום בחלק מהדפדפנים)
+  function dcStartFolderRename(fhead, f){
+    const nameEl = fhead.querySelector('.name');
+    if(!nameEl || fhead.querySelector('.cluster-rename-input')) return;
+    const input = document.createElement('input');
+    input.type = 'text'; input.value = f.name || ''; input.className = 'cluster-rename-input';
+    nameEl.replaceWith(input);
+    input.focus(); input.select();
+    let done = false;
+    const finish = (save)=>{
+      if(done) return; done = true;
+      if(save){ const t = (input.value||'').trim(); if(t && t !== f.name){ f.name = t; saveDocCollections(); } }
+      renderDocumentsView();
+    };
+    input.addEventListener('keydown', ev=>{
+      if(ev.key==='Enter'){ ev.preventDefault(); finish(true); }
+      else if(ev.key==='Escape'){ ev.preventDefault(); finish(false); }
+    });
+    input.addEventListener('blur', ()=>finish(true));
+    input.addEventListener('click', ev=>ev.stopPropagation());
+  }
+
   // ---- גוף תיקייה בהתאמה אישית: רשימת קבצים + הוספת קובץ (אקסל/וורד/העלאה) ----
   function renderCustomFolderBody(body, fid){
     if(!body) return;
@@ -8297,10 +8340,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const ic = file.kind==='sheet'?DC_SHEET_SVG : file.kind==='doc'?DC_DOC_SVG : (String(file.mime||'').indexOf('sheet')>=0||/xls/i.test(file.name||'')?DC_SHEET_SVG:DC_DOC_SVG);
       const kindTxt = file.kind==='sheet'?'טבלה' : file.kind==='doc'?'מסמך' : 'קובץ שהועלה';
       const canEdit = (file.kind==='sheet'||file.kind==='doc');
-      return `<div class="dc-file" data-file="${escapeHtml(file.id)}">
+      return `<div class="dc-file" data-file="${escapeHtml(file.id)}" data-kind="${escapeHtml(file.kind||'')}">
         <span class="dc-file-ic">${ic}</span>
         <div class="dc-file-main"><div class="dc-file-name">${escapeHtml(file.name||'קובץ')}</div><div class="dc-file-meta">${kindTxt}${file.updatedAt?(' · '+escapeHtml(file.updatedAt)):''}</div></div>
-        ${canEdit?`<button type="button" class="dc-file-btn" data-fedit="${escapeHtml(file.id)}" title="עריכה">${DC_EDIT_SVG}</button>`:''}
+        <button type="button" class="dc-file-btn" data-frename="${escapeHtml(file.id)}" title="שינוי שם">${DC_EDIT_SVG}</button>
         <button type="button" class="dc-file-btn" data-fdlfile="${escapeHtml(file.id)}" title="הורדה">${DC_DL_SVG}</button>
         <button type="button" class="dc-file-btn" data-fdelfile="${escapeHtml(file.id)}" title="מחיקה">${DC_TRASH_SVG}</button>
       </div>`;
@@ -8314,15 +8357,20 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <label class="dc-addfile" title="העלאת קובץ קיים">${DC_DL_SVG}<span>העלאת קובץ</span><input type="file" class="dc-upload-input" data-fid="${escapeHtml(fid)}" accept=".xlsx,.xls,.csv,.doc,.docx,.pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden></label>
         </div>
       </div>`;
+    // תמיד שולפים את אובייקט התיקייה החי מ-docCollections לפי id (ולא שומרים הפניה ישנה),
+    // כי סנכרון realtime מחליף את docCollections באובייקט חדש — הפניה ישנה גורמת לפעולות (כמו מחיקה) לא להיתפס.
+    const liveFolder = () => docCollections.folders.find(x=>x.id===fid);
     // הוספת טבלה/מסמך חדש → פותח עורך
     body.querySelectorAll('.dc-addfile[data-add]').forEach(btn=>btn.addEventListener('click', ()=>{
+      const folder = liveFolder(); if(!folder) return;
+      if(!Array.isArray(folder.files)) folder.files = [];
       const kind = btn.dataset.add;
-      const nm = prompt(kind==='sheet'?'שם הטבלה:':'שם המסמך:', kind==='sheet'?'טבלה חדשה':'מסמך חדש');
-      if(nm==null) return; const t=(nm.trim())|| (kind==='sheet'?'טבלה חדשה':'מסמך חדש');
+      // בלי prompt (חסום בחלק מהדפדפנים): נוצר עם שם ברירת מחדל ונפתח העורך — אפשר לשנות שם בשדה שבראש העורך.
+      const t = kind==='sheet' ? 'טבלה חדשה' : 'מסמך חדש';
       const file = kind==='sheet'
         ? { id:dcUid(), name:t, kind:'sheet', sheet:{ rows:8, cols:5, cells:{} }, updatedAt:(typeof localDateString==='function'?localDateString():'') }
         : { id:dcUid(), name:t, kind:'doc', content:'', updatedAt:(typeof localDateString==='function'?localDateString():'') };
-      f.files.push(file); saveDocCollections();
+      folder.files.push(file); saveDocCollections();
       openDocFileEditor(fid, file.id);
     }));
     // העלאת קובץ קיים
@@ -8332,19 +8380,58 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(file0.size > 5*1024*1024){ alert('הקובץ גדול מדי (מקסימום 5MB).'); up.value=''; return; }
       const reader = new FileReader();
       reader.onload = ()=>{
-        f.files.push({ id:dcUid(), name:file0.name, kind:'upload', mime:file0.type||'application/octet-stream', data:reader.result, updatedAt:(typeof localDateString==='function'?localDateString():'') });
+        const folder = liveFolder(); if(!folder){ return; }
+        if(!Array.isArray(folder.files)) folder.files = [];
+        folder.files.push({ id:dcUid(), name:file0.name, kind:'upload', mime:file0.type||'application/octet-stream', data:reader.result, updatedAt:(typeof localDateString==='function'?localDateString():'') });
         saveDocCollections(); renderCustomFolderBody(body, fid);
       };
       reader.readAsDataURL(file0);
     });
-    // עריכה / הורדה / מחיקה של קובץ
-    body.querySelectorAll('[data-fedit]').forEach(b=>b.addEventListener('click', ()=> openDocFileEditor(fid, b.dataset.fedit)));
-    body.querySelectorAll('[data-fdlfile]').forEach(b=>b.addEventListener('click', ()=> dcDownloadFile(fid, b.dataset.fdlfile)));
-    body.querySelectorAll('[data-fdelfile]').forEach(b=>b.addEventListener('click', ()=>{
-      const file = f.files.find(x=>x.id===b.dataset.fdelfile); if(!file) return;
-      if(!confirm('למחוק את "' + (file.name||'הקובץ') + '"?')) return;
-      f.files = f.files.filter(x=>x.id!==file.id); saveDocCollections(); renderCustomFolderBody(body, fid);
+    // לחיצה על הכרטיס (לא על הכפתורים) פותחת את הקובץ — עורך לטבלה/מסמך, הורדה לקובץ שהועלה
+    body.querySelectorAll('.dc-file').forEach(fileEl=>{
+      fileEl.addEventListener('click', ev=>{
+        if(ev.target.closest('.dc-file-btn') || fileEl.querySelector('.dc-file-rename-input')) return;
+        const fileId = fileEl.dataset.file;
+        const folder = liveFolder(); if(!folder) return;
+        const file = (folder.files||[]).find(x=>x.id===fileId); if(!file) return;
+        if(file.kind==='sheet' || file.kind==='doc') openDocFileEditor(fid, fileId);
+        else dcDownloadFile(fid, fileId);
+      });
+    });
+    // עיפרון = שינוי שם בעריכה במקום (בלי לפתוח את הקובץ)
+    body.querySelectorAll('[data-frename]').forEach(b=>b.addEventListener('click', e=>{
+      e.stopPropagation();
+      const folder = liveFolder(); if(!folder) return;
+      const file = (folder.files||[]).find(x=>x.id===b.dataset.frename);
+      dcStartFileRename(b.closest('.dc-file'), folder, file);
     }));
+    body.querySelectorAll('[data-fdlfile]').forEach(b=>b.addEventListener('click', e=>{ e.stopPropagation(); dcDownloadFile(fid, b.dataset.fdlfile); }));
+    body.querySelectorAll('[data-fdelfile]').forEach(b=>b.addEventListener('click', e=>{
+      e.stopPropagation();
+      const folder = liveFolder(); if(!folder) return;
+      const file = (folder.files||[]).find(x=>x.id===b.dataset.fdelfile); if(!file) return;
+      if(!confirm('למחוק את "' + (file.name||'הקובץ') + '"?')) return;
+      folder.files = (folder.files||[]).filter(x=>x.id!==file.id); saveDocCollections(); renderCustomFolderBody(body, fid);
+    }));
+  }
+  // שינוי שם קובץ בעריכה במקום (input inline) — כמו שינוי שם תיקייה, בלי prompt
+  function dcStartFileRename(fileEl, folder, file){
+    if(!fileEl || !folder || !file) return;
+    const nameEl = fileEl.querySelector('.dc-file-name');
+    if(!nameEl || fileEl.querySelector('.dc-file-rename-input')) return;
+    const input = document.createElement('input');
+    input.type = 'text'; input.value = file.name || ''; input.className = 'dc-file-rename-input';
+    nameEl.replaceWith(input);
+    input.focus(); input.select();
+    let done = false;
+    const finish = (save)=>{
+      if(done) return; done = true;
+      if(save){ const t = (input.value||'').trim(); if(t && t !== file.name){ file.name = t; file.updatedAt = (typeof localDateString==='function'?localDateString():''); saveDocCollections(); } }
+      dcRefreshOpenFolder(folder.id);
+    };
+    input.addEventListener('keydown', ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); finish(true); } else if(ev.key==='Escape'){ ev.preventDefault(); finish(false); } });
+    input.addEventListener('blur', ()=>finish(true));
+    input.addEventListener('click', ev=>ev.stopPropagation());
   }
 
   function dcFindFile(fid, fileId){
@@ -8368,7 +8455,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     overlay.innerHTML =
       `<div class="dce-box">
         <div class="dce-head">
-          <input type="text" class="dce-name" id="dceName" value="${escapeHtml(file.name||'')}">
+          <div class="dce-name" id="dceName">${escapeHtml(file.name||'')}</div>
           <span class="dce-folder">${escapeHtml(folder.name||'')}</span>
           <div class="dce-head-actions">
             <button type="button" class="dce-save" id="dceSave">שמור</button>
@@ -8392,11 +8479,26 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(isSheet){
       if(!file.sheet) file.sheet = { rows:8, cols:5, cells:{} };
       const st = file.sheet;
+      if(!st.cellColors || typeof st.cellColors!=='object') st.cellColors = {};
+      let _selCells = new Set(); // מפתחות "r_c" של התאים הנבחרים
+      let _anchor = null;        // תא עוגן לבחירת טווח
+      let _dragging = false;
       toolbar.innerHTML =
         `<button type="button" class="dce-tb" id="dceAddRow">＋ שורה</button>
          <button type="button" class="dce-tb" id="dceAddCol">＋ עמודה</button>
          <button type="button" class="dce-tb" id="dceDelRow">− שורה</button>
-         <button type="button" class="dce-tb" id="dceDelCol">− עמודה</button>`;
+         <button type="button" class="dce-tb" id="dceDelCol">− עמודה</button>
+         <label class="dce-tb dce-tb-color" title="צבע לתאים הנבחרים">צבע תא <input type="color" id="dceCellColor" value="#1b2a47"></label>
+         <button type="button" class="dce-tb" id="dceCellClear">נקה צבע תא</button>
+         <span class="dce-tb-hint">בחרו תא, או גררו / Shift+לחיצה לכמה תאים, ואז צבע</span>`;
+      const cellColorInput = overlay.querySelector('#dceCellColor');
+      const applyCellBg = (r,c,color)=>{ const inp=bodyEl.querySelector('td input[data-r="'+r+'"][data-c="'+c+'"]'); const td=inp&&inp.closest('td'); if(td) td.style.background = color||''; };
+      const refreshSel = ()=>{
+        bodyEl.querySelectorAll('td.dce-sel').forEach(td=>td.classList.remove('dce-sel'));
+        _selCells.forEach(k=>{ const p=k.split('_'); const inp=bodyEl.querySelector('td input[data-r="'+p[0]+'"][data-c="'+p[1]+'"]'); const td=inp&&inp.closest('td'); if(td) td.classList.add('dce-sel'); });
+      };
+      const setRange = (a,b)=>{ _selCells = new Set(); const r0=Math.min(a.r,b.r),r1=Math.max(a.r,b.r),c0=Math.min(a.c,b.c),c1=Math.max(a.c,b.c); for(let r=r0;r<=r1;r++) for(let c=c0;c<=c1;c++) _selCells.add(r+'_'+c); };
+      const cellFromPoint = (x,y)=>{ const el=document.elementFromPoint(x,y); const td=el&&el.closest('td'); if(!td||!bodyEl.contains(td)) return null; const inp=td.querySelector('input[data-r]'); return inp?{r:+inp.dataset.r,c:+inp.dataset.c}:null; };
       const renderGrid = ()=>{
         let h = '<table class="dce-grid"><thead><tr><th class="dce-corner"></th>';
         for(let cix=0;cix<st.cols;cix++) h += `<th>${dcColLabel(cix)}</th>`;
@@ -8405,21 +8507,46 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           h += `<tr><th class="dce-rownum">${r+1}</th>`;
           for(let cix=0;cix<st.cols;cix++){
             const v = st.cells[r+'_'+cix] || '';
-            h += `<td><input type="text" data-r="${r}" data-c="${cix}" value="${escapeHtml(v)}"></td>`;
+            const cc = st.cellColors[r+'_'+cix] || '';
+            h += `<td${cc?` style="background:${escapeHtml(cc)}"`:''}><input type="text" data-r="${r}" data-c="${cix}" value="${escapeHtml(v)}"></td>`;
           }
           h += '</tr>';
         }
         h += '</tbody></table>';
         bodyEl.innerHTML = h;
-        bodyEl.querySelectorAll('input[data-r]').forEach(inp=>{
+        bodyEl.querySelectorAll('td input[type="text"][data-r]').forEach(inp=>{
           inp.addEventListener('input', ()=>{ const k=inp.dataset.r+'_'+inp.dataset.c; if(inp.value==='') delete st.cells[k]; else st.cells[k]=inp.value; markDirty(); });
+          inp.addEventListener('focus', ()=>{ const cc=st.cellColors[inp.dataset.r+'_'+inp.dataset.c]; if(cc) cellColorInput.value=cc; });
         });
+        refreshSel();
       };
       renderGrid();
-      overlay.querySelector('#dceAddRow').addEventListener('click', ()=>{ st.rows++; markDirty(); renderGrid(); });
-      overlay.querySelector('#dceAddCol').addEventListener('click', ()=>{ st.cols++; markDirty(); renderGrid(); });
-      overlay.querySelector('#dceDelRow').addEventListener('click', ()=>{ if(st.rows>1){ st.rows--; Object.keys(st.cells).forEach(k=>{ if(+k.split('_')[0]>=st.rows) delete st.cells[k]; }); markDirty(); renderGrid(); } });
-      overlay.querySelector('#dceDelCol').addEventListener('click', ()=>{ if(st.cols>1){ st.cols--; Object.keys(st.cells).forEach(k=>{ if(+k.split('_')[1]>=st.cols) delete st.cells[k]; }); markDirty(); renderGrid(); } });
+      // בחירת תאים: לחיצה=תא בודד, גרירה או Shift+לחיצה=טווח
+      bodyEl.addEventListener('pointerdown', e=>{
+        const cell = cellFromPoint(e.clientX, e.clientY); if(!cell) return;
+        if(e.shiftKey && _anchor){ e.preventDefault(); setRange(_anchor, cell); refreshSel(); return; }
+        _dragging = true; _anchor = cell; _selCells = new Set([cell.r+'_'+cell.c]); refreshSel();
+        const cc = st.cellColors[cell.r+'_'+cell.c]; if(cc) cellColorInput.value = cc;
+      });
+      bodyEl.addEventListener('pointermove', e=>{
+        if(!_dragging || !_anchor) return;
+        const cell = cellFromPoint(e.clientX, e.clientY); if(!cell) return;
+        if(cell.r!==_anchor.r || cell.c!==_anchor.c){
+          e.preventDefault();
+          const ae=document.activeElement; if(ae && ae.blur && bodyEl.contains(ae)) ae.blur();
+          setRange(_anchor, cell); refreshSel();
+        }
+      });
+      overlay.addEventListener('pointerup', ()=>{ _dragging=false; });
+      overlay.addEventListener('pointercancel', ()=>{ _dragging=false; });
+      // צביעת כל התאים הנבחרים (בלי רינדור מלא)
+      cellColorInput.addEventListener('input', ()=>{ if(!_selCells.size) return; _selCells.forEach(k=>{ const p=k.split('_'); st.cellColors[k]=cellColorInput.value; applyCellBg(p[0],p[1],cellColorInput.value); }); markDirty(); });
+      overlay.querySelector('#dceCellClear').addEventListener('click', ()=>{ if(!_selCells.size) return; _selCells.forEach(k=>{ const p=k.split('_'); delete st.cellColors[k]; applyCellBg(p[0],p[1],''); }); markDirty(); });
+      const _resetSel = ()=>{ _selCells=new Set(); _anchor=null; };
+      overlay.querySelector('#dceAddRow').addEventListener('click', ()=>{ st.rows++; _resetSel(); markDirty(); renderGrid(); });
+      overlay.querySelector('#dceAddCol').addEventListener('click', ()=>{ st.cols++; _resetSel(); markDirty(); renderGrid(); });
+      overlay.querySelector('#dceDelRow').addEventListener('click', ()=>{ if(st.rows>1){ st.rows--; Object.keys(st.cells).forEach(k=>{ if(+k.split('_')[0]>=st.rows) delete st.cells[k]; }); Object.keys(st.cellColors).forEach(k=>{ if(+k.split('_')[0]>=st.rows) delete st.cellColors[k]; }); _resetSel(); markDirty(); renderGrid(); } });
+      overlay.querySelector('#dceDelCol').addEventListener('click', ()=>{ if(st.cols>1){ st.cols--; Object.keys(st.cells).forEach(k=>{ if(+k.split('_')[1]>=st.cols) delete st.cells[k]; }); Object.keys(st.cellColors).forEach(k=>{ if(+k.split('_')[1]>=st.cols) delete st.cellColors[k]; }); _resetSel(); markDirty(); renderGrid(); } });
       collect = ()=>{ /* st mutated live */ };
     } else {
       // עורך מסמך טקסט עשיר (וורד)
@@ -8447,10 +8574,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       }));
       collect = ()=>{ file.content = docEl.innerHTML; };
     }
-    overlay.querySelector('#dceName').addEventListener('input', markDirty);
+    // שם הקובץ בכותרת הוא טקסט בלבד (שינוי שם נעשה דרך העיפרון ברשימת התיקייה) — נשמר רק התוכן.
     overlay.querySelector('#dceSave').addEventListener('click', ()=>{
       collect();
-      const nm = overlay.querySelector('#dceName').value.trim(); if(nm) file.name = nm;
       file.updatedAt = (typeof localDateString==='function'?localDateString():'');
       saveDocCollections();
       _dceDirty = false; statusEl.textContent = 'נשמר ✓'; statusEl.className='dce-status saved';
@@ -11526,6 +11652,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       try{ renderAll(); }catch(_){}
       try{ if(currentView==='inventories') renderInventoriesView(); }catch(_){}
       try{ if(currentView==='journal') renderJrCalendar(); }catch(_){}
+      try{ if(currentView==='documents' && !document.querySelector('.dce-overlay') && !document.querySelector('.dc-file-rename-input') && !document.querySelector('.cluster-rename-input')) renderDocumentsView(); }catch(_){}
     }catch(e){ console.error('realtime refresh', e); }
     finally{ _rtRunning = false; }
   }
