@@ -2087,33 +2087,34 @@
   .dc-file-btn:hover{ background:rgba(255,255,255,.1); }
   .dc-file-btn svg{ width:16px; height:16px; }
   .dc-file-btn[data-fdelfile]{ color:#ff8a8a; }
-  /* כפתורי הוספה — צורת "כדור" (pill) כמו כפתור שליחת הדו״ח היומי, בצבעים הקיימים, ובגודל שווה */
-  .dc-addfile-row{ display:flex; gap:8px; margin-top:12px; }
-  .dc-addfile{ flex:1 1 0; min-width:0; box-sizing:border-box; height:42px; margin:0; display:inline-flex; align-items:center; justify-content:center; gap:8px; font-size:.82rem; line-height:1; color:#dfe7f5; cursor:pointer; padding:0 12px; border:1px solid rgba(255,255,255,.2); border-radius:23px; background:rgba(255,255,255,.06); font-family:inherit; white-space:nowrap; }
+  /* כפתורי הוספה — צורת "כדור"; מתאימים את עצמם לרוחב הטקסט (בלי גלישה) ונשברים לשורה אם צריך */
+  .dc-addfile-row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .dc-addfile{ flex:1 1 auto; min-width:max-content; box-sizing:border-box; height:42px; margin:0; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-size:.82rem; line-height:1; color:#dfe7f5; cursor:pointer; padding:0 8px; border:1px solid rgba(255,255,255,.2); border-radius:23px; background:rgba(255,255,255,.06); font-family:inherit; white-space:nowrap; }
+  .dc-addfile span{ padding-inline:4px; }
   .dc-addfile:hover{ background:rgba(255,255,255,.12); }
   .dc-addfile svg{ width:17px; height:17px; fill:currentColor; color:#7fb0ff; flex:0 0 auto; }
 
   /* עורך קבצים (טבלה/מסמך) */
   .dce-overlay{ position:fixed; inset:0; z-index:9600; background:rgba(3,8,20,.72); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:16px; }
-  .dce-box{ background:#0f1a2e; border:1px solid #223154; border-radius:16px; width:min(900px,100%); max-height:92vh; display:flex; flex-direction:column; overflow:hidden; }
-  .dce-head{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid #223154; background:#0a1428; }
+  .dce-box{ background:#ffffff; border:1px solid #d6dee9; border-radius:16px; width:min(900px,100%); max-height:92vh; display:flex; flex-direction:column; overflow:hidden; }
+  .dce-head{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid #e3e8f0; background:#f3f6fa; }
   .dce-name{ flex:1; min-width:0; color:#0277fb; font-size:1.05rem; font-weight:700; padding:6px 2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:right; }
-  .dce-folder{ font-size:.75rem; color:#9fb0d0; flex:0 0 auto; }
+  .dce-folder{ font-size:.75rem; color:#6b7280; flex:0 0 auto; }
   .dce-head-actions{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
   .dce-save{ background:#025ffb; border:none; color:#fff; border-radius:9px; padding:8px 16px; font-weight:600; font-size:.85rem; cursor:pointer; font-family:inherit; }
   .dce-save:hover{ background:#1a72ff; }
-  .dce-close{ background:transparent; border:none; color:#cdd9ef; font-size:1.1rem; cursor:pointer; padding:4px 8px; border-radius:8px; }
-  .dce-close:hover{ background:rgba(255,255,255,.12); }
-  .dce-toolbar{ display:flex; gap:6px; padding:9px 12px; border-bottom:1px solid #223154; flex-wrap:wrap; background:#0c1730; }
-  /* כפתורי סרגל העורך — כמו כפתור שליחת הדו״ח היומי: כדור, רקע #021236, בורדר 1px #0277fb, כולם באותו גובה בדיוק */
-  .dce-tb{ background:#021236; border:1px solid #0277fb; color:#e6edf9; border-radius:23px; height:40px; padding:0 16px; margin:0; font-size:.82rem; line-height:1; cursor:pointer; font-family:inherit; min-width:34px; display:inline-flex; align-items:center; justify-content:center; gap:6px; box-sizing:border-box; }
-  .dce-tb:hover{ background:#04205e; }
+  .dce-close{ background:transparent; border:none; color:#334155; font-size:1.1rem; cursor:pointer; padding:4px 8px; border-radius:8px; }
+  .dce-close:hover{ background:rgba(0,0,0,.07); }
+  .dce-toolbar{ display:flex; gap:6px; padding:9px 12px; border-bottom:1px solid #e3e8f0; flex-wrap:wrap; background:#f3f6fa; }
+  /* כפתורי סרגל העורך — כדור לבן עם בורדר אפור, כולם באותו גובה בדיוק */
+  .dce-tb{ background:#ffffff; border:1px solid #cbd5e1; color:#1c2733; border-radius:23px; height:40px; padding:0 16px; margin:0; font-size:.82rem; line-height:1; cursor:pointer; font-family:inherit; min-width:34px; display:inline-flex; align-items:center; justify-content:center; gap:6px; box-sizing:border-box; }
+  .dce-tb:hover{ background:#f1f5f9; }
   .dce-body{ flex:1; overflow:auto; padding:14px; }
   .dce-grid{ border-collapse:collapse; width:max-content; min-width:100%; direction:rtl; }
-  .dce-grid th{ background:#1b2a47; color:#cdd9ef; font-size:.75rem; font-weight:600; padding:5px 8px; border:1px solid #2c3e63; position:sticky; top:0; }
-  .dce-grid .dce-rownum{ background:#16233c; white-space:nowrap; }
-  .dce-grid td{ border:1px solid #2c3e63; padding:0; }
-  .dce-grid td input{ width:120px; border:none; border-radius:0; background:transparent; color:#fff; padding:7px 9px; font-size:.85rem; font-family:inherit; outline:none; }
+  .dce-grid th{ background:#eef2f8; color:#334155; font-size:.75rem; font-weight:600; padding:5px 8px; border:1px solid #cbd5e1; position:sticky; top:0; }
+  .dce-grid .dce-rownum{ background:#eef2f8; white-space:nowrap; }
+  .dce-grid td{ border:1px solid #cbd5e1; padding:0; }
+  .dce-grid td input{ width:120px; border:none; border-radius:0; background:transparent; color:#1c1c1c; padding:7px 9px; font-size:.85rem; font-family:inherit; outline:none; }
   /* מיקוד על תא — בורדר מרובע 1px בדיוק בגודל התא (בלי פינות מעוגלות, בלי מילוי) */
   .dce-grid td input:focus{ background:transparent; border-radius:0; box-shadow:none; outline:none; }
   .dce-grid td:focus-within, .dce-grid td.dce-sel{ outline:1px solid #025ffb; outline-offset:-1px; position:relative; z-index:1; }
@@ -2123,15 +2124,15 @@
   /* בורר צבע לתא הנבחר (בסרגל הכלים) + כפתור ניקוי */
   .dce-tb-color{ display:inline-flex; align-items:center; gap:6px; }
   /* עיגול צבע (לא מרובע) בכפתור "צבע תא" */
-  .dce-tb-color input[type="color"]{ -webkit-appearance:none; appearance:none; width:18px; height:18px; padding:0; border:1px solid rgba(255,255,255,.5); border-radius:50%; background:transparent; cursor:pointer; flex:0 0 auto; }
+  .dce-tb-color input[type="color"]{ -webkit-appearance:none; appearance:none; width:18px; height:18px; padding:0; border:1px solid rgba(0,0,0,.35); border-radius:50%; background:transparent; cursor:pointer; flex:0 0 auto; }
   .dce-tb-color input[type="color"]::-webkit-color-swatch-wrapper{ padding:0; }
   .dce-tb-color input[type="color"]::-webkit-color-swatch{ border:none; border-radius:50%; }
   .dce-tb-color input[type="color"]::-moz-color-swatch{ border:none; border-radius:50%; }
-  .dce-tb-hint{ color:#9fb0d0; font-size:.72rem; align-self:center; margin-inline-start:6px; }
+  .dce-tb-hint{ color:#6b7280; font-size:.72rem; align-self:center; margin-inline-start:6px; }
   .dce-doc{ background:#fff; color:#1c1c1c; min-height:340px; border-radius:8px; padding:26px 30px; direction:rtl; line-height:1.7; font-size:1rem; outline:none; }
   .dce-doc:focus{ box-shadow:0 0 0 2px #025ffb; }
   .dce-doc h2{ font-size:1.35rem; margin:.4em 0; }
-  .dce-status{ padding:8px 14px; font-size:.78rem; color:#9fb0d0; min-height:18px; border-top:1px solid #223154; }
+  .dce-status{ padding:8px 14px; font-size:.78rem; color:#6b7280; min-height:18px; border-top:1px solid #e3e8f0; }
   .dce-status.dirty{ color:#ffce6b; } .dce-status.saved{ color:#6ce39b; }
 
 </style>
