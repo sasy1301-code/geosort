@@ -1993,82 +1993,23 @@
 <body>
 <div id="loginOverlay" class="login-overlay">
   <form class="login-box" id="loginForm" autocomplete="on">
-    <div class="login-title">מרכז לקוחות</div>
-    <div class="login-sub">הזן שם משתמש וסיסמה כדי להיכנס למערכת</div>
-    <input type="text" id="loginUser" class="login-input login-input-user" placeholder="שם משתמש" autocomplete="username" name="username" autocapitalize="off" autocorrect="off" spellcheck="false">
-    <input type="password" id="loginPassword" class="login-input" placeholder="••••" autocomplete="current-password" name="password" inputmode="numeric">
-    <label class="login-remember"><input type="checkbox" id="loginRemember" checked> זכור אותי במכשיר הזה</label>
+    <div class="login-title">GeoSort</div>
+    <div class="login-sub" id="loginSub">התחברות למערכת</div>
+    <input type="text" id="loginEmail" class="login-input login-input-user" placeholder="אימייל או שם משתמש" autocomplete="username" name="username" autocapitalize="off" autocorrect="off" spellcheck="false">
+    <input type="password" id="loginPassword" class="login-input login-input-user" placeholder="סיסמה" autocomplete="current-password" name="password">
+    <div id="signupFields" style="display:none">
+      <input type="text" id="loginOrgName" class="login-input login-input-user" placeholder="שם הארגון / העסק" style="margin-top:12px">
+      <input type="text" id="loginDisplayName" class="login-input login-input-user" placeholder="השם שלך" style="margin-top:12px">
+    </div>
     <button type="submit" id="loginBtn" class="login-btn">כניסה</button>
+    <button type="button" id="loginToggle" class="login-btn" style="background:transparent;border:1px solid rgba(255,255,255,.3);margin-top:10px;font-weight:400;font-size:.85rem">אין לך חשבון? הרשמה ליצירת ארגון</button>
     <div id="loginError" class="login-error"></div>
   </form>
 </div>
 <script>
-  (function(){
-    var USERNAME = 'sasy';
-    var PASSWORD = '1301';
-    var REMEMBER_KEY = 'geosort_auth_v1';
-    var overlay = document.getElementById('loginOverlay');
-    var form = document.getElementById('loginForm');
-    var userInput = document.getElementById('loginUser');
-    var input = document.getElementById('loginPassword');
-    var remember = document.getElementById('loginRemember');
-    var err = document.getElementById('loginError');
-
-    function safeGet(k){ try{ return localStorage.getItem(k); }catch(_){ return null; } }
-    function safeSet(k,v){ try{ localStorage.setItem(k,v); }catch(_){} }
-    function safeDel(k){ try{ localStorage.removeItem(k); }catch(_){} }
-
-    function unlock(){ overlay.classList.add('unlocked'); }
-
-    // already signed in on this device? skip the gate entirely (no password on every refresh)
-    if(safeGet(REMEMBER_KEY) === '1'){
-      unlock();
-      // heal legacy remembered sessions that predate role tracking: a device that
-      // remembered a login before roles existed is the owner's (admin) device.
-      var storedUser = safeGet('geosort_user');
-      var needsHeal = true;
-      // a healthy session has BOTH a role and the username (so we can resolve the display name)
-      if(storedUser){ try{ var pu = JSON.parse(storedUser); if(pu && pu.role && pu.username){ needsHeal = false; } }catch(_){ } }
-      if(needsHeal){
-        var healed = { name: 'מנהל', role: 'admin', username: USERNAME };
-        safeSet('geosort_user', JSON.stringify(healed));
-        if(typeof window.__applyUser === 'function'){ try{ window.__applyUser(healed); }catch(_){} }
-      }
-    }
-
-    function tryLogin(){
-      var u = (userInput.value || '').trim();
-      var ul = u.toLowerCase();
-      var pw = input.value;
-      var matched = null;
-      if(ul === USERNAME && pw === PASSWORD){
-        matched = { name: 'מנהל', role: 'admin', username: u };
-      } else {
-        // managers + agents added in Settings; the app publishes their creds to window.__agentCreds
-        var list = window.__agentCreds || [];
-        for(var i = 0; i < list.length; i++){
-          if(list[i].username && String(list[i].username).toLowerCase() === ul && String(list[i].password) === pw){
-            matched = { name: list[i].name, role: list[i].role || 'agent', username: list[i].username };
-            break;
-          }
-        }
-      }
-      if(matched){
-        if(remember.checked) safeSet(REMEMBER_KEY, '1'); else safeDel(REMEMBER_KEY);
-        safeSet('geosort_user', JSON.stringify(matched));
-        err.textContent = '';
-        unlock();
-        if(typeof window.__applyUser === 'function'){ try{ window.__applyUser(matched); }catch(_){} }
-      } else {
-        err.textContent = 'שם משתמש או סיסמה שגויים, נסה שוב';
-        input.value = ''; input.focus();
-      }
-    }
-    form.addEventListener('submit', function(e){ e.preventDefault(); tryLogin(); });
-    setTimeout(function(){ try{ (userInput.value ? input : userInput).focus(); }catch(_){} }, 120);
-  })();
-  // expose a sign-out helper so a future "logout" button can clear the remembered session
-  window.geosortSignOut = function(){ try{ localStorage.removeItem('geosort_auth_v1'); localStorage.removeItem('geosort_user'); }catch(_){} location.reload(); };
+  // ההתחברות האמיתית (Supabase Auth) מנוהלת במטה הראשי, אחרי שנוצר לקוח sb.
+  // כאן רק ממקדים את שדה האימייל.
+  setTimeout(function(){ try{ document.getElementById('loginEmail').focus(); }catch(_){} }, 120);
 </script>
 <div id="bgImage"></div>
 <canvas id="starfield"></canvas>
@@ -2092,6 +2033,8 @@
       <button class="side-menu-item view-nav-item" id="viewJournalItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg></span><span class="txt">יומן</span></button>
       <div class="side-menu-sep" aria-hidden="true"></div>
       <a class="side-menu-item" href="./order/" target="_blank"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m9,12c3.309,0,6-2.691,6-6S12.309,0,9,0,3,2.691,3,6s2.691,6,6,6Zm0-11c2.757,0,5,2.243,5,5s-2.243,5-5,5-5-2.243-5-5S6.243,1,9,1Zm1.5,13.5c0,.276-.224.5-.5.5h-.5c-4.687,0-8.5,3.813-8.5,8.5,0,.276-.224.5-.5.5s-.5-.224-.5-.5c0-5.238,4.262-9.5,9.5-9.5h.5c.276,0,.5.224.5.5Zm13.414,2.259c-.203-.557-.738-.931-1.331-.931h-2.398l-.856-2.406c-.206-.551-.739-.922-1.328-.922s-1.122.371-1.33.929l-.854,2.399h-2.398c-.592,0-1.126.373-1.33.927-.205.556-.039,1.187.421,1.576l1.912,1.556-.757,2.272c-.179.573.023,1.2.503,1.558.243.183.545.283.849.283.282,0,.555-.083.788-.239l2.208-1.478,2.248,1.464c.504.326,1.16.301,1.639-.065.476-.367.668-.996.477-1.576l-.781-2.227,1.903-1.55c.453-.382.621-1.013.418-1.569Zm-1.056.799l-2.169,1.767c-.164.133-.227.354-.156.553l.895,2.55c.056.168,0,.354-.14.46-.143.108-.336.116-.484.02l-2.524-1.644c-.167-.109-.384-.107-.551.003l-2.482,1.662c-.143.095-.342.092-.48-.014-.142-.105-.201-.29-.15-.451l.862-2.591c.065-.197.002-.415-.159-.545l-2.172-1.767c-.132-.112-.181-.297-.12-.461.06-.164.217-.273.391-.273h2.751c.212,0,.4-.133.471-.332l.971-2.725c.121-.325.662-.318.779-.007l.973,2.731c.07.199.259.332.471.332h2.751c.175,0,.332.11.392.274.06.164.01.35-.116.457Z"/></svg></span><span class="txt">כניסת לקוחות</span></a>
+      <div class="side-menu-sep" aria-hidden="true"></div>
+      <button class="side-menu-item" id="logoutMenuItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg></span><span class="txt">התנתקות</span></button>
     </nav>
   </div>
 
@@ -2656,6 +2599,115 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     'sb_publishable_cR4JjUiuuxMGJ3Ke2FWBuQ_dcG25pvN'
   );
 
+  // ===================== התחברות אמיתית + ארגון (Supabase Auth) =====================
+  let CURRENT_ORG_ID = null;         // מזהה הארגון של המשתמש המחובר — כל הנתונים מתויגים לפיו
+  let CURRENT_ROLE = null;           // admin / manager / agent
+  let _resolveAuthReady;
+  const authReady = new Promise(res => { _resolveAuthReady = res; }); // האתחול ממתין לזה
+  (function setupAuth(){
+    const overlay = document.getElementById('loginOverlay');
+    const form = document.getElementById('loginForm');
+    const emailEl = document.getElementById('loginEmail');
+    const passEl = document.getElementById('loginPassword');
+    const orgEl = document.getElementById('loginOrgName');
+    const nameEl = document.getElementById('loginDisplayName');
+    const errEl = document.getElementById('loginError');
+    const btn = document.getElementById('loginBtn');
+    const subEl = document.getElementById('loginSub');
+    const toggleBtn = document.getElementById('loginToggle');
+    const signupFields = document.getElementById('signupFields');
+    let mode = 'login';
+
+    toggleBtn.addEventListener('click', ()=>{
+      mode = (mode === 'login') ? 'signup' : 'login';
+      signupFields.style.display = (mode === 'signup') ? 'block' : 'none';
+      subEl.textContent = (mode === 'signup') ? 'הרשמה ליצירת ארגון חדש' : 'התחברות למערכת';
+      btn.textContent = (mode === 'signup') ? 'הרשמה' : 'כניסה';
+      toggleBtn.textContent = (mode === 'signup') ? 'כבר יש לך חשבון? התחברות' : 'אין לך חשבון? הרשמה ליצירת ארגון';
+      emailEl.placeholder = (mode === 'signup') ? 'אימייל' : 'אימייל או שם משתמש';
+      errEl.textContent = '';
+    });
+
+    async function resolveProfile(){
+      const { data:{ user } } = await sb.auth.getUser();
+      if(!user) return null;
+      // חייבים לסנן לפי המשתמש המחובר — ה-RLS מחזיר את כל פרופילי הארגון, וכשיש כמה
+      // משתמשים בארגון (מנהל + סוכנים) maybeSingle היה נכשל ב"multiple rows".
+      const { data, error } = await sb.from('profiles').select('org_id, role, name').eq('id', user.id).maybeSingle();
+      if(error) throw error;
+      return data; // null אם עדיין אין ארגון
+    }
+    async function proceed(allowCreate){
+      let profile = await resolveProfile();
+      if(!profile){
+        // יצירת ארגון חדש מותרת אך ורק בהרשמה מפורשת — לעולם לא בהתחברות רגילה,
+        // אחרת התחברות של משתמש בלי פרופיל הייתה יוצרת "ארגון ריק" בטעות.
+        if(!allowCreate){
+          errEl.textContent = 'למשתמש הזה אין ארגון במערכת. התחבר עם החשבון הנכון, או פנה למנהל.';
+          try{ await sb.auth.signOut(); }catch(_){}
+          return;
+        }
+        const orgName = (orgEl.value || '').trim() || 'הארגון שלי';
+        const displayName = (nameEl.value || '').trim();
+        const { error } = await sb.rpc('create_org_and_admin', { org_name: orgName, display_name: displayName || null });
+        if(error) throw error;
+        profile = await resolveProfile();
+      }
+      CURRENT_ORG_ID = profile.org_id;
+      CURRENT_ROLE = profile.role;
+      errEl.textContent = '';
+      overlay.classList.add('unlocked');
+      // תצוגת המשתמש המחובר + כפתור התנתקות
+      try{
+        const { data:{ user } } = await sb.auth.getUser();
+        const who = (profile.name && profile.name.trim()) ? profile.name.trim() : (user && user.email ? user.email : '');
+        window.__authGreeting = 'שלום, ' + who;
+        const g = document.getElementById('sideMenuGreeting');
+        if(g) g.textContent = window.__authGreeting;
+      }catch(_){}
+      const lo = document.getElementById('logoutMenuItem');
+      if(lo && !lo._wired){ lo._wired = true; lo.addEventListener('click', ()=>{ if(confirm('להתנתק מהמערכת?')) window.geosortSignOut(); }); }
+      _resolveAuthReady(); // משחרר את אתחול האפליקציה
+    }
+    // סוכנים מתחברים עם שם משתמש (בלי אימייל) — ממופה מאחורי הקלעים לאימייל סינתטי.
+    const AGENT_EMAIL_DOMAIN = 'agents.geosort.app';
+    function toLoginEmail(identifier){
+      const id = (identifier || '').trim();
+      return id.includes('@') ? id : (id.toLowerCase() + '@' + AGENT_EMAIL_DOMAIN);
+    }
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const identifier = (emailEl.value || '').trim(), password = passEl.value;
+      if(!identifier || !password){ errEl.textContent = 'הזן פרטים וסיסמה'; return; }
+      errEl.textContent = 'אנא המתן...';
+      try{
+        if(mode === 'signup'){
+          if(!identifier.includes('@')){ errEl.textContent = 'בהרשמת ארגון חדש יש להזין אימייל אמיתי'; return; }
+          const { error } = await sb.auth.signUp({ email: identifier, password });
+          if(error) throw error;
+        } else {
+          const email = toLoginEmail(identifier); // אימייל או שם משתמש
+          const { error } = await sb.auth.signInWithPassword({ email, password });
+          if(error) throw error;
+        }
+        const { data:{ session } } = await sb.auth.getSession();
+        if(!session){ errEl.textContent = 'נדרש אישור מייל — ודא ש-Confirm email כבוי ב-Supabase.'; return; }
+        await proceed(mode === 'signup'); // יצירת ארגון רק בהרשמה, לא בהתחברות
+      }catch(err){ errEl.textContent = 'שגיאה: ' + (err && err.message ? err.message : err); passEl.value=''; }
+    });
+
+    // רענון עמוד כשכבר מחוברים — נכנסים ישר בלי להקליד שוב
+    (async ()=>{
+      try{
+        const { data:{ session } } = await sb.auth.getSession();
+        if(session){ await proceed(false); } // סשן קיים — לעולם לא ליצור ארגון חדש
+      }catch(_){}
+    })();
+
+    // כפתור התנתקות (זמין דרך window)
+    window.geosortSignOut = async function(){ try{ await sb.auth.signOut(); }catch(_){} location.reload(); };
+  })();
+
   const STORAGE_KEY = "clients_data";
   const FOLDERS_KEY = "folders_list";
   const VEHICLE_STOCK_BASELINE_KEY = "vehicle_stock_baseline";
@@ -2912,14 +2964,21 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     return order;
   }
 
-  // shared helpers: read/write a single key's JSON blob in the app_storage table
+  // קריאה/כתיבה של מפתח בטבלת app_data — מתויג לארגון של המשתמש המחובר (RLS מוודא בידוד).
+  // מתאם JSON: האפליקציה עובדת עם מחרוזות JSON (JSON.stringify/parse); הטבלה היא jsonb.
+  // לכן בכתיבה ממירים מחרוזת→אובייקט, ובקריאה אובייקט→מחרוזת — כדי שכל שאר הקוד יישאר ללא שינוי.
   async function sbGet(key){
-    const { data, error } = await sb.from('app_storage').select('value').eq('key', key).maybeSingle();
+    if(!CURRENT_ORG_ID) return null;
+    const { data, error } = await sb.from('app_data').select('value').eq('org_id', CURRENT_ORG_ID).eq('key', key).maybeSingle();
     if(error) throw error;
-    return data ? data.value : null;
+    if(!data) return null;
+    return (typeof data.value === 'string') ? data.value : JSON.stringify(data.value);
   }
   async function sbSet(key, value){
-    const { error } = await sb.from('app_storage').upsert({ key, value });
+    if(!CURRENT_ORG_ID) throw new Error('לא מחובר לארגון');
+    let v;
+    try{ v = (typeof value === 'string') ? JSON.parse(value) : value; }catch(_){ v = value; }
+    const { error } = await sb.from('app_data').upsert({ org_id: CURRENT_ORG_ID, key, value: v });
     if(error) throw error;
   }
 
@@ -7955,18 +8014,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const settingsManagerList = document.getElementById('settingsManagerList');
   // shared row markup for managers/agents. password reveal + reset shown to managers only.
   function settingsUserRowHtml(a, i, delTitle){
-    const canManage = isManagerUser() && !!a.username;
+    // הסיסמה כבר לא נשמרת באפליקציה — היא מוצפנת ב-Supabase Auth בלבד (מאובטח יותר),
+    // לכן אין יותר תצוגת/איפוס סיסמה מקומיים כאן.
     const userLine = a.username
-      ? `<span class="settings-agent-user">כניסה: ${escapeHtml(a.username)}</span>`
+      ? `<span class="settings-agent-user">שם משתמש לכניסה: ${escapeHtml(a.username)}</span>`
       : `<span class="settings-agent-user settings-agent-nologin">ללא כניסה למערכת</span>`;
-    const passLine = canManage
-      ? `<span class="settings-agent-pass" data-pass="${escapeHtml(a.password||'')}">
-           <span class="settings-pass-label">סיסמה:</span>
-           <span class="settings-pass-val" data-shown="0">••••••</span>
-           <button type="button" class="settings-pass-toggle">הצג</button>
-         </span>`
-      : '';
-    const resetBtn = canManage
+    const resetBtn = a.username
       ? `<button type="button" class="settings-pass-reset">אפס סיסמה</button>`
       : '';
     return `
@@ -7974,7 +8027,6 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <div class="settings-agent-info">
           <span class="settings-agent-name">${escapeHtml(a.name)}</span>
           ${userLine}
-          ${passLine}
         </div>
         <div class="settings-agent-actions">
           ${resetBtn}
@@ -7982,29 +8034,23 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </div>
       </div>`;
   }
-  // wire the manager-only reveal toggle + password reset for a rendered list
+  // איפוס סיסמה לסוכן/מנהל — דרך פונקציית השרת (הסיסמה מוצפנת ב-Auth, לא נשמרת מקומית)
   function wireSettingsPassControls(listEl, arr, persist, rerender){
-    listEl.querySelectorAll('.settings-pass-toggle').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
-        const wrap = btn.closest('.settings-agent-pass');
-        const val = wrap.querySelector('.settings-pass-val');
-        const shown = val.dataset.shown === '1';
-        if(shown){ val.textContent = '••••••'; val.dataset.shown='0'; btn.textContent='הצג'; }
-        else { val.textContent = wrap.dataset.pass || '(ריק)'; val.dataset.shown='1'; btn.textContent='הסתר'; }
-      });
-    });
     listEl.querySelectorAll('.settings-pass-reset').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
+      btn.addEventListener('click', async ()=>{
         const idx = parseInt(btn.closest('.settings-agent-row').dataset.idx, 10);
         const rec = arr[idx];
-        if(rec == null) return;
-        const np = prompt(`סיסמה חדשה עבור "${rec.name}":`, '');
-        if(np == null) return; // cancelled
+        if(rec == null || !rec.username) return;
+        const np = prompt(`סיסמה חדשה עבור "${rec.name}" (מומלץ ספרות, לפחות 6 תווים):`, '');
+        if(np == null) return; // ביטול
         const pw = np.trim();
-        if(!pw){ alert('לא הוזנה סיסמה.'); return; }
-        rec.password = pw;
-        persist();
-        rerender();
+        if(pw.length < 6){ alert('הסיסמה חייבת להיות לפחות 6 תווים.'); return; }
+        btn.disabled = true; const t = btn.textContent; btn.textContent = 'מאפס...';
+        try{
+          await invokeAgentFn({ action:'reset_password', username: rec.username, password: pw });
+          alert('הסיסמה אופסה ✓ המשתמש יכול להתחבר עם הסיסמה החדשה.');
+        }catch(e){ alert('שגיאה באיפוס הסיסמה: ' + e.message); }
+        finally{ btn.disabled = false; btn.textContent = t; }
       });
     });
   }
@@ -8017,33 +8063,60 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     settingsAgentList.innerHTML = agents.map((a,i)=>settingsUserRowHtml(a,i,'מחק סוכן')).join('');
     wireSettingsPassControls(settingsAgentList, agents, ()=>{ saveAgents(); syncAgentCreds(); }, renderSettingsAgents);
     settingsAgentList.querySelectorAll('.settings-agent-del').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
+      btn.addEventListener('click', async ()=>{
         const row = btn.closest('.settings-agent-row');
         const idx = parseInt(row.dataset.idx, 10);
         const ag = agents[idx];
         if(ag == null) return;
-        if(!confirm(`למחוק את הסוכן "${ag.name}" מהרשימה?`)) return;
+        if(!confirm(`למחוק את הסוכן "${ag.name}"?${ag.username ? ' הוא לא יוכל יותר להתחבר.' : ''}`)) return;
+        if(ag.username){
+          btn.disabled = true;
+          try{ await invokeAgentFn({ action:'delete', username: ag.username }); }
+          catch(e){ alert('שגיאה במחיקת המשתמש: ' + e.message); btn.disabled = false; return; }
+        }
         agents.splice(idx, 1);
         recentlyDeletedAgents.add(ag.name); // block the merge-safe save from resurrecting it
-        saveAgents(); syncAgentCreds();
+        saveAgents();
         renderSettingsAgents();
         if(typeof populateAgentSelect === 'function') populateAgentSelect(); // keep the orders dropdown in sync
       });
     });
   }
-  function addAgentFromSettings(){
+  // יצירת משתמש התחברות אמיתי (סוכן/מנהל) דרך ה-Edge Function create-agent
+  // קריאה כללית ל-Edge Function של ניהול משתמשים (create / reset_password / delete)
+  async function invokeAgentFn(payload){
+    const { data, error } = await sb.functions.invoke('create-agent', { body: payload });
+    if(error){
+      let msg = error.message || 'שגיאה';
+      try{ const ctx = error.context && error.context.json ? await error.context.json() : null; if(ctx && ctx.error) msg = ctx.error; }catch(_){}
+      throw new Error(msg);
+    }
+    if(data && data.error) throw new Error(data.error);
+    return data;
+  }
+  async function createLoginUser({ username, password, name, role }){
+    return invokeAgentFn({ action:'create', username, password, name, role });
+  }
+  async function addAgentFromSettings(){
     const name = (settingsAgentInput.value || '').trim();
     if(!name) return;
     const username = (settingsAgentUser.value || '').trim();
     const password = (settingsAgentPass.value || '').trim();
     const clearInputs = ()=>{ settingsAgentInput.value=''; settingsAgentUser.value=''; settingsAgentPass.value=''; };
+    if(!username || !password){ alert('לסוכן עם כניסה למערכת יש להזין שם משתמש וסיסמה (לפחות 6 תווים).'); return; }
     if(agents.some(a=>a.name===name)){ clearInputs(); return; }
-    agents.push({ name, username, password });
-    recentlyDeletedAgents.delete(name); // re-adding a previously deleted name clears the guard
-    saveAgents(); syncAgentCreds();
-    clearInputs();
-    renderSettingsAgents();
-    if(typeof populateAgentSelect === 'function') populateAgentSelect(); // keep the orders dropdown in sync
+    settingsAddAgentBtn.disabled = true; const prev = settingsAddAgentBtn.textContent; settingsAddAgentBtn.textContent = 'יוצר...';
+    try{
+      await createLoginUser({ username, password, name, role: 'agent' });
+      agents.push({ name, username }); // נשמר בלי סיסמה (הסיסמה יושבת ב-Auth בלבד)
+      recentlyDeletedAgents.delete(name);
+      saveAgents();
+      clearInputs();
+      renderSettingsAgents();
+      if(typeof populateAgentSelect === 'function') populateAgentSelect();
+      alert('הסוכן נוצר ✓ הוא יכול להתחבר עם שם המשתמש והסיסמה.');
+    }catch(e){ alert('לא ניתן ליצור סוכן: ' + e.message); }
+    finally{ settingsAddAgentBtn.disabled = false; settingsAddAgentBtn.textContent = prev; }
   }
   settingsAddAgentBtn.addEventListener('click', addAgentFromSettings);
   settingsAgentPass.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); addAgentFromSettings(); } });
@@ -8058,30 +8131,42 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     settingsManagerList.innerHTML = managers.map((a,i)=>settingsUserRowHtml(a,i,'מחק מנהל')).join('');
     wireSettingsPassControls(settingsManagerList, managers, ()=>{ saveManagers(); syncAgentCreds(); }, renderSettingsManagers);
     settingsManagerList.querySelectorAll('.settings-agent-del').forEach(btn=>{
-      btn.addEventListener('click', ()=>{
+      btn.addEventListener('click', async ()=>{
         const idx = parseInt(btn.closest('.settings-agent-row').dataset.idx, 10);
         const mg = managers[idx];
         if(mg == null) return;
-        if(!confirm(`למחוק את המנהל "${mg.name}"?`)) return;
+        if(!confirm(`למחוק את המנהל "${mg.name}"?${mg.username ? ' הוא לא יוכל יותר להתחבר.' : ''}`)) return;
+        if(mg.username){
+          btn.disabled = true;
+          try{ await invokeAgentFn({ action:'delete', username: mg.username }); }
+          catch(e){ alert('שגיאה במחיקת המשתמש: ' + e.message); btn.disabled = false; return; }
+        }
         managers.splice(idx, 1);
         recentlyDeletedManagers.add(mg.name);
-        saveManagers(); syncAgentCreds();
+        saveManagers();
         renderSettingsManagers();
       });
     });
   }
-  function addManagerFromSettings(){
+  async function addManagerFromSettings(){
     const name = (settingsManagerInput.value || '').trim();
     if(!name) return;
     const username = (settingsManagerUser.value || '').trim();
     const password = (settingsManagerPass.value || '').trim();
     const clear = ()=>{ settingsManagerInput.value=''; settingsManagerUser.value=''; settingsManagerPass.value=''; };
+    if(!username || !password){ alert('למנהל עם כניסה למערכת יש להזין שם משתמש וסיסמה (לפחות 6 תווים).'); return; }
     if(managers.some(a=>a.name===name)){ clear(); return; }
-    managers.push({ name, username, password });
-    recentlyDeletedManagers.delete(name);
-    saveManagers(); syncAgentCreds();
-    clear();
-    renderSettingsManagers();
+    settingsAddManagerBtn.disabled = true; const prev = settingsAddManagerBtn.textContent; settingsAddManagerBtn.textContent = 'יוצר...';
+    try{
+      await createLoginUser({ username, password, name, role: 'manager' });
+      managers.push({ name, username });
+      recentlyDeletedManagers.delete(name);
+      saveManagers();
+      clear();
+      renderSettingsManagers();
+      alert('המנהל נוצר ✓ הוא יכול להתחבר עם שם המשתמש והסיסמה.');
+    }catch(e){ alert('לא ניתן ליצור מנהל: ' + e.message); }
+    finally{ settingsAddManagerBtn.disabled = false; settingsAddManagerBtn.textContent = prev; }
   }
   settingsAddManagerBtn.addEventListener('click', addManagerFromSettings);
   settingsManagerPass.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); addManagerFromSettings(); } });
@@ -8246,6 +8331,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function applyUserGreeting(user){
     const el = document.getElementById('sideMenuGreeting');
     if(!el) return;
+    // מקור האמת הוא המשתמש המחובר (Auth). מתעלמים משם ישן שנשמר ב-localStorage מהמערכת הישנה,
+    // אחרת אחרי טעינה הוא היה דורס את השם האמיתי (למשל חוזר ל"מנהל").
+    if(window.__authGreeting){ el.textContent = window.__authGreeting; return; }
     const name = resolveDisplayName(user);
     el.textContent = name ? ('שלום, ' + name) : '';
   }
@@ -10669,7 +10757,42 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     return changed;
   }
 
+  // ===================== סנכרון בזמן אמת (Supabase Realtime) =====================
+  // כאשר משתמש כלשהו בארגון שומר שינוי ב-app_data, כל שאר המשתמשים המחוברים מקבלים
+  // עדכון מיידי ומרעננים את המסך — כך אין "מסך ישן" ולא דורסים אחד את השני.
+  let _orgChannel = null, _rtTimer = null, _rtRunning = false;
+  function startOrgRealtime(){
+    if(!CURRENT_ORG_ID || _orgChannel) return;
+    try{
+      _orgChannel = sb.channel('org-app-data')
+        .on('postgres_changes',
+            { event:'*', schema:'public', table:'app_data', filter:'org_id=eq.'+CURRENT_ORG_ID },
+            ()=>{ scheduleRealtimeRefresh(); })
+        .subscribe();
+    }catch(e){ console.error('realtime subscribe', e); }
+  }
+  function scheduleRealtimeRefresh(){
+    if(_rtTimer) clearTimeout(_rtTimer);
+    _rtTimer = setTimeout(runRealtimeRefresh, 400); // דיבאונס: מאחד ריבוי שינויים
+  }
+  async function runRealtimeRefresh(){
+    if(_rtRunning){ scheduleRealtimeRefresh(); return; }
+    _rtRunning = true;
+    try{
+      try{ await saveDataQueue; }catch(_){}   // לא להתנגש עם שמירה מקומית שרצה
+      await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal()]);
+      try{ populateBusinessDetails(); }catch(_){}
+      try{ applySettingsPanelOrder(); }catch(_){}
+      try{ applyInventoryPanelOrder(); }catch(_){}
+      try{ renderAll(); }catch(_){}
+      try{ if(currentView==='inventories') renderInventoriesView(); }catch(_){}
+      try{ if(currentView==='journal') renderJrCalendar(); }catch(_){}
+    }catch(e){ console.error('realtime refresh', e); }
+    finally{ _rtRunning = false; }
+  }
+
   (async function init(){
+    await authReady; // אתחול האפליקציה מתחיל רק אחרי התחברות והגדרת הארגון
     await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal()]);
     populateBusinessDetails();
     applySettingsPanelOrder();
@@ -10687,6 +10810,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
     }
     openDeepLinkedClientIfAny();
+    startOrgRealtime(); // מתחילים להאזין לשינויים של שאר המשתמשים בארגון
   })();
 
   // if the URL contains ?client=<id>, jump straight to that client: open its
