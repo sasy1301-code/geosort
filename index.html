@@ -205,11 +205,13 @@
   .sys-icon-disc:hover > svg{ transform:scale(calc(1 / var(--hscale))); }  /* icon stays the same size */
   /* side-menu icons follow the disc standard (27px icon → 43px disc) */
   .side-menu-item .icon{ width:43px; height:43px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; background:#091321; border-radius:50%; transition:transform .15s ease; }
-  /* hover: the disc grows ~5px (43→48) and eases back */
-  .side-menu-item:hover .icon{ transform:scale(1.116); }
   .side-menu-item .icon svg{ width:27px; height:27px; display:block; fill:#0277fb; transform:translateY(var(--ny,0px)); transition:transform .15s ease; }
-  /* hover: the disc grows ~5px; the icon is counter-scaled so it stays the same size (keeps its --ny nudge) */
-  .side-menu-item:hover .icon svg{ transform:translateY(var(--ny,0px)) scale(.896); }
+  /* hover grow (disc +5px, icon counter-scaled) — ONLY on real mouse pointers, so a tap on
+     touch never leaves the button stuck enlarged */
+  @media (hover:hover) and (pointer:fine){
+    .side-menu-item:hover .icon{ transform:scale(1.116); }
+    .side-menu-item:hover .icon svg{ transform:translateY(var(--ny,0px)) scale(.896); }
+  }
   /* optical centering: these icons are bounding-box-centered but their painted mass sits low/high,
      so a tiny per-icon --ny nudge brings the *visual* centre onto the disc centre. A NEW icon
      defaults to 0 (no nudge); measure it and set --ny only if it looks off. */
@@ -1217,7 +1219,8 @@
   @media (prefers-reduced-motion: reduce){ .order-modal, .photo-modal-box, .order-modal-overlay, .photo-modal-overlay{ animation:none; } }
   .order-modal-overlay{
     position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:2000;
-    display:flex; align-items:center; justify-content:center; padding:20px;
+    display:flex; align-items:flex-start; justify-content:center; padding:20px;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
   }
   .photo-modal-overlay{
     position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:2100;
@@ -1236,7 +1239,7 @@
   .photo-modal-close:hover{ background:#1c2f8a; }
   .order-modal{
     background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:15px;
-    width:100%; max-width:640px; max-height:88vh; max-height:88dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; color:#fff;
+    width:100%; max-width:640px; max-height:calc(100vh - 40px); max-height:calc(100dvh - 40px); overflow-y:auto; -webkit-overflow-scrolling:touch; color:#fff;
     padding:0; box-shadow:0 10px 40px rgba(0,0,0,.5); margin:auto;
   }
   .order-modal-header{
@@ -2007,9 +2010,6 @@
   #docFolderList .cluster-body{ overflow:hidden; }
   /* עיגול צבע סטטי לתיקיית "גבייה" המובנית — נראה זהה ל-folder-swatch של שאר התיקיות */
   .doc-swatch-static{ width:14px; height:14px; border-radius:50%; flex:0 0 auto; border:1px solid rgba(255,255,255,.35); }
-  /* אזור לחיצה גדול יותר לעיפרון (שינוי שם) ול-X (מחיקה) בתיקיות המסמכים — כדי שבמגע לא ייפתח בטעות */
-  #docFolderList .cluster-head .rename-folder,
-  #docFolderList .cluster-head .folder-del{ padding:8px 7px; }
   /* חץ התיקייה בצד שמאל — זהה לחץ התיקיות בכל המערכת (CHEVRON_ICON_SVG), מסתובב בפתיחה */
   .dc-fchev{ display:inline-flex; color:#fff; width:12.7px; flex:0 0 auto; transition:transform .18s ease; margin-inline-start:5px; }
   .dc-fchev svg{ display:block; }
