@@ -865,9 +865,15 @@
   #searchResults .search-folder-label .sfl-count{ background:#025ffb; color:#fff; border-radius:20px; padding:1px 11px; font-size:.8rem; flex:0 0 auto; }
 
   /* login gate shown on entry (temporary fixed password) */
-  .login-overlay{ position:fixed; inset:0; z-index:100000; background:linear-gradient(135deg,#025ffb,#6303ed); display:flex; align-items:center; justify-content:center; padding:20px; }
+  .login-overlay{ position:fixed; inset:0; z-index:100000; background:linear-gradient(135deg,#025ffb,#6303ed); display:flex; align-items:center; justify-content:center; padding:20px; overflow:hidden; }
   .login-overlay.unlocked{ display:none; }
-  .login-box{ width:100%; max-width:340px; box-sizing:border-box; background:#fff; border:1px solid #e3e8f0; border-radius:18px; padding:28px 22px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+  /* top-view luxury commercial van that drives across the login screen */
+  .login-van{ position:absolute; top:0; left:0; width:46px; height:auto; z-index:1; pointer-events:none;
+    transform:translate(-50%,-50%); transform-origin:50% 50%; will-change:transform, left, top;
+    filter:drop-shadow(0 9px 15px rgba(0,0,0,.42)) drop-shadow(0 2px 4px rgba(0,0,0,.25));
+    opacity:0; transition:opacity .8s ease; }
+  .login-van.driving{ opacity:1; }
+  .login-box{ position:relative; z-index:5; width:100%; max-width:340px; box-sizing:border-box; background:#fff; border:1px solid #e3e8f0; border-radius:18px; padding:28px 22px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.3); }
   .login-title{ font-size:1.35rem; font-weight:700; color:#0f1a2e; margin-bottom:6px; }
   .login-sub{ font-size:.85rem; color:#5b6472; margin-bottom:18px; }
   /* שדות וכפתורים בעמוד הכניסה — כדור (עגולים בצדדים) ובאותו גודל, כמו כפתור שליחת הדו״ח היומי */
@@ -1219,8 +1225,8 @@
   @media (prefers-reduced-motion: reduce){ .order-modal, .photo-modal-box, .order-modal-overlay, .photo-modal-overlay{ animation:none; } }
   .order-modal-overlay{
     position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:2000;
-    display:flex; align-items:flex-start; justify-content:center; padding:20px;
-    overflow-y:auto; -webkit-overflow-scrolling:touch;
+    display:flex; align-items:center; justify-content:center;
+    padding:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
   }
   .photo-modal-overlay{
     position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:2100;
@@ -1239,8 +1245,11 @@
   .photo-modal-close:hover{ background:#1c2f8a; }
   .order-modal{
     background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:15px;
-    width:100%; max-width:640px; max-height:calc(100vh - 40px); max-height:calc(100dvh - 40px); overflow-y:auto; -webkit-overflow-scrolling:touch; color:#fff;
-    padding:0; box-shadow:0 10px 40px rgba(0,0,0,.5); margin:auto;
+    /* תמיד 94% מגודל המסך — גובה ורוחב — בכל רזולוציה */
+    width:94vw; width:94dvw; max-width:94vw; max-width:94dvw;
+    height:94vh; height:94dvh; max-height:94vh; max-height:94dvh;
+    overflow-y:auto; -webkit-overflow-scrolling:touch; color:#fff;
+    padding:0; box-shadow:0 10px 40px rgba(0,0,0,.5); margin:auto; flex:0 0 auto;
   }
   .order-modal-header{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
@@ -2147,6 +2156,46 @@
 </head>
 <body>
 <div id="loginOverlay" class="login-overlay">
+  <svg id="loginVan" class="login-van" viewBox="0 0 60 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <defs>
+      <linearGradient id="vanBody" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#cfd8e6"/>
+        <stop offset=".16" stop-color="#ffffff"/>
+        <stop offset=".5" stop-color="#f2f6fb"/>
+        <stop offset=".84" stop-color="#ffffff"/>
+        <stop offset="1" stop-color="#c7d1e0"/>
+      </linearGradient>
+      <linearGradient id="vanGlass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#28374f"/>
+        <stop offset="1" stop-color="#465b7c"/>
+      </linearGradient>
+    </defs>
+    <g fill="#161d29">
+      <rect x="4" y="25" width="7" height="16" rx="3"/>
+      <rect x="49" y="25" width="7" height="16" rx="3"/>
+      <rect x="4" y="73" width="7" height="16" rx="3"/>
+      <rect x="49" y="73" width="7" height="16" rx="3"/>
+    </g>
+    <g fill="#eef2f7" stroke="#c4cedb" stroke-width=".6">
+      <path d="M9 29 L3.5 27 q-1.8 -.6 -1 1.2 l1.1 2.6 q.6 1.4 2.2 .9 L9 34 Z"/>
+      <path d="M51 29 L56.5 27 q1.8 -.6 1 1.2 l-1.1 2.6 q-.6 1.4 -2.2 .9 L51 34 Z"/>
+    </g>
+    <rect x="9" y="6" width="42" height="100" rx="13" fill="url(#vanBody)" stroke="#c2ccd9" stroke-width="1"/>
+    <g fill="#eaf2ff">
+      <rect x="13" y="9.5" width="6.5" height="3.2" rx="1.6"/>
+      <rect x="40.5" y="9.5" width="6.5" height="3.2" rx="1.6"/>
+    </g>
+    <path d="M14 20 q16 -8.5 32 0 l-2 10 q-14 -5 -28 0 Z" fill="url(#vanGlass)"/>
+    <rect x="15" y="34" width="30" height="52" rx="6" fill="#f7fafd" stroke="#e2e8f1" stroke-width="1"/>
+    <g stroke="#e4eaf2" stroke-width="1.4" stroke-linecap="round">
+      <line x1="18" y1="46" x2="42" y2="46"/>
+      <line x1="18" y1="56" x2="42" y2="56"/>
+      <line x1="18" y1="66" x2="42" y2="66"/>
+      <line x1="18" y1="76" x2="42" y2="76"/>
+    </g>
+    <path d="M15 95 q15 5 30 0 l-1.4 -5.5 q-13.6 4 -27.2 0 Z" fill="url(#vanGlass)" opacity=".9"/>
+    <rect x="12" y="8" width="13" height="96" rx="10" fill="#ffffff" opacity=".16"/>
+  </svg>
   <form class="login-box" id="loginForm" autocomplete="on">
     <div class="login-title">GeoSort</div>
     <div class="login-sub" id="loginSub">התחברות למערכת</div>
@@ -2165,6 +2214,79 @@
   // ההתחברות האמיתית (Supabase Auth) מנוהלת במטה הראשי, אחרי שנוצר לקוח sb.
   // כאן רק ממקדים את שדה האימייל.
   setTimeout(function(){ try{ document.getElementById('loginEmail').focus(); }catch(_){} }, 120);
+
+  // ===== רכב מסחרי במבט-על שנוסע על מסך הכניסה בהתאם לתזוזת העכבר =====
+  (function(){
+    const overlay = document.getElementById('loginOverlay');
+    const van = document.getElementById('loginVan');
+    if(!overlay || !van) return;
+    let W = overlay.clientWidth || window.innerWidth;
+    let H = overlay.clientHeight || window.innerHeight;
+    // מצב הרכב
+    let x = W * 0.5, y = H * 0.72;      // מיקום
+    let angle = -Math.PI / 2;            // כיוון נסיעה (מתחיל כלפי מעלה)
+    let speed = 0;                       // מהירות נוכחית
+    let tx = x, ty = y * 0.6;            // יעד
+    let pointerActive = false;
+    let lastMove = 0;
+    let started = false;
+
+    function measure(){ W = overlay.clientWidth || window.innerWidth; H = overlay.clientHeight || window.innerHeight; }
+    window.addEventListener('resize', measure);
+
+    function onMove(cx, cy){
+      const r = overlay.getBoundingClientRect();
+      tx = cx - r.left; ty = cy - r.top;
+      pointerActive = true;
+      lastMove = performance.now();
+      if(!started){ started = true; van.classList.add('driving'); }
+    }
+    overlay.addEventListener('pointermove', e => onMove(e.clientX, e.clientY), { passive:true });
+    overlay.addEventListener('touchmove', e => { if(e.touches[0]) onMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive:true });
+
+    let last = performance.now();
+    function frame(now){
+      const dt = Math.min(2.4, (now - last) / 16.6667); last = now;
+      if(!started){ van.classList.add('driving'); started = true; }
+
+      // כשאין עכבר פעיל — נסיעה יוקרתית וחלקה בדמות שמינייה על המסך
+      if(!pointerActive || now - lastMove > 2600){
+        const t = now / 1000;
+        tx = W * 0.5 + Math.sin(t * 0.42) * W * 0.34;
+        ty = H * 0.5 + Math.sin(t * 0.63 + 0.9) * H * 0.30;
+      }
+
+      // הגה: מפנים בהדרגה את חרטום הרכב לכיוון היעד (תחושת רכב אמיתי)
+      const dx = tx - x, dy = ty - y;
+      const dist = Math.hypot(dx, dy);
+      const desired = Math.atan2(dy, dx);
+      let da = desired - angle;
+      while(da > Math.PI) da -= Math.PI * 2;
+      while(da < -Math.PI) da += Math.PI * 2;
+      const maxTurn = 0.075 * dt;
+      angle += Math.max(-maxTurn, Math.min(maxTurn, da));
+
+      // מהירות: מאיצים בעדינות, מאטים בקרבת היעד
+      const targetSpeed = Math.min(3.0, dist * 0.045);
+      speed += (targetSpeed - speed) * 0.06 * dt;
+
+      x += Math.cos(angle) * speed * dt;
+      y += Math.sin(angle) * speed * dt;
+
+      // שמירה בתוך גבולות המסך
+      const m = 30;
+      if(x < m){ x = m; } if(x > W - m){ x = W - m; }
+      if(y < m){ y = m; } if(y > H - m){ y = H - m; }
+
+      const deg = angle * 180 / Math.PI + 90; // הציור מכוון כלפי מעלה כברירת מחדל
+      van.style.left = x + 'px';
+      van.style.top = y + 'px';
+      van.style.transform = 'translate(-50%,-50%) rotate(' + deg + 'deg)';
+      requestAnimationFrame(frame);
+    }
+    measure();
+    requestAnimationFrame(frame);
+  })();
 </script>
 <div id="bgImage"></div>
 <canvas id="starfield"></canvas>
