@@ -863,17 +863,20 @@
   #searchResults .search-folder-label .sfl-count{ background:#025ffb; color:#fff; border-radius:20px; padding:1px 11px; font-size:.8rem; flex:0 0 auto; }
 
   /* login gate shown on entry (temporary fixed password) */
-  .login-overlay{ position:fixed; inset:0; z-index:100000; background:#0a1428; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .login-overlay{ position:fixed; inset:0; z-index:100000; background:linear-gradient(135deg,#025ffb,#6303ed); display:flex; align-items:center; justify-content:center; padding:20px; }
   .login-overlay.unlocked{ display:none; }
-  .login-box{ width:100%; max-width:340px; box-sizing:border-box; background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:18px; padding:28px 22px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.55); }
-  .login-title{ font-size:1.35rem; font-weight:700; color:#fff; margin-bottom:6px; }
-  .login-sub{ font-size:.85rem; color:rgba(255,255,255,.6); margin-bottom:18px; }
-  .login-input{ width:100%; box-sizing:border-box; padding:13px 14px; border-radius:14px; border:1px solid rgba(255,255,255,.25); background:#fff; color:#021236; font-size:1.15rem; text-align:center; letter-spacing:.25em; }
+  .login-box{ width:100%; max-width:340px; box-sizing:border-box; background:#fff; border:1px solid #e3e8f0; border-radius:18px; padding:28px 22px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+  .login-title{ font-size:1.35rem; font-weight:700; color:#0f1a2e; margin-bottom:6px; }
+  .login-sub{ font-size:.85rem; color:#5b6472; margin-bottom:18px; }
+  /* שדות וכפתורים בעמוד הכניסה — כדור (עגולים בצדדים) ובאותו גודל, כמו כפתור שליחת הדו״ח היומי */
+  .login-input{ -webkit-appearance:none; appearance:none; width:100%; box-sizing:border-box; height:48px; padding:0 18px; border-radius:23px; border:1px solid #cbd5e1; background:#f7f9fc; color:#021236; font-size:1.1rem; text-align:center; letter-spacing:.25em; }
   .login-input-user{ letter-spacing:normal; margin-bottom:12px; }
   .login-input:focus{ outline:2px solid #2f7cf6; outline-offset:1px; }
-  .login-remember{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:12px; color:rgba(255,255,255,.75); font-size:.85rem; cursor:pointer; }
+  /* מנטרלים את הרקע/גבול של מילוי-אוטומטי (autofill) כדי שהאימייל/שם המשתמש ייראה בדיוק כמו שאר השדות */
+  .login-input:-webkit-autofill, .login-input:-webkit-autofill:hover, .login-input:-webkit-autofill:focus{ -webkit-text-fill-color:#021236; -webkit-box-shadow:0 0 0 1000px #f7f9fc inset; box-shadow:0 0 0 1000px #f7f9fc inset; border:1px solid #cbd5e1; border-radius:23px; caret-color:#021236; }
+  .login-remember{ display:flex; align-items:center; justify-content:center; gap:8px; margin-top:12px; color:#5b6472; font-size:.85rem; cursor:pointer; }
   .login-remember input{ width:16px; height:16px; accent-color:#2f7cf6; cursor:pointer; }
-  .login-btn{ width:100%; margin-top:14px; padding:13px; border:none; border-radius:14px; background:#2f7cf6; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; font-family:inherit; }
+  .login-btn{ width:100%; box-sizing:border-box; height:48px; margin-top:14px; padding:0 18px; border:none; border-radius:23px; background:#2f7cf6; color:#fff; font-size:1rem; font-weight:600; cursor:pointer; font-family:inherit; display:flex; align-items:center; justify-content:center; }
   .login-btn:hover{ background:#4d93ff; }
   .login-error{ color:#ff8a8a; font-size:.82rem; margin-top:10px; min-height:1.1em; }
   .slider-row{ display:flex; align-items:center; gap:10px; margin-top:4px; }
@@ -1233,8 +1236,8 @@
   .photo-modal-close:hover{ background:#1c2f8a; }
   .order-modal{
     background:#111e63; border:1px solid rgba(255,255,255,.25); border-radius:15px;
-    width:100%; max-width:640px; max-height:88vh; overflow-y:auto; color:#fff;
-    padding:0; box-shadow:0 10px 40px rgba(0,0,0,.5);
+    width:100%; max-width:640px; max-height:88vh; max-height:88dvh; overflow-y:auto; -webkit-overflow-scrolling:touch; color:#fff;
+    padding:0; box-shadow:0 10px 40px rgba(0,0,0,.5); margin:auto;
   }
   .order-modal-header{
     display:flex; align-items:center; justify-content:space-between; gap:8px;
@@ -1828,8 +1831,9 @@
 
   /* ===================== יומן (Journal) ===================== */
   #viewJournalItem .icon svg{ --ny:0px; }
-  .jr-cal-panel{ padding:0; overflow:visible; }
-  .jr-cal{ background:#fff; border-radius:10px; padding:14px 14px 16px; box-shadow:0 6px 20px rgba(9,19,33,.10); }
+  .panel.jr-cal-panel{ padding:0; overflow:visible; background:transparent; box-shadow:none; border:none; }
+  /* לוח שנה לבן עם בורדר 1px בגרדיאנט של באנר התזכורת */
+  .jr-cal{ border-radius:10px; padding:14px 14px 16px; box-shadow:none; border:1px solid transparent; background:linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,#025ffb,#6303ed) border-box; }
   .jr-cal-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
   .jr-cal-title{ font-size:15pt; font-weight:600; color:#0f1a2e; text-align:center; flex:1; }
   .jr-nav{ -webkit-appearance:none; appearance:none; width:38px; height:38px; flex:0 0 auto; border:none; border-radius:50%; background:#025ffb; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s ease, transform .12s ease; }
@@ -1967,10 +1971,14 @@
   .jr-modal .order-modal-body{ padding:16px 20px 20px; }
   .jr-field{ margin-bottom:12px; }
   .jr-field label{ display:block; font-size:.82rem; color:rgba(255,255,255,.75); margin-bottom:5px; }
-  .jr-field input, .jr-field select, .jr-field textarea{ width:100%; box-sizing:border-box; padding:10px 12px; border-radius:11px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.06); color:#fff; font-size:.9rem; font-family:inherit; }
+  .jr-field input, .jr-field select, .jr-field textarea{ width:100%; box-sizing:border-box; min-height:44px; padding:10px 12px; border-radius:11px; border:1px solid rgba(255,255,255,.22); background:rgba(255,255,255,.06); color:#fff; font-size:.9rem; font-family:inherit; }
+  .jr-field textarea{ min-height:64px; }
+  /* אינפוט שעה/תאריך ב-iOS לא מכבד width:100% כברירת מחדל — מנרמלים שיהיו בגודל שאר השדות */
+  .jr-field input[type="time"], .jr-field input[type="date"]{ -webkit-appearance:none; appearance:none; min-width:0; text-align:right; }
   .jr-field textarea{ min-height:64px; resize:vertical; }
   .jr-field input::placeholder, .jr-field textarea::placeholder{ color:rgba(255,255,255,.4); }
   .jr-two{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .jr-two > .jr-field{ min-width:0; }
   .jr-client-wrap{ position:relative; }
   .jr-client-results{ position:absolute; top:100%; right:0; left:0; z-index:5; background:#0f1a2e; border:1px solid rgba(255,255,255,.22); border-radius:11px; margin-top:4px; max-height:200px; overflow-y:auto; display:none; }
   .jr-client-results.show{ display:block; }
@@ -2149,7 +2157,7 @@
       <input type="text" id="loginDisplayName" class="login-input login-input-user" placeholder="השם שלך" style="margin-top:12px">
     </div>
     <button type="submit" id="loginBtn" class="login-btn">כניסה</button>
-    <button type="button" id="loginToggle" class="login-btn" style="background:transparent;border:1px solid rgba(255,255,255,.3);margin-top:10px;font-weight:400;font-size:.85rem">אין לך חשבון? הרשמה ליצירת ארגון</button>
+    <button type="button" id="loginToggle" class="login-btn" style="background:transparent;border:1px solid #cbd5e1;color:#025ffb;margin-top:10px;font-weight:400;font-size:.85rem">אין לך חשבון? הרשמה ליצירת ארגון</button>
     <div id="loginError" class="login-error"></div>
   </form>
 </div>
