@@ -717,6 +717,9 @@
     border:1px solid rgba(140,160,255,.35);
   }
   #foldersPanel{ background:#007aff; }
+  #docsPanel{ background:#007aff; }
+  #dcNewFolderBtn{ background:#021236; border:1px solid transparent; box-sizing:border-box; }
+  #dcNewFolderBtn:hover{ background:#04205e; }
   #invoicesPanel{ background:#0277fb; }
   #receiptsPanel{ background:#6303ed; }
   /* readable section titles on the saturated invoice/receipt panels */
@@ -936,41 +939,41 @@
   .cluster-head .map-visibility-toggle:hover{ background:rgba(255,255,255,.14); }
   .cluster-head .map-visibility-toggle.off{ color:#e08b7d; opacity:.85; }
 
-  /* ---- folder cards redesign (client-count folders inside :is(#folderList, #clusterList, #searchResults) only, so the
+  /* ---- folder cards redesign (client-count folders inside :is(#folderList, #clusterList, #searchResults, #docFolderList) only, so the
      clusters panel keeps its own colours) ---- */
-  :is(#folderList, #clusterList, #searchResults) .cluster-head{ background:#025ffb; border:1px solid #4394f7; gap:10px; padding:11px 10px; border-radius:15px; }
-  :is(#folderList, #clusterList, #searchResults) .cluster-group{ margin-bottom:8px; }
-  :is(#folderList, #clusterList, #searchResults) .cluster-head:hover{ background:#1a72ff; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head{ background:#025ffb; border:1px solid #4394f7; gap:10px; padding:11px 10px; border-radius:15px; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-group{ margin-bottom:8px; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head:hover{ background:#1a72ff; }
   /* client-count circle: white with a navy number, folder name Regular @ 15pt */
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .count{ background:#fff; color:#0f1a2e; width:28px; height:28px; }
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .name{ font-weight:400; font-size:10pt; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .count{ background:#fff; color:#0f1a2e; width:28px; height:28px; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .name{ font-weight:400; font-size:10pt; }
   /* the rename input matches the folder name exactly (Regular, 10pt) so the text
      doesn't jump size/weight when you enter edit mode */
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .cluster-rename-input{ font-size:10pt; font-weight:400; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .cluster-rename-input{ font-size:10pt; font-weight:400; }
   /* SVG action icons (eye / clock / pencil / X) sit bare on the blue card.
      each icon carries its own base size in --sz; hovering grows it by 2px. */
-  :is(#folderList, #clusterList, #searchResults) .cluster-head button{ display:inline-flex; align-items:center; justify-content:center; line-height:0; padding:2px 0; }
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .map-visibility-toggle{ --sz:17px; }
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .route-toggle{ --sz:14px; }
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .rename-folder{ --sz:13px; }
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .rename-cluster{ --sz:13px; }
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .folder-del{ --sz:9px; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head button{ display:inline-flex; align-items:center; justify-content:center; line-height:0; padding:2px 0; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .map-visibility-toggle{ --sz:17px; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .route-toggle{ --sz:14px; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .rename-folder{ --sz:13px; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .rename-cluster{ --sz:13px; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .folder-del{ --sz:9px; }
   /* the clusters' "reset to auto name" (↺) is a glyph, not an SVG — colour it navy to match */
   #clusterList .cluster-head .reset-cluster-name{ color:#0f1a2e; font-size:15px; }
-  :is(#folderList, #clusterList, #searchResults) .cluster-head button svg{ width:var(--sz,19px); height:var(--sz,19px); display:block; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head button svg{ width:var(--sz,19px); height:var(--sz,19px); display:block; }
   /* no hover effect on the icons — they stay put, with no background highlight */
-  :is(#folderList, #clusterList, #searchResults) .cluster-head button:hover{ background:transparent; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head button:hover{ background:transparent; }
   /* press feedback while held down: the navy parts turn pink, matching the X */
-  :is(#folderList, #clusterList, #searchResults) .cluster-head button:active svg [fill="#0f1a2e"]{ fill:#ff7bac; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head button:active svg [fill="#0f1a2e"]{ fill:#ff7bac; }
   /* persistent "pressed" state — the toggle stays pink so you can see it is active.
      these classes are re-applied from state on every render, so a second click
      (which clears the state) returns the icon to navy. */
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .map-visibility-toggle.off svg [fill="#0f1a2e"]{ fill:#ff7bac; }
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .route-toggle.active svg [fill="#0f1a2e"]{ fill:#ff7bac; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .map-visibility-toggle.off svg [fill="#0f1a2e"]{ fill:#ff7bac; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .route-toggle.active svg [fill="#0f1a2e"]{ fill:#ff7bac; }
   /* no background box behind the pressed/active toggle — only the pink icon signals it
      (overrides the global gold .route-toggle.active background) */
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .route-toggle.active,
-  :is(#folderList, #clusterList, #searchResults) .cluster-head .map-visibility-toggle.off{ background:transparent; }
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .route-toggle.active,
+  :is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-head .map-visibility-toggle.off{ background:transparent; }
   /* the אזורים / אשכולות (region) cards keep their own look: deep purple, not the
      folders' blue, with 8px of air between each card (same source-order specificity as
      the shared :is() block above, so being later here is what makes these win) */
@@ -1988,6 +1991,130 @@
   .jr-ev-empty{ font-size:.82rem; color:rgba(255,255,255,.45); padding:4px 0 12px; }
   .jr-form-title{ font-size:.82rem; color:rgba(255,255,255,.6); margin:4px 0 10px; padding-top:12px; border-top:1px solid rgba(255,255,255,.12); }
 
+  /* ===================== מסמכים (Documents) ===================== */
+  #viewDocumentsItem .icon svg{ --ny:0px; }
+  /* מסמכים: התיקיות משתמשות בדיוק בשפת התיקיות של "לקוחות ואזורים"
+     (.cluster-group/.cluster-head/.cluster-body) — ראו הבלוק המשותף למעלה. */
+  .doc-newfolder-row{ margin-bottom:12px; }
+  #docFolderList .cluster-body{ overflow:hidden; }
+  /* עיגול צבע סטטי לתיקיית "גבייה" המובנית — נראה זהה ל-folder-swatch של שאר התיקיות */
+  .doc-swatch-static{ width:14px; height:14px; border-radius:50%; flex:0 0 auto; border:1px solid rgba(255,255,255,.35); }
+  /* חץ התיקייה בצד שמאל — זהה לחץ התיקיות בכל המערכת (CHEVRON_ICON_SVG), מסתובב בפתיחה */
+  .dc-fchev{ display:inline-flex; color:#fff; width:12.7px; flex:0 0 auto; transition:transform .18s ease; margin-inline-start:5px; }
+  .dc-fchev svg{ display:block; }
+  #docFolderList .cluster-head.open .dc-fchev{ transform:rotate(90deg); }
+  /* תוכן התיקייה זורם מתחת לכותרת (בלי כרטיס כהה נפרד) — כמו רשימת הכתובות בתיקיות */
+  .dc-inner{ padding:12px 2px 4px; }
+
+  .dc-summary{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .dc-sum{ flex:1; min-width:96px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:12px; padding:9px 11px; text-align:center; }
+  .dc-sum-num{ font-size:14pt; font-weight:700; color:#fff; }
+  .dc-sum-num.owed{ color:#ff9a6b; } .dc-sum-num.paid{ color:#6ce39b; } .dc-sum-num.total{ color:#8fb8ff; }
+  .dc-sum-label{ font-size:8pt; color:rgba(255,255,255,.6); margin-top:1px; }
+  .dc-toolbar{ display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .dc-tool-btn{ -webkit-appearance:none; appearance:none; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#dfe7f5; border-radius:10px; padding:8px 12px; font-size:.82rem; font-family:inherit; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+  .dc-tool-btn:hover{ background:rgba(255,255,255,.12); }
+  .dc-search{ flex:1; min-width:140px; padding:8px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#fff; font-size:.85rem; }
+  .dc-search::placeholder{ color:rgba(255,255,255,.4); }
+
+  /* כרטיסי הפריטים בתוך תיקייה פתוחה — בדיוק בצבע כרטיס הלקוח (.client-card): #0f1a2e, פינות 15px */
+  .dc-row{ background:#0f1a2e; border:1px solid transparent; border-radius:15px; padding:11px 12px; margin:6px 0; color:#fff; transition:opacity .2s ease, background .15s ease; }
+  .dc-row:hover{ background:#040f1e; }
+  .dc-row.paid{ opacity:.62; }
+  .dc-row-top{ display:flex; align-items:center; gap:10px; cursor:pointer; }
+  .dc-row-name{ flex:1; min-width:0; font-weight:600; font-size:.95rem; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dc-badge{ flex:0 0 auto; font-size:.72rem; font-weight:700; padding:3px 10px; border-radius:20px; }
+  .dc-badge.owed{ background:rgba(255,120,80,.18); color:#ff9a6b; }
+  .dc-badge.paidb{ background:rgba(60,220,140,.16); color:#6ce39b; }
+  .dc-badge.none{ background:rgba(255,255,255,.1); color:rgba(255,255,255,.6); }
+  .dc-row-toggle{ flex:0 0 auto; background:transparent; border:none; color:#fff; cursor:pointer; display:inline-flex; padding:2px; width:12.7px; box-sizing:content-box; }
+  .dc-row-toggle svg{ width:12.7px; display:block; transition:transform .18s ease; }
+  .dc-row.expanded .dc-row-toggle svg{ transform:rotate(90deg); }
+  /* פתיחת כרטיס לקוח באנימציה — אותה שפת ה-animated-collapse של כל הכרטיסים במערכת */
+  .dc-fields{ display:grid; grid-template-columns:1fr 1fr; gap:9px 12px; overflow:hidden; border-top:1px solid rgba(255,255,255,.1); }
+  .dc-fields.animated-collapse{ transition: max-height .5s cubic-bezier(.4,0,.2,1), opacity .4s ease, margin-top .5s cubic-bezier(.4,0,.2,1), padding-top .5s cubic-bezier(.4,0,.2,1); margin-top:11px; padding-top:11px; }
+  .dc-fields.animated-collapse:not(.is-open){ max-height:0; opacity:0; margin-top:0; padding-top:0; border-top-color:transparent; }
+  .dc-fields.animated-collapse.is-open{ opacity:1; }
+  .dc-field label{ display:block; font-size:.72rem; color:rgba(255,255,255,.6); margin-bottom:4px; }
+  .dc-field input, .dc-field select{ width:100%; box-sizing:border-box; padding:8px 10px; border-radius:9px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#fff; font-size:.85rem; font-family:inherit; }
+  .dc-field.full{ grid-column:1 / -1; }
+  /* שדה קריאה-בלבד (תאריך הוצאת החשבונית — אוטומטי מהחשבונית) */
+  .dc-readonly{ width:100%; box-sizing:border-box; padding:8px 10px; border-radius:9px; border:1px dashed rgba(255,255,255,.18); background:rgba(255,255,255,.03); color:#cdd9ef; font-size:.85rem; min-height:37px; display:flex; align-items:center; }
+  .dc-docs{ grid-column:1 / -1; margin-top:2px; }
+  .dc-docs-title{ font-size:.72rem; color:rgba(255,255,255,.55); margin-bottom:5px; }
+  .dc-doc-line{ display:flex; align-items:center; gap:8px; font-size:.78rem; padding:6px 8px; color:#cdd9ef; border-radius:9px; cursor:pointer; transition:background .15s ease; }
+  .dc-doc-line:hover{ background:rgba(109,178,255,.12); }
+  .dc-doc-tag{ font-weight:700; }
+  .dc-doc-tag.d-ord{ color:#ffce6b; } .dc-doc-tag.d-inv{ color:#8fb8ff; } .dc-doc-tag.d-rec{ color:#6ce39b; }
+  .dc-doc-unsigned{ font-size:.66rem; color:#ff9a6b; background:rgba(255,120,80,.15); padding:1px 6px; border-radius:10px; }
+  .dc-doc-date{ color:rgba(255,255,255,.55); font-size:.72rem; }
+  .dc-doc-amt{ margin-inline-start:auto; font-weight:600; color:#e6edf9; }
+  .dc-doc-go{ display:inline-flex; color:#6db2ff; }
+  .dc-doc-go svg{ width:15px; height:15px; }
+  .dc-doc-empty{ font-size:.76rem; color:rgba(255,255,255,.4); padding:2px 0; }
+  .dc-empty{ font-size:.85rem; color:rgba(255,255,255,.5); padding:12px 4px; text-align:center; }
+  .dc-manual-wrap{ display:flex; align-items:center; gap:8px; }
+  .dc-manual-wrap label{ margin:0; }
+  .dc-bell{ display:inline-flex; vertical-align:-2px; margin-inline-start:5px; }
+  .dc-bell svg{ width:12px; height:12px; fill:#ffab13; }
+
+  /* קבצים מצורפים בכרטיס גבייה */
+  .dc-attach{ margin-top:10px; padding-top:10px; border-top:1px dashed rgba(255,255,255,.12); }
+  .dc-att-line{ display:flex; align-items:center; gap:8px; font-size:.78rem; color:#cdd9ef; padding:5px 8px; border-radius:9px; }
+  .dc-att-line:hover{ background:rgba(255,255,255,.05); }
+  .dc-att-ic{ display:inline-flex; color:#9fb8e6; } .dc-att-ic svg{ width:16px; height:16px; }
+  .dc-att-name{ flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dc-att-dl, .dc-att-del{ background:transparent; border:none; cursor:pointer; display:inline-flex; padding:3px; border-radius:7px; color:#8fb8ff; }
+  .dc-att-del{ color:#ff8a8a; } .dc-att-dl:hover,.dc-att-del:hover{ background:rgba(255,255,255,.1); }
+  .dc-att-dl svg,.dc-att-del svg{ width:15px; height:15px; }
+  .dc-attach-add{ display:inline-flex; align-items:center; gap:6px; margin-top:8px; font-size:.78rem; color:#6db2ff; cursor:pointer; padding:6px 10px; border:1px dashed rgba(109,178,255,.4); border-radius:9px; }
+  .dc-attach-add:hover{ background:rgba(109,178,255,.1); }
+
+  /* רשימת קבצים בתיקייה בהתאמה אישית */
+  .dc-file-list{ display:flex; flex-direction:column; gap:8px; }
+  .dc-file{ display:flex; align-items:center; gap:10px; background:#0f1a2e; border:1px solid transparent; border-radius:15px; padding:10px 12px; transition:background .15s ease; }
+  .dc-file:hover{ background:#040f1e; }
+  .dc-file-ic{ width:34px; height:34px; flex:0 0 auto; border-radius:9px; background:rgba(2,95,251,.22); display:flex; align-items:center; justify-content:center; color:#7fb0ff; }
+  .dc-file-ic svg{ width:19px; height:19px; }
+  .dc-file-main{ flex:1; min-width:0; }
+  .dc-file-name{ color:#fff; font-weight:600; font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dc-file-meta{ color:#9fb0d0; font-size:.72rem; margin-top:2px; }
+  .dc-file-btn{ flex:0 0 auto; background:transparent; border:none; cursor:pointer; display:inline-flex; padding:6px; border-radius:8px; color:#8fb8ff; }
+  .dc-file-btn:hover{ background:rgba(255,255,255,.1); }
+  .dc-file-btn svg{ width:16px; height:16px; }
+  .dc-file-btn[data-fdelfile]{ color:#ff8a8a; }
+  .dc-addfile-row{ display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  .dc-addfile{ display:inline-flex; align-items:center; gap:7px; font-size:.82rem; color:#dfe7f5; cursor:pointer; padding:9px 13px; border:1px solid rgba(255,255,255,.2); border-radius:11px; background:rgba(255,255,255,.06); font-family:inherit; }
+  .dc-addfile:hover{ background:rgba(255,255,255,.12); }
+  .dc-addfile svg{ width:17px; height:17px; fill:currentColor; color:#7fb0ff; }
+
+  /* עורך קבצים (טבלה/מסמך) */
+  .dce-overlay{ position:fixed; inset:0; z-index:9600; background:rgba(3,8,20,.72); backdrop-filter:blur(3px); display:flex; align-items:center; justify-content:center; padding:16px; }
+  .dce-box{ background:#0f1a2e; border:1px solid #223154; border-radius:16px; width:min(900px,100%); max-height:92vh; display:flex; flex-direction:column; overflow:hidden; }
+  .dce-head{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-bottom:1px solid #223154; background:#0a1428; }
+  .dce-name{ flex:1; min-width:0; background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.15); border-radius:9px; color:#fff; font-size:.95rem; font-weight:600; padding:8px 11px; font-family:inherit; }
+  .dce-folder{ font-size:.75rem; color:#9fb0d0; flex:0 0 auto; }
+  .dce-head-actions{ display:flex; align-items:center; gap:8px; flex:0 0 auto; }
+  .dce-save{ background:#025ffb; border:none; color:#fff; border-radius:9px; padding:8px 16px; font-weight:600; font-size:.85rem; cursor:pointer; font-family:inherit; }
+  .dce-save:hover{ background:#1a72ff; }
+  .dce-close{ background:transparent; border:none; color:#cdd9ef; font-size:1.1rem; cursor:pointer; padding:4px 8px; border-radius:8px; }
+  .dce-close:hover{ background:rgba(255,255,255,.12); }
+  .dce-toolbar{ display:flex; gap:6px; padding:9px 12px; border-bottom:1px solid #223154; flex-wrap:wrap; background:#0c1730; }
+  .dce-tb{ background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.15); color:#e6edf9; border-radius:8px; padding:6px 11px; font-size:.82rem; cursor:pointer; font-family:inherit; min-width:34px; }
+  .dce-tb:hover{ background:rgba(255,255,255,.16); }
+  .dce-body{ flex:1; overflow:auto; padding:14px; }
+  .dce-grid{ border-collapse:collapse; width:max-content; min-width:100%; direction:rtl; }
+  .dce-grid th{ background:#1b2a47; color:#cdd9ef; font-size:.75rem; font-weight:600; padding:5px 8px; border:1px solid #2c3e63; position:sticky; top:0; }
+  .dce-grid .dce-rownum{ background:#16233c; }
+  .dce-grid td{ border:1px solid #2c3e63; padding:0; }
+  .dce-grid td input{ width:120px; border:none; background:transparent; color:#fff; padding:7px 9px; font-size:.85rem; font-family:inherit; outline:none; }
+  .dce-grid td input:focus{ background:rgba(2,95,251,.18); box-shadow:inset 0 0 0 2px #025ffb; }
+  .dce-doc{ background:#fff; color:#1c1c1c; min-height:340px; border-radius:8px; padding:26px 30px; direction:rtl; line-height:1.7; font-size:1rem; outline:none; }
+  .dce-doc:focus{ box-shadow:0 0 0 2px #025ffb; }
+  .dce-doc h2{ font-size:1.35rem; margin:.4em 0; }
+  .dce-status{ padding:8px 14px; font-size:.78rem; color:#9fb0d0; min-height:18px; border-top:1px solid #223154; }
+  .dce-status.dirty{ color:#ffce6b; } .dce-status.saved{ color:#6ce39b; }
+
 </style>
 </head>
 <body>
@@ -2031,6 +2158,7 @@
       <button class="side-menu-item view-nav-item" id="viewOrdersItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM8 7h8c.55 0 1 .45 1 1s-.45 1-1 1H8c-.55 0-1-.45-1-1s.45-1 1-1zm3 10H8c-.55 0-1-.45-1-1s.45-1 1-1h3c.55 0 1 .45 1 1s-.45 1-1 1zm5-4H8c-.55 0-1-.45-1-1s.45-1 1-1h8c.55 0 1 .45 1 1s-.45 1-1 1z"/></svg></span><span class="txt">הזמנות</span></button>
       <button class="side-menu-item view-nav-item" id="viewInventoriesItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M12 2 3 7v10l9 5 9-5V7l-9-5zm0 2.31L18.5 8 12 11.69 5.5 8 12 4.31zM5 9.5l6 3.46v6.74l-6-3.33V9.5zm14 0v6.87l-6 3.33v-6.74l6-3.46z"/></svg></span><span class="txt">מלאים</span></button>
       <button class="side-menu-item view-nav-item" id="viewJournalItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2zM7 12h5v5H7z"/></svg></span><span class="txt">יומן</span></button>
+      <button class="side-menu-item view-nav-item" id="viewDocumentsItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg></span><span class="txt">מסמכים</span></button>
       <div class="side-menu-sep" aria-hidden="true"></div>
       <a class="side-menu-item" href="./order/" target="_blank"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="m9,12c3.309,0,6-2.691,6-6S12.309,0,9,0,3,2.691,3,6s2.691,6,6,6Zm0-11c2.757,0,5,2.243,5,5s-2.243,5-5,5-5-2.243-5-5S6.243,1,9,1Zm1.5,13.5c0,.276-.224.5-.5.5h-.5c-4.687,0-8.5,3.813-8.5,8.5,0,.276-.224.5-.5.5s-.5-.224-.5-.5c0-5.238,4.262-9.5,9.5-9.5h.5c.276,0,.5.224.5.5Zm13.414,2.259c-.203-.557-.738-.931-1.331-.931h-2.398l-.856-2.406c-.206-.551-.739-.922-1.328-.922s-1.122.371-1.33.929l-.854,2.399h-2.398c-.592,0-1.126.373-1.33.927-.205.556-.039,1.187.421,1.576l1.912,1.556-.757,2.272c-.179.573.023,1.2.503,1.558.243.183.545.283.849.283.282,0,.555-.083.788-.239l2.208-1.478,2.248,1.464c.504.326,1.16.301,1.639-.065.476-.367.668-.996.477-1.576l-.781-2.227,1.903-1.55c.453-.382.621-1.013.418-1.569Zm-1.056.799l-2.169,1.767c-.164.133-.227.354-.156.553l.895,2.55c.056.168,0,.354-.14.46-.143.108-.336.116-.484.02l-2.524-1.644c-.167-.109-.384-.107-.551.003l-2.482,1.662c-.143.095-.342.092-.48-.014-.142-.105-.201-.29-.15-.451l.862-2.591c.065-.197.002-.415-.159-.545l-2.172-1.767c-.132-.112-.181-.297-.12-.461.06-.164.217-.273.391-.273h2.751c.212,0,.4-.133.471-.332l.971-2.725c.121-.325.662-.318.779-.007l.973,2.731c.07.199.259.332.471.332h2.751c.175,0,.332.11.392.274.06.164.01.35-.116.457Z"/></svg></span><span class="txt">כניסת לקוחות</span></a>
       <div class="side-menu-sep" aria-hidden="true"></div>
@@ -2366,6 +2494,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </div>
       </section>
       <div id="journalDayFolders" class="jr-day-folders"></div>
+    </div>
+  </div>
+
+  <div class="products-view documents-view view-hidden" id="documentsView">
+    <div class="products-inner">
+      <div id="documentsHost"></div>
     </div>
   </div>
 
@@ -2714,6 +2848,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const INVENTORY_COUNT_FROM_KEY = "inventory_count_from"; // date the general-inventory tally counts from
   const BUSINESS_STOCK_KEY = "business_stock"; // "מלאי כללי של העסק" — יומן רכש (הכנסות למלאי)
   const JOURNAL_KEY = "journal"; // יומן — פגישות/משימות לפי תאריך ושעה
+  const DOC_COLLECTIONS_KEY = "doc_collections"; // מסמכים › תיקיית גבייה — מטא-דאטה per לקוח (תאריכי צ'ק/תשלום, תזכורת, הערה)
   const CLUSTER_NAMES_KEY = "cluster_names_map";
   const CLUSTER_ORDER_KEY = "cluster_order_map";
   const CATALOG_KEY = "catalog"; // separate app_storage key so saving the catalog never rewrites the clients blob
@@ -2733,6 +2868,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   let inventoryCountFrom = ""; // general-inventory running tally start date ("" = never reset → defaults to today)
   let businessStock = { purchases: [] }; // מלאי כללי של העסק — יומן רכש: [{id, name, qty, date}]. נותר = סך רכש פחות נמכר (חשבוניות חתומות)
   let journal = { events: [] }; // יומן — פגישות: [{id, date:'YYYY-MM-DD', time:'HH:MM', clientName, business, phone, email, details, reminder:0|30|60, notified}]
+  let docCollections = { entries: {}, folders: [] }; // מסמכים: entries=גבייה per-לקוח (כולל attachments[]); folders=תיקיות בהתאמה אישית [{id,name,createdAt,files:[{id,name,kind:'sheet'|'doc'|'upload',...}]}]
   let folders = []; // manually-created folder names, e.g. "ראשון לציון" or "צפון"
   let agents = []; // sales agents: [{name, username, password}] — chosen on the orders page
   let managers = []; // main managers: [{name, username, password}] — elevated access (future)
@@ -3304,6 +3440,19 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   async function saveJournal(){
     try{ await sbSet(JOURNAL_KEY, JSON.stringify(journal)); }
     catch(e){ console.error("שגיאת שמירת היומן", e); }
+  }
+  async function loadDocCollections(){
+    try{
+      const raw = await sbGet(DOC_COLLECTIONS_KEY);
+      if(raw){ const p = JSON.parse(raw); docCollections = {
+        entries: (p && p.entries && typeof p.entries==='object') ? p.entries : {},
+        folders: (p && Array.isArray(p.folders)) ? p.folders : []
+      }; }
+    }catch(e){ /* none saved yet — keep empty */ }
+  }
+  async function saveDocCollections(){
+    try{ await sbSet(DOC_COLLECTIONS_KEY, JSON.stringify(docCollections)); }
+    catch(e){ console.error("שגיאת שמירת מסמכי גבייה", e); }
   }
   async function saveVehicleStockBaseline(){
     try{
@@ -7131,7 +7280,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
 
   document.getElementById('refreshBtn').addEventListener('click', async ()=>{
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal(), loadDocCollections()]);
     populateBusinessDetails();
     applySettingsPanelOrder();
     applyInventoryPanelOrder();
@@ -7323,6 +7472,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const inventoriesViewEl = document.getElementById('inventoriesView');
   const journalViewEl = document.getElementById('journalView');
   const viewJournalItem = document.getElementById('viewJournalItem');
+  const documentsViewEl = document.getElementById('documentsView');
+  const viewDocumentsItem = document.getElementById('viewDocumentsItem');
   const viewCustomersItem = document.getElementById('viewCustomersItem');
   const viewProductsItem = document.getElementById('viewProductsItem');
   const viewOrdersItem = document.getElementById('viewOrdersItem');
@@ -7334,6 +7485,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     viewOrdersItem.classList.toggle('active-view', currentView === 'orders');
     viewInventoriesItem.classList.toggle('active-view', currentView === 'inventories');
     viewJournalItem.classList.toggle('active-view', currentView === 'journal');
+    viewDocumentsItem.classList.toggle('active-view', currentView === 'documents');
     settingsMenuItem.classList.toggle('active-view', currentView === 'settings');
   }
   function hideAllViews(){
@@ -7343,6 +7495,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     settingsViewEl.classList.add('view-hidden');
     inventoriesViewEl.classList.add('view-hidden');
     journalViewEl.classList.add('view-hidden');
+    documentsViewEl.classList.add('view-hidden');
   }
   function renderInventoriesView(){
     try{ applyInventoryPanelOrder(); }catch(_){}
@@ -7963,8 +8116,590 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
   setInterval(()=>{ jrCheckReminders(); jrCheckScheduledWa(); }, 30000);
 
+  // ===================== מסמכים › תיקיית גבייה =====================
+  const DC_FOLDER_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 6h-8l-2-2H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/></svg>`;
+  const DC_CHEV_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8.6 7.4 10 6l6 6-6 6-1.4-1.4L13.2 12z"/></svg>`;
+  const DC_CARET_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>`;
+  const DC_BELL2_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10.5 3.17 10.5 4v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>`;
+  const DC_OPEN_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3h7v7"/><path d="M21 3l-9 9"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>`;
+  const DC_PDF_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm3 18H7v-1h10v1zm0-3H7v-1h10v1zm-4-5V3.5L18.5 9H13z"/></svg>`;
+  const DC_IMG_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2zM8.5 13.5l2.5 3 3.5-4.5 4.5 6H5l3.5-4.5z"/></svg>`;
+  const DC_DL_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>`;
+  const DC_TRASH_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>`;
+  const DC_EDIT_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>`;
+  const DC_SHEET_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-9 16H5v-4h5v4zm0-6H5V9h5v4zm0-6H5V5h5v2zm9 12h-7v-4h7v4zm0-6h-7V9h7v4zm0-6h-7V5h7v2z"/></svg>`;
+  const DC_DOC_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-1.5h8V18zm0-4H8v-1.5h8V14zm-3-4H8V8.5h5V10zm0-3.5V3.5L18.5 9H13z"/></svg>`;
+  const DC_PLUS_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>`;
+  const DC_REMINDER_OPTS = [[0,'ללא'],[1,'יום לפני'],[2,'יומיים לפני'],[3,'3 ימים לפני'],[7,'שבוע לפני']];
+  let _dcOpen = false, _dcSearch = '';
+  const _dcExpanded = new Set();
+
+  function dcNum(v){ const n = Number(v); return isNaN(n) ? 0 : n; }
+  function collectionStatus(c){
+    // כל חשבונית שהופקה נחשבת חוב עד שמופקת עבורה קבלה (invoiceHasReceipt לפי sourceInvoiceId).
+    const invoices = (c.invoices||[]);
+    let invoiced=0, received=0, openDebt=0;
+    invoices.forEach(inv=>{
+      if(!inv) return;
+      const t = dcNum(inv.total);
+      invoiced += t;
+      if(invoiceHasReceipt(c, inv)) received += t; else openDebt += t;
+    });
+    invoiced = Math.round(invoiced*100)/100;
+    received = Math.round(received*100)/100;
+    const balance = Math.round(openDebt*100)/100;
+    const hasInvoice = invoices.length > 0;
+    return { invoiced, received, balance, hasInvoice, paid: hasInvoice && balance <= 0.01 };
+  }
+  // תאריך הוצאת החשבונית האחרונה של הלקוח — אוטומטי, לא ידני
+  function dcInvoiceDate(c){
+    const inv = (c.invoices||[]).filter(i=>i&&i.date).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    return inv.length ? inv[0].date : '';
+  }
+  function dcEntry(id){
+    if(!docCollections.entries[id]) docCollections.entries[id] = { checkDate:'', dueDate:'', reminder:0, note:'', handledManual:null, notified:false, attachments:[] };
+    const e = docCollections.entries[id];
+    if(!Array.isArray(e.attachments)) e.attachments = [];
+    return e;
+  }
+  if(!Array.isArray(docCollections.folders)) docCollections.folders = [];
+  function dcIsHandled(c, e){
+    if(e.handledManual === true) return true;
+    if(e.handledManual === false) return false;
+    return collectionStatus(c).paid; // אוטומטי: שולם לפי קבלות
+  }
+
+  const _dcCustomOpen = new Set(); // אילו תיקיות בהתאמה אישית פתוחות
+  function renderDocumentsView(){
+    const host = document.getElementById('documentsHost');
+    if(!host) return;
+    if(!Array.isArray(docCollections.folders)) docCollections.folders = [];
+    // חוב פתוח לספירת "ממתינים" בעיגול של תיקיית גבייה
+    let unpaidCount = 0;
+    clients.forEach(c=>{ const s=collectionStatus(c); if(s.hasInvoice){ const e=dcEntry(c.id); if(!dcIsHandled(c,e) && s.balance>0.01) unpaidCount++; } });
+    host.innerHTML =
+      `<section class="panel" id="docsPanel">
+         <h2 id="docsFoldersHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px">
+           <span class="dot" style="background:#ffa90d"></span> מסמכים
+           <span id="docsFoldersChevron" style="margin-right:auto;display:inline-block;transition:transform .15s ease;transform:rotate(90deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
+         </h2>
+         <div id="docsFoldersBody" class="animated-collapse is-open">
+           <div class="row2">
+             <div style="flex:1"><input type="text" id="dcNewFolderInput" placeholder="שם תיקייה חדשה (למשל: חוזים, קבלות ספקים)"></div>
+             <div style="flex:0 0 auto"><input type="color" id="dcNewFolderColor" class="folder-color-input" value="#A85C32" title="צבע לתיקייה"></div>
+             <div style="flex:0 0 auto"><button class="primary" id="dcNewFolderBtn" style="margin-top:0;width:auto;padding:9px 14px">+ הוסף</button></div>
+           </div>
+           <div id="docFolderList" style="margin-top:10px"></div>
+         </div>
+       </section>`;
+    const listEl = host.querySelector('#docFolderList');
+    // כותרת "מסמכים" מתקפלת בדיוק כמו כותרת "תיקיות"
+    const dHead = host.querySelector('#docsFoldersHeader');
+    const dBody = host.querySelector('#docsFoldersBody');
+    if(dBody) dBody.style.maxHeight = 'none';
+    if(dHead) dHead.addEventListener('click', ()=> toggleAnimatedCollapse(dBody, host.querySelector('#docsFoldersChevron')));
+    // ----- תיקיית גבייה (מובנית) — כותרת בשפת התיקיות של לקוחות ואזורים -----
+    const gv = document.createElement('div');
+    gv.className = 'cluster-group';
+    gv.innerHTML =
+      `<div class="cluster-head" id="dcGvHead">
+         <span class="doc-swatch-static" style="background:#ffab13"></span>
+         <div class="name">גבייה</div>
+         <div class="count">${unpaidCount}</div>
+         <span class="dc-fchev">${CHEVRON_ICON_SVG}</span>
+       </div>
+       <div class="cluster-body animated-collapse${_dcOpen?' is-open':''}" id="dcGvBody"></div>`;
+    listEl.appendChild(gv);
+    const head = gv.querySelector('#dcGvHead');
+    const body = gv.querySelector('#dcGvBody');
+    if(_dcOpen){ head.classList.add('open'); body.style.maxHeight = 'none'; }
+    head.addEventListener('click', ()=>{
+      _dcOpen = !_dcOpen;
+      head.classList.toggle('open', _dcOpen);
+      if(_dcOpen && !body.innerHTML.trim()) renderCollectionBody(body);
+      toggleAnimatedCollapse(body, null);
+    });
+    if(_dcOpen) renderCollectionBody(body);
+    // ----- תיקיות בהתאמה אישית — זהות לתיקיות של לקוחות ואזורים -----
+    docCollections.folders.forEach(f=>{
+      if(!Array.isArray(f.files)) f.files = [];
+      if(!f.color) f.color = (typeof colorForName==='function' ? colorForName(f.name||'') : '#3E7BB6');
+      const open = _dcCustomOpen.has(f.id);
+      const n = f.files.length;
+      const group = document.createElement('div');
+      group.className = 'cluster-group';
+      group.dataset.folderId = f.id;
+      const fhead = document.createElement('div');
+      fhead.className = 'cluster-head';
+      fhead.innerHTML =
+        `<input type="color" class="folder-swatch" value="${escapeHtml(f.color)}" title="שינוי צבע התיקייה">
+         <div class="name">${escapeHtml(f.name||'תיקייה')}</div>
+         <div class="count">${n}</div>
+         <button class="rename-folder" title="שינוי שם התיקייה">${FOLDER_PEN_SVG}</button>
+         <button class="folder-del" title="מחיקת תיקייה">${FOLDER_X_SVG}</button>
+         <span class="dc-fchev">${CHEVRON_ICON_SVG}</span>`;
+      const fbody = document.createElement('div');
+      fbody.className = 'cluster-body animated-collapse' + (open?' is-open':'');
+      if(open) fbody.style.maxHeight = 'none';
+      group.appendChild(fhead); group.appendChild(fbody);
+      listEl.appendChild(group);
+      if(open) fhead.classList.add('open');
+      const swatch = fhead.querySelector('.folder-swatch');
+      swatch.addEventListener('click', e=> e.stopPropagation());
+      swatch.addEventListener('change', e=>{ f.color = e.target.value; saveDocCollections(); });
+      fhead.addEventListener('click', ev=>{
+        if(ev.target.closest('.folder-swatch') || ev.target.closest('.rename-folder') || ev.target.closest('.folder-del')) return;
+        const willOpen = !_dcCustomOpen.has(f.id);
+        if(willOpen) _dcCustomOpen.add(f.id); else _dcCustomOpen.delete(f.id);
+        fhead.classList.toggle('open', willOpen);
+        if(willOpen) renderCustomFolderBody(fbody, f.id);
+        toggleAnimatedCollapse(fbody, null);
+      });
+      fhead.querySelector('.rename-folder').addEventListener('click', e=>{
+        e.stopPropagation();
+        const nm = prompt('שם חדש לתיקייה:', f.name||''); if(nm==null) return;
+        const t = nm.trim(); if(!t) return;
+        f.name = t; saveDocCollections(); renderDocumentsView();
+      });
+      fhead.querySelector('.folder-del').addEventListener('click', e=>{
+        e.stopPropagation();
+        if(!confirm('למחוק את התיקייה "' + (f.name||'') + '"' + (n?(' ואת ' + n + ' הקבצים שבתוכה'):'') + '?')) return;
+        docCollections.folders = docCollections.folders.filter(x=>x.id!==f.id);
+        _dcCustomOpen.delete(f.id); saveDocCollections(); renderDocumentsView();
+      });
+      if(open) renderCustomFolderBody(fbody, f.id);
+    });
+    // ----- יצירת תיקייה חדשה (בדיוק כמו בלקוחות ואזורים: שם + עיגול צבע + הוסף) -----
+    const nfInput = document.getElementById('dcNewFolderInput');
+    const nfColor = document.getElementById('dcNewFolderColor');
+    const nfBtn = document.getElementById('dcNewFolderBtn');
+    const addFolder = ()=>{
+      const nm = (nfInput.value||'').trim();
+      if(!nm){ nfInput.focus(); return; }
+      const color = (nfColor && nfColor.value) || (typeof colorForName==='function'?colorForName(nm):'#3E7BB6');
+      const folder = { id: dcUid(), name: nm, color, createdAt: (typeof localDateString==='function'?localDateString():''), files: [] };
+      docCollections.folders.push(folder);
+      _dcCustomOpen.add(folder.id);
+      saveDocCollections();
+      renderDocumentsView();
+    };
+    if(nfBtn) nfBtn.addEventListener('click', addFolder);
+    if(nfInput) nfInput.addEventListener('keydown', ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); addFolder(); } });
+  }
+  function cssEsc(s){ return String(s).replace(/["\\\]]/g,'\\$&'); }
+
+  // ---- גוף תיקייה בהתאמה אישית: רשימת קבצים + הוספת קובץ (אקסל/וורד/העלאה) ----
+  function renderCustomFolderBody(body, fid){
+    if(!body) return;
+    const f = docCollections.folders.find(x=>x.id===fid); if(!f) return;
+    if(!Array.isArray(f.files)) f.files = [];
+    const filesHtml = f.files.length ? f.files.slice().sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||''))).map(file=>{
+      const ic = file.kind==='sheet'?DC_SHEET_SVG : file.kind==='doc'?DC_DOC_SVG : (String(file.mime||'').indexOf('sheet')>=0||/xls/i.test(file.name||'')?DC_SHEET_SVG:DC_DOC_SVG);
+      const kindTxt = file.kind==='sheet'?'טבלה' : file.kind==='doc'?'מסמך' : 'קובץ שהועלה';
+      const canEdit = (file.kind==='sheet'||file.kind==='doc');
+      return `<div class="dc-file" data-file="${escapeHtml(file.id)}">
+        <span class="dc-file-ic">${ic}</span>
+        <div class="dc-file-main"><div class="dc-file-name">${escapeHtml(file.name||'קובץ')}</div><div class="dc-file-meta">${kindTxt}${file.updatedAt?(' · '+escapeHtml(file.updatedAt)):''}</div></div>
+        ${canEdit?`<button type="button" class="dc-file-btn" data-fedit="${escapeHtml(file.id)}" title="עריכה">${DC_EDIT_SVG}</button>`:''}
+        <button type="button" class="dc-file-btn" data-fdlfile="${escapeHtml(file.id)}" title="הורדה">${DC_DL_SVG}</button>
+        <button type="button" class="dc-file-btn" data-fdelfile="${escapeHtml(file.id)}" title="מחיקה">${DC_TRASH_SVG}</button>
+      </div>`;
+    }).join('') : '<div class="dc-doc-empty">אין קבצים בתיקייה. הוסיפו קובץ חדש למטה.</div>';
+    body.innerHTML =
+      `<div class="dc-inner">
+        <div class="dc-file-list">${filesHtml}</div>
+        <div class="dc-addfile-row">
+          <button type="button" class="dc-addfile" data-add="sheet" data-fid="${escapeHtml(fid)}">${DC_SHEET_SVG}<span>טבלה (אקסל)</span></button>
+          <button type="button" class="dc-addfile" data-add="doc" data-fid="${escapeHtml(fid)}">${DC_DOC_SVG}<span>מסמך (וורד)</span></button>
+          <label class="dc-addfile" title="העלאת קובץ קיים">${DC_DL_SVG}<span>העלאת קובץ</span><input type="file" class="dc-upload-input" data-fid="${escapeHtml(fid)}" accept=".xlsx,.xls,.csv,.doc,.docx,.pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden></label>
+        </div>
+      </div>`;
+    // הוספת טבלה/מסמך חדש → פותח עורך
+    body.querySelectorAll('.dc-addfile[data-add]').forEach(btn=>btn.addEventListener('click', ()=>{
+      const kind = btn.dataset.add;
+      const nm = prompt(kind==='sheet'?'שם הטבלה:':'שם המסמך:', kind==='sheet'?'טבלה חדשה':'מסמך חדש');
+      if(nm==null) return; const t=(nm.trim())|| (kind==='sheet'?'טבלה חדשה':'מסמך חדש');
+      const file = kind==='sheet'
+        ? { id:dcUid(), name:t, kind:'sheet', sheet:{ rows:8, cols:5, cells:{} }, updatedAt:(typeof localDateString==='function'?localDateString():'') }
+        : { id:dcUid(), name:t, kind:'doc', content:'', updatedAt:(typeof localDateString==='function'?localDateString():'') };
+      f.files.push(file); saveDocCollections();
+      openDocFileEditor(fid, file.id);
+    }));
+    // העלאת קובץ קיים
+    const up = body.querySelector('.dc-upload-input');
+    if(up) up.addEventListener('change', ()=>{
+      const file0 = up.files && up.files[0]; if(!file0) return;
+      if(file0.size > 5*1024*1024){ alert('הקובץ גדול מדי (מקסימום 5MB).'); up.value=''; return; }
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        f.files.push({ id:dcUid(), name:file0.name, kind:'upload', mime:file0.type||'application/octet-stream', data:reader.result, updatedAt:(typeof localDateString==='function'?localDateString():'') });
+        saveDocCollections(); renderCustomFolderBody(body, fid);
+      };
+      reader.readAsDataURL(file0);
+    });
+    // עריכה / הורדה / מחיקה של קובץ
+    body.querySelectorAll('[data-fedit]').forEach(b=>b.addEventListener('click', ()=> openDocFileEditor(fid, b.dataset.fedit)));
+    body.querySelectorAll('[data-fdlfile]').forEach(b=>b.addEventListener('click', ()=> dcDownloadFile(fid, b.dataset.fdlfile)));
+    body.querySelectorAll('[data-fdelfile]').forEach(b=>b.addEventListener('click', ()=>{
+      const file = f.files.find(x=>x.id===b.dataset.fdelfile); if(!file) return;
+      if(!confirm('למחוק את "' + (file.name||'הקובץ') + '"?')) return;
+      f.files = f.files.filter(x=>x.id!==file.id); saveDocCollections(); renderCustomFolderBody(body, fid);
+    }));
+  }
+
+  function dcFindFile(fid, fileId){
+    const f = docCollections.folders.find(x=>x.id===fid); if(!f) return null;
+    return { folder:f, file:(f.files||[]).find(x=>x.id===fileId) || null };
+  }
+  function dcRefreshOpenFolder(fid){
+    const group = document.querySelector('#docFolderList .cluster-group[data-folder-id="'+cssEsc(fid)+'"]');
+    const body = group ? group.querySelector('.cluster-body') : null;
+    if(body && _dcCustomOpen.has(fid)) renderCustomFolderBody(body, fid);
+  }
+  function dcColLabel(i){ let s=''; i=i+1; while(i>0){ const m=(i-1)%26; s=String.fromCharCode(65+m)+s; i=Math.floor((i-1)/26); } return s; }
+
+  // ===== עורך קבצים בתיקייה: טבלה (אקסל) / מסמך טקסט (וורד) =====
+  function openDocFileEditor(fid, fileId){
+    const found = dcFindFile(fid, fileId); if(!found || !found.file) return;
+    const { folder, file } = found;
+    const overlay = document.createElement('div');
+    overlay.className = 'dce-overlay';
+    const isSheet = file.kind==='sheet';
+    overlay.innerHTML =
+      `<div class="dce-box">
+        <div class="dce-head">
+          <input type="text" class="dce-name" id="dceName" value="${escapeHtml(file.name||'')}">
+          <span class="dce-folder">${escapeHtml(folder.name||'')}</span>
+          <div class="dce-head-actions">
+            <button type="button" class="dce-save" id="dceSave">שמור</button>
+            <button type="button" class="dce-close" id="dceClose" title="סגור">✕</button>
+          </div>
+        </div>
+        <div class="dce-toolbar" id="dceToolbar"></div>
+        <div class="dce-body" id="dceBody"></div>
+        <div class="dce-status" id="dceStatus"></div>
+      </div>`;
+    document.body.appendChild(overlay);
+    const bodyEl = overlay.querySelector('#dceBody');
+    const toolbar = overlay.querySelector('#dceToolbar');
+    const statusEl = overlay.querySelector('#dceStatus');
+    const close = ()=>overlay.remove();
+    overlay.querySelector('#dceClose').addEventListener('click', ()=>{ if(_dceDirty){ if(!confirm('לצאת בלי לשמור? השינויים לא יישמרו.')) return; } close(); });
+    let _dceDirty = false;
+    const markDirty = ()=>{ _dceDirty = true; statusEl.textContent = 'יש שינויים שלא נשמרו'; statusEl.className='dce-status dirty'; };
+
+    let collect; // ()=> updates file object with current editor content
+    if(isSheet){
+      if(!file.sheet) file.sheet = { rows:8, cols:5, cells:{} };
+      const st = file.sheet;
+      toolbar.innerHTML =
+        `<button type="button" class="dce-tb" id="dceAddRow">＋ שורה</button>
+         <button type="button" class="dce-tb" id="dceAddCol">＋ עמודה</button>
+         <button type="button" class="dce-tb" id="dceDelRow">− שורה</button>
+         <button type="button" class="dce-tb" id="dceDelCol">− עמודה</button>`;
+      const renderGrid = ()=>{
+        let h = '<table class="dce-grid"><thead><tr><th class="dce-corner"></th>';
+        for(let cix=0;cix<st.cols;cix++) h += `<th>${dcColLabel(cix)}</th>`;
+        h += '</tr></thead><tbody>';
+        for(let r=0;r<st.rows;r++){
+          h += `<tr><th class="dce-rownum">${r+1}</th>`;
+          for(let cix=0;cix<st.cols;cix++){
+            const v = st.cells[r+'_'+cix] || '';
+            h += `<td><input type="text" data-r="${r}" data-c="${cix}" value="${escapeHtml(v)}"></td>`;
+          }
+          h += '</tr>';
+        }
+        h += '</tbody></table>';
+        bodyEl.innerHTML = h;
+        bodyEl.querySelectorAll('input[data-r]').forEach(inp=>{
+          inp.addEventListener('input', ()=>{ const k=inp.dataset.r+'_'+inp.dataset.c; if(inp.value==='') delete st.cells[k]; else st.cells[k]=inp.value; markDirty(); });
+        });
+      };
+      renderGrid();
+      overlay.querySelector('#dceAddRow').addEventListener('click', ()=>{ st.rows++; markDirty(); renderGrid(); });
+      overlay.querySelector('#dceAddCol').addEventListener('click', ()=>{ st.cols++; markDirty(); renderGrid(); });
+      overlay.querySelector('#dceDelRow').addEventListener('click', ()=>{ if(st.rows>1){ st.rows--; Object.keys(st.cells).forEach(k=>{ if(+k.split('_')[0]>=st.rows) delete st.cells[k]; }); markDirty(); renderGrid(); } });
+      overlay.querySelector('#dceDelCol').addEventListener('click', ()=>{ if(st.cols>1){ st.cols--; Object.keys(st.cells).forEach(k=>{ if(+k.split('_')[1]>=st.cols) delete st.cells[k]; }); markDirty(); renderGrid(); } });
+      collect = ()=>{ /* st mutated live */ };
+    } else {
+      // עורך מסמך טקסט עשיר (וורד)
+      toolbar.innerHTML =
+        `<button type="button" class="dce-tb" data-cmd="bold" title="מודגש"><b>B</b></button>
+         <button type="button" class="dce-tb" data-cmd="italic" title="נטוי"><i>I</i></button>
+         <button type="button" class="dce-tb" data-cmd="underline" title="קו תחתון"><u>U</u></button>
+         <button type="button" class="dce-tb" data-block="h2" title="כותרת">כותרת</button>
+         <button type="button" class="dce-tb" data-block="p" title="טקסט רגיל">רגיל</button>
+         <button type="button" class="dce-tb" data-cmd="insertUnorderedList" title="רשימה">• רשימה</button>
+         <button type="button" class="dce-tb" data-align="right" title="ימין">⇥</button>
+         <button type="button" class="dce-tb" data-align="center" title="מרכז">≡</button>
+         <button type="button" class="dce-tb" data-align="left" title="שמאל">⇤</button>`;
+      bodyEl.innerHTML = `<div class="dce-doc" id="dceDoc" contenteditable="true">${file.content||''}</div>`;
+      const docEl = bodyEl.querySelector('#dceDoc');
+      docEl.addEventListener('input', markDirty);
+      toolbar.querySelectorAll('.dce-tb').forEach(btn=>btn.addEventListener('mousedown', ev=>{
+        ev.preventDefault(); docEl.focus();
+        try{
+          if(btn.dataset.cmd) document.execCommand(btn.dataset.cmd, false, null);
+          else if(btn.dataset.block) document.execCommand('formatBlock', false, btn.dataset.block);
+          else if(btn.dataset.align) document.execCommand('justify'+({right:'Right',center:'Center',left:'Left'})[btn.dataset.align], false, null);
+        }catch(_){}
+        markDirty();
+      }));
+      collect = ()=>{ file.content = docEl.innerHTML; };
+    }
+    overlay.querySelector('#dceName').addEventListener('input', markDirty);
+    overlay.querySelector('#dceSave').addEventListener('click', ()=>{
+      collect();
+      const nm = overlay.querySelector('#dceName').value.trim(); if(nm) file.name = nm;
+      file.updatedAt = (typeof localDateString==='function'?localDateString():'');
+      saveDocCollections();
+      _dceDirty = false; statusEl.textContent = 'נשמר ✓'; statusEl.className='dce-status saved';
+      dcRefreshOpenFolder(fid);
+    });
+  }
+
+  // הורדת קובץ מתיקייה: העלאה→כמו שהוא, טבלה→CSV, מסמך→HTML/Word
+  function dcDownloadFile(fid, fileId){
+    const found = dcFindFile(fid, fileId); if(!found || !found.file) return;
+    const file = found.file;
+    if(file.kind==='upload'){ dcDownloadDataUrl(file.data, file.name); return; }
+    if(file.kind==='sheet'){
+      const st = file.sheet || { rows:0, cols:0, cells:{} };
+      const lines = [];
+      for(let r=0;r<st.rows;r++){ const row=[]; for(let cix=0;cix<st.cols;cix++) row.push(st.cells[r+'_'+cix]||''); lines.push(row); }
+      const csv = lines.map(row=>row.map(f=>'"'+String(f).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+      const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+      _dlBlob(blob, (file.name||'טבלה')+'.csv'); return;
+    }
+    // doc → קובץ Word (HTML עם כותרת msword). Word פותח את זה כמסמך.
+    const html = '<!DOCTYPE html><html dir="rtl"><head><meta charset="utf-8"></head><body style="font-family:Arial,\'Noto Sans Hebrew\',sans-serif;direction:rtl">'+(file.content||'')+'</body></html>';
+    const blob = new Blob(['﻿'+html], {type:'application/msword;charset=utf-8;'});
+    _dlBlob(blob, (file.name||'מסמך')+'.doc');
+  }
+
+  function renderCollectionBody(body){
+    let totalInvoiced=0, totalOwed=0, totalPaid=0, unpaidCount=0;
+    clients.forEach(c=>{ const s=collectionStatus(c); if(s.hasInvoice){ const e=dcEntry(c.id); totalInvoiced+=s.invoiced; totalPaid+=s.received; if(!dcIsHandled(c,e) && s.balance>0.01){ totalOwed+=s.balance; unpaidCount++; } } });
+    const gvHead = document.getElementById('dcGvHead'); const gvCount = gvHead && gvHead.querySelector('.count'); if(gvCount) gvCount.textContent = unpaidCount;
+    body.innerHTML =
+      `<div class="dc-inner">
+        <div class="dc-summary">
+          <div class="dc-sum"><div class="dc-sum-num total" id="dcSumInvoiced">₪${Math.round(totalInvoiced)}</div><div class="dc-sum-label">סה״כ חשבוניות</div></div>
+          <div class="dc-sum"><div class="dc-sum-num owed" id="dcSumOwed">₪${Math.round(totalOwed)}</div><div class="dc-sum-label">חוב פתוח</div></div>
+          <div class="dc-sum"><div class="dc-sum-num paid" id="dcSumPaid">₪${Math.round(totalPaid)}</div><div class="dc-sum-label">נגבה</div></div>
+          <div class="dc-sum"><div class="dc-sum-num" id="dcSumWait">${unpaidCount}</div><div class="dc-sum-label">ממתינים</div></div>
+        </div>
+        <div class="dc-toolbar">
+          <input type="text" class="dc-search" id="dcSearch" placeholder="חיפוש לקוח..." value="${escapeHtml(_dcSearch)}">
+          <button type="button" class="dc-tool-btn" id="dcExport">⤓ ייצוא CSV</button>
+        </div>
+        <div id="dcRows"></div>
+      </div>`;
+    const searchEl = document.getElementById('dcSearch');
+    if(searchEl){ searchEl.addEventListener('input', ()=>{ _dcSearch = searchEl.value; renderCollectionRows(); }); }
+    const exportEl = document.getElementById('dcExport');
+    if(exportEl) exportEl.addEventListener('click', dcExportCsv);
+    renderCollectionRows();
+  }
+
+  function collectionRowHtml(r){
+    const { c, e, s } = r;
+    const handled = dcIsHandled(c, e);
+    const invDate = dcInvoiceDate(c); // תאריך הוצאת החשבונית — אוטומטי מהחשבונית
+    const name = escapeHtml(c.business || c.name || 'לקוח');
+    const badge = !s.hasInvoice ? '<span class="dc-badge none">אין חשבונית</span>'
+      : handled ? '<span class="dc-badge paidb">שולם</span>'
+      : ('<span class="dc-badge owed">חוב ₪' + Math.round(s.balance) + '</span>');
+    const bell = (e.reminder && !handled) ? ('<span class="dc-bell" title="תזכורת">' + DC_BELL2_SVG + '</span>') : '';
+    const expanded = _dcExpanded.has(c.id);
+    const remOpts = DC_REMINDER_OPTS.map(o=>`<option value="${o[0]}"${(+e.reminder===o[0])?' selected':''}>${o[1]}</option>`).join('');
+    const manualVal = e.handledManual===true?'done':(e.handledManual===false?'open':'auto');
+    // מסמכים לפי תאריך (הזמנות + חשבוניות + קבלות) — לחיצים לפתיחת המסמך הרשמי
+    const docs = []
+      .concat((c.orders||[]).filter(o=>o&&!o.noOrder).map(o=>({type:'order', id:o.id, num:o.num, date:o.date, total:dcNum(o.total)})))
+      .concat((c.invoices||[]).map(i=>({type:'invoice', id:i.id, num:i.num, date:i.date, total:dcNum(i.total), signed:!!i.signature})))
+      .concat((c.receipts||[]).map(rr=>({type:'receipt', id:rr.id, num:rr.num, date:rr.date, total:dcNum(rr.total)})))
+      .sort((a,b)=> String(b.date||'').localeCompare(String(a.date||'')));
+    const dcTypeLabel = t => t==='order'?'הזמנה':t==='invoice'?'חשבונית':'קבלה';
+    const dcTypeCls   = t => t==='order'?'d-ord':t==='invoice'?'d-inv':'d-rec';
+    const docsHtml = docs.length ? docs.map(d=>`<div class="dc-doc-line" data-doc-open="${escapeHtml(String(d.id||''))}" data-doc-type="${d.type}" role="button" tabindex="0" title="פתיחת המסמך"><span class="dc-doc-tag ${dcTypeCls(d.type)}">${dcTypeLabel(d.type)} #${escapeHtml(String(d.num||''))}</span>${(d.type==='invoice'&&!d.signed)?'<span class="dc-doc-unsigned">טרם נחתם</span>':''}<span class="dc-doc-date">${escapeHtml(formatDocDate(d.date))}</span><span class="dc-doc-amt">₪${d.total.toFixed(0)}</span></div>`).join('') : '<div class="dc-doc-empty">אין הזמנות/חשבוניות/קבלות ללקוח זה.</div>';
+    // קבצים שצורפו ידנית (PDF/תמונה) — "העלאת קובץ מוכן"
+    const atts = Array.isArray(e.attachments) ? e.attachments : [];
+    const attHtml = atts.length ? atts.map(a=>`<div class="dc-att-line" data-att-id="${escapeHtml(String(a.id||''))}"><span class="dc-att-ic">${(a.mime||'').indexOf('pdf')>=0?DC_PDF_SVG:DC_IMG_SVG}</span><span class="dc-att-name">${escapeHtml(a.name||'קובץ')}</span><button type="button" class="dc-att-dl" title="הורדה">${DC_DL_SVG}</button><button type="button" class="dc-att-del" title="מחיקה">${DC_TRASH_SVG}</button></div>`).join('') : '<div class="dc-doc-empty">לא צורפו קבצים.</div>';
+    return `<div class="dc-row${handled?' paid':''}${expanded?' expanded':''}" data-id="${escapeHtml(c.id)}">
+      <div class="dc-row-top">
+        <div class="dc-row-name">${name}${bell}</div>
+        ${badge}
+        <button type="button" class="dc-row-toggle" title="פרטים">${CHEVRON_ICON_SVG}</button>
+      </div>
+      <div class="dc-fields animated-collapse${expanded?' is-open':''}">
+        <div class="dc-field"><label>תאריך הוצאת החשבונית</label><div class="dc-readonly" title="מתעדכן אוטומטית מהחשבונית">${invDate?escapeHtml(formatDocDate(invDate)):'—'}</div></div>
+        <div class="dc-field"><label>תאריך תשלום</label><input type="date" class="dc-due" value="${escapeHtml(e.dueDate||'')}"></div>
+        <div class="dc-field"><label>תזכורת</label><select class="dc-rem">${remOpts}</select></div>
+        <div class="dc-field"><label>סטטוס</label><select class="dc-manual"><option value="auto"${manualVal==='auto'?' selected':''}>אוטומטי (לפי קבלות)</option><option value="open"${manualVal==='open'?' selected':''}>לא טופל</option><option value="done"${manualVal==='done'?' selected':''}>טופל</option></select></div>
+        <div class="dc-field full"><label>הערה</label><input type="text" class="dc-note" value="${escapeHtml(e.note||'')}" placeholder="הערה חופשית..."></div>
+        <div class="dc-docs"><div class="dc-docs-title">הזמנות · חשבוניות · קבלות (לחצו לפתיחה)</div>${docsHtml}</div>
+        <div class="dc-docs dc-attach"><div class="dc-docs-title">קבצים מצורפים</div>${attHtml}<label class="dc-attach-add">＋ צרף קובץ (PDF/תמונה)<input type="file" class="dc-attach-input" accept="application/pdf,image/*" hidden></label></div>
+      </div>
+    </div>`;
+  }
+
+  function collectionRows(){
+    const rows = clients.map(c=>({ c, e: dcEntry(c.id), s: collectionStatus(c) }));
+    rows.forEach(r=> r.handled = dcIsHandled(r.c, r.e));
+    const q = _dcSearch.trim().toLowerCase();
+    const filtered = q ? rows.filter(r => (r.c.business||r.c.name||'').toLowerCase().includes(q)) : rows;
+    // דירוג: חוב פתוח (0) → אין חשבונית (1) → טופל/שולם (2, לתחתית)
+    const rank = r => r.handled ? 2 : (r.s.hasInvoice ? 0 : 1);
+    filtered.sort((a,b)=>{
+      const ra = rank(a), rb = rank(b);
+      if(ra !== rb) return ra - rb;
+      const ad = a.e.dueDate || '9999-99-99', bd = b.e.dueDate || '9999-99-99';
+      if(ad !== bd) return ad < bd ? -1 : 1;                    // הקרוב לתשלום קודם
+      return (a.c.business||a.c.name||'').localeCompare(b.c.business||b.c.name||'');
+    });
+    return filtered;
+  }
+
+  function renderCollectionRows(){
+    const rowsHost = document.getElementById('dcRows');
+    if(!rowsHost) return;
+    const filtered = collectionRows();
+    rowsHost.innerHTML = filtered.length ? filtered.map(collectionRowHtml).join('') : '<div class="dc-empty">אין לקוחות להצגה.</div>';
+    rowsHost.querySelectorAll('.dc-row').forEach(row=>{
+      const id = row.dataset.id;
+      const e = dcEntry(id);
+      // לחיצה בכל מקום על ראש הכרטיס פותחת/סוגרת באנימציה (אותה שפת animated-collapse של המערכת)
+      row.querySelector('.dc-row-top').addEventListener('click', ()=>{
+        const willExpand = !_dcExpanded.has(id);
+        if(willExpand) _dcExpanded.add(id); else _dcExpanded.delete(id);
+        row.classList.toggle('expanded', willExpand);
+        toggleAnimatedCollapse(row.querySelector('.dc-fields'), null);
+      });
+      const c = clients.find(x=>String(x.id)===String(id));
+      const due = row.querySelector('.dc-due'),
+            rem = row.querySelector('.dc-rem'), manual = row.querySelector('.dc-manual'), note = row.querySelector('.dc-note');
+      // עדכון בכל שינוי — במקום רינדור מלא שמרנדר מחדש וממיין (מה שהיה מקפיץ/סוגר את הכרטיס).
+      // הערכים נשמרים והתצוגה מתעדכנת במקום; המיון מתרענן בפתיחה הבאה של התיקייה.
+      // "תאריך הוצאת החשבונית" אוטומטי מהחשבונית — אין שדה ידני. מזינים רק "תאריך תשלום".
+      due.addEventListener('change', ()=>{ e.dueDate = due.value; e.notified = false; saveDocCollections(); });
+      rem.addEventListener('change', ()=>{ e.reminder = parseInt(rem.value,10)||0; e.notified = false; if(e.reminder) dcEnsureNotify(); saveDocCollections(); dcRefreshRowChrome(row, c, e); });
+      manual.addEventListener('change', ()=>{ e.handledManual = manual.value==='done'?true:(manual.value==='open'?false:null); saveDocCollections(); dcRefreshRowChrome(row, c, e); dcRefreshSummary(); });
+      note.addEventListener('input', ()=>{ e.note = note.value; saveDocCollections(); });
+      row.querySelectorAll('.dc-doc-line[data-doc-open]').forEach(line=>{
+        const openDoc = ()=>{
+          if(!c) return;
+          const dt = line.dataset.docType, did = line.dataset.docOpen;
+          let doc = null;
+          if(dt==='order') doc = (c.orders||[]).find(o=>String(o.id)===String(did));
+          else if(dt==='invoice') doc = (c.invoices||[]).find(d=>String(d.id)===String(did));
+          else if(dt==='receipt') doc = (c.receipts||[]).find(d=>String(d.id)===String(did));
+          if(doc && typeof openSignableDoc==='function') openSignableDoc(c, dt, doc);
+        };
+        line.addEventListener('click', openDoc);
+        line.addEventListener('keydown', ev=>{ if(ev.key==='Enter'||ev.key===' '){ ev.preventDefault(); openDoc(); } });
+      });
+      // צירוף קובץ מוכן (PDF/תמונה)
+      const attInput = row.querySelector('.dc-attach-input');
+      if(attInput) attInput.addEventListener('change', ()=>{
+        const f = attInput.files && attInput.files[0]; if(!f) return;
+        if(f.size > 4*1024*1024){ alert('הקובץ גדול מדי (מקסימום 4MB). כדאי לצרף PDF/תמונה קטנים יותר.'); attInput.value=''; return; }
+        const reader = new FileReader();
+        reader.onload = ()=>{
+          e.attachments.push({ id: dcUid(), name: f.name, mime: f.type||'application/octet-stream', data: reader.result, addedAt: (typeof localDateString==='function'?localDateString():'') });
+          saveDocCollections(); renderCollectionRows();
+        };
+        reader.readAsDataURL(f);
+      });
+      row.querySelectorAll('.dc-att-line').forEach(al=>{
+        const aid = al.dataset.attId;
+        const dl = al.querySelector('.dc-att-dl'), del = al.querySelector('.dc-att-del');
+        if(dl) dl.addEventListener('click', ()=>{ const a = e.attachments.find(x=>String(x.id)===String(aid)); if(a) dcDownloadDataUrl(a.data, a.name); });
+        if(del) del.addEventListener('click', ()=>{ if(confirm('למחוק את הקובץ המצורף?')){ e.attachments = e.attachments.filter(x=>String(x.id)!==String(aid)); saveDocCollections(); renderCollectionRows(); } });
+      });
+    });
+  }
+  // עדכון תג/פעמון/מצב-שולם של שורה בודדת במקום, בלי לרנדר ולמיין מחדש (מונע קפיצה/סגירה של הכרטיס)
+  function dcRefreshRowChrome(row, c, e){
+    if(!row || !c) return;
+    const s = collectionStatus(c);
+    const handled = dcIsHandled(c, e);
+    const badgeEl = row.querySelector('.dc-badge');
+    if(badgeEl){
+      if(!s.hasInvoice){ badgeEl.className = 'dc-badge none'; badgeEl.textContent = 'אין חשבונית'; }
+      else if(handled){ badgeEl.className = 'dc-badge paidb'; badgeEl.textContent = 'שולם'; }
+      else { badgeEl.className = 'dc-badge owed'; badgeEl.textContent = 'חוב ₪' + Math.round(s.balance); }
+    }
+    row.classList.toggle('paid', handled);
+    const nameEl = row.querySelector('.dc-row-name');
+    if(nameEl){
+      let bell = nameEl.querySelector('.dc-bell');
+      const wantBell = e.reminder && !handled;
+      if(wantBell && !bell) nameEl.insertAdjacentHTML('beforeend', '<span class="dc-bell" title="תזכורת">' + DC_BELL2_SVG + '</span>');
+      else if(!wantBell && bell) bell.remove();
+    }
+  }
+  // עדכון פסי הסיכום + מונה תיקיית גבייה במקום
+  function dcRefreshSummary(){
+    let totalInvoiced=0, totalOwed=0, totalPaid=0, unpaidCount=0;
+    clients.forEach(c=>{ const s=collectionStatus(c); if(s.hasInvoice){ const e=dcEntry(c.id); totalInvoiced+=s.invoiced; totalPaid+=s.received; if(!dcIsHandled(c,e) && s.balance>0.01){ totalOwed+=s.balance; unpaidCount++; } } });
+    const iv=document.getElementById('dcSumInvoiced'); if(iv) iv.textContent='₪'+Math.round(totalInvoiced);
+    const o=document.getElementById('dcSumOwed'); if(o) o.textContent='₪'+Math.round(totalOwed);
+    const p=document.getElementById('dcSumPaid'); if(p) p.textContent='₪'+Math.round(totalPaid);
+    const w=document.getElementById('dcSumWait'); if(w) w.textContent=unpaidCount;
+    const gvHead=document.getElementById('dcGvHead'); const gc=gvHead&&gvHead.querySelector('.count'); if(gc) gc.textContent=unpaidCount;
+  }
+  function dcUid(){ return 'd' + Math.abs((Date.now()^(performance.now()*1000|0))>>>0).toString(36) + Math.floor(performance.now()%1000).toString(36); }
+  function dcDownloadDataUrl(dataUrl, filename){
+    try{
+      const a = document.createElement('a'); a.href = dataUrl; a.download = filename||'file';
+      document.body.appendChild(a); a.click(); a.remove();
+    }catch(err){ alert('שגיאה בהורדה: ' + err.message); }
+  }
+
+  function dcExportCsv(){
+    const header = ['לקוח','תאריך הוצאת החשבונית','תאריך תשלום','חשבונית','נגבה','חוב','סטטוס','הערה'];
+    const lines = [header];
+    collectionRows().forEach(r=>{
+      const s = r.s, handled = r.handled;
+      lines.push([ (r.c.business||r.c.name||''), dcInvoiceDate(r.c)||'', r.e.dueDate||'', s.invoiced.toFixed(2), s.received.toFixed(2), s.balance.toFixed(2), handled?'שולם':(s.hasInvoice?'חוב פתוח':'אין חשבונית'), (r.e.note||'') ]);
+    });
+    const csv = lines.map(row=>row.map(f=>'"'+String(f).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+    try{
+      const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'גבייה_'+localDateString()+'.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 1500);
+    }catch(e){ alert('שגיאה בייצוא: ' + e.message); }
+  }
+
+  function dcEnsureNotify(){ try{ if('Notification' in window && Notification.permission==='default') Notification.requestPermission(); }catch(_){} }
+  function dcCheckReminders(){
+    if(!docCollections || !docCollections.entries) return;
+    const today = localDateString(); let changed = false;
+    clients.forEach(c=>{
+      const e = docCollections.entries[c.id];
+      if(!e || !e.reminder || !e.dueDate || e.notified) return;
+      if(dcIsHandled(c, e)) return; // כבר שולם — לא צריך תזכורת
+      const d = new Date(e.dueDate); if(isNaN(d.getTime())) return;
+      d.setDate(d.getDate() - e.reminder);
+      const fireDate = localDateString(d);
+      if(today >= fireDate){
+        e.notified = true; changed = true;
+        const name = c.business || c.name || 'לקוח';
+        const body = 'תשלום מ' + name + ' עד ' + e.dueDate + (typeof e.note==='string' && e.note ? (' · ' + e.note) : '');
+        let shown = false;
+        try{ if('Notification' in window && Notification.permission==='granted'){ new Notification('תזכורת גבייה 💰', { body }); shown = true; } }catch(_){}
+        if(!shown && typeof jrToast === 'function') jrToast('תזכורת גבייה — ' + body);
+      }
+    });
+    if(changed){ try{ saveDocCollections(); }catch(_){} }
+  }
+  setInterval(dcCheckReminders, 60000);
+
   function switchView(view){
-    if(!['customers','products','orders','settings','inventories','journal'].includes(view)) return;
+    if(!['customers','products','orders','settings','inventories','journal','documents'].includes(view)) return;
     currentView = view;
     if(view !== 'inventories') stopInventoryBalls(); // עוזבים עמוד עם כדורים → עוצרים
     hideAllViews();
@@ -7981,6 +8716,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     } else if(view === 'journal'){
       journalViewEl.classList.remove('view-hidden');
       renderJournalView();
+    } else if(view === 'documents'){
+      documentsViewEl.classList.remove('view-hidden');
+      renderDocumentsView();
     } else if(view === 'orders'){
       ordersViewEl.classList.remove('view-hidden');
       renderOrdersView();
@@ -7999,6 +8737,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   viewOrdersItem.addEventListener('click', ()=>{ ordEditingOrderId = null; switchView('orders'); closeSideMenu(); });
   viewInventoriesItem.addEventListener('click', ()=>{ switchView('inventories'); closeSideMenu(); });
   viewJournalItem.addEventListener('click', ()=>{ switchView('journal'); closeSideMenu(); });
+  viewDocumentsItem.addEventListener('click', ()=>{ switchView('documents'); closeSideMenu(); });
   settingsMenuItem.addEventListener('click', ()=>{ switchView('settings'); closeSideMenu(); });
 
   // ---- settings page: agents management ----
@@ -10780,7 +11519,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     _rtRunning = true;
     try{
       try{ await saveDataQueue; }catch(_){}   // לא להתנגש עם שמירה מקומית שרצה
-      await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal()]);
+      await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal(), loadDocCollections()]);
       try{ populateBusinessDetails(); }catch(_){}
       try{ applySettingsPanelOrder(); }catch(_){}
       try{ applyInventoryPanelOrder(); }catch(_){}
@@ -10793,7 +11532,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   (async function init(){
     await authReady; // אתחול האפליקציה מתחיל רק אחרי התחברות והגדרת הארגון
-    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal()]);
+    await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal(), loadDocCollections()]);
     populateBusinessDetails();
     applySettingsPanelOrder();
     applyInventoryPanelOrder();
@@ -10805,7 +11544,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const bounds = renderAll();
     // belt-and-suspenders: force every folder/cluster body closed on first load,
     // no matter what caused it to render open
-    document.querySelectorAll(':is(#folderList, #clusterList, #searchResults) .cluster-body.animated-collapse').forEach(b => { b.classList.remove('is-open'); b.style.maxHeight = '0px'; });
+    document.querySelectorAll(':is(#folderList, #clusterList, #searchResults, #docFolderList) .cluster-body.animated-collapse').forEach(b => { b.classList.remove('is-open'); b.style.maxHeight = '0px'; });
     if(clients.length){
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
     }
