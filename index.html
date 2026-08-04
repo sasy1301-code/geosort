@@ -2222,14 +2222,15 @@
     if(!overlay || !van) return;
     let W = overlay.clientWidth || window.innerWidth;
     let H = overlay.clientHeight || window.innerHeight;
-    // מצב הרכב
-    let x = W * 0.5, y = H * 0.72;      // מיקום
-    let angle = -Math.PI / 2;            // כיוון נסיעה (מתחיל כלפי מעלה)
-    let speed = 0;                       // מהירות נוכחית
-    let tx = x, ty = y * 0.6;            // יעד
+    // מצב הרכב — נכנס מלמעלה אל תוך המסך
+    let x = W * 0.5, y = -90;            // מתחיל מעל המסך
+    let angle = Math.PI / 2;             // כיוון נסיעה כלפי מטה (כניסה מלמעלה)
+    let speed = 2.4;                     // מהירות התחלתית לכניסה חלקה
+    let tx = W * 0.5, ty = H * 0.5;      // יעד ראשוני — מרכז המסך
     let pointerActive = false;
     let lastMove = 0;
     let started = false;
+    let entered = false;               // האם הרכב כבר נכנס אל תוך המסך
 
     function measure(){ W = overlay.clientWidth || window.innerWidth; H = overlay.clientHeight || window.innerHeight; }
     window.addEventListener('resize', measure);
@@ -2273,10 +2274,13 @@
       x += Math.cos(angle) * speed * dt;
       y += Math.sin(angle) * speed * dt;
 
-      // שמירה בתוך גבולות המסך
+      // שמירה בתוך גבולות המסך — מופעל רק אחרי שהרכב נכנס אל המסך מלמעלה
       const m = 30;
-      if(x < m){ x = m; } if(x > W - m){ x = W - m; }
-      if(y < m){ y = m; } if(y > H - m){ y = H - m; }
+      if(!entered && y > m + 20){ entered = true; }
+      if(entered){
+        if(x < m){ x = m; } if(x > W - m){ x = W - m; }
+        if(y < m){ y = m; } if(y > H - m){ y = H - m; }
+      }
 
       const deg = angle * 180 / Math.PI + 90; // הציור מכוון כלפי מעלה כברירת מחדל
       van.style.left = x + 'px';
@@ -8526,7 +8530,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const folder = liveFolder(); if(!folder) return;
         const file = (folder.files||[]).find(x=>x.id===fileId); if(!file) return;
         if(file.kind==='sheet' || file.kind==='doc') openDocFileEditor(fid, fileId);
-        else dcDownloadFile(fid, fileId);
+        else dcOpenUpload(file);
       });
     });
     // עיפרון = שינוי שם בעריכה במקום (בלי לפתוח את הקובץ)
@@ -8907,11 +8911,39 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const gvHead=document.getElementById('dcGvHead'); const gc=gvHead&&gvHead.querySelector('.count'); if(gc) gc.textContent=unpaidCount;
   }
   function dcUid(){ return 'd' + Math.abs((Date.now()^(performance.now()*1000|0))>>>0).toString(36) + Math.floor(performance.now()%1000).toString(36); }
+  // המרת data-URL ל-Blob (אמין ב-webview של iOS, בניגוד ל-<a download> עם data-URL)
+  function dcDataUrlToBlob(dataUrl){
+    const comma = dataUrl.indexOf(','); const meta = dataUrl.slice(0, comma); const body = dataUrl.slice(comma+1);
+    const mime = (meta.match(/data:([^;]+)/) || [,'application/octet-stream'])[1];
+    if(/;base64/i.test(meta)){
+      const bin = atob(body); const len = bin.length; const arr = new Uint8Array(len);
+      for(let i=0;i<len;i++) arr[i] = bin.charCodeAt(i);
+      return new Blob([arr], { type:mime });
+    }
+    return new Blob([decodeURIComponent(body)], { type:mime });
+  }
+  // פתיחת קובץ שהועלה: תמונה נפתחת בתוך האפליקציה, כל שאר הסוגים נפתחים בצפייה — בלי לנווט את האפליקציה
+  function dcOpenUpload(file){
+    if(!file || !file.data) return;
+    const mime = file.mime || '';
+    if(mime.indexOf('image/') === 0){ openPhotoModal(file.data); return; }
+    let url = null;
+    try{ url = URL.createObjectURL(dcDataUrlToBlob(file.data)); }catch(_){ url = null; }
+    if(url){
+      const w = window.open(url, '_blank');
+      if(!w){ const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; document.body.appendChild(a); a.click(); a.remove(); }
+      setTimeout(()=>{ try{ URL.revokeObjectURL(url); }catch(_){} }, 60000);
+      return;
+    }
+    dcDownloadDataUrl(file.data, file.name);
+  }
   function dcDownloadDataUrl(dataUrl, filename){
     try{
-      const a = document.createElement('a'); a.href = dataUrl; a.download = filename||'file';
-      document.body.appendChild(a); a.click(); a.remove();
-    }catch(err){ alert('שגיאה בהורדה: ' + err.message); }
+      _dlBlob(dcDataUrlToBlob(dataUrl), filename||'file');
+    }catch(err){
+      try{ const a = document.createElement('a'); a.href = dataUrl; a.download = filename||'file'; document.body.appendChild(a); a.click(); a.remove(); }
+      catch(e){ alert('שגיאה בהורדה: ' + e.message); }
+    }
   }
 
   function dcExportCsv(){
