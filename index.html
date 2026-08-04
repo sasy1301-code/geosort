@@ -204,14 +204,10 @@
   .sys-icon-disc:hover{ transform:scale(var(--hscale)); }                  /* only the disc grows */
   .sys-icon-disc:hover > svg{ transform:scale(calc(1 / var(--hscale))); }  /* icon stays the same size */
   /* side-menu icons follow the disc standard (27px icon → 43px disc) */
-  .side-menu-item .icon{ width:43px; height:43px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; background:#091321; border-radius:50%; transition:transform .15s ease; }
-  .side-menu-item .icon svg{ width:27px; height:27px; display:block; fill:#0277fb; transform:translateY(var(--ny,0px)); transition:transform .15s ease; }
-  /* hover grow (disc +5px, icon counter-scaled) — ONLY on real mouse pointers, so a tap on
-     touch never leaves the button stuck enlarged */
-  @media (hover:hover) and (pointer:fine){
-    .side-menu-item:hover .icon{ transform:scale(1.116); }
-    .side-menu-item:hover .icon svg{ transform:translateY(var(--ny,0px)) scale(.896); }
-  }
+  .side-menu-item .icon{ width:43px; height:43px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; background:#091321; border-radius:50%; transition:none; }
+  .side-menu-item .icon svg{ width:27px; height:27px; display:block; fill:#0277fb; transform:translateY(var(--ny,0px)); transition:fill .15s ease; }
+  /* ללא הגדלה בכלל — רק שינוי צבע ב-hover */
+  .side-menu-item:hover .icon svg{ fill:#2f7cf6; }
   /* optical centering: these icons are bounding-box-centered but their painted mass sits low/high,
      so a tiny per-icon --ny nudge brings the *visual* centre onto the disc centre. A NEW icon
      defaults to 0 (no nudge); measure it and set --ny only if it looks off. */
@@ -8284,6 +8280,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const DC_SHEET_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm-9 16H5v-4h5v4zm0-6H5V9h5v4zm0-6H5V5h5v2zm9 12h-7v-4h7v4zm0-6h-7V9h7v4zm0-6h-7V5h7v2z"/></svg>`;
   const DC_DOC_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm2 16H8v-1.5h8V18zm0-4H8v-1.5h8V14zm-3-4H8V8.5h5V10zm0-3.5V3.5L18.5 9H13z"/></svg>`;
   const DC_PLUS_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>`;
+  // אייקון Google Sheets (ירוק) לקבצי גיליון מקושר
+  const DC_GSHEET_SVG = `<svg viewBox="0 0 24 24" fill="#0f9d58"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-.5 5.5V3.5L18 8h-4a.5.5 0 0 1-.5-.5z" opacity=".55"/><path fill="#0f9d58" d="M8 11h8v1.6H8zM8 14.2h8v1.6H8zM8 17.4h5v1.6H8z"/></svg>`;
+  // אייקון קישור (עריכת קישור לגיליון)
+  const DC_LINK_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>`;
   const DC_REMINDER_OPTS = [[0,'ללא'],[1,'יום לפני'],[2,'יומיים לפני'],[3,'3 ימים לפני'],[7,'שבוע לפני']];
   let _dcOpen = false, _dcSearch = '';
   const _dcExpanded = new Set();
@@ -8472,14 +8472,18 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const f = docCollections.folders.find(x=>x.id===fid); if(!f) return;
     if(!Array.isArray(f.files)) f.files = [];
     const filesHtml = f.files.length ? f.files.slice().sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||''))).map(file=>{
-      const ic = file.kind==='sheet'?DC_SHEET_SVG : file.kind==='doc'?DC_DOC_SVG : (String(file.mime||'').indexOf('sheet')>=0||/xls/i.test(file.name||'')?DC_SHEET_SVG:DC_DOC_SVG);
-      const kindTxt = file.kind==='sheet'?'טבלה' : file.kind==='doc'?'מסמך' : 'קובץ שהועלה';
-      const canEdit = (file.kind==='sheet'||file.kind==='doc');
+      const isG = file.kind==='gsheet';
+      const ic = isG?DC_GSHEET_SVG : file.kind==='sheet'?DC_SHEET_SVG : file.kind==='doc'?DC_DOC_SVG : (String(file.mime||'').indexOf('sheet')>=0||/xls/i.test(file.name||'')?DC_SHEET_SVG:DC_DOC_SVG);
+      const kindTxt = isG?'Google Sheets' : file.kind==='sheet'?'טבלה' : file.kind==='doc'?'מסמך' : 'קובץ שהועלה';
+      // כפתור אמצעי: לגיליון מקושר = עריכת קישור, אחרת = הורדה
+      const midBtn = isG
+        ? `<button type="button" class="dc-file-btn" data-flink="${escapeHtml(file.id)}" title="עריכת קישור">${DC_LINK_SVG}</button>`
+        : `<button type="button" class="dc-file-btn" data-fdlfile="${escapeHtml(file.id)}" title="הורדה">${DC_DL_SVG}</button>`;
       return `<div class="dc-file" data-file="${escapeHtml(file.id)}" data-kind="${escapeHtml(file.kind||'')}">
         <span class="dc-file-ic">${ic}</span>
         <div class="dc-file-main"><div class="dc-file-name">${escapeHtml(file.name||'קובץ')}</div><div class="dc-file-meta">${kindTxt}${file.updatedAt?(' · '+escapeHtml(file.updatedAt)):''}</div></div>
         <button type="button" class="dc-file-btn" data-frename="${escapeHtml(file.id)}" title="שינוי שם">${DC_EDIT_SVG}</button>
-        <button type="button" class="dc-file-btn" data-fdlfile="${escapeHtml(file.id)}" title="הורדה">${DC_DL_SVG}</button>
+        ${midBtn}
         <button type="button" class="dc-file-btn" data-fdelfile="${escapeHtml(file.id)}" title="מחיקה">${DC_TRASH_SVG}</button>
       </div>`;
     }).join('') : '<div class="dc-doc-empty">אין קבצים בתיקייה. הוסיפו קובץ חדש למטה.</div>';
@@ -8488,6 +8492,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         <div class="dc-file-list">${filesHtml}</div>
         <div class="dc-addfile-row">
           <button type="button" class="dc-addfile" data-add="sheet" data-fid="${escapeHtml(fid)}">${DC_SHEET_SVG}<span>טבלה (אקסל)</span></button>
+          <button type="button" class="dc-addfile" data-add="gsheet" data-fid="${escapeHtml(fid)}">${DC_GSHEET_SVG}<span>Google Sheets</span></button>
           <button type="button" class="dc-addfile" data-add="doc" data-fid="${escapeHtml(fid)}">${DC_DOC_SVG}<span>מסמך (וורד)</span></button>
           <label class="dc-addfile" title="העלאת קובץ קיים">${DC_DL_SVG}<span>העלאת קובץ</span><input type="file" class="dc-upload-input" data-fid="${escapeHtml(fid)}" accept=".xlsx,.xls,.csv,.doc,.docx,.pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden></label>
         </div>
@@ -8500,6 +8505,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const folder = liveFolder(); if(!folder) return;
       if(!Array.isArray(folder.files)) folder.files = [];
       const kind = btn.dataset.add;
+      // Google Sheets: נוצר כרטיס מקושר ונפתח שדה להדבקת הקישור (בלי prompt החסום ב-webview)
+      if(kind==='gsheet'){
+        const gf = { id:dcUid(), name:'Google Sheets', kind:'gsheet', url:'', updatedAt:(typeof localDateString==='function'?localDateString():'') };
+        folder.files.push(gf); saveDocCollections();
+        renderCustomFolderBody(body, fid);
+        const el = body.querySelector('.dc-file[data-file="'+cssEsc(gf.id)+'"]');
+        dcStartGsheetLink(el, liveFolder(), gf, true);
+        return;
+      }
       // בלי prompt (חסום בחלק מהדפדפנים): נוצר עם שם ברירת מחדל ונפתח העורך — אפשר לשנות שם בשדה שבראש העורך.
       const t = kind==='sheet' ? 'טבלה חדשה' : 'מסמך חדש';
       const file = kind==='sheet'
@@ -8530,6 +8544,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const folder = liveFolder(); if(!folder) return;
         const file = (folder.files||[]).find(x=>x.id===fileId); if(!file) return;
         if(file.kind==='sheet' || file.kind==='doc') openDocFileEditor(fid, fileId);
+        else if(file.kind==='gsheet'){
+          if(file.url){ const w=window.open(file.url,'_blank','noopener'); if(!w){ const a=document.createElement('a'); a.href=file.url; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); } }
+          else dcStartGsheetLink(fileEl, folder, file, true);
+        }
         else dcOpenUpload(file);
       });
     });
@@ -8541,6 +8559,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       dcStartFileRename(b.closest('.dc-file'), folder, file);
     }));
     body.querySelectorAll('[data-fdlfile]').forEach(b=>b.addEventListener('click', e=>{ e.stopPropagation(); dcDownloadFile(fid, b.dataset.fdlfile); }));
+    body.querySelectorAll('[data-flink]').forEach(b=>b.addEventListener('click', e=>{
+      e.stopPropagation();
+      const folder = liveFolder(); if(!folder) return;
+      const file = (folder.files||[]).find(x=>x.id===b.dataset.flink); if(!file) return;
+      dcStartGsheetLink(b.closest('.dc-file'), folder, file, false);
+    }));
     body.querySelectorAll('[data-fdelfile]').forEach(b=>b.addEventListener('click', e=>{
       e.stopPropagation();
       const folder = liveFolder(); if(!folder) return;
@@ -8562,6 +8586,41 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const finish = (save)=>{
       if(done) return; done = true;
       if(save){ const t = (input.value||'').trim(); if(t && t !== file.name){ file.name = t; file.updatedAt = (typeof localDateString==='function'?localDateString():''); saveDocCollections(); } }
+      dcRefreshOpenFolder(folder.id);
+    };
+    input.addEventListener('keydown', ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); finish(true); } else if(ev.key==='Escape'){ ev.preventDefault(); finish(false); } });
+    input.addEventListener('blur', ()=>finish(true));
+    input.addEventListener('click', ev=>ev.stopPropagation());
+  }
+  // הדבקת/עריכת קישור לגיליון Google Sheets בשדה inline (בלי prompt). isNew=כרטיס חדש שנוצר עכשיו.
+  function dcStartGsheetLink(fileEl, folder, file, isNew){
+    if(!fileEl || !folder || !file) return;
+    const mainEl = fileEl.querySelector('.dc-file-main');
+    if(!mainEl || fileEl.querySelector('.dc-gsheet-link-input')) return;
+    const prev = mainEl.innerHTML;
+    const input = document.createElement('input');
+    input.type = 'url'; input.value = file.url || ''; input.className = 'dc-file-rename-input dc-gsheet-link-input';
+    input.placeholder = 'הדביקו קישור ל-Google Sheets…'; input.dir = 'ltr';
+    mainEl.innerHTML = ''; mainEl.appendChild(input);
+    input.focus(); input.select();
+    let done = false;
+    const finish = (save)=>{
+      if(done) return; done = true;
+      if(save){
+        const t = (input.value||'').trim();
+        if(t){
+          file.url = t;
+          // אם השם עדיין ברירת מחדל — נגזור שם קריא מהקישור
+          if(!file.name || file.name==='Google Sheets'){ try{ const u=new URL(t); file.name = 'Google Sheets · '+u.hostname.replace(/^www\./,''); }catch(_){ file.name='Google Sheets'; } }
+          file.updatedAt = (typeof localDateString==='function'?localDateString():'');
+          saveDocCollections();
+        } else if(isNew && !file.url){
+          // כרטיס חדש שנשאר בלי קישור → מבטלים אותו
+          folder.files = (folder.files||[]).filter(x=>x.id!==file.id); saveDocCollections();
+        }
+      } else if(isNew && !file.url){
+        folder.files = (folder.files||[]).filter(x=>x.id!==file.id); saveDocCollections();
+      }
       dcRefreshOpenFolder(folder.id);
     };
     input.addEventListener('keydown', ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); finish(true); } else if(ev.key==='Escape'){ ev.preventDefault(); finish(false); } });
