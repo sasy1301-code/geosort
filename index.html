@@ -871,6 +871,16 @@
     opacity:0; transition:opacity .8s ease; }
   .login-van.driving{ opacity:1; }
   .login-box{ position:relative; z-index:5; width:100%; max-width:340px; box-sizing:border-box; background:#fff; border:1px solid #e3e8f0; border-radius:18px; padding:28px 22px; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.3); }
+  /* התראת כניסה למערכת (למנהל בלבד) */
+  #loginToastWrap{ position:fixed; top:calc(env(safe-area-inset-top,0px) + 14px); left:50%; transform:translateX(-50%); z-index:100001; display:flex; flex-direction:column; gap:8px; align-items:center; width:max-content; max-width:92vw; pointer-events:none; }
+  .login-toast{ pointer-events:auto; display:flex; align-items:center; gap:11px; min-width:250px; max-width:92vw; box-sizing:border-box; padding:11px 12px 11px 14px; border-radius:14px; color:#fff; background:linear-gradient(135deg,#025ffb,#6303ed); border:1px solid rgba(255,255,255,.22); box-shadow:0 12px 34px rgba(0,0,0,.4); opacity:0; transform:translateY(-14px); transition:opacity .3s ease, transform .3s cubic-bezier(.34,1.42,.5,1); }
+  .login-toast.in{ opacity:1; transform:translateY(0); }
+  .login-toast-bell{ font-size:1.15rem; flex:0 0 auto; }
+  .login-toast-main{ flex:1 1 auto; min-width:0; text-align:right; }
+  .login-toast-title{ font-size:.9rem; font-weight:600; line-height:1.25; }
+  .login-toast-time{ font-size:.75rem; opacity:.85; margin-top:1px; }
+  .login-toast-x{ flex:0 0 auto; background:transparent; border:none; color:rgba(255,255,255,.8); font-size:.9rem; cursor:pointer; padding:2px 4px; line-height:1; }
+  .login-toast-x:hover{ color:#fff; }
   .login-title{ font-size:1.35rem; font-weight:700; color:#0f1a2e; margin-bottom:6px; }
   .login-sub{ font-size:.85rem; color:#5b6472; margin-bottom:18px; }
   /* שדות וכפתורים בעמוד הכניסה — כדור (עגולים בצדדים) ובאותו גודל, כמו כפתור שליחת הדו״ח היומי */
@@ -2928,7 +2938,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(error) throw error;
       return data; // null אם עדיין אין ארגון
     }
-    async function proceed(allowCreate){
+    async function proceed(allowCreate, explicitLogin){
       let profile = await resolveProfile();
       if(!profile){
         // יצירת ארגון חדש מותרת אך ורק בהרשמה מפורשת — לעולם לא בהתחברות רגילה,
@@ -2955,6 +2965,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         window.__authGreeting = 'שלום, ' + who;
         const g = document.getElementById('sideMenuGreeting');
         if(g) g.textContent = window.__authGreeting;
+        // רישום כניסה למערכת (המנהל יקבל התראה)
+        recordLoginEvent(who, CURRENT_ROLE, (user && user.email) || '', !!explicitLogin);
       }catch(_){}
       const lo = document.getElementById('logoutMenuItem');
       if(lo && !lo._wired){ lo._wired = true; lo.addEventListener('click', ()=>{ if(confirm('להתנתק מהמערכת?')) window.geosortSignOut(); }); }
@@ -2983,7 +2995,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         }
         const { data:{ session } } = await sb.auth.getSession();
         if(!session){ errEl.textContent = 'נדרש אישור מייל — ודא ש-Confirm email כבוי ב-Supabase.'; return; }
-        await proceed(mode === 'signup'); // יצירת ארגון רק בהרשמה, לא בהתחברות
+        await proceed(mode === 'signup', true); // כניסה מפורשת — נרשמת תמיד ביומן הכניסות
       }catch(err){ errEl.textContent = 'שגיאה: ' + (err && err.message ? err.message : err); passEl.value=''; }
     });
 
@@ -2991,7 +3003,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     (async ()=>{
       try{
         const { data:{ session } } = await sb.auth.getSession();
-        if(session){ await proceed(false); } // סשן קיים — לעולם לא ליצור ארגון חדש
+        if(session){ await proceed(false, false); } // סשן קיים (שחזור ברענון) — לעולם לא ליצור ארגון חדש
       }catch(_){}
     })();
 
@@ -3011,6 +3023,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const CATALOG_KEY = "catalog"; // separate app_storage key so saving the catalog never rewrites the clients blob
   const AGENTS_KEY = "agents_list"; // manager-curated list of sales-agent names used on the orders page
   const MANAGERS_KEY = "managers_list"; // main managers — like agents, but with elevated (future) access
+  const LOGIN_EVENTS_KEY = "login_events"; // יומן כניסות למערכת — מנהל מקבל התראה על כל כניסת סוכן
   const BUSINESS_DETAILS_KEY = "business_details"; // "פרטי העסק שלי" — פרטי העסק של המשתמש שמפעיל את המערכת
   // { categories:[{id,name,order}], subcategories:[{id,categoryId,name,order}],
   //   products:[{id,categoryId,subcategoryId,name,sku,unit,price,imageUrl,note,active,trackStock,order}] }
@@ -3273,6 +3286,83 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     try{ v = (typeof value === 'string') ? JSON.parse(value) : value; }catch(_){ v = value; }
     const { error } = await sb.from('app_data').upsert({ org_id: CURRENT_ORG_ID, key, value: v });
     if(error) throw error;
+  }
+
+  // ===== יומן כניסות + התראות למנהל =====
+  // כל כניסה למערכת נרשמת ב-login_events; המנהל מקבל התראה קופצת על כל כניסת משתמש.
+  let _loginNotifSeed = false;                 // האם כבר "סימנּו" את ההיסטוריה כנצפתה (כדי לא להציף בעבר)
+  async function recordLoginEvent(name, role, email, explicit){
+    try{
+      if(!CURRENT_ORG_ID) return;
+      const now = Date.now();
+      // כניסה מפורשת (הקלדת פרטים) נרשמת תמיד; שחזור-סשן ברענון נרשם לכל היותר פעם ב-8 שעות
+      if(!explicit){
+        let lastLog = 0; try{ lastLog = parseInt(localStorage.getItem('geosort_last_login_log')||'0',10)||0; }catch(_){}
+        if(now - lastLog < 8*60*60*1000) return;
+      }
+      try{ localStorage.setItem('geosort_last_login_log', String(now)); }catch(_){}
+      const raw = await sbGet(LOGIN_EVENTS_KEY);
+      let list = []; if(raw){ try{ list = JSON.parse(raw) || []; }catch(_){ list = []; } }
+      if(!Array.isArray(list)) list = [];
+      list.push({ id:'lg'+now.toString(36)+Math.floor(Math.random()*1e4).toString(36), name:(name||email||'משתמש'), role:(role||''), email:(email||''), ts:now });
+      if(list.length > 80) list = list.slice(list.length-80);  // שומרים 80 אחרונות בלבד
+      await sbSet(LOGIN_EVENTS_KEY, JSON.stringify(list));
+    }catch(e){ console.error('recordLoginEvent', e); }
+  }
+  function _fmtLoginTime(ts){
+    try{
+      const d = new Date(ts), now = new Date();
+      const hh = String(d.getHours()).padStart(2,'0'), mm = String(d.getMinutes()).padStart(2,'0');
+      const sameDay = d.toDateString() === now.toDateString();
+      const y = new Date(now); y.setDate(now.getDate()-1);
+      if(sameDay) return 'היום ' + hh + ':' + mm;
+      if(d.toDateString() === y.toDateString()) return 'אתמול ' + hh + ':' + mm;
+      return String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0') + ' ' + hh + ':' + mm;
+    }catch(_){ return ''; }
+  }
+  function showLoginToast(ev){
+    let wrap = document.getElementById('loginToastWrap');
+    if(!wrap){ wrap = document.createElement('div'); wrap.id = 'loginToastWrap'; document.body.appendChild(wrap); }
+    const roleTxt = (ev.role==='manager'||ev.role==='admin') ? 'מנהל' : 'סוכן';
+    const t = document.createElement('div');
+    t.className = 'login-toast';
+    t.innerHTML =
+      '<span class="login-toast-bell">🔔</span>' +
+      '<div class="login-toast-main">' +
+        '<div class="login-toast-title">'+ escapeHtml(roleTxt+' '+(ev.name||'')) +' נכנס למערכת</div>' +
+        '<div class="login-toast-time">'+ escapeHtml(_fmtLoginTime(ev.ts)) +'</div>' +
+      '</div>' +
+      '<button type="button" class="login-toast-x" aria-label="סגור">✕</button>';
+    wrap.appendChild(t);
+    requestAnimationFrame(()=>t.classList.add('in'));
+    const kill = ()=>{ t.classList.remove('in'); setTimeout(()=>{ try{ t.remove(); }catch(_){} }, 300); };
+    t.querySelector('.login-toast-x').addEventListener('click', kill);
+    setTimeout(kill, 8000);
+    // התראת דפדפן (גם כשלא מסתכלים על המסך) — כמו בתזכורות
+    try{ if('Notification' in window && Notification.permission==='granted'){ new Notification('כניסה למערכת', { body:(roleTxt+' '+(ev.name||''))+' נכנס — '+_fmtLoginTime(ev.ts) }); } }catch(_){}
+  }
+  async function checkLoginNotifications(){
+    try{
+      if(!(CURRENT_ROLE==='manager' || CURRENT_ROLE==='admin')) return;  // רק מנהל מקבל התראות
+      const raw = await sbGet(LOGIN_EVENTS_KEY); if(!raw) return;
+      let list = []; try{ list = JSON.parse(raw) || []; }catch(_){ return; }
+      if(!Array.isArray(list) || !list.length) return;
+      let lastSeen = 0; try{ lastSeen = parseInt(localStorage.getItem('geosort_login_seen_ts')||'0',10)||0; }catch(_){}
+      // בפעם הראשונה אי-פעם על המכשיר — לא מציפים היסטוריה, מסמנים כנצפה עד עכשיו
+      if(!lastSeen){ lastSeen = Date.now(); try{ localStorage.setItem('geosort_login_seen_ts', String(lastSeen)); }catch(_){} _loginNotifSeed = true; return; }
+      let myEmail = ''; try{ const { data:{ user } } = await sb.auth.getUser(); myEmail = ((user&&user.email)||'').toLowerCase(); }catch(_){}
+      const fresh = list.filter(e => e && e.ts > lastSeen && (e.email||'').toLowerCase() !== myEmail);
+      if(!fresh.length) return;
+      fresh.sort((a,b)=>a.ts-b.ts);
+      const maxTs = fresh[fresh.length-1].ts;
+      try{ localStorage.setItem('geosort_login_seen_ts', String(maxTs)); }catch(_){}
+      // עד 5 התראות בודדות; אם יותר — סיכום מרוכז
+      if(fresh.length <= 5){ fresh.forEach(showLoginToast); }
+      else {
+        fresh.slice(-4).forEach(showLoginToast);
+        showLoginToast({ name:'ועוד '+(fresh.length-4)+' כניסות', role:'', ts:maxTs });
+      }
+    }catch(err){ console.error('checkLoginNotifications', err); }
   }
 
   async function loadData(){
@@ -11906,6 +11996,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       try{ if(currentView==='inventories') renderInventoriesView(); }catch(_){}
       try{ if(currentView==='journal') renderJrCalendar(); }catch(_){}
       try{ if(currentView==='documents' && !document.querySelector('.dce-overlay') && !document.querySelector('.dc-file-rename-input') && !document.querySelector('.cluster-rename-input')) renderDocumentsView(); }catch(_){}
+      try{ await checkLoginNotifications(); }catch(_){}  // התראה למנהל על כניסות חדשות
     }catch(e){ console.error('realtime refresh', e); }
     finally{ _rtRunning = false; }
   }
@@ -11930,6 +12021,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
     openDeepLinkedClientIfAny();
     startOrgRealtime(); // מתחילים להאזין לשינויים של שאר המשתמשים בארגון
+    // התראות כניסה למערכת — רק למנהל
+    if(CURRENT_ROLE==='manager' || CURRENT_ROLE==='admin'){
+      try{ if('Notification' in window && Notification.permission==='default') Notification.requestPermission(); }catch(_){}
+      checkLoginNotifications();
+    }
   })();
 
   // if the URL contains ?client=<id>, jump straight to that client: open its
