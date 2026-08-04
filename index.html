@@ -881,6 +881,38 @@
   .login-toast-time{ font-size:.75rem; opacity:.85; margin-top:1px; }
   .login-toast-x{ flex:0 0 auto; background:transparent; border:none; color:rgba(255,255,255,.8); font-size:.9rem; cursor:pointer; padding:2px 4px; line-height:1; }
   .login-toast-x:hover{ color:#fff; }
+  /* ===== עוזר חכם (AI) ===== */
+  #aiFab{ position:fixed; bottom:22px; left:18px; z-index:4000; width:56px; height:56px; border-radius:50%; border:none; cursor:pointer; background:linear-gradient(150deg,#025ffb,#6303ed); box-shadow:0 8px 24px rgba(2,95,251,.42); display:flex; align-items:center; justify-content:center; color:#fff; transition:transform .15s ease; }
+  #aiFab:hover{ transform:scale(1.06); } #aiFab.hidden{ display:none; }
+  #aiFab svg{ width:27px; height:27px; }
+  .ai-panel{ position:fixed; bottom:22px; left:18px; z-index:4001; width:min(380px, calc(100vw - 32px)); height:min(560px, calc(100dvh - 120px)); background:#fff; border-radius:20px; box-shadow:0 22px 64px rgba(0,0,0,.38); display:flex; flex-direction:column; overflow:hidden; border:1px solid #e3e8f0; opacity:0; transform:translateY(24px) scale(.97); transition:opacity .22s ease, transform .22s ease; pointer-events:none; }
+  .ai-panel.open{ opacity:1; transform:none; pointer-events:auto; }
+  .ai-head{ background:linear-gradient(135deg,#025ffb,#6303ed); color:#fff; padding:13px 15px; display:flex; align-items:center; gap:10px; }
+  .ai-ava{ width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.2); display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .ai-ava svg{ width:21px; height:21px; }
+  .ai-head-txt{ flex:1; min-width:0; } .ai-head-txt .ai-ttl{ font-weight:700; font-size:.98rem; } .ai-head-txt .ai-sub{ font-size:.72rem; opacity:.9; }
+  .ai-x{ background:transparent; border:none; color:#fff; font-size:1.15rem; cursor:pointer; padding:2px 6px; }
+  .ai-msgs{ flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:14px; display:flex; flex-direction:column; gap:10px; background:#f6f8fb; }
+  .ai-msg{ max-width:86%; padding:10px 13px; border-radius:15px; font-size:.9rem; line-height:1.55; white-space:pre-wrap; word-break:break-word; }
+  .ai-msg.user{ align-self:flex-start; background:linear-gradient(135deg,#025ffb,#3b18e0); color:#fff; border-bottom-right-radius:5px; }
+  .ai-msg.bot{ align-self:flex-end; background:#fff; color:#1c2733; border:1px solid #e7ecf3; border-bottom-left-radius:5px; }
+  .ai-msg.bot b{ color:#0f1a2e; }
+  .ai-card{ align-self:stretch; background:#fff; border:1px solid #e7ecf3; border-radius:13px; padding:9px 11px; display:flex; align-items:center; gap:10px; }
+  .ai-card-ic{ width:34px; height:34px; border-radius:9px; background:rgba(2,95,251,.1); color:#025ffb; display:flex; align-items:center; justify-content:center; flex:0 0 auto; }
+  .ai-card-ic svg{ width:18px; height:18px; }
+  .ai-card-main{ flex:1; min-width:0; }
+  .ai-card-t{ font-weight:600; font-size:.87rem; color:#0f1a2e; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ai-card-s{ font-size:.74rem; color:#8a93a5; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ai-open-btn{ flex:0 0 auto; background:#eef4ff; color:#025ffb; border:none; border-radius:9px; padding:8px 13px; font-size:.8rem; font-weight:700; cursor:pointer; font-family:inherit; }
+  .ai-open-btn:hover{ background:#dbe8ff; }
+  .ai-chips{ display:flex; flex-wrap:wrap; gap:6px; padding:9px 12px 4px; background:#fff; border-top:1px solid #eef1f6; }
+  .ai-chip{ background:#f0f3f8; border:1px solid #e2e8f1; border-radius:20px; padding:6px 12px; font-size:.77rem; color:#3a4657; cursor:pointer; font-family:inherit; }
+  .ai-chip:hover{ background:#e6ecf6; }
+  .ai-input-row{ display:flex; gap:8px; padding:10px 12px; background:#fff; }
+  .ai-input{ flex:1; -webkit-appearance:none; box-sizing:border-box; border:1px solid #dce2ec; border-radius:22px; padding:11px 15px; font-size:.9rem; font-family:inherit; background:#f7f9fc; color:#0f1a2e; min-width:0; }
+  .ai-input:focus{ outline:none; border-color:#025ffb; }
+  .ai-send{ flex:0 0 auto; width:44px; height:44px; border-radius:50%; border:none; background:#025ffb; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .ai-send:hover{ background:#1a72ff; } .ai-send svg{ width:19px; height:19px; }
   .login-title{ font-size:1.35rem; font-weight:700; color:#0f1a2e; margin-bottom:6px; }
   .login-sub{ font-size:.85rem; color:#5b6472; margin-bottom:18px; }
   /* שדות וכפתורים בעמוד הכניסה — כדור (עגולים בצדדים) ובאותו גודל, כמו כפתור שליחת הדו״ח היומי */
@@ -12133,6 +12165,182 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     return changed;
   }
 
+  // ===================== עוזר חכם מובנה (AI Assistant) =====================
+  // צ'אט עזרה שעונה על שאלות תפעול מתוך מאגר ידע מובנה, ומחפש לקוחות/חשבוניות
+  // ופותח כרטיס לקוח או מסמך ישירות — הכול בתוך המערכת, בלי שרת/מפתח חיצוני.
+  const AI_ICON = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 4.4L18 8l-4.4 1.6L12 14l-1.6-4.4L6 8l4.4-1.6L12 2zm7 9l.9 2.5L22 14l-2.1.8L19 17l-.9-2.2L16 14l2.1-.5L19 11zM5 13l.8 2.2L8 16l-2.2.8L5 19l-.8-2.2L2 16l2.2-.8L5 13z"/></svg>`;
+  const AI_STOP = new Set(['מצא','חפש','הצג','פתח','תראה','תמצא','תפתח','לי','את','של','על','לקוח','לקוחות','כרטיס','חשבונית','חשבוניות','קבלה','קבלות','מסמך','מסמכים','איך','כיצד','אפשר','צריך','רוצה','מה','זה','עם','הכי']);
+  const AI_KB = [
+    { keys:['הוסף לקוח','להוסיף לקוח','לקוח חדש','מוסיפים לקוח','להכניס לקוח','רישום לקוח'],
+      a:'כדי להוסיף לקוח: בעמוד "לקוחות ואזורים" מלאו את שם העסק והכתובת בטופס "הוספת לקוח", ולחצו על 🔍 "מצא כתובת לפי שם העסק" כדי למקם אותו אוטומטית על המפה. אפשר לשייך אותו לתיקייה/אזור, ולשמור.' },
+    { keys:['כתובת','מיקום','לא במפה','לא מופיע','geocod','למקם'],
+      a:'המערכת ממקמת כל לקוח על המפה לפי הכתובת. אם המיקום לא מדויק — ודאו שהרחוב והמספר נכונים, או השתמשו ב-🔍 "מצא כתובת לפי שם העסק". אפשר גם לבחור מתוך הכתובות המוצעות שמופיעות כסמנים צהובים.' },
+    { keys:['תיקייה','אזור','תיקיות','אזורים','קבוצה'],
+      a:'תיקיות = אזורים. בפאנל "תיקיות" הקלידו שם (למשל "צפון"), בחרו צבע ולחצו "+ הוסף". אחר כך שייכו לקוחות לתיקייה דרך עריכת הכרטיס. אפשר להסתיר/להציג את כל התיקיות על המפה בעין שבראש הפאנל.' },
+    { keys:['קיבוץ','רגישות','אשכול','אשכולות'],
+      a:'"רגישות קיבוץ" מקבצת לקוחות סמוכים לאשכולות לפי מרחק. גררו את העיגול או הקלידו את מספר הק"מ בשדה שליד — ערך קטן = קיבוצים צפופים, ערך גדול = פחות קיבוצים גדולים.' },
+    { keys:['מסלול','נסיעה','route','סדר נסיעה'],
+      a:'להצגת מסלול נסיעה יעיל: בכרטיס התיקייה לחצו על אייקון השעון (מסלול נסיעה). המערכת תסדר את הכתובות למסלול חכם שחוסך זמן ודלק, ותמספר אותן על המפה.' },
+    { keys:['הזמנה','להזמין','הזמנות','לפתוח הזמנה'],
+      a:'ליצירת הזמנה: היכנסו לעמוד "הזמנות", בחרו סוכן ולקוח, ואז בחרו מוצרים וכמויות מהקטלוג. ההזמנה נשמרת אצל הלקוח ואפשר להפיק ממנה חשבונית.' },
+    { keys:['חשבונית','להוציא חשבונית','חשבונית חדשה','להפיק חשבונית'],
+      a:'להוצאת חשבונית: פתחו את הזמנת הלקוח ולחצו "הפק חשבונית" — נפתח מסמך החשבונית לחתימה דיגיטלית. אחרי החתימה והאישור החשבונית מופקת, ואפשר לשלוח אותה כ-PDF בוואטסאפ או במייל. (טיפ: אפשר גם לחפש כאן "חשבונית 123" ואפתח אותה.)' },
+    { keys:['קבלה','להוציא קבלה','קבלה חדשה'],
+      a:'להוצאת קבלה: פתחו את החשבונית של הלקוח ולחצו "הפק קבלה" — הקבלה נוצרת על בסיס החשבונית ונשמרת אצל הלקוח.' },
+    { keys:['גבייה','חוב','גובים','תשלום','חובות','ממתין לתשלום'],
+      a:'מודול הגבייה נמצא בעמוד "מסמכים". לכל לקוח מוצג סה"כ החשבוניות, כמה נגבה וכמה חוב פתוח. אפשר להזין תאריך תשלום ולהגדיר תזכורות גבייה. חשבונית נחשבת כחוב עד שמופקת עליה קבלה.' },
+    { keys:['מלאי','מלאי רכב','מלאי כללי','ספירת מלאי','נותר במלאי'],
+      a:'בעמוד "מלאים" יש שני סוגים: "מלאי רכב" (מה שיש ברכב הסוכן) ו"מלאי כללי של העסק" (נרכש / נמכר / נותר, כולל יומן רכש). אפשר לעדכן כמויות ולעקוב אחרי כמה נמכר.' },
+    { keys:['יומן','פגישה','פגישות','לקבוע פגישה'],
+      a:'ביומן לוחצים על יום ואז על שעה כדי לפתוח פופאפ "הוספת פגישה". בוחרים לקוח, שעה ופרטים. אפשר גם לשלוח את הפגישה ללקוח בוואטסאפ/מייל, ולהגדיר תזכורת.' },
+    { keys:['תזכורת','להזכיר','תזכורות'],
+      a:'ביומן, בפופאפ היום, יש כפתור "הוספת תזכורת" ליד "הוספת פגישה". מזינים כותרת, תאריך, שעה ומתי להתריע — וקופצת התראה בזמן שנקבע.' },
+    { keys:['וואטסאפ','whatsapp','הודעה','לשלוח הודעה'],
+      a:'אפשר לשלוח וואטסאפ ללקוח בלחיצה על אייקון הוואטסאפ הירוק בכרטיס. בכל לקוח יש גם "הודעת וואטסאפ מוכנה מראש", וביומן אפשר לתזמן הודעת וואטסאפ שתישלח ללקוח בשעה שתבחרו.' },
+    { keys:['מוצר','מחיר','קטלוג','מוצרים','מחירון'],
+      a:'הקטלוג נמצא בעמוד "מוצרים ומחירים": קטגוריות, תת-קטגוריות ומוצרים עם מחיר, יחידת מידה, מק"ט ותמונה. משם בוחרים מוצרים בהזמנות.' },
+    { keys:['גיבוי','לגבות','גיבוי נתונים','לשמור עותק'],
+      a:'גיבוי נמצא בהגדרות → "גיבוי נתונים". יש גיבוי אוטומטי, ואפשר גם להוריד קובץ גיבוי מלא בכל רגע. כל הנתונים שמורים בענן ומסונכרנים בין המכשירים.' },
+    { keys:['סוכן','מנהל','משתמש','הרשאה','להוסיף משתמש','צוות'],
+      a:'ניהול צוות נמצא בהגדרות: אפשר להוסיף סוכנים ומנהלים עם שם משתמש וסיסמה. המנהל מקבל התראה בכל פעם שסוכן נכנס למערכת, וכל השינויים מסתנכרנים בזמן אמת.' },
+    { keys:['שיתוף','לשתף','קישור','שלח כרטיס'],
+      a:'בכל כרטיס לקוח יש אפשרות שיתוף — נוצר קישור שמוביל ישר לכרטיס הלקוח עם כל הפרטים, ואפשר לשלוח אותו בוואטסאפ או בכל דרך.' },
+    { keys:['התנתק','יציאה','להתנתק','לצאת'],
+      a:'להתנתקות: פתחו את התפריט הצדדי (מהצד הימני) ולחצו על "התנתקות".' }
+  ];
+
+  function aiCoreTerm(raw){ return raw.split(/\s+/).filter(w=> w && !AI_STOP.has(w)).join(' ').trim(); }
+  function aiMatchKB(raw){
+    let best=null, score=0;
+    AI_KB.forEach(e=>{ let s=0; e.keys.forEach(k=>{ if(raw.indexOf(k)>=0) s++; }); if(s>score){ score=s; best=e; } });
+    return best ? best.a : null;
+  }
+  function aiSearchClients(term){
+    const t = normalizeSearchText(term); if(t.length<2) return [];
+    return clients.filter(c=>{
+      const hay = normalizeSearchText((c.business||'')+' '+(c.name||'')+' '+(c.phone||'')+' '+(c.address||''));
+      return hay.includes(t);
+    }).slice(0,6);
+  }
+  function aiSearchDocs(raw, term){
+    const numM = raw.match(/\d{1,}/);
+    const t = normalizeSearchText(term);
+    const out = [];
+    clients.forEach(c=>{
+      const nm = normalizeSearchText((c.business||'')+' '+(c.name||''));
+      const cMatch = t.length>=2 && nm.includes(t);
+      (c.invoices||[]).forEach(inv=>{ if(!inv) return; if((numM && String(inv.num)===numM[0]) || cMatch) out.push({ clientId:c.id, type:'invoice', id:inv.id, t:'חשבונית #'+(inv.num||'')+' · '+(c.business||c.name||''), s:(inv.date||'')+' · '+gMoney(inv.total) }); });
+      (c.receipts||[]).forEach(r=>{ if(!r) return; if((numM && String(r.num)===numM[0]) || cMatch) out.push({ clientId:c.id, type:'receipt', id:r.id, t:'קבלה #'+(r.num||'')+' · '+(c.business||c.name||''), s:(r.date||'')+' · '+gMoney(r.total) }); });
+    });
+    return out.slice(0,8);
+  }
+  function aiAnswer(raw){
+    raw = (raw||'').trim();
+    if(!raw) return [{k:'text', html:'שלום! אפשר לשאול אותי איך עושים משהו במערכת, או לחפש לקוח / חשבונית — ואני אפתח לכם אותם.'}];
+    const howto = /(איך|כיצד|מה זה|מה עושים|למה|היכן|איפה|\?)/.test(raw);
+    const term = aiCoreTerm(raw);
+    const kb = aiMatchKB(raw);
+    const wantDocs = /(חשבונ|קבל|מסמך|מסמכ)/.test(raw) || /^\s*\d+\s*$/.test(raw);
+    const docs = wantDocs ? aiSearchDocs(raw, term) : [];
+    const wantClients = (!howto) || /(לקוח|כרטיס|מצא|חפש|טלפון)/.test(raw);
+    const cl = (wantClients && !wantDocs) ? aiSearchClients(term || raw) : (wantClients ? aiSearchClients(term||raw) : []);
+    const blocks = [];
+    if(kb && (howto || (!cl.length && !docs.length))) blocks.push({k:'text', html:kb});
+    if(cl.length) blocks.push({k:'clients', items:cl});
+    if(docs.length) blocks.push({k:'docs', items:docs});
+    if(!blocks.length){
+      if(kb) blocks.push({k:'text', html:kb});
+      else blocks.push({k:'text', html:'לא מצאתי תשובה או תוצאה מתאימה. נסו לנסח אחרת, או השתמשו בכפתורים המהירים למטה. אפשר לחפש למשל: שם לקוח, "חשבונית 120", "איך מוציאים חשבונית".'});
+    }
+    return blocks;
+  }
+  function aiOpenClient(id){
+    const c = clients.find(x=>String(x.id)===String(id)); if(!c) return;
+    aiTogglePanel(false);
+    try{ if(currentView!=='customers') switchView('customers'); }catch(_){}
+    if(c.folder) openFolderNames.add(c.folder);
+    if(c.tempFolder) openFolderNames.add(c.tempFolder);
+    try{ openClientCards.add(c.id); }catch(_){}
+    try{ renderAll(); }catch(_){}
+    setTimeout(()=>{ try{ const el=document.querySelector('.client-card[data-client-id="'+CSS.escape(String(c.id))+'"]'); if(el) el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(_){} }, 350);
+  }
+  function aiOpenDoc(clientId, type, docId){
+    const c = clients.find(x=>String(x.id)===String(clientId)); if(!c) return;
+    const arr = type==='invoice' ? c.invoices : type==='receipt' ? c.receipts : c.orders;
+    const doc = (arr||[]).find(d=>String(d.id)===String(docId)); if(!doc) return;
+    aiTogglePanel(false);
+    try{ openSignableDoc(c, type, doc); }catch(e){ alert('לא ניתן לפתוח את המסמך.'); }
+  }
+  let _aiPanel=null;
+  function aiTogglePanel(open){
+    if(!_aiPanel) return;
+    const willOpen = (open===undefined) ? !_aiPanel.classList.contains('open') : open;
+    _aiPanel.classList.toggle('open', willOpen);
+    const fab=document.getElementById('aiFab'); if(fab) fab.classList.toggle('hidden', willOpen);
+    if(willOpen){ setTimeout(()=>{ const inp=_aiPanel.querySelector('.ai-input'); if(inp) inp.focus(); }, 200); }
+  }
+  function aiAppendUser(text){
+    const wrap=_aiPanel.querySelector('.ai-msgs');
+    const d=document.createElement('div'); d.className='ai-msg user'; d.textContent=text; wrap.appendChild(d);
+    wrap.scrollTop=wrap.scrollHeight;
+  }
+  function aiAppendBlocks(blocks){
+    const wrap=_aiPanel.querySelector('.ai-msgs');
+    blocks.forEach(b=>{
+      if(b.k==='text'){ const d=document.createElement('div'); d.className='ai-msg bot'; d.textContent=b.html; wrap.appendChild(d); }
+      else if(b.k==='clients'){
+        const head=document.createElement('div'); head.className='ai-msg bot'; head.textContent='לקוחות שנמצאו:'; wrap.appendChild(head);
+        b.items.forEach(c=>{
+          const card=document.createElement('div'); card.className='ai-card';
+          card.innerHTML='<span class="ai-card-ic">'+AI_ICON.replace('27','18')+'</span><div class="ai-card-main"><div class="ai-card-t"></div><div class="ai-card-s"></div></div><button class="ai-open-btn">פתח כרטיס</button>';
+          card.querySelector('.ai-card-t').textContent = c.business||c.name||'לקוח';
+          card.querySelector('.ai-card-s').textContent = [c.name&&c.business?c.name:'', c.phone||'', c.folder||''].filter(Boolean).join(' · ');
+          card.querySelector('.ai-open-btn').addEventListener('click', ()=>aiOpenClient(c.id));
+          wrap.appendChild(card);
+        });
+      } else if(b.k==='docs'){
+        const head=document.createElement('div'); head.className='ai-msg bot'; head.textContent='מסמכים שנמצאו:'; wrap.appendChild(head);
+        b.items.forEach(it=>{
+          const card=document.createElement('div'); card.className='ai-card';
+          card.innerHTML='<span class="ai-card-ic">'+DOC_VIEW_SVG+'</span><div class="ai-card-main"><div class="ai-card-t"></div><div class="ai-card-s"></div></div><button class="ai-open-btn">פתח</button>';
+          card.querySelector('.ai-card-t').textContent = it.t;
+          card.querySelector('.ai-card-s').textContent = it.s;
+          card.querySelector('.ai-open-btn').addEventListener('click', ()=>aiOpenDoc(it.clientId, it.type, it.id));
+          wrap.appendChild(card);
+        });
+      }
+    });
+    wrap.scrollTop=wrap.scrollHeight;
+  }
+  function aiSubmit(text){
+    text=(text||'').trim(); if(!text) return;
+    aiAppendUser(text);
+    setTimeout(()=>{ try{ aiAppendBlocks(aiAnswer(text)); }catch(e){ aiAppendBlocks([{k:'text',html:'אירעה שגיאה. נסו שוב.'}]); } }, 120);
+  }
+  function setupAiAssistant(){
+    if(document.getElementById('aiFab')) return;
+    const fab=document.createElement('button'); fab.id='aiFab'; fab.type='button'; fab.title='עוזר חכם'; fab.setAttribute('aria-label','עוזר חכם'); fab.innerHTML=AI_ICON;
+    document.body.appendChild(fab);
+    const panel=document.createElement('div'); panel.className='ai-panel'; _aiPanel=panel;
+    panel.innerHTML =
+      '<div class="ai-head"><span class="ai-ava">'+AI_ICON+'</span><div class="ai-head-txt"><div class="ai-ttl">עוזר GeoSort</div><div class="ai-sub">שאלות תפעול · חיפוש לקוחות וחשבוניות</div></div><button type="button" class="ai-x" title="סגור">✕</button></div>'+
+      '<div class="ai-msgs"></div>'+
+      '<div class="ai-chips"></div>'+
+      '<div class="ai-input-row"><input type="text" class="ai-input" placeholder="שאלו אותי, או חפשו לקוח / חשבונית..."><button type="button" class="ai-send" title="שלח"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2v6z"/></svg></button></div>';
+    document.body.appendChild(panel);
+    // הודעת פתיחה
+    aiAppendBlocks([{k:'text', html:'שלום 👋 אני העוזר של GeoSort. אפשר לשאול אותי "איך מוציאים חשבונית?", לחפש לקוח לפי שם, או להקליד "חשבונית 120" ואפתח אותה. במה אפשר לעזור?'}]);
+    // כפתורים מהירים
+    const chips=['איך מוציאים חשבונית?','ניהול גבייה','מסלול נסיעה','הוספת לקוח','מלאי'];
+    const chipsEl=panel.querySelector('.ai-chips');
+    chips.forEach(c=>{ const b=document.createElement('button'); b.type='button'; b.className='ai-chip'; b.textContent=c; b.addEventListener('click', ()=>aiSubmit(c)); chipsEl.appendChild(b); });
+    fab.addEventListener('click', ()=>aiTogglePanel(true));
+    panel.querySelector('.ai-x').addEventListener('click', ()=>aiTogglePanel(false));
+    const inp=panel.querySelector('.ai-input');
+    panel.querySelector('.ai-send').addEventListener('click', ()=>{ aiSubmit(inp.value); inp.value=''; });
+    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); aiSubmit(inp.value); inp.value=''; } });
+  }
+
   // ===================== סנכרון בזמן אמת (Supabase Realtime) =====================
   // כאשר משתמש כלשהו בארגון שומר שינוי ב-app_data, כל שאר המשתמשים המחוברים מקבלים
   // עדכון מיידי ומרעננים את המסך — כך אין "מסך ישן" ולא דורסים אחד את השני.
@@ -12189,6 +12397,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     }
     openDeepLinkedClientIfAny();
     startOrgRealtime(); // מתחילים להאזין לשינויים של שאר המשתמשים בארגון
+    try{ setupAiAssistant(); }catch(_){}  // עוזר חכם מובנה — כפתור צף
     // התראות כניסה למערכת — רק למנהל
     if(CURRENT_ROLE==='manager' || CURRENT_ROLE==='admin'){
       try{ if('Notification' in window && Notification.permission==='default') Notification.requestPermission(); }catch(_){}
