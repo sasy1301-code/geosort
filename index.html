@@ -204,8 +204,9 @@
   .sys-icon-disc:hover{ transform:scale(var(--hscale)); }                  /* only the disc grows */
   .sys-icon-disc:hover > svg{ transform:scale(calc(1 / var(--hscale))); }  /* icon stays the same size */
   /* side-menu icons follow the disc standard (27px icon → 43px disc) */
-  .side-menu-item .icon{ width:43px; height:43px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; background:#091321; border-radius:50%; transition:none; }
-  .side-menu-item .icon svg{ width:27px; height:27px; display:block; fill:#0277fb; transform:translateY(var(--ny,0px)); transition:fill .15s ease; }
+  /* אייקוני התפריט הוקטנו ב-30% (עיגול 43→30, אייקון 27→19) */
+  .side-menu-item .icon{ width:30px; height:30px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; background:#091321; border-radius:50%; transition:none; }
+  .side-menu-item .icon svg{ width:19px; height:19px; display:block; fill:#0277fb; transform:translateY(var(--ny,0px)); transition:fill .15s ease; }
   /* ללא הגדלה בכלל — רק שינוי צבע ב-hover */
   .side-menu-item:hover .icon svg{ fill:#2f7cf6; }
   /* optical centering: these icons are bounding-box-centered but their painted mass sits low/high,
@@ -220,7 +221,7 @@
   /* these three icons read a touch large — render them 2px smaller (27→25) */
   #vehicleStockMenuItem .icon svg,
   .side-menu-item[href="./order/"] .icon svg,
-  #dedupeOrdersMenuItem .icon svg{ width:25px; height:25px; }
+  #dedupeOrdersMenuItem .icon svg{ width:18px; height:18px; }
   .side-menu-item:hover .txt{ color:#2f7cf6; }
   /* the active view is marked with the menu's existing hover colour */
   .side-menu-item.active-view .txt{ color:#2f7cf6; }
@@ -902,10 +903,12 @@
   input[type=range]::-moz-range-thumb{
     width:16px; height:16px; border-radius:50%; background:#ffa90d; border:2px solid #fff; cursor:pointer;
   }
-  .slider-val{ font-size:.78rem; color:rgba(255,255,255,.6); display:flex; align-items:center; gap:4px; }
-  .slider-num{ width:50px; box-sizing:border-box; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.25); border-radius:8px; color:#fff; font-size:.82rem; font-family:inherit; padding:4px 6px; text-align:center; -webkit-appearance:none; -moz-appearance:textfield; appearance:textfield; }
-  .slider-num::-webkit-outer-spin-button, .slider-num::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
-  .slider-num:focus{ outline:none; border-color:#ffa90d; }
+  .slider-val{ font-size:.78rem; color:rgba(255,255,255,.6); display:flex; align-items:center; gap:3px; min-width:52px; justify-content:flex-start; }
+  /* רקע השדה בצבע סגול #5a11ce — סלקטור חזק כדי לגבור על כלל input[type=number] הכללי */
+  .slider-val input.slider-num{ width:46px; box-sizing:border-box; background:#5a11ce; border:1px solid rgba(255,255,255,.18); border-radius:8px; color:#fff; font-size:.78rem; font-family:inherit; font-weight:inherit; padding:4px 6px; margin:0; text-align:center; -webkit-appearance:none; -moz-appearance:textfield; appearance:textfield; cursor:text; }
+  .slider-val input.slider-num::-webkit-outer-spin-button, .slider-val input.slider-num::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .slider-val input.slider-num:focus{ outline:none; background:#5a11ce; color:#fff; border-color:rgba(255,255,255,.4); }
+  .slider-val input.slider-num::placeholder{ color:rgba(255,255,255,.6); }
   .slider-unit{ white-space:nowrap; }
 
   .cluster-group{ margin-bottom:10px; }
