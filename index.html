@@ -920,6 +920,9 @@
   .slider-val input.slider-num:focus{ outline:none; background:#5a11ce; color:#fff; border-color:rgba(255,255,255,.4); }
   .slider-val input.slider-num::placeholder{ color:rgba(255,255,255,.6); }
   .slider-unit{ white-space:nowrap; }
+  /* אייקון "עין" ראשי בכותרת התיקיות — הצג/הסתר את כל התיקיות על המפה */
+  #foldersEyeAll svg{ width:20px; height:20px; display:block; }
+  #foldersEyeAll:hover{ opacity:.8; }
 
   .cluster-group{ margin-bottom:10px; }
   .cluster-group[draggable="true"] > .cluster-head{ cursor:grab; }
@@ -2427,9 +2430,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </section>
 
         <section class="panel" id="foldersPanel">
-          <h2 id="foldersHeader" style="cursor:pointer;display:flex;align-items:center;gap:6px">
+          <h2 id="foldersHeader" style="cursor:pointer;display:flex;align-items:center;gap:8px">
             <span class="dot" style="background:#ffa90d"></span> תיקיות
-            <span id="foldersChevron" style="margin-right:auto;display:inline-block;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
+            <button type="button" id="foldersEyeAll" title="הסתר/הצג את כל התיקיות על המפה" style="margin-right:auto;background:transparent;border:none;cursor:pointer;padding:2px;display:none;align-items:center;color:#fff"></button>
+            <span id="foldersChevron" style="display:inline-block;transition:transform .15s ease;transform:rotate(0deg)"><svg width="12.7" height="25" viewBox="0 0 24 24" fill="currentColor" style="display:block"><path d="m6.733,23.888l-.707-.707,10.827-10.827c.095-.095.146-.22.146-.354s-.052-.259-.146-.354L6.026.819l.707-.707,10.827,10.827c.283.283.439.66.439,1.061s-.156.777-.439,1.061l-10.827,10.827Z"/></svg></span>
           </h2>
           <div class="row2">
             <div><input type="text" id="newFolderInput" placeholder="שם תיקייה חדשה (למשל: צפון, ראשון לציון)"></div>
@@ -6942,6 +6946,21 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     } else if(!anyVisible && folderSearchQ){
       listEl.innerHTML = `<div class="empty">לא נמצאו תיקיות שתואמות את החיפוש.</div>`;
     }
+    syncFoldersEyeAll();
+  }
+
+  // ===== אייקון עין ראשי: הצג/הסתר את כל התיקיות על המפה בבת אחת =====
+  const EYE_OPEN_SVG_HDR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"/><circle cx="12" cy="12" r="3"/></svg>`;
+  const EYE_OFF_SVG_HDR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" opacity=".45"/><line x1="3" y1="3" x2="21" y2="21"/></svg>`;
+  function syncFoldersEyeAll(){
+    const btn = document.getElementById('foldersEyeAll'); if(!btn) return;
+    const hasFolders = Array.isArray(folders) && folders.length > 0;
+    btn.style.display = hasFolders ? 'inline-flex' : 'none';
+    if(!hasFolders) return;
+    const allHidden = folders.every(f => f && f.mapVisible === false);
+    btn.innerHTML = allHidden ? EYE_OFF_SVG_HDR : EYE_OPEN_SVG_HDR;
+    btn.style.color = allHidden ? '#ffd0dc' : '#fff';
+    btn.title = allHidden ? 'הצג את כל התיקיות על המפה' : 'הסתר את כל התיקיות מהמפה';
   }
 
   function renderAll(){
@@ -7274,6 +7293,17 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
   document.getElementById('foldersHeader').addEventListener('click', ()=>{
     toggleAnimatedCollapse(document.getElementById('foldersListBody'), document.getElementById('foldersChevron'));
+  });
+  // עין ראשית: לחיצה מסתירה/מציגה את כל התיקיות על המפה בבת אחת (בלי לסגור את הפאנל)
+  document.getElementById('foldersEyeAll').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    if(!Array.isArray(folders) || !folders.length) return;
+    const anyVisible = folders.some(f => f && f.mapVisible !== false);
+    const makeVisible = !anyVisible;            // אם כולן מוסתרות → הצג הכל; אחרת → הסתר הכל
+    folders.forEach(f => { if(f) f.mapVisible = makeVisible; });
+    if(!makeVisible) selectedFolderForRoute = null;
+    saveFolders();
+    renderAll();                                 // renderFolders יעדכן גם את מצב העין
   });
   document.getElementById('settingsAgentsHeader').addEventListener('click', ()=>{
     toggleAnimatedCollapse(document.getElementById('settingsAgentsBody'), document.getElementById('settingsAgentsChevron'));
