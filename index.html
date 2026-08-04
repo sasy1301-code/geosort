@@ -2015,6 +2015,17 @@
   .jr-client-opt small{ color:rgba(255,255,255,.55); display:block; font-size:.72rem; margin-top:1px; }
   .jr-save-btn{ -webkit-appearance:none; appearance:none; display:flex; width:100%; justify-content:center; align-items:center; gap:8px; margin-top:6px; padding:13px; border:none; border-radius:23px; background:#025ffb; color:#fff; font-size:.95rem; font-weight:600; font-family:inherit; cursor:pointer; transition:background .15s ease; }
   .jr-save-btn:hover{ background:#1a72ff; }
+  /* טאבים: פגישה / תזכורת */
+  .jr-tabs{ display:flex; gap:8px; margin:2px 0 14px; }
+  .jr-tab{ flex:1; -webkit-appearance:none; appearance:none; padding:12px 8px; border-radius:13px; border:1px solid #dce2ec; background:#f3f5f9; color:#5b6472; font-weight:700; font-size:.9rem; font-family:inherit; cursor:pointer; transition:all .15s ease; }
+  .jr-tab.active{ background:linear-gradient(135deg,#025ffb,#6303ed); color:#fff; border-color:transparent; box-shadow:0 4px 12px rgba(2,95,251,.28); }
+  /* שליחת הפגישה ללקוח */
+  .jr-send-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:2px 0 14px; }
+  .jr-send-label{ flex:1 1 100%; font-size:.82rem; color:#5b6472; margin-bottom:1px; }
+  .jr-send-btn{ flex:1 1 0; min-width:120px; -webkit-appearance:none; appearance:none; display:flex; align-items:center; justify-content:center; gap:7px; padding:11px; border-radius:12px; border:1px solid #dce2ec; background:#fff; font-weight:600; font-size:.88rem; font-family:inherit; cursor:pointer; }
+  .jr-send-btn svg{ width:16px; height:16px; display:block; }
+  .jr-send-wa{ color:#1fb457; border-color:#bfe8cf; fill:#1fb457; } .jr-send-wa:hover{ background:#e6f8ee; }
+  .jr-send-email{ color:#025ffb; border-color:#cfe0ff; } .jr-send-email:hover{ background:#eef4ff; }
   .jr-ev-list{ margin-bottom:16px; }
   .jr-ev-list-title{ font-size:.82rem; color:rgba(255,255,255,.6); margin-bottom:8px; }
   .jr-ev-item{ display:flex; align-items:flex-start; gap:10px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:10px 12px; margin-bottom:8px; }
@@ -3041,7 +3052,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   let vehicleStockBaseline = { anchors: {} }; // per-product: { qty: <stock level set at this point>, cumulative: <cumulative orders total at that moment> } - lets the driver set any starting quantity, not just 50
   let inventoryCountFrom = ""; // general-inventory running tally start date ("" = never reset → defaults to today)
   let businessStock = { purchases: [] }; // מלאי כללי של העסק — יומן רכש: [{id, name, qty, date}]. נותר = סך רכש פחות נמכר (חשבוניות חתומות)
-  let journal = { events: [] }; // יומן — פגישות: [{id, date:'YYYY-MM-DD', time:'HH:MM', clientName, business, phone, email, details, reminder:0|30|60, notified}]
+  let journal = { events: [], reminders: [] }; // יומן — פגישות + תזכורות. reminders:[{id,date,time,title,remindBefore,note,notified}]
   let docCollections = { entries: {}, folders: [] }; // מסמכים: entries=גבייה per-לקוח (כולל attachments[]); folders=תיקיות בהתאמה אישית [{id,name,createdAt,files:[{id,name,kind:'sheet'|'doc'|'upload',...}]}]
   let folders = []; // manually-created folder names, e.g. "ראשון לציון" or "צפון"
   let agents = []; // sales agents: [{name, username, password}] — chosen on the orders page
@@ -3691,7 +3702,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   async function loadJournal(){
     try{
       const raw = await sbGet(JOURNAL_KEY);
-      if(raw){ const p = JSON.parse(raw); journal = { events: Array.isArray(p && p.events) ? p.events : [] }; }
+      if(raw){ const p = JSON.parse(raw); journal = { events: Array.isArray(p && p.events) ? p.events : [], reminders: Array.isArray(p && p.reminders) ? p.reminders : [] }; }
     }catch(e){ /* none saved yet — keep empty */ }
   }
   async function saveJournal(){
@@ -8233,26 +8244,52 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     overlay.innerHTML = `<div class="order-modal jr-modal">
       <div class="order-modal-header"><h3>${escapeHtml(title)}</h3><button type="button" class="order-modal-close">✕</button></div>
       <div class="order-modal-body">
-        <div class="jr-ev-list"></div>
-        <div class="jr-form-title">הוספת פגישה חדשה</div>
-        <div class="jr-two">
-          <div class="jr-field"><label>שעה</label><input type="time" class="jr-in-time" value="${defaultTime||'09:00'}"></div>
-          <div class="jr-field"><label>תזכורת</label><select class="jr-in-reminder"><option value="0">ללא</option><option value="30">חצי שעה לפני</option><option value="60">שעה לפני</option></select></div>
+        <div class="jr-tabs">
+          <button type="button" class="jr-tab active" data-cat="meeting">הוספת פגישה חדשה</button>
+          <button type="button" class="jr-tab" data-cat="reminder">הוספת תזכורת</button>
         </div>
-        <div class="jr-field jr-client-wrap"><label>לקוח / שם העסק</label><input type="text" class="jr-in-client" autocomplete="off" placeholder="חפש לקוח או הקלד שם עסק..."><div class="jr-client-results"></div></div>
-        <div class="jr-two">
-          <div class="jr-field"><label>טלפון</label><input type="tel" class="jr-in-phone" placeholder="טלפון"></div>
-          <div class="jr-field"><label>אימייל</label><input type="email" class="jr-in-email" placeholder="אימייל"></div>
+
+        <div class="jr-cat jr-cat-meeting">
+          <div class="jr-ev-list"></div>
+          <div class="jr-form-title">הוספת פגישה חדשה</div>
+          <div class="jr-two">
+            <div class="jr-field"><label>שעה</label><input type="time" class="jr-in-time" value="${defaultTime||'09:00'}"></div>
+            <div class="jr-field"><label>תזכורת</label><select class="jr-in-reminder"><option value="0">ללא</option><option value="30">חצי שעה לפני</option><option value="60">שעה לפני</option></select></div>
+          </div>
+          <div class="jr-field jr-client-wrap"><label>לקוח / שם העסק</label><input type="text" class="jr-in-client" autocomplete="off" placeholder="חפש לקוח או הקלד שם עסק..."><div class="jr-client-results"></div></div>
+          <div class="jr-two">
+            <div class="jr-field"><label>טלפון</label><input type="tel" class="jr-in-phone" placeholder="טלפון"></div>
+            <div class="jr-field"><label>אימייל</label><input type="email" class="jr-in-email" placeholder="אימייל"></div>
+          </div>
+          <div class="jr-field"><label>פרטים נוספים</label><textarea class="jr-in-details" placeholder="נושא הפגישה, כתובת, הערות..."></textarea></div>
+          <div class="jr-send-row">
+            <div class="jr-send-label">שליחת הפגישה ללקוח:</div>
+            <button type="button" class="jr-send-btn jr-send-wa">${JR_WA_SVG} וואטסאפ</button>
+            <button type="button" class="jr-send-btn jr-send-email">מייל</button>
+          </div>
+          <div class="jr-wa-sec-title"><span class="jr-wa-sec-ic">${JR_WA_SVG}</span> הודעת וואטסאפ מתוזמנת ללקוח <span class="jr-wa-sec-opt">(לא חובה)</span></div>
+          <div class="jr-field"><label>תוכן ההודעה</label><textarea class="jr-in-wamsg" placeholder="ההודעה שתישלח לוואטסאפ של הלקוח בשעה שתבחר..."></textarea></div>
+          <div class="jr-two">
+            <div class="jr-field"><label>תאריך שליחה</label><input type="date" class="jr-in-wadate" value="${ds}"></div>
+            <div class="jr-field"><label>שעת שליחה</label><input type="time" class="jr-in-watime" value="${defaultTime||'09:00'}"></div>
+          </div>
+          <button type="button" class="jr-save-btn">שמור פגישה</button>
+          <button type="button" class="jr-cancel-edit">בטל עריכה</button>
         </div>
-        <div class="jr-field"><label>פרטים נוספים</label><textarea class="jr-in-details" placeholder="נושא הפגישה, כתובת, הערות..."></textarea></div>
-        <div class="jr-wa-sec-title"><span class="jr-wa-sec-ic">${JR_WA_SVG}</span> הודעת וואטסאפ מתוזמנת ללקוח <span class="jr-wa-sec-opt">(לא חובה)</span></div>
-        <div class="jr-field"><label>תוכן ההודעה</label><textarea class="jr-in-wamsg" placeholder="ההודעה שתישלח לוואטסאפ של הלקוח בשעה שתבחר..."></textarea></div>
-        <div class="jr-two">
-          <div class="jr-field"><label>תאריך שליחה</label><input type="date" class="jr-in-wadate" value="${ds}"></div>
-          <div class="jr-field"><label>שעת שליחה</label><input type="time" class="jr-in-watime" value="${defaultTime||'09:00'}"></div>
+
+        <div class="jr-cat jr-cat-reminder" hidden>
+          <div class="jr-rem-list"></div>
+          <div class="jr-form-title jr-rem-form-title">הוספת תזכורת</div>
+          <div class="jr-field"><label>כותרת התזכורת</label><input type="text" class="jr-in-remtitle" placeholder="מה להזכיר לי?"></div>
+          <div class="jr-two">
+            <div class="jr-field"><label>תאריך</label><input type="date" class="jr-in-remdate" value="${ds}"></div>
+            <div class="jr-field"><label>שעה</label><input type="time" class="jr-in-remtime" value="${defaultTime||'09:00'}"></div>
+          </div>
+          <div class="jr-field"><label>התראה</label><select class="jr-in-remwhen"><option value="0">בזמן התזכורת</option><option value="30">חצי שעה לפני</option><option value="60">שעה לפני</option><option value="1440">יום לפני</option></select></div>
+          <div class="jr-field"><label>פרטים (לא חובה)</label><textarea class="jr-in-remnote" placeholder="פרטים נוספים..."></textarea></div>
+          <button type="button" class="jr-save-btn jr-save-rem">שמור תזכורת</button>
+          <button type="button" class="jr-cancel-edit jr-cancel-rem">בטל עריכה</button>
         </div>
-        <button type="button" class="jr-save-btn">שמור פגישה</button>
-        <button type="button" class="jr-cancel-edit">בטל עריכה</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -8350,6 +8387,84 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       resetForm();
       renderList(); try{ renderJrCalendar(); }catch(_){}
     });
+
+    // ===== מעבר בין הקטגוריות: פגישה / תזכורת =====
+    overlay.querySelectorAll('.jr-tab').forEach(tab=>{
+      tab.addEventListener('click', ()=>{
+        overlay.querySelectorAll('.jr-tab').forEach(t=>t.classList.remove('active'));
+        tab.classList.add('active');
+        const cat = tab.dataset.cat;
+        q('.jr-cat-meeting').hidden = (cat!=='meeting');
+        q('.jr-cat-reminder').hidden = (cat!=='reminder');
+      });
+    });
+
+    // ===== שליחת הפגישה ללקוח (וואטסאפ / מייל) =====
+    function jrMeetingMessage(){
+      const client = q('.jr-in-client').value.trim();
+      const tm = q('.jr-in-time').value || '09:00';
+      const det = q('.jr-in-details').value.trim();
+      const biz = (typeof businessDetails==='object' && businessDetails) ? (businessDetails.invoiceName || businessDetails.name || '') : '';
+      let m = 'שלום' + (client?(' '+client):'') + ',\nנקבעה פגישה ל' + title + ' בשעה ' + tm + '.';
+      if(det) m += '\n' + det;
+      if(biz) m += '\n\n' + biz;
+      return m;
+    }
+    q('.jr-send-wa').addEventListener('click', ()=>{
+      const phone = q('.jr-in-phone').value.trim();
+      if(!phone){ q('.jr-in-phone').focus(); jrToast('צריך מספר טלפון לשליחה בוואטסאפ'); return; }
+      try{ window.open(waHref(phone) + '?text=' + encodeURIComponent(jrMeetingMessage()), '_blank'); }catch(_){}
+    });
+    q('.jr-send-email').addEventListener('click', ()=>{
+      const email = q('.jr-in-email').value.trim();
+      if(!email){ q('.jr-in-email').focus(); jrToast('צריך אימייל לשליחה במייל'); return; }
+      const subject = 'פגישה — ' + title;
+      window.location.href = 'mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(jrMeetingMessage());
+    });
+
+    // ===== קטגוריית תזכורת: רשימה + שמירה + עריכה/מחיקה =====
+    let editingRemId = null;
+    function renderReminders(){
+      const el = q('.jr-rem-list');
+      const rems = (journal.reminders||[]).filter(r=> r && r.date===ds).slice().sort((a,b)=>String(a.time||'').localeCompare(String(b.time||'')));
+      if(!rems.length){ el.innerHTML = `<div class="jr-ev-list-title">תזכורות היום</div><div class="jr-ev-empty">אין עדיין תזכורות ליום זה.</div>`; return; }
+      el.innerHTML = `<div class="jr-ev-list-title">תזכורות היום (${rems.length})</div>` + rems.map(r=>{
+        const whenTxt = r.remindBefore==1440?'יום לפני':(r.remindBefore==60?'שעה לפני':(r.remindBefore==30?'חצי שעה לפני':'בזמן התזכורת'));
+        const meta = [r.note, whenTxt].filter(Boolean).map(escapeHtml).join(' · ');
+        return `<div class="jr-ev-item" data-id="${r.id}"><span class="jr-ev-item-time">${escapeHtml(r.time||'')}</span><div class="jr-ev-item-main"><div class="jr-ev-item-name">${escapeHtml(r.title||'תזכורת')}<span class="jr-ev-item-bell">${JR_BELL_SVG}</span></div>${meta?`<div class="jr-ev-item-meta">${meta}</div>`:''}</div><div class="jr-ev-item-actions"><button type="button" class="jr-ev-act edit" title="עריכה">${JR_PEN_SVG}</button><button type="button" class="jr-ev-act del" title="מחיקה">${JR_TRASH_SVG}</button></div></div>`;
+      }).join('');
+      el.querySelectorAll('.jr-ev-act.del').forEach(btn=>btn.addEventListener('click', ()=>{ const id=btn.closest('.jr-ev-item').dataset.id; journal.reminders=(journal.reminders||[]).filter(x=>x.id!==id); saveJournal(); if(editingRemId===id) resetReminderForm(); renderReminders(); }));
+      el.querySelectorAll('.jr-ev-act.edit').forEach(btn=>btn.addEventListener('click', ()=>{ const id=btn.closest('.jr-ev-item').dataset.id; const r=(journal.reminders||[]).find(x=>x.id===id); if(r) startEditReminder(r); }));
+    }
+    function startEditReminder(r){
+      editingRemId = r.id;
+      q('.jr-in-remtitle').value = r.title || '';
+      q('.jr-in-remdate').value = r.date || ds;
+      q('.jr-in-remtime').value = r.time || '09:00';
+      q('.jr-in-remwhen').value = String(r.remindBefore||0);
+      q('.jr-in-remnote').value = r.note || '';
+      q('.jr-rem-form-title').textContent = 'עריכת תזכורת';
+      q('.jr-save-rem').textContent = 'עדכן תזכורת';
+      modalEl.classList.add('editing');
+      try{ q('.jr-rem-form-title').scrollIntoView({behavior:'smooth', block:'center'}); }catch(_){}
+    }
+    function resetReminderForm(){
+      editingRemId = null;
+      q('.jr-in-remtitle').value=''; q('.jr-in-remdate').value=ds; q('.jr-in-remtime').value=defaultTime||'09:00'; q('.jr-in-remwhen').value='0'; q('.jr-in-remnote').value='';
+      q('.jr-rem-form-title').textContent = 'הוספת תזכורת'; q('.jr-save-rem').textContent = 'שמור תזכורת';
+      modalEl.classList.remove('editing');
+    }
+    q('.jr-cancel-rem').addEventListener('click', resetReminderForm);
+    q('.jr-save-rem').addEventListener('click', ()=>{
+      const t = q('.jr-in-remtitle').value.trim();
+      if(!t){ q('.jr-in-remtitle').focus(); return; }
+      const fields = { date:q('.jr-in-remdate').value||ds, time:q('.jr-in-remtime').value||'09:00', title:t, remindBefore:parseInt(q('.jr-in-remwhen').value,10)||0, note:q('.jr-in-remnote').value.trim() };
+      if(!Array.isArray(journal.reminders)) journal.reminders=[];
+      if(editingRemId){ const r=journal.reminders.find(x=>x.id===editingRemId); if(r){ Object.assign(r, fields); r.notified=false; } }
+      else { journal.reminders.push(Object.assign({ id:genDocId(), notified:false }, fields)); }
+      saveJournal(); jrEnsureNotifyPermission(); resetReminderForm(); renderReminders();
+    });
+    renderReminders();
   }
 
   function jrEnsureNotifyPermission(){
@@ -8378,6 +8493,23 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         if(!shown) jrToast('תזכורת פגישה — ' + body);
       }
     });
+    // תזכורות עצמאיות (קטגוריית "הוספת תזכורת")
+    if(Array.isArray(journal.reminders)){
+      journal.reminders.forEach(r=>{
+        if(!r || r.notified) return;
+        const p = (r.date||'').split('-').map(Number); if(!p[0]) return;
+        const tp = (r.time||'00:00').split(':').map(Number);
+        const rt = new Date(p[0], p[1]-1, p[2], tp[0]||0, tp[1]||0, 0).getTime();
+        const fireAt = rt - (r.remindBefore||0)*60000;
+        if(now >= fireAt && now < rt + 60000){
+          r.notified = true; changed = true;
+          const body = (r.title||'תזכורת') + (r.note ? (' — ' + r.note) : '');
+          let shown = false;
+          try{ if('Notification' in window && Notification.permission==='granted'){ new Notification('תזכורת', { body }); shown = true; } }catch(_){}
+          if(!shown) jrToast('תזכורת — ' + body);
+        }
+      });
+    }
     if(changed){ try{ saveJournal(); }catch(_){} }
   }
 
