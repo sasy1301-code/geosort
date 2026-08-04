@@ -3513,7 +3513,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     return PALETTE[hash % PALETTE.length];
   }
 
+  // חלון-הגנה: אחרי שינוי מקומי בתיקיות (כולל הצג/הסתר על המפה) לא טוענים מחדש מהשרת
+  // לזמן קצר, כדי שטעינת-רקע (סנכרון realtime) לא תדרוס את השינוי הטרי לפני שהוא נשמר.
+  let _foldersDirtyUntil = 0;
   async function loadFolders(){
+    if(Date.now() < _foldersDirtyUntil) return; // שינוי מקומי טרי — משאירים את המצב המקומי
     try{
       const raw = await sbGet(FOLDERS_KEY);
       const parsed = raw ? JSON.parse(raw) : [];
@@ -3525,6 +3529,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   }
 
   async function saveFolders(){
+    _foldersDirtyUntil = Date.now() + 4000; // מגן על השינוי המקומי מפני דריסה ע"י טעינה מקבילה
     try{
       let serverFolders = [];
       try{
@@ -3543,6 +3548,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       });
 
       await sbSet(FOLDERS_KEY, JSON.stringify(folders));
+      _foldersDirtyUntil = Date.now() + 2500; // מכסה גם את הד ה-realtime שמגיע אחרי השמירה
       if(recovered > 0) renderAll();
     }catch(e){
       console.error("שגיאת שמירה", e);
