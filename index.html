@@ -913,6 +913,9 @@
   .ai-input:focus{ outline:none; border-color:#025ffb; }
   .ai-send{ flex:0 0 auto; width:44px; height:44px; border-radius:50%; border:none; background:#025ffb; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .ai-send:hover{ background:#1a72ff; } .ai-send svg{ width:19px; height:19px; }
+  /* הדגשת כרטיס שהעוזר פתח */
+  .client-card.ai-flash{ animation:aiFlash 1.7s ease; }
+  @keyframes aiFlash{ 0%{ box-shadow:0 0 0 0 rgba(2,95,251,.55); } 30%{ box-shadow:0 0 0 4px rgba(2,95,251,.45); } 100%{ box-shadow:0 0 0 0 rgba(2,95,251,0); } }
   .login-title{ font-size:1.35rem; font-weight:700; color:#0f1a2e; margin-bottom:6px; }
   .login-sub{ font-size:.85rem; color:#5b6472; margin-bottom:18px; }
   /* שדות וכפתורים בעמוד הכניסה — כדור (עגולים בצדדים) ובאותו גודל, כמו כפתור שליחת הדו״ח היומי */
@@ -12258,11 +12261,28 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const c = clients.find(x=>String(x.id)===String(id)); if(!c) return;
     aiTogglePanel(false);
     try{ if(currentView!=='customers') switchView('customers'); }catch(_){}
+    // 1) ודא שפאנל "תיקיות" פתוח (אם המשתמש כיווץ אותו — הכרטיס לא היה נראה)
+    try{
+      const pb = document.getElementById('foldersListBody');
+      if(pb && !pb.classList.contains('is-open')){ pb.classList.add('is-open'); pb.style.maxHeight='none'; const ch=document.getElementById('foldersChevron'); if(ch) ch.style.transform='rotate(90deg)'; }
+    }catch(_){}
+    // 2) פתח את התיקייה של הלקוח וסמן את הכרטיס לפתיחה
     if(c.folder) openFolderNames.add(c.folder);
     if(c.tempFolder) openFolderNames.add(c.tempFolder);
     try{ openClientCards.add(c.id); }catch(_){}
     try{ renderAll(); }catch(_){}
-    setTimeout(()=>{ try{ const el=document.querySelector('.client-card[data-client-id="'+CSS.escape(String(c.id))+'"]'); if(el) el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(_){} }, 350);
+    // 3) אחרי הרינדור: ודא שקבוצת התיקייה פתוחה בפועל, גלול לכרטיס והדגש אותו
+    const reveal = ()=>{
+      const el = document.querySelector('.client-card[data-client-id="'+CSS.escape(String(c.id))+'"]');
+      if(!el) return false;
+      // אם קבוצת התיקייה עדיין סגורה (max-height:0) — פותחים אותה ידנית כדי שהכרטיס ייראה
+      const body = el.closest('.cluster-body.animated-collapse');
+      if(body && !body.classList.contains('is-open')){ body.classList.add('is-open'); body.style.maxHeight='none'; }
+      try{ el.scrollIntoView({behavior:'smooth', block:'center'}); }catch(_){}
+      el.classList.add('ai-flash'); setTimeout(()=>{ try{ el.classList.remove('ai-flash'); }catch(_){} }, 1700);
+      return true;
+    };
+    setTimeout(()=>{ if(!reveal()){ try{ renderAll(); }catch(_){}; setTimeout(reveal, 300); } }, 320);
   }
   function aiOpenDoc(clientId, type, docId){
     const c = clients.find(x=>String(x.id)===String(clientId)); if(!c) return;
