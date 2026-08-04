@@ -902,7 +902,11 @@
   input[type=range]::-moz-range-thumb{
     width:16px; height:16px; border-radius:50%; background:#ffa90d; border:2px solid #fff; cursor:pointer;
   }
-  .slider-val{ font-size:.78rem; color:rgba(255,255,255,.6); min-width:52px; text-align:left; }
+  .slider-val{ font-size:.78rem; color:rgba(255,255,255,.6); display:flex; align-items:center; gap:4px; }
+  .slider-num{ width:50px; box-sizing:border-box; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.25); border-radius:8px; color:#fff; font-size:.82rem; font-family:inherit; padding:4px 6px; text-align:center; -webkit-appearance:none; -moz-appearance:textfield; appearance:textfield; }
+  .slider-num::-webkit-outer-spin-button, .slider-num::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+  .slider-num:focus{ outline:none; border-color:#ffa90d; }
+  .slider-unit{ white-space:nowrap; }
 
   .cluster-group{ margin-bottom:10px; }
   .cluster-group[draggable="true"] > .cluster-head{ cursor:grab; }
@@ -2432,7 +2436,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           </h2>
           <div class="slider-row">
             <input type="range" id="thresholdSlider" min="0.1" max="40" step="0.1" value="12">
-            <div class="slider-val" id="thresholdVal">12 ק"מ</div>
+            <div class="slider-val"><input type="number" id="thresholdNum" class="slider-num" min="0.1" max="40" step="0.1" value="12" inputmode="decimal"><span class="slider-unit">ק"מ</span></div>
           </div>
           <h2 style="margin-top:14px"><span class="dot" style="background:#ffa90d"></span> אזורים / אשכולות</h2>
           <div id="clusterListBody" class="animated-collapse">
@@ -7407,9 +7411,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   // block the main thread on every move and make the thumb stutter/jump.
   let _thTrail = null, _thLast = 0;
   const _thSlider = document.getElementById('thresholdSlider');
+  const _thNum = document.getElementById('thresholdNum');
+  // עדכון תיבת המספר לפי הסליידר (מציג ק"מ עם ספרה עשרונית אחת)
+  const _thSyncNum = (v)=>{ if(_thNum && document.activeElement !== _thNum) _thNum.value = String(Math.round(v*10)/10); };
   _thSlider.addEventListener('input', (e)=>{
     threshold = parseFloat(e.target.value);
-    document.getElementById('thresholdVal').textContent = formatThreshold(threshold);
+    _thSyncNum(threshold);
     updateSliderFill(e.target);
     const now = (window.performance && performance.now) ? performance.now() : 0;
     if(now - _thLast >= 110){ _thLast = now; renderAll(); }
@@ -7417,6 +7424,27 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   });
   _thSlider.addEventListener('change', ()=>{ if(_thTrail){ clearTimeout(_thTrail); _thTrail = null; } renderAll(); }); // final re-cluster on release
   updateSliderFill(_thSlider);
+
+  // הקלדת ערך הקילומטר ידנית — חלופה לגרירת העיגול (מונע היתקעות בקבצים גדולים).
+  // הערך מוחל פעם אחת ב-Enter / ביציאה מהשדה, כך שאין ריצת קיבוץ כבדה על כל הקשה.
+  if(_thNum){
+    const _thMin = parseFloat(_thSlider.min)||0.1, _thMax = parseFloat(_thSlider.max)||40;
+    const applyNum = (recluster)=>{
+      let v = parseFloat(_thNum.value);
+      if(!isFinite(v)) v = threshold;
+      v = Math.min(_thMax, Math.max(_thMin, v));
+      v = Math.round(v*10)/10;
+      threshold = v;
+      _thNum.value = String(v);
+      _thSlider.value = String(v);
+      updateSliderFill(_thSlider);
+      if(recluster) renderAll();
+    };
+    _thNum.addEventListener('change', ()=>applyNum(true));
+    _thNum.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); applyNum(true); _thNum.blur(); } });
+    _thNum.addEventListener('blur', ()=>applyNum(true));
+    _thNum.addEventListener('click', (e)=>{ e.stopPropagation(); _thNum.select(); });
+  }
 
   document.getElementById('searchBox').addEventListener('input', refreshSearch);
   document.getElementById('folderSearchBox').addEventListener('input', refreshSearch);
