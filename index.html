@@ -916,6 +916,73 @@
   /* הדגשת כרטיס שהעוזר פתח */
   .client-card.ai-flash{ animation:aiFlash 1.7s ease; }
   @keyframes aiFlash{ 0%{ box-shadow:0 0 0 0 rgba(2,95,251,.55); } 30%{ box-shadow:0 0 0 4px rgba(2,95,251,.45); } 100%{ box-shadow:0 0 0 0 rgba(2,95,251,0); } }
+  /* ===== דשבורד (עמוד כניסה) ===== */
+  .dash-week-title{ text-align:center; font-size:10pt; font-weight:600; color:#8a93a5; margin-bottom:9px; }
+  .dash-week{ display:grid; grid-template-columns:repeat(7,1fr); direction:rtl; gap:5px; }
+  .dash-day{ position:relative; border:none; border-radius:12px; background:#eef2f7; color:#0f1a2e; font-family:inherit; cursor:pointer; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:9px 2px 11px; gap:3px; transition:background .13s ease, transform .1s ease, color .13s ease; }
+  .dash-day:hover{ background:#dde6f2; }
+  .dash-day:active{ transform:scale(.93); }
+  .dash-day-wd{ font-size:8pt; font-weight:600; color:#8a93a5; }
+  .dash-day-num{ font-size:13.5pt; font-weight:700; }
+  .dash-day.jr-weekend{ background:#c6b4e9; } .dash-day.jr-weekend:hover{ background:#b8a3e2; }
+  .dash-day.jr-weekend .dash-day-wd{ color:#5b4b7a; }
+  .dash-day.today{ background:#025ffb; color:#fff; } .dash-day.today:hover{ background:#1a72ff; }
+  .dash-day.today .dash-day-wd{ color:rgba(255,255,255,.82); }
+  .dash-day .jr-dot{ position:absolute; bottom:5px; left:50%; transform:translateX(-50%); width:6px; height:6px; border-radius:50%; background:#6303ed; }
+  .dash-day.today .jr-dot{ background:#fff; }
+  .dash-section-title{ display:flex; align-items:center; gap:6px; font-size:11pt; font-weight:700; color:#0f1a2e; margin:18px 4px 9px; }
+  .dash-section-title .dash-more{ margin-inline-start:auto; font-size:8.5pt; font-weight:400; color:#025ffb; }
+  .dash-section-title.dash-clickable{ cursor:pointer; }
+  .dash-collect{ cursor:pointer; }
+  #dashCollect .dc-sum-wait{ background:#fff; border-color:rgba(15,26,46,.12); }
+  /* דורש טיפול */
+  .dash-att{ display:flex; flex-direction:column; gap:8px; }
+  .dash-att-item{ display:flex; align-items:center; gap:10px; background:#0f1a2e; border:1px solid rgba(255,255,255,.08); border-radius:13px; padding:10px 12px; }
+  .dash-att-ic{ width:34px; height:34px; border-radius:9px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+  .dash-att-ic svg{ width:18px; height:18px; fill:currentColor; }
+  .dash-att-ic.debt{ background:rgba(255,77,137,.18); color:#ff4d89; }
+  .dash-att-ic.meet{ background:rgba(2,95,251,.18); color:#6db2ff; }
+  .dash-att-ic.rem{ background:rgba(255,171,19,.18); color:#ffab13; }
+  .dash-att-main{ flex:1; min-width:0; }
+  .dash-att-t{ font-size:.9rem; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dash-att-s{ font-size:.75rem; color:#9fb0d0; margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .dash-att-acts{ flex:0 0 auto; display:flex; gap:6px; }
+  .dash-att-act{ width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; text-decoration:none; padding:0; }
+  .dash-att-act svg{ width:15px; height:15px; display:block; fill:currentColor; }
+  .dash-att-act.wa{ background:rgba(37,211,102,.18); color:#25D366; }
+  .dash-att-act.call{ background:rgba(2,95,251,.2); color:#6db2ff; }
+  .dash-att-act.open{ background:rgba(255,255,255,.1); color:#cdd6e6; }
+  .dash-att-act:hover{ filter:brightness(1.2); }
+  .dash-att-empty{ color:rgba(255,255,255,.55); font-size:.85rem; padding:12px 4px; background:#0f1a2e; border-radius:13px; text-align:center; }
+  /* מדדי פעילות */
+  .dash-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .dash-stat{ background:#0f1a2e; border:1px solid rgba(255,255,255,.08); border-radius:13px; padding:13px 8px 12px; text-align:center; }
+  .dash-stat-num{ font-size:18pt; font-weight:800; line-height:1; }
+  .dash-stat-lbl{ font-size:8pt; color:#9fb0d0; margin-top:4px; }
+  .dash-stat.o .dash-stat-num{ color:#6db2ff; } .dash-stat.i .dash-stat-num{ color:#b79bff; } .dash-stat.n .dash-stat-num{ color:#6ce39b; }
+  /* גישה מהירה */
+  .dash-quick{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .dash-qbtn{ display:flex; align-items:center; gap:12px; background:#0f1a2e; border:1px solid rgba(255,255,255,.08); border-radius:15px; padding:13px 14px; cursor:pointer; font-family:inherit; text-align:right; }
+  .dash-qbtn:hover{ background:#0a1424; }
+  .dash-qbtn:active{ transform:scale(.98); }
+  .dash-qic{ width:42px; height:42px; border-radius:12px; flex:0 0 auto; display:flex; align-items:center; justify-content:center; }
+  .dash-qic svg{ width:22px; height:22px; display:block; fill:currentColor; }
+  .dash-qbtn.a1 .dash-qic{ background:linear-gradient(150deg,#025ffb,#6303ed); color:#fff; }
+  .dash-qbtn.a2 .dash-qic{ background:rgba(108,227,155,.18); color:#6ce39b; }
+  .dash-qbtn.a3 .dash-qic{ background:rgba(109,178,255,.18); color:#6db2ff; }
+  .dash-qbtn.a4 .dash-qic{ background:rgba(37,211,102,.18); color:#25D366; }
+  .dash-qtext{ font-size:.95rem; font-weight:600; color:#fff; }
+  /* מיני-מפה */
+  .dash-map-select{ width:100%; box-sizing:border-box; -webkit-appearance:none; appearance:none; background-color:#fff; color:#0f1a2e; border:1px solid rgba(15,26,46,.16); border-radius:12px; padding:12px 14px 12px 42px; font-family:inherit; font-size:.9rem; font-weight:600; margin-bottom:9px; cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230277fb' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:left 14px center; background-size:16px; }
+  .dash-map-select:focus{ outline:none; border-color:#0277fb; }
+  .dash-map-select option{ background:#fff; color:#0f1a2e; }
+  .dash-minimap{ height:200px; border-radius:15px; overflow:hidden; border:1px solid rgba(15,26,46,.12); background:#0f1a2e; position:relative; }
+  .dash-minimap .leaflet-container{ height:100%; width:100%; background:#0f1a2e; }
+  .dash-map-empty{ height:100%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.55); font-size:.9rem; }
+  /* רכב נוסע בעמוד הדשבורד (כמו בעמוד הכניסה) */
+  .dash-van{ position:fixed; top:0; left:0; width:42px; height:auto; z-index:-1; pointer-events:none; transform:translate(-50%,-50%); transform-origin:50% 50%; filter:drop-shadow(0 8px 14px rgba(0,0,0,.22)); display:none; }
+  .dash-van.show{ display:block; }
+  .dash-placeholder{ margin-top:14px; border:1px dashed rgba(255,255,255,.25); border-radius:15px; padding:18px 16px; text-align:center; color:rgba(255,255,255,.6); font-size:.9rem; }
   .login-title{ font-size:1.35rem; font-weight:700; color:#0f1a2e; margin-bottom:6px; }
   .login-sub{ font-size:.85rem; color:#5b6472; margin-bottom:18px; }
   /* שדות וכפתורים בעמוד הכניסה — כדור (עגולים בצדדים) ובאותו גודל, כמו כפתור שליחת הדו״ח היומי */
@@ -1951,6 +2018,8 @@
   .jr-ev-chip{ display:flex; align-items:center; gap:7px; background:#0f1a2e; color:#fff; border-radius:9px; padding:5px 9px; font-size:9.5pt; }
   .jr-ev-chip .jr-ev-time{ color:#6db2ff; font-weight:600; flex:0 0 auto; }
   .jr-ev-chip .jr-ev-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .jr-ev-chip.jr-rem-chip{ background:#3a2a0a; }
+  .jr-ev-chip.jr-rem-chip .jr-ev-time{ color:#ffab13; }
   .jr-ev-chip .jr-ev-bell{ flex:0 0 auto; opacity:1; display:inline-flex; }
   .jr-ev-chip .jr-ev-bell svg{ width:13px; height:13px; display:block; fill:#ffab13; }
 
@@ -2130,8 +2199,11 @@
   .dc-fields.animated-collapse{ transition: max-height .5s cubic-bezier(.4,0,.2,1), opacity .4s ease, margin-top .5s cubic-bezier(.4,0,.2,1), padding-top .5s cubic-bezier(.4,0,.2,1); margin-top:11px; padding-top:11px; }
   .dc-fields.animated-collapse:not(.is-open){ max-height:0; opacity:0; margin-top:0; padding-top:0; border-top-color:transparent; }
   .dc-fields.animated-collapse.is-open{ opacity:1; }
+  .dc-field{ min-width:0; }
   .dc-field label{ display:block; font-size:.72rem; color:rgba(255,255,255,.6); margin-bottom:4px; }
   .dc-field input, .dc-field select{ width:100%; box-sizing:border-box; padding:8px 10px; border-radius:9px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#fff; font-size:.85rem; font-family:inherit; }
+  /* שדות תאריך/שעה במובייל — מונעים גלישה מהתא (iOS מכתיב רוחב-מינימום מובנה) */
+  .dc-field input[type="date"], .dc-field input[type="time"]{ -webkit-appearance:none; appearance:none; min-width:0; }
   /* אייקון בורר התאריך (תאריך תשלום) — לבן */
   .dc-field input[type="date"]::-webkit-calendar-picker-indicator{ filter:invert(1); opacity:.9; cursor:pointer; }
   .dc-field.full{ grid-column:1 / -1; }
@@ -2385,6 +2457,7 @@
     <nav class="side-menu-items">
       <button class="side-menu-item" id="settingsMenuItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg></span><span class="txt">הגדרות</span></button>
       <div class="side-menu-sep" aria-hidden="true"></div>
+      <button class="side-menu-item view-nav-item" id="viewDashboardItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3L12 3z"/></svg></span><span class="txt">דשבורד</span></button>
       <button class="side-menu-item view-nav-item" id="viewCustomersItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg></span><span class="txt">לקוחות ואזורים</span></button>
       <button class="side-menu-item view-nav-item" id="viewProductsItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/></svg></span><span class="txt">מוצרים ומחירים</span></button>
       <button class="side-menu-item view-nav-item" id="viewOrdersItem"><span class="icon"><svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM8 7h8c.55 0 1 .45 1 1s-.45 1-1 1H8c-.55 0-1-.45-1-1s.45-1 1-1zm3 10H8c-.55 0-1-.45-1-1s.45-1 1-1h3c.55 0 1 .45 1 1s-.45 1-1 1zm5-4H8c-.55 0-1-.45-1-1s.45-1 1-1h8c.55 0 1 .45 1 1s-.45 1-1 1z"/></svg></span><span class="txt">הזמנות</span></button>
@@ -2399,7 +2472,7 @@
     </nav>
   </div>
 
-  <div class="main">
+  <div class="main view-hidden">
     <div class="sidebar">
       <div class="map-actions">
         <button class="ghost" id="refreshBtn" title="טען מחדש מהאחסון">↻ רענון</button>
@@ -2728,6 +2801,12 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         </div>
       </section>
       <div id="journalDayFolders" class="jr-day-folders"></div>
+    </div>
+  </div>
+
+  <div class="products-view journal-view view-hidden" id="dashboardView">
+    <div class="products-inner">
+      <div id="dashboardHost"></div>
     </div>
   </div>
 
@@ -7852,6 +7931,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const viewDocumentsItem = document.getElementById('viewDocumentsItem');
   const collectionViewEl = document.getElementById('collectionView');
   const viewCollectionItem = document.getElementById('viewCollectionItem');
+  const dashboardViewEl = document.getElementById('dashboardView');
+  const viewDashboardItem = document.getElementById('viewDashboardItem');
   const viewCustomersItem = document.getElementById('viewCustomersItem');
   const viewProductsItem = document.getElementById('viewProductsItem');
   const viewOrdersItem = document.getElementById('viewOrdersItem');
@@ -7865,6 +7946,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     viewJournalItem.classList.toggle('active-view', currentView === 'journal');
     viewDocumentsItem.classList.toggle('active-view', currentView === 'documents');
     if(viewCollectionItem) viewCollectionItem.classList.toggle('active-view', currentView === 'collection');
+    if(viewDashboardItem) viewDashboardItem.classList.toggle('active-view', currentView === 'dashboard');
     settingsMenuItem.classList.toggle('active-view', currentView === 'settings');
   }
   function hideAllViews(){
@@ -7876,6 +7958,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     journalViewEl.classList.add('view-hidden');
     documentsViewEl.classList.add('view-hidden');
     if(collectionViewEl) collectionViewEl.classList.add('view-hidden');
+    if(dashboardViewEl) dashboardViewEl.classList.add('view-hidden');
   }
   function renderInventoriesView(){
     try{ applyInventoryPanelOrder(); }catch(_){}
@@ -8147,6 +8230,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const jrPad = n => String(n).padStart(2,'0');
   const jrDateStr = (y,m,d) => `${y}-${jrPad(m+1)}-${jrPad(d)}`;
   function jrEventsFor(ds){ return (journal.events||[]).filter(e=> e && e.date===ds).slice().sort((a,b)=> String(a.time||'').localeCompare(String(b.time||''))); }
+  function jrRemindersFor(ds){ return (journal.reminders||[]).filter(r=> r && r.date===ds).slice().sort((a,b)=> String(a.time||'').localeCompare(String(b.time||''))); }
   function jrDayLabel(y,m,d){ return `יום ${JR_WEEKDAYS[new Date(y,m,d).getDay()]}, ${d} ${JR_MONTHS[m]}`; }
 
   function renderJournalView(){
@@ -8185,7 +8269,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     for(let i=0;i<firstDow;i++) html += `<div class="jr-cal-cell empty"></div>`;
     for(let d=1; d<=days; d++){
       const ds = jrDateStr(jrYear, jrMonth, d);
-      const has = jrEventsFor(ds).length > 0;
+      const has = jrEventsFor(ds).length > 0 || jrRemindersFor(ds).length > 0;
       const dow = new Date(jrYear, jrMonth, d).getDay(); // 5=שישי, 6=שבת
       const cls = ['jr-cal-cell'];
       if(dow===5 || dow===6) cls.push('jr-weekend');
@@ -8234,14 +8318,242 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(main) main.addEventListener('click', ()=>{ const p2=(e.date).split('-').map(Number); jrYear=p2[0]; jrMonth=p2[1]-1; jrSelectedDate=e.date; renderJrCalendar(); renderJrDayFolders(true); });
   }
 
+  // ===================== דשבורד — עמוד כניסה =====================
+  function renderDashboardView(){
+    const host = document.getElementById('dashboardHost'); if(!host) return;
+    host.innerHTML =
+      `<div id="dashUpcoming" class="jr-upcoming"></div>
+       <section class="panel jr-cal-panel">
+         <div class="jr-cal">
+           <div class="dash-week-title">השבוע הקרוב</div>
+           <div class="dash-week" id="dashWeek"></div>
+         </div>
+       </section>
+       <div class="dash-section-title">גישה מהירה</div>
+       <div class="dash-quick" id="dashQuick"></div>
+       <div class="dash-section-title dash-clickable" id="dashCollectHead">גבייה במבט מהיר <span class="dash-more">לעמוד הגבייה ›</span></div>
+       <div class="dc-summary dash-collect" id="dashCollect"></div>
+       <div class="dash-section-title">דורש טיפול</div>
+       <div class="dash-att" id="dashAttention"></div>
+       <div class="dash-section-title">מדדי פעילות · השבוע</div>
+       <div class="dash-stats" id="dashActivity"></div>
+       <div class="dash-section-title dash-clickable" id="dashMapHead">המפה שלי <span class="dash-more">ללקוחות ואזורים ›</span></div>
+       <select id="dashMapFolder" class="dash-map-select"></select>
+       <div class="dash-minimap" id="dashMiniMap"></div>`;
+    renderDashUpcoming();
+    renderDashWeek();
+    renderDashQuick();
+    renderDashCollection();
+    renderDashAttention();
+    renderDashActivity();
+    renderDashMiniMap();
+  }
+  // מיני-מפה — מציגה את התיקייה שנבחרה (או הכול). לחיצה על הכותרת עוברת ל"לקוחות ואזורים"
+  let _dashMap = null;
+  let _dashMapFolder = (function(){ try{ return localStorage.getItem('geosort_dash_map_folder') || ''; }catch(_){ return ''; } })();
+  function renderDashMiniMap(){
+    const el = document.getElementById('dashMiniMap'); if(!el) return;
+    const head = document.getElementById('dashMapHead');
+    if(head && !head._wired){ head._wired = true; head.addEventListener('click', ()=>{ try{ switchView('customers'); }catch(_){} }); }
+    // בורר תיקייה — כל הלקוחות או תיקייה ספציפית
+    const sel = document.getElementById('dashMapFolder');
+    if(sel){
+      const fl = (folders||[]);
+      if(_dashMapFolder && !fl.some(f=>f.name===_dashMapFolder)) _dashMapFolder = '';
+      const opts = ['<option value="">כל הלקוחות</option>'].concat(fl.map(f=>{
+        const cnt = (clients||[]).filter(c=> (c.folder||'')===f.name && typeof c.lat==='number' && !isNaN(c.lat)).length;
+        return `<option value="${escapeHtml(f.name)}">${escapeHtml(f.name)}${cnt?(' ('+cnt+')'):''}</option>`;
+      }));
+      sel.innerHTML = opts.join('');
+      sel.value = _dashMapFolder || '';
+      sel.onchange = ()=>{ _dashMapFolder = sel.value; try{ localStorage.setItem('geosort_dash_map_folder', _dashMapFolder); }catch(_){} renderDashMiniMap(); };
+    }
+    let pts = (clients||[]).filter(c=> typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon));
+    if(_dashMapFolder) pts = pts.filter(c=> (c.folder||'')===_dashMapFolder);
+    if(_dashMap){ try{ _dashMap.remove(); }catch(_){} _dashMap=null; }
+    if(!pts.length){ el.innerHTML = '<div class="dash-map-empty">'+(_dashMapFolder?'אין לקוחות עם מיקום בתיקייה זו':'אין עדיין לקוחות על המפה')+'</div>'; return; }
+    el.innerHTML = '';
+    try{
+      _dashMap = L.map(el, { zoomControl:false, attributionControl:false, dragging:true, scrollWheelZoom:false, doubleClickZoom:false, tap:false });
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom:19 }).addTo(_dashMap);
+      const latlngs = [];
+      pts.forEach(c=>{
+        const folder = (folders||[]).find(f=>f.name===c.folder);
+        const color = (folder && folder.color) || '#025ffb';
+        L.circleMarker([c.lat, c.lon], { radius:6, color:'#fff', weight:1.5, fillColor:color, fillOpacity:.95 }).addTo(_dashMap);
+        latlngs.push([c.lat, c.lon]);
+      });
+      if(latlngs.length===1){ _dashMap.setView(latlngs[0], 13); }
+      else { _dashMap.fitBounds(latlngs, { padding:[26,26], maxZoom:14 }); }
+      setTimeout(()=>{ try{ _dashMap.invalidateSize(); }catch(_){} }, 220);
+    }catch(e){ console.error('dash mini map', e); el.innerHTML = '<div class="dash-map-empty">לא ניתן לטעון את המפה</div>'; }
+  }
+  // גישה מהירה — כפתורי פעולה נפוצים
+  function renderDashQuick(){
+    const host = document.getElementById('dashQuick'); if(!host) return;
+    const ICO = {
+      order:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm1 15h-2v-3H8v-2h3v-3h2v3h3v2h-3v3z"/></svg>',
+      client:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>',
+      map:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>',
+      report: JR_WA_SVG
+    };
+    host.innerHTML =
+      `<button type="button" class="dash-qbtn a1" data-act="order"><span class="dash-qic">${ICO.order}</span><span class="dash-qtext">הזמנה חדשה</span></button>
+       <button type="button" class="dash-qbtn a2" data-act="client"><span class="dash-qic">${ICO.client}</span><span class="dash-qtext">לקוח חדש</span></button>
+       <button type="button" class="dash-qbtn a3" data-act="map"><span class="dash-qic">${ICO.map}</span><span class="dash-qtext">מפה</span></button>
+       <button type="button" class="dash-qbtn a4" data-act="report"><span class="dash-qic">${ICO.report}</span><span class="dash-qtext">דוח יומי</span></button>`;
+    host.querySelectorAll('.dash-qbtn').forEach(btn=> btn.addEventListener('click', ()=> dashQuickAction(btn.dataset.act)));
+  }
+  function dashQuickAction(act){
+    if(act==='order'){ try{ ordEditingOrderId = null; }catch(_){} switchView('orders'); }
+    else if(act==='client'){
+      switchView('customers');
+      setTimeout(()=>{ try{
+        const body=document.getElementById('addClientBody');
+        if(body && !body.classList.contains('is-open')){ body.classList.add('is-open'); body.style.maxHeight='none'; const ch=document.getElementById('addClientChevron'); if(ch) ch.style.transform='rotate(90deg)'; }
+        const f=document.getElementById('f-business'); if(f){ f.scrollIntoView({behavior:'smooth', block:'center'}); f.focus(); }
+      }catch(_){} }, 260);
+    }
+    else if(act==='map'){ switchView('customers'); setTimeout(()=>{ try{ const btn=document.getElementById('fitAllBtn'); if(btn) btn.click(); }catch(_){} }, 260); }
+    else if(act==='report'){ sendDailyReportForToday(); }
+  }
+  function sendDailyReportForToday(){
+    const today = localDateString();
+    let orderCount=0, total=0;
+    clients.forEach(c=>{ if(c.testClient) return; (c.orders||[]).forEach(o=>{ if(o && o.date===today && (o.total||0)>0){ orderCount++; total+=(o.total||0); } }); });
+    const newClientsCount = clients.filter(c=> !c.testClient && c.newClientSince===today).length;
+    const report = `דוח יומי: ${fmtUpdateDate(today)}\nכמות הזמנות חדשות: ${orderCount}\nלקוחות חדשים: ${newClientsCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total*(1+VAT_RATE)).toFixed(2)}`;
+    try{ window.open(`https://wa.me/${dailyReportWaNumber()}?text=${encodeURIComponent(report)}`, '_blank'); }catch(_){}
+  }
+  // מדדי פעילות — הזמנות/חשבוניות שנוצרו ב-7 הימים האחרונים + לקוחות חדשים
+  function renderDashActivity(){
+    const host = document.getElementById('dashActivity'); if(!host) return;
+    const today = localDateString();
+    const dw = new Date(); dw.setDate(dw.getDate()-6);
+    const weekAgo = jrDateStr(dw.getFullYear(), dw.getMonth(), dw.getDate());
+    const inRange = (d)=> d && d>=weekAgo && d<=today;
+    let orders=0, invoices=0, newClients=0;
+    clients.forEach(c=>{
+      if(c.testClient) return;
+      (c.orders||[]).forEach(o=>{ if(o && inRange(o.date)) orders++; });
+      (c.invoices||[]).forEach(inv=>{ if(inv && inv.signature && inRange(inv.date)) invoices++; });
+      if(inRange(c.newClientSince)) newClients++;
+    });
+    host.innerHTML =
+      `<div class="dash-stat o"><div class="dash-stat-num">${orders}</div><div class="dash-stat-lbl">הזמנות</div></div>
+       <div class="dash-stat i"><div class="dash-stat-num">${invoices}</div><div class="dash-stat-lbl">חשבוניות</div></div>
+       <div class="dash-stat n"><div class="dash-stat-num">${newClients}</div><div class="dash-stat-lbl">לקוחות חדשים</div></div>`;
+  }
+  // "דורש טיפול" — חובות שעבר תאריך התשלום + פגישות ותזכורות של היום
+  function renderDashAttention(){
+    const host = document.getElementById('dashAttention'); if(!host) return;
+    const todayStr = localDateString();
+    const shortDate = (s)=>{ const p=String(s||'').split('-'); return p.length===3 ? (p[2]+'/'+p[1]) : (s||''); };
+    const items = [];
+    clients.forEach(c=>{
+      const s = collectionStatus(c); if(!s.hasInvoice) return;
+      const e = dcEntry(c.id); if(dcIsHandled(c,e)) return;
+      if(s.balance <= 0.01) return;
+      if(e && e.dueDate && e.dueDate < todayStr){
+        items.push({ kind:'debt', cid:c.id, name:(c.business||c.name||'לקוח'), sub:'חוב ₪'+Math.round(s.balance)+' · תאריך תשלום עבר ('+shortDate(e.dueDate)+')', phone:c.phone, sortKey:'0'+e.dueDate });
+      }
+    });
+    jrEventsFor(todayStr).forEach(ev=>{
+      items.push({ kind:'meet', name:(ev.business||ev.clientName||'פגישה'), sub:'פגישה היום · '+(ev.time||''), phone:ev.phone, sortKey:'1'+(ev.time||'') });
+    });
+    (journal.reminders||[]).filter(r=>r&&r.date===todayStr).forEach(r=>{
+      items.push({ kind:'rem', name:(r.title||'תזכורת'), sub:'תזכורת היום · '+(r.time||''), sortKey:'2'+(r.time||'') });
+    });
+    items.sort((a,b)=> String(a.sortKey).localeCompare(String(b.sortKey)));
+    if(!items.length){ host.innerHTML = '<div class="dash-att-empty">אין משימות דחופות כרגע — הכול תחת שליטה ✓</div>'; return; }
+    const ICO = {
+      debt:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>',
+      meet:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5z"/></svg>',
+      rem: JR_BELL_SVG
+    };
+    const CHEV='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></svg>';
+    host.innerHTML = items.slice(0,7).map(it=>{
+      const wa = it.phone?`<a class="dash-att-act wa" href="${escapeHtml(waHref(it.phone))}" target="_blank" rel="noopener" title="וואטסאפ">${JR_WA_SVG}</a>`:'';
+      const call = it.phone?`<a class="dash-att-act call" href="tel:${escapeHtml(telHref(it.phone))}" title="חיוג">${JR_PHONE_SVG}</a>`:'';
+      const open = it.cid?`<button type="button" class="dash-att-act open" data-open="${escapeHtml(it.cid)}" title="פתח כרטיס">${CHEV}</button>`:'';
+      return `<div class="dash-att-item"><span class="dash-att-ic ${it.kind}">${ICO[it.kind]}</span><div class="dash-att-main"><div class="dash-att-t">${escapeHtml(it.name)}</div><div class="dash-att-s">${escapeHtml(it.sub)}</div></div><div class="dash-att-acts">${wa}${call}${open}</div></div>`;
+    }).join('');
+    host.querySelectorAll('[data-open]').forEach(btn=> btn.addEventListener('click', ()=> aiOpenClient(btn.dataset.open)));
+  }
+  // שורת מדדי גבייה במבט מהיר — אותם צבעים כמו קוביות עמוד הגבייה, לחיצה קופצת לגבייה
+  function renderDashCollection(){
+    const host = document.getElementById('dashCollect'); if(!host) return;
+    let totalOwed=0, totalPaid=0, unpaidCount=0;
+    clients.forEach(c=>{ const s=collectionStatus(c); if(s.hasInvoice){ const e=dcEntry(c.id); totalPaid+=s.received; if(!dcIsHandled(c,e) && s.balance>0.01){ totalOwed+=s.balance; unpaidCount++; } } });
+    host.innerHTML =
+      `<div class="dc-sum dc-sum-owed"><div class="dc-sum-num owed">₪${Math.round(totalOwed)}</div><div class="dc-sum-label">חוב פתוח</div></div>
+       <div class="dc-sum dc-sum-paid"><div class="dc-sum-num paid">₪${Math.round(totalPaid)}</div><div class="dc-sum-label">נגבה</div></div>
+       <div class="dc-sum dc-sum-wait"><div class="dc-sum-num">${unpaidCount}</div><div class="dc-sum-label">ממתינים לתשלום</div></div>`;
+    const goCollection = ()=>{ try{ switchView('collection'); }catch(_){} };
+    host.addEventListener('click', goCollection);
+    const head = document.getElementById('dashCollectHead');
+    if(head) head.addEventListener('click', goCollection);
+  }
+  // באנר "הפגישה הקרובה" — בדיוק אותו רכיב וצבע כמו ביומן
+  function renderDashUpcoming(){
+    const host = document.getElementById('dashUpcoming'); if(!host) return;
+    const e = jrNextEvent();
+    if(!e){ host.className='jr-upcoming'; host.innerHTML=''; return; }
+    const p=(e.date).split('-').map(Number);
+    const when=`${jrDayLabel(p[0],p[1]-1,p[2])} · ${escapeHtml(e.time||'')}`;
+    const name=escapeHtml(e.business||e.clientName||'פגישה');
+    const call=e.phone?`<a class="jr-up-act" href="tel:${escapeHtml(telHref(e.phone))}" title="חיוג">${JR_PHONE_SVG}</a>`:'';
+    const wa=e.phone?`<a class="jr-up-act" href="${escapeHtml(waHref(e.phone))}" target="_blank" rel="noopener" title="וואטסאפ">${JR_WA_SVG}</a>`:'';
+    host.className='jr-upcoming show';
+    host.innerHTML=`<div class="jr-up-bell">${JR_BELL_SVG}</div><div class="jr-up-main"><div class="jr-up-label">הפגישה הקרובה</div><div class="jr-up-title">${name}</div><div class="jr-up-when">${when}</div></div><div class="jr-up-actions">${call}${wa}</div>`;
+    const main=host.querySelector('.jr-up-main');
+    if(main) main.addEventListener('click', ()=>{
+      // מעבר ליומן קודם (הפעם הראשונה מאתחלת את היומן לתאריך היום), ורק אז קובעים את תאריך האירוע —
+      // אחרת האתחול היה דורס את הבחירה ופותח את היום של היום במקום את היום של האירוע.
+      switchView('journal');
+      const p2=(e.date).split('-').map(Number); jrYear=p2[0]; jrMonth=p2[1]-1; jrSelectedDate=e.date;
+      try{ renderJrCalendar(); renderJrDayFolders(true); }catch(_){}
+    });
+  }
+  // לוח שבוע — 7 ימים החל מהיום, באותה שפה עיצובית של לוח היומן
+  function renderDashWeek(){
+    const host = document.getElementById('dashWeek'); if(!host) return;
+    const WD = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ש׳'];
+    const now = new Date(); const base = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayStr = localDateString();
+    let html = '';
+    for(let i=0;i<7;i++){
+      const d = new Date(base.getFullYear(), base.getMonth(), base.getDate()+i);
+      const ds = jrDateStr(d.getFullYear(), d.getMonth(), d.getDate());
+      const dow = d.getDay();
+      const has = jrEventsFor(ds).length > 0 || jrRemindersFor(ds).length > 0;
+      const cls = ['dash-day'];
+      if(dow===5 || dow===6) cls.push('jr-weekend');
+      if(ds===todayStr) cls.push('today');
+      html += `<button type="button" class="${cls.join(' ')}" data-date="${ds}"><span class="dash-day-wd">${WD[dow]}</span><span class="dash-day-num">${d.getDate()}</span>${has?'<span class="jr-dot"></span>':''}</button>`;
+    }
+    host.innerHTML = html;
+    host.querySelectorAll('.dash-day').forEach(cell=>{
+      cell.addEventListener('click', ()=>{ openJrMeetingPopup(cell.dataset.date, '09:00'); });
+    });
+  }
+
   function jrHoursHtml(ds){
     const byHour = {};
-    jrEventsFor(ds).forEach(e=>{ const h = (e.time||'00:00').slice(0,2); (byHour[h]=byHour[h]||[]).push(e); });
+    jrEventsFor(ds).forEach(e=>{ const h = (e.time||'00:00').slice(0,2); (byHour[h]=byHour[h]||[]).push({t:'meet', e}); });
+    jrRemindersFor(ds).forEach(r=>{ const h = (r.time||'00:00').slice(0,2); (byHour[h]=byHour[h]||[]).push({t:'rem', e:r}); });
     let rows = '';
     for(let h=0; h<24; h++){
       const hh = jrPad(h);
       const list = byHour[hh] || [];
-      const chips = list.map(e=>`<div class="jr-ev-chip"><span class="jr-ev-time">${escapeHtml(e.time||'')}</span><span class="jr-ev-name">${escapeHtml(e.business||e.clientName||'פגישה')}</span>${e.reminder?`<span class="jr-ev-bell">${JR_BELL_SVG}</span>`:''}</div>`).join('');
+      const chips = list.map(it=>{
+        if(it.t==='rem'){
+          const r = it.e;
+          return `<div class="jr-ev-chip jr-rem-chip"><span class="jr-ev-time">${escapeHtml(r.time||'')}</span><span class="jr-ev-name">${escapeHtml(r.title||'תזכורת')}</span><span class="jr-ev-bell">${JR_BELL_SVG}</span></div>`;
+        }
+        const e = it.e;
+        return `<div class="jr-ev-chip"><span class="jr-ev-time">${escapeHtml(e.time||'')}</span><span class="jr-ev-name">${escapeHtml(e.business||e.clientName||'פגישה')}</span>${e.reminder?`<span class="jr-ev-bell">${JR_BELL_SVG}</span>`:''}</div>`;
+      }).join('');
       rows += `<div class="jr-hour-row" data-date="${ds}" data-hour="${hh}"><span class="jr-hour-time">${hh}:00</span><div class="jr-hour-events">${chips || '<span class="jr-hour-empty">—</span>'}</div><span class="jr-hour-add">${JR_PLUS_SVG}</span></div>`;
     }
     return `<div class="jr-hours">${rows}</div>`;
@@ -9227,21 +9539,21 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     //  1 — קיימת הזמנה ללא חשבונית
     //  2 — הכול סגור: יש הזמנה/חשבונית וכל החשבוניות עם קבלה (הזמנה+חשבונית+קבלה)
     //  3 — אין כלל הזמנות/חשבוניות/קבלות
-    // הכלל: גם אם ללקוח מאות הזמנות משולמות — די בהזמנה אחת ללא חשבונית או בחשבונית אחת ללא קבלה
-    // כדי לשייך אותו לקבוצת החוב/הפתוחות המתאימה (0 קודם ל-1).
+    // הכלל: גם אם ללקוח מאות הזמנות משולמות — די בחשבונית אחת ללא קבלה (0) או בהזמנה אחת ללא חשבונית (1)
+    // כדי לשייך אותו לקבוצה המתאימה; חוב (0) קודם להזמנה-ללא-חשבונית (1).
     const rank = r => {
-      if(r.e.handledManual === true) return 2;                          // המנהל סימן ידנית "טופל" → קבוצת השולם
-      const c = r.c, orders = c.orders || [], invoices = c.invoices || [];
-      if(invoices.some(inv => inv && !invoiceHasReceipt(c, inv))) return 0; // חשבונית ללא קבלה — חוב פתוח
-      if(orders.some(o => o && !orderHasInvoice(c, o)))            return 1; // הזמנה ללא חשבונית
-      if(orders.length || invoices.length)                        return 2; // הכול סגור
+      if(r.e.handledManual === true) return 2;                              // המנהל סימן ידנית "טופל" → קבוצת השולם
+      const c = r.c, orders = (c.orders||[]), invoices = (c.invoices||[]);
+      if(invoices.some(inv=> inv && !invoiceHasReceipt(c, inv))) return 0;   // חשבונית ללא קבלה — חוב פתוח
+      if(orders.some(o=> o && !orderHasInvoice(c, o)))           return 1;   // הזמנה ללא חשבונית
+      if(orders.length || invoices.length)                      return 2;   // הכול סגור
       return 3;                                                             // אין כלום
     };
     filtered.sort((a,b)=>{
       const ra = rank(a), rb = rank(b);
       if(ra !== rb) return ra - rb;
       const ad = a.e.dueDate || '9999-99-99', bd = b.e.dueDate || '9999-99-99';
-      if(ad !== bd) return ad < bd ? -1 : 1;                    // הקרוב לתשלום קודם
+      if(ad !== bd) return ad < bd ? -1 : 1;                    // בתוך אותה קבוצה: הקרוב לתשלום קודם
       return (a.c.business||a.c.name||'').localeCompare(b.c.business||b.c.name||'');
     });
     return filtered;
@@ -9413,7 +9725,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   setInterval(dcCheckReminders, 60000);
 
   function switchView(view){
-    if(!['customers','products','orders','settings','inventories','journal','documents','collection'].includes(view)) return;
+    if(!['customers','products','orders','settings','inventories','journal','documents','collection','dashboard'].includes(view)) return;
     currentView = view;
     if(view !== 'inventories') stopInventoryBalls(); // עוזבים עמוד עם כדורים → עוצרים
     hideAllViews();
@@ -9436,6 +9748,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     } else if(view === 'collection'){
       collectionViewEl.classList.remove('view-hidden');
       renderCollectionView();
+    } else if(view === 'dashboard'){
+      dashboardViewEl.classList.remove('view-hidden');
+      renderDashboardView();
     } else if(view === 'orders'){
       ordersViewEl.classList.remove('view-hidden');
       renderOrdersView();
@@ -9456,6 +9771,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   viewJournalItem.addEventListener('click', ()=>{ switchView('journal'); closeSideMenu(); });
   viewDocumentsItem.addEventListener('click', ()=>{ switchView('documents'); closeSideMenu(); });
   if(viewCollectionItem) viewCollectionItem.addEventListener('click', ()=>{ switchView('collection'); closeSideMenu(); });
+  if(viewDashboardItem) viewDashboardItem.addEventListener('click', ()=>{ switchView('dashboard'); closeSideMenu(); });
   settingsMenuItem.addEventListener('click', ()=>{ switchView('settings'); closeSideMenu(); });
 
   // ---- settings page: agents management ----
@@ -12407,6 +12723,46 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); aiSubmit(inp.value); inp.value=''; } });
   }
 
+  // ===================== רכב נוסע בעמוד הדשבורד =====================
+  function setupDashVan(){
+    if(document.getElementById('dashVan')) return;
+    const src = document.getElementById('loginVan');
+    if(!src) return;
+    const van = src.cloneNode(true);
+    van.id = 'dashVan';
+    van.setAttribute('class', 'dash-van');
+    // מזהי גרדיאנט ייחודיים כדי לא להתנגש עם רכב הכניסה
+    van.innerHTML = van.innerHTML.replace(/vanBody/g, 'dashVanBody').replace(/vanGlass/g, 'dashVanGlass');
+    document.body.appendChild(van);
+    let W = window.innerWidth, H = window.innerHeight;
+    let x = W*0.5, y = H*0.4, angle = 0, speed = 1.6, tx = x, ty = y, pointerActive = false, lastMove = 0, last = performance.now();
+    window.addEventListener('resize', ()=>{ W = window.innerWidth; H = window.innerHeight; });
+    window.addEventListener('pointermove', e=>{ if(currentView!=='dashboard') return; tx = e.clientX; ty = e.clientY; pointerActive = true; lastMove = performance.now(); }, { passive:true });
+    function frame(now){
+      const active = (currentView === 'dashboard');
+      van.classList.toggle('show', active);
+      const dt = Math.min(2.4, (now - last) / 16.6667); last = now;
+      if(active){
+        if(!pointerActive || now - lastMove > 2600){
+          const t = now / 1000;
+          tx = W*0.5 + Math.sin(t*0.42) * W*0.34;
+          ty = H*0.5 + Math.sin(t*0.63 + 0.9) * H*0.30;
+        }
+        const dx = tx - x, dy = ty - y, dist = Math.hypot(dx, dy), desired = Math.atan2(dy, dx);
+        let da = desired - angle; while(da > Math.PI) da -= Math.PI*2; while(da < -Math.PI) da += Math.PI*2;
+        const maxTurn = 0.075 * dt; angle += Math.max(-maxTurn, Math.min(maxTurn, da));
+        speed += (Math.min(2.6, dist*0.045) - speed) * 0.06 * dt;
+        x += Math.cos(angle) * speed * dt; y += Math.sin(angle) * speed * dt;
+        const m = 26; if(x < m) x = m; if(x > W-m) x = W-m; if(y < m) y = m; if(y > H-m) y = H-m;
+        const deg = angle * 180 / Math.PI + 90;
+        van.style.left = x + 'px'; van.style.top = y + 'px';
+        van.style.transform = 'translate(-50%,-50%) rotate(' + deg + 'deg)';
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
   // ===================== סנכרון בזמן אמת (Supabase Realtime) =====================
   // כאשר משתמש כלשהו בארגון שומר שינוי ב-app_data, כל שאר המשתמשים המחוברים מקבלים
   // עדכון מיידי ומרעננים את המסך — כך אין "מסך ישן" ולא דורסים אחד את השני.
@@ -12439,6 +12795,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       try{ if(currentView==='journal') renderJrCalendar(); }catch(_){}
       try{ if(currentView==='documents' && !document.querySelector('.dce-overlay') && !document.querySelector('.dc-file-rename-input') && !document.querySelector('.cluster-rename-input')) renderDocumentsView(); }catch(_){}
       try{ if(currentView==='collection') renderCollectionView(); }catch(_){}
+      try{ if(currentView==='dashboard') renderDashboardView(); }catch(_){}
       try{ await checkLoginNotifications(); }catch(_){}  // התראה למנהל על כניסות חדשות
     }catch(e){ console.error('realtime refresh', e); }
     finally{ _rtRunning = false; }
@@ -12446,6 +12803,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   (async function init(){
     await authReady; // אתחול האפליקציה מתחיל רק אחרי התחברות והגדרת הארגון
+    try{ switchView('dashboard'); }catch(_){}  // מיד לדשבורד — כדי שהמפה לא תוצג ותקפוץ
     await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal(), loadDocCollections()]);
     populateBusinessDetails();
     applySettingsPanelOrder();
@@ -12462,9 +12820,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(clients.length){
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
     }
-    openDeepLinkedClientIfAny();
+    try{ if(currentView==='dashboard') renderDashboardView(); }catch(_){}  // רענון הדשבורד עם הנתונים שנטענו
+    openDeepLinkedClientIfAny();  // אם יש deep-link ללקוח — יעבור לתצוגת הלקוחות
     startOrgRealtime(); // מתחילים להאזין לשינויים של שאר המשתמשים בארגון
     try{ setupAiAssistant(); }catch(_){}  // עוזר חכם מובנה — כפתור צף
+    try{ setupDashVan(); }catch(_){}  // רכב נוסע בדשבורד
     // התראות כניסה למערכת — רק למנהל
     if(CURRENT_ROLE==='manager' || CURRENT_ROLE==='admin'){
       try{ if('Notification' in window && Notification.permission==='default') Notification.requestPermission(); }catch(_){}
@@ -12484,6 +12844,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       alert('הלקוח שהקישור מצביע אליו לא נמצא (אולי נמחק).');
       return;
     }
+    try{ switchView('customers'); }catch(_){}  // קישור ללקוח מוביל לתצוגת המפה/לקוחות
     if(c.folder) openFolderNames.add(c.folder);
     if(c.tempFolder) openFolderNames.add(c.tempFolder);
     openClientCards.add(c.id);
