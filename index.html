@@ -908,8 +908,14 @@
   .ai-chips{ display:flex; flex-wrap:wrap; gap:6px; padding:9px 12px 4px; background:#fff; border-top:1px solid #eef1f6; }
   .ai-chip{ background:#f0f3f8; border:1px solid #e2e8f1; border-radius:20px; padding:6px 12px; font-size:.77rem; color:#3a4657; cursor:pointer; font-family:inherit; }
   .ai-chip:hover{ background:#e6ecf6; }
-  .ai-input-row{ display:flex; gap:8px; padding:10px 12px; background:#fff; }
-  .ai-input{ flex:1; -webkit-appearance:none; box-sizing:border-box; border:1px solid #dce2ec; border-radius:22px; padding:11px 15px; font-size:.9rem; font-family:inherit; background:#f7f9fc; color:#0f1a2e; min-width:0; }
+  .ai-foldpick{ align-self:stretch; background:#fff; border:1px solid #e7ecf3; border-radius:13px; padding:9px 11px; }
+  .ai-foldpick-lbl{ font-size:.78rem; color:#6b7688; margin-bottom:7px; }
+  .ai-foldpick-row{ display:flex; flex-wrap:wrap; gap:6px; }
+  .ai-fold-chip{ display:inline-flex; align-items:center; gap:6px; background:#f2f5fa; border:1px solid #e2e8f1; border-radius:20px; padding:6px 11px; font-size:.8rem; color:#1c2733; cursor:pointer; font-family:inherit; }
+  .ai-fold-chip:hover{ background:#e6ecf6; }
+  .ai-fold-dot{ width:10px; height:10px; border-radius:50%; flex:0 0 auto; }
+  .ai-input-row{ display:flex; gap:8px; padding:10px 12px; background:#fff; align-items:flex-end; }
+  .ai-input{ flex:1; -webkit-appearance:none; box-sizing:border-box; border:1px solid #dce2ec; border-radius:22px; padding:11px 15px; font-size:.9rem; font-family:inherit; background:#f7f9fc; color:#0f1a2e; min-width:0; resize:none; line-height:1.45; max-height:130px; overflow-y:auto; }
   .ai-input:focus{ outline:none; border-color:#025ffb; }
   .ai-send{ flex:0 0 auto; width:44px; height:44px; border-radius:50%; border:none; background:#025ffb; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .ai-send:hover{ background:#1a72ff; } .ai-send svg{ width:19px; height:19px; }
@@ -8814,12 +8820,15 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     else if(act==='map'){ switchView('customers'); setTimeout(()=>{ try{ const btn=document.getElementById('fitAllBtn'); if(btn) btn.click(); }catch(_){} }, 260); }
     else if(act==='report'){ sendDailyReportForToday(); }
   }
-  function sendDailyReportForToday(){
+  function buildDailyReportForToday(){
     const today = localDateString();
     let orderCount=0, total=0;
     clients.forEach(c=>{ if(c.testClient) return; (c.orders||[]).forEach(o=>{ if(o && o.date===today && (o.total||0)>0){ orderCount++; total+=(o.total||0); } }); });
     const newClientsCount = clients.filter(c=> !c.testClient && c.newClientSince===today).length;
-    const report = `דוח יומי: ${fmtUpdateDate(today)}\nכמות הזמנות חדשות: ${orderCount}\nלקוחות חדשים: ${newClientsCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total*(1+VAT_RATE)).toFixed(2)}`;
+    return `דוח יומי: ${fmtUpdateDate(today)}\nכמות הזמנות חדשות: ${orderCount}\nלקוחות חדשים: ${newClientsCount}\nסכום (לפני מע״מ): ₪${total.toFixed(2)}\nסכום (כולל מע״מ ${Math.round(VAT_RATE*100)}%): ₪${(total*(1+VAT_RATE)).toFixed(2)}`;
+  }
+  function sendDailyReportForToday(){
+    const report = buildDailyReportForToday();
     try{ window.open(`https://wa.me/${dailyReportWaNumber()}?text=${encodeURIComponent(report)}`, '_blank'); }catch(_){}
   }
   // מדדי פעילות — הזמנות/חשבוניות שנוצרו ב-7 הימים האחרונים + לקוחות חדשים
@@ -13082,6 +13091,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     try{ openSignableDoc(c, type, doc); }catch(e){ alert('לא ניתן לפתוח את המסמך.'); }
   }
   let _aiPanel=null;
+  let _aiInput=null;
   function aiTogglePanel(open){
     if(!_aiPanel) return;
     const willOpen = (open===undefined) ? !_aiPanel.classList.contains('open') : open;
@@ -13118,13 +13128,188 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           card.querySelector('.ai-open-btn').addEventListener('click', ()=>aiOpenDoc(it.clientId, it.type, it.id));
           wrap.appendChild(card);
         });
+      } else if(b.k==='folderpick'){
+        const box=document.createElement('div'); box.className='ai-foldpick';
+        const items=b.items||[];
+        if(!items.length){
+          const e=document.createElement('div'); e.className='ai-foldpick-lbl';
+          e.textContent='אין תיקיות עדיין — צרו תיקייה בעמוד "לקוחות ואזורים" ואז נסו שוב.'; box.appendChild(e);
+        } else {
+          const lbl=document.createElement('div'); lbl.className='ai-foldpick-lbl'; lbl.textContent=b.label||'בחרו תיקייה (לחיצה תמלא אותה בטופס):'; box.appendChild(lbl);
+          const row=document.createElement('div'); row.className='ai-foldpick-row';
+          items.forEach(fn=>{
+            const btn=document.createElement('button'); btn.type='button'; btn.className='ai-fold-chip';
+            const fo=folders.find(x=>x.name===fn);
+            const dot=document.createElement('span'); dot.className='ai-fold-dot'; dot.style.background=(fo&&fo.color)||'#025ffb'; btn.appendChild(dot);
+            const t=document.createElement('span'); t.textContent=fn; btn.appendChild(t);
+            btn.addEventListener('click', ()=>aiSetTemplateFolder(fn));
+            row.appendChild(btn);
+          });
+          box.appendChild(row);
+        }
+        wrap.appendChild(box);
+      } else if(b.k==='reportsend'){
+        const box=document.createElement('div'); box.className='ai-card';
+        box.innerHTML='<span class="ai-card-ic">'+SEND_ICON_SVG+'</span><div class="ai-card-main"><div class="ai-card-t">דו״ח יומי מוכן לשליחה</div><div class="ai-card-s">נשלח בוואטסאפ למספר הדו״ח היומי</div></div><button class="ai-open-btn">📤 שלח בוואטסאפ</button>';
+        box.querySelector('.ai-open-btn').addEventListener('click', ()=>{ try{ sendDailyReportForToday(); }catch(_){}} );
+        wrap.appendChild(box);
       }
     });
     wrap.scrollTop=wrap.scrollHeight;
   }
+  function aiSetTemplateFolder(name){
+    const inp=_aiInput; if(!inp) return;
+    let v=inp.value; if(!v.trim()) v=AI_ADD_TEMPLATE;
+    const lines=v.split(/\r?\n/); let done=false;
+    for(let i=0;i<lines.length;i++){
+      if(/^\s*(תיקייה|תיקיה|אזור|קטגוריה)\s*[:=\-–]/.test(lines[i])){
+        lines[i]=lines[i].replace(/([:=\-–])\s*.*$/, '$1 '+name); done=true; break;
+      }
+    }
+    if(!done) lines.push('תיקייה: '+name);
+    inp.value=lines.join('\n');
+    inp.focus();
+    try{ inp.dispatchEvent(new Event('input')); }catch(_){}
+  }
+  // ===================== פקודת "הוסף לקוח" דרך העוזר החכם =====================
+  // שדות חובה (לפי בקשת המשתמש): שם העסק, שם לחשבונית, איש קשר, טלפון, כתובת, תיקייה, חדש כן/לא.
+  // בלי אחד מהם הלקוח לא ייווסף — העוזר מציין בדיוק מה חסר.
+  const AI_ADD_TEMPLATE =
+    'הוסף לקוח\n' +
+    'עסק: \n' +
+    'שם לחשבונית: \n' +
+    'איש קשר: \n' +
+    'טלפון: \n' +
+    'כתובת: רחוב ומספר, עיר\n' +
+    'תיקייה: \n' +
+    'חדש: כן/לא';
+  function aiIsAddClientCmd(text){
+    return /^\s*(הוסף|הוסיף|הוסיפי|תוסיף|צור|הכנס|add)\s+(לקוח|client)/i.test(text||'');
+  }
+  function aiParseYesNo(v){
+    const s=(v||'').trim().toLowerCase();
+    if(!s) return undefined;
+    if(/^(כן|כ|yes|y|true|1|חדש)$/.test(s)) return true;
+    if(/^(לא|no|n|false|0|ותיק|קיים|ישן)$/.test(s)) return false;
+    return undefined;
+  }
+  function aiParseClientFields(text){
+    // הסרת מילת הפקודה מתחילת הטקסט
+    let body=(text||'').replace(/^\s*(הוסף|הוסיף|הוסיפי|תוסיף|צור|הכנס|add)\s+(לקוח|client)\s*[:,\-–]?\s*/i,'');
+    // סדר חשוב: תוויות ספציפיות (שם העסק / איש קשר) לפני התווית הכללית "שם"
+    const labels=[
+      [/^(שם\s*ה?עסק|שם\s*עסק|בית\s*עסק|שם\s*ה?חנות|חנות|עסק)\s*[:=\-–]\s*/, 'business'],
+      [/^(שם\s*(על\s*)?(גבי\s*)?ה?חשבונית|שם\s*לחשבונית|שם\s*בחשבונית|שם\s*מלא|שם)\s*[:=\-–]\s*/, 'name'],
+      [/^(איש\s*ה?קשר|אישקשר|נציג|קשר)\s*[:=\-–]\s*/, 'contact'],
+      [/^(מספר\s*טלפון|טלפון|נייד|פלאפון|טל|פון)\s*[:=\-–]\s*/, 'phone'],
+      [/^(כתובת\s*מלאה|כתובת|רחוב)\s*[:=\-–]\s*/, 'street'],
+      [/^(עיר|יישוב|ישוב)\s*[:=\-–]\s*/, 'city'],
+      [/^(תיקייה|תיקיה|אזור|קטגוריה)\s*[:=\-–]\s*/, 'folder'],
+      [/^(לקוח\s*חדש|האם\s*חדש|חדש)\s*[:=\-–]\s*/, 'isNew'],
+      [/^(אימייל|מייל|דוא"?ל|email|e-?mail)\s*[:=\-–]\s*/i, 'email'],
+      [/^(ח\.?\s*פ\.?|ת\.?\s*ז\.?|חפ|תז|עוסק\s*מורשה|מספר\s*עוסק)\s*[:=\-–]\s*/, 'businessId'],
+      [/^(הערות|הערה)\s*[:=\-–]\s*/, 'notes'],
+    ];
+    const out={}; let count=0;
+    body.split(/\r?\n/).forEach(line=>{
+      const l=line.trim(); if(!l) return;
+      for(const [re,key] of labels){
+        const m=l.match(re);
+        if(m){ const val=l.slice(m[0].length).trim(); if(val){ out[key]=val; count++; } return; }
+      }
+    });
+    out._count=count;
+    return out;
+  }
+  async function aiGeocodeForAdd(street, city){
+    let r=[];
+    try{ r=await geocodeFields(street, city, 5); }catch(_){ r=[]; }
+    if((!r||!r.length) && city){ try{ r=await geocodeFields([street,city].filter(Boolean).join(' '), '', 5); }catch(_){ } }
+    if((!r||!r.length) && !city){ try{ r=await geocodeFields(street, '', 5); }catch(_){ } }
+    return r||[];
+  }
+  async function aiHandleAddClient(text){
+    const f=aiParseClientFields(text);
+    // רק מילת הפקודה בלי שדות → הצגת תבנית + רשימת תיקיות לבחירה
+    if(!f._count){
+      aiAppendBlocks([{k:'text', html:'כדי להוסיף לקוח, מלאו את התבנית (כל שדה בשורה נפרדת) ושלחו. את התיקייה בחרו מהרשימה שמתחת — לחיצה תמלא אותה בטופס:\n\n'+AI_ADD_TEMPLATE}, {k:'folderpick', items:folders.map(x=>x.name)}]);
+      return;
+    }
+    const hasAddress = !!(f.street || f.city);
+    const isNew = aiParseYesNo(f.isNew);
+    const missing=[];
+    if(!f.business) missing.push('שם העסק');
+    if(!f.name) missing.push('שם לחשבונית');
+    if(!f.contact) missing.push('איש קשר');
+    if(!f.phone) missing.push('טלפון');
+    if(!hasAddress) missing.push('כתובת (רחוב ועיר)');
+    if(!f.folder) missing.push('תיקייה');
+    if(isNew===undefined) missing.push('האם לקוח חדש (כן/לא)');
+    if(missing.length){
+      aiAppendBlocks([{k:'text', html:'לא הוספתי את הלקוח — חסרים שדות חובה:\n• '+missing.join('\n• ')+'\n\nמלאו את כולם ושלחו שוב. תבנית:\n\n'+AI_ADD_TEMPLATE}]);
+      return;
+    }
+    // פירוק כתובת: אם אין "עיר" נפרדת, מה שאחרי הפסיק האחרון נחשב לעיר
+    let street=f.street||'', city=f.city||'';
+    if(!city && street.indexOf(',')>=0){
+      const parts=street.split(',');
+      city=parts.pop().trim();
+      street=parts.join(',').trim();
+    }
+    // התיקייה חייבת להיות אחת מהתיקיות הקיימות — לא יוצרים תיקייה חדשה מכאן
+    const _normF=s=>(s||'').trim().replace(/\s+/g,' ');
+    const folderInput=(f.folder||'').trim();
+    const matchedFolder=folders.find(x=>_normF(x.name)===_normF(folderInput));
+    if(!matchedFolder){
+      aiAppendBlocks([{k:'text', html:'התיקייה "'+folderInput+'" לא קיימת במערכת, אז לא הוספתי את הלקוח (כדי לא ליצור תיקיות מיותרות). בחרו אחת מהתיקיות הקיימות — לחיצה תמלא אותה בטופס, ואז שלחו שוב:'}, {k:'folderpick', items:folders.map(x=>x.name)}]);
+      return;
+    }
+    const houseMatch=street.match(/(\d+[א-ת]?(?:\/\d+)?)\s*$/);
+    const houseNumber=houseMatch?houseMatch[1]:'';
+    aiAppendBlocks([{k:'text', html:'🔍 מאתר את הכתובת ומוסיף את הלקוח…'}]);
+    const results=await aiGeocodeForAdd(street, city);
+    if(!results.length){
+      aiAppendBlocks([{k:'text', html:'לא הצלחתי לאתר את הכתובת "'+[street,city].filter(Boolean).join(', ')+'". בדקו את הכתיב של הרחוב והעיר ונסו שוב — הלקוח לא נוסף.'}]);
+      return;
+    }
+    const g=results[0];
+    const folder=matchedFolder.name;
+    const c={
+      id: Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+      business: f.business||'', businessId: f.businessId||'', name: f.name, contact: f.contact||'',
+      phone: f.phone||'', email: f.email||'', price: '', houseNumber: houseNumber||'',
+      address: insertHouseNumber(g.label, houseNumber), notes: f.notes||'', whatsappMessage: '',
+      folder: folder||'', lat: g.lat, lon: g.lon, city: g.city||city||'',
+      newClient: !!isNew, newClientSince: isNew?localDateString():''
+    };
+    clients.push(c);
+    try{ saveData(); }catch(_){}
+    try{ renderAll(); }catch(_){}
+    let msg='✅ הלקוח "'+c.business+'" נוסף בהצלחה';
+    msg+='\n📍 כתובת שאותרה: '+c.address;
+    msg+='\n🗂️ תיקייה: '+folder;
+    msg+='\n'+(isNew?'🆕 סומן כלקוח חדש':'לקוח קיים (לא חדש)');
+    aiAppendBlocks([{k:'text', html:msg}, {k:'clients', items:[c]}]);
+  }
+  // ===================== פקודת "שליחת דו״ח יומי" דרך העוזר החכם =====================
+  function aiIsDailyReportCmd(text){
+    const t=(text||'');
+    if(/(איך|כיצד|למה|מה זה)/.test(t)) return false; // שאלת "איך" → הסבר, לא שליחה
+    return /דו(?:״|"|')?ח\s*(?:יומי|של\s*היום|היום)/.test(t) ||
+           /(שלח|שליחת|תשלח|שלוח)\s+(?:את\s+)?(?:ה)?דו(?:״|"|')?ח/.test(t);
+  }
+  function aiHandleDailyReport(){
+    let report='';
+    try{ report=buildDailyReportForToday(); }catch(_){ report=''; }
+    if(!report){ aiAppendBlocks([{k:'text', html:'לא הצלחתי להפיק את הדו״ח היומי. נסו שוב.'}]); return; }
+    aiAppendBlocks([{k:'text', html:'📊 הנה הדו״ח היומי:\n\n'+report}, {k:'reportsend'}]);
+    try{ sendDailyReportForToday(); }catch(_){}
+  }
   function aiSubmit(text){
     text=(text||'').trim(); if(!text) return;
     aiAppendUser(text);
+    if(aiIsAddClientCmd(text)){ aiHandleAddClient(text).catch(()=>{ aiAppendBlocks([{k:'text', html:'אירעה שגיאה בהוספת הלקוח. נסו שוב.'}]); }); return; }
+    if(aiIsDailyReportCmd(text)){ aiHandleDailyReport(); return; }
     setTimeout(()=>{ try{ aiAppendBlocks(aiAnswer(text)); }catch(e){ aiAppendBlocks([{k:'text',html:'אירעה שגיאה. נסו שוב.'}]); } }, 120);
   }
   function setupAiAssistant(){
@@ -13133,22 +13318,33 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     document.body.appendChild(fab);
     const panel=document.createElement('div'); panel.className='ai-panel'; _aiPanel=panel;
     panel.innerHTML =
-      '<div class="ai-head"><span class="ai-ava">'+AI_ICON+'</span><div class="ai-head-txt"><div class="ai-ttl">עוזר GeoSort</div><div class="ai-sub">שאלות תפעול · חיפוש לקוחות וחשבוניות</div></div><button type="button" class="ai-x" title="סגור">✕</button></div>'+
+      '<div class="ai-head"><span class="ai-ava">'+AI_ICON+'</span><div class="ai-head-txt"><div class="ai-ttl">עוזר GeoSort</div><div class="ai-sub">חיפוש והוספת לקוחות · חשבוניות</div></div><button type="button" class="ai-x" title="סגור">✕</button></div>'+
       '<div class="ai-msgs"></div>'+
       '<div class="ai-chips"></div>'+
-      '<div class="ai-input-row"><input type="text" class="ai-input" placeholder="שאלו אותי, או חפשו לקוח / חשבונית..."><button type="button" class="ai-send" title="שלח"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2v6z"/></svg></button></div>';
+      '<div class="ai-input-row"><textarea class="ai-input" rows="1" placeholder="שאלו, חפשו לקוח / חשבונית, או הקלידו: הוסף לקוח"></textarea><button type="button" class="ai-send" title="שלח"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 20l18-8L3 4v6l12 2-12 2v6z"/></svg></button></div>';
     document.body.appendChild(panel);
     // הודעת פתיחה
-    aiAppendBlocks([{k:'text', html:'שלום 👋 אני העוזר של GeoSort. אפשר לשאול אותי "איך מוציאים חשבונית?", לחפש לקוח לפי שם, או להקליד "חשבונית 120" ואפתח אותה. במה אפשר לעזור?'}]);
-    // כפתורים מהירים
-    const chips=['איך מוציאים חשבונית?','ניהול גבייה','מסלול נסיעה','הוספת לקוח','מלאי'];
-    const chipsEl=panel.querySelector('.ai-chips');
-    chips.forEach(c=>{ const b=document.createElement('button'); b.type='button'; b.className='ai-chip'; b.textContent=c; b.addEventListener('click', ()=>aiSubmit(c)); chipsEl.appendChild(b); });
+    aiAppendBlocks([{k:'text', html:'שלום 👋 אני העוזר של GeoSort. אפשר לשאול "איך מוציאים חשבונית?", לחפש לקוח לפי שם, להקליד "חשבונית 120" ואפתח אותה, או להקליד "הוסף לקוח" ואוסיף לקוח חדש לבד. במה אפשר לעזור?'}]);
     fab.addEventListener('click', ()=>aiTogglePanel(true));
     panel.querySelector('.ai-x').addEventListener('click', ()=>aiTogglePanel(false));
-    const inp=panel.querySelector('.ai-input');
-    panel.querySelector('.ai-send').addEventListener('click', ()=>{ aiSubmit(inp.value); inp.value=''; });
-    inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); aiSubmit(inp.value); inp.value=''; } });
+    const inp=panel.querySelector('.ai-input'); _aiInput=inp;
+    function aiGrowInput(){ inp.style.height='auto'; inp.style.height=Math.min(inp.scrollHeight,130)+'px'; }
+    function aiDoSend(){ const v=inp.value; aiSubmit(v); inp.value=''; aiGrowInput(); }
+    inp.addEventListener('input', aiGrowInput);
+    panel.querySelector('.ai-send').addEventListener('click', aiDoSend);
+    inp.addEventListener('keydown', e=>{
+      if(e.key!=='Enter') return;
+      if(e.shiftKey) return;                                   // Shift+Enter → שורה חדשה
+      if(e.ctrlKey || e.metaKey){ e.preventDefault(); aiDoSend(); return; } // Ctrl/⌘+Enter → שליחה
+      if(inp.value.indexOf('\n')===-1){ e.preventDefault(); aiDoSend(); }   // שורה בודדת → שליחה; רב-שורתי → שורה חדשה
+    });
+    // כפתורים מהירים
+    const chips=['➕ הוסף לקוח','📤 שליחת דו״ח יומי','איך מוציאים חשבונית?','ניהול גבייה','מלאי'];
+    const chipsEl=panel.querySelector('.ai-chips');
+    chips.forEach(c=>{ const b=document.createElement('button'); b.type='button'; b.className='ai-chip'; b.textContent=c; b.addEventListener('click', ()=>{
+      if(c.indexOf('הוסף לקוח')>=0){ inp.value=AI_ADD_TEMPLATE; aiGrowInput(); inp.focus(); aiAppendBlocks([{k:'text', html:'מלאו את הפרטים בתיבה למטה. בחרו תיקייה מהרשימה — לחיצה תמלא אותה בטופס:'}, {k:'folderpick', items:folders.map(x=>x.name)}]); }
+      else aiSubmit(c);
+    }); chipsEl.appendChild(b); });
   }
 
   // ===================== רכב נוסע בעמוד הדשבורד =====================
