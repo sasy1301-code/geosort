@@ -973,6 +973,9 @@
   .dash-qbtn.a4 .dash-qic{ background:rgba(37,211,102,.18); color:#25D366; }
   .dash-qtext{ font-size:.95rem; font-weight:600; color:#fff; }
   /* מיני-מפה */
+  .dash-map-select{ width:100%; box-sizing:border-box; -webkit-appearance:none; appearance:none; background:#0f1a2e; color:#fff; border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:11px 14px; font-family:inherit; font-size:.9rem; margin-bottom:9px; cursor:pointer; background-image:linear-gradient(45deg,transparent 50%,#8fb8ff 50%),linear-gradient(135deg,#8fb8ff 50%,transparent 50%); background-position:left 16px center, left 11px center; background-size:5px 5px,5px 5px; background-repeat:no-repeat; }
+  .dash-map-select:focus{ outline:none; border-color:#025ffb; }
+  .dash-map-select option{ background:#0f1a2e; color:#fff; }
   .dash-minimap{ height:200px; border-radius:15px; overflow:hidden; border:1px solid rgba(15,26,46,.12); background:#0f1a2e; position:relative; }
   .dash-minimap .leaflet-container{ height:100%; width:100%; background:#0f1a2e; }
   .dash-map-empty{ height:100%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.55); font-size:.9rem; }
@@ -2012,6 +2015,8 @@
   .jr-ev-chip{ display:flex; align-items:center; gap:7px; background:#0f1a2e; color:#fff; border-radius:9px; padding:5px 9px; font-size:9.5pt; }
   .jr-ev-chip .jr-ev-time{ color:#6db2ff; font-weight:600; flex:0 0 auto; }
   .jr-ev-chip .jr-ev-name{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .jr-ev-chip.jr-rem-chip{ background:#3a2a0a; }
+  .jr-ev-chip.jr-rem-chip .jr-ev-time{ color:#ffab13; }
   .jr-ev-chip .jr-ev-bell{ flex:0 0 auto; opacity:1; display:inline-flex; }
   .jr-ev-chip .jr-ev-bell svg{ width:13px; height:13px; display:block; fill:#ffab13; }
 
@@ -2191,8 +2196,11 @@
   .dc-fields.animated-collapse{ transition: max-height .5s cubic-bezier(.4,0,.2,1), opacity .4s ease, margin-top .5s cubic-bezier(.4,0,.2,1), padding-top .5s cubic-bezier(.4,0,.2,1); margin-top:11px; padding-top:11px; }
   .dc-fields.animated-collapse:not(.is-open){ max-height:0; opacity:0; margin-top:0; padding-top:0; border-top-color:transparent; }
   .dc-fields.animated-collapse.is-open{ opacity:1; }
+  .dc-field{ min-width:0; }
   .dc-field label{ display:block; font-size:.72rem; color:rgba(255,255,255,.6); margin-bottom:4px; }
   .dc-field input, .dc-field select{ width:100%; box-sizing:border-box; padding:8px 10px; border-radius:9px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#fff; font-size:.85rem; font-family:inherit; }
+  /* שדות תאריך/שעה במובייל — מונעים גלישה מהתא (iOS מכתיב רוחב-מינימום מובנה) */
+  .dc-field input[type="date"], .dc-field input[type="time"]{ -webkit-appearance:none; appearance:none; min-width:0; }
   /* אייקון בורר התאריך (תאריך תשלום) — לבן */
   .dc-field input[type="date"]::-webkit-calendar-picker-indicator{ filter:invert(1); opacity:.9; cursor:pointer; }
   .dc-field.full{ grid-column:1 / -1; }
@@ -8218,6 +8226,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   const jrPad = n => String(n).padStart(2,'0');
   const jrDateStr = (y,m,d) => `${y}-${jrPad(m+1)}-${jrPad(d)}`;
   function jrEventsFor(ds){ return (journal.events||[]).filter(e=> e && e.date===ds).slice().sort((a,b)=> String(a.time||'').localeCompare(String(b.time||''))); }
+  function jrRemindersFor(ds){ return (journal.reminders||[]).filter(r=> r && r.date===ds).slice().sort((a,b)=> String(a.time||'').localeCompare(String(b.time||''))); }
   function jrDayLabel(y,m,d){ return `יום ${JR_WEEKDAYS[new Date(y,m,d).getDay()]}, ${d} ${JR_MONTHS[m]}`; }
 
   function renderJournalView(){
@@ -8256,7 +8265,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     for(let i=0;i<firstDow;i++) html += `<div class="jr-cal-cell empty"></div>`;
     for(let d=1; d<=days; d++){
       const ds = jrDateStr(jrYear, jrMonth, d);
-      const has = jrEventsFor(ds).length > 0;
+      const has = jrEventsFor(ds).length > 0 || jrRemindersFor(ds).length > 0;
       const dow = new Date(jrYear, jrMonth, d).getDay(); // 5=שישי, 6=שבת
       const cls = ['jr-cal-cell'];
       if(dow===5 || dow===6) cls.push('jr-weekend');
@@ -8324,7 +8333,8 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
        <div class="dash-att" id="dashAttention"></div>
        <div class="dash-section-title">מדדי פעילות · השבוע</div>
        <div class="dash-stats" id="dashActivity"></div>
-       <div class="dash-section-title dash-clickable" id="dashMapHead">המפה שלי <span class="dash-more">לכל הלקוחות ›</span></div>
+       <div class="dash-section-title dash-clickable" id="dashMapHead">המפה שלי <span class="dash-more">ללקוחות ואזורים ›</span></div>
+       <select id="dashMapFolder" class="dash-map-select"></select>
        <div class="dash-minimap" id="dashMiniMap"></div>`;
     renderDashUpcoming();
     renderDashWeek();
@@ -8334,15 +8344,30 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     renderDashActivity();
     renderDashMiniMap();
   }
-  // מיני-מפה — כל הלקוחות על מפה קטנה, לחיצה על הכותרת עוברת ל"לקוחות ואזורים"
+  // מיני-מפה — מציגה את התיקייה שנבחרה (או הכול). לחיצה על הכותרת עוברת ל"לקוחות ואזורים"
   let _dashMap = null;
+  let _dashMapFolder = (function(){ try{ return localStorage.getItem('geosort_dash_map_folder') || ''; }catch(_){ return ''; } })();
   function renderDashMiniMap(){
     const el = document.getElementById('dashMiniMap'); if(!el) return;
     const head = document.getElementById('dashMapHead');
-    if(head) head.addEventListener('click', ()=>{ try{ switchView('customers'); }catch(_){} });
-    const pts = (clients||[]).filter(c=> typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon));
+    if(head && !head._wired){ head._wired = true; head.addEventListener('click', ()=>{ try{ switchView('customers'); }catch(_){} }); }
+    // בורר תיקייה — כל הלקוחות או תיקייה ספציפית
+    const sel = document.getElementById('dashMapFolder');
+    if(sel){
+      const fl = (folders||[]);
+      if(_dashMapFolder && !fl.some(f=>f.name===_dashMapFolder)) _dashMapFolder = '';
+      const opts = ['<option value="">כל הלקוחות</option>'].concat(fl.map(f=>{
+        const cnt = (clients||[]).filter(c=> (c.folder||'')===f.name && typeof c.lat==='number' && !isNaN(c.lat)).length;
+        return `<option value="${escapeHtml(f.name)}">${escapeHtml(f.name)}${cnt?(' ('+cnt+')'):''}</option>`;
+      }));
+      sel.innerHTML = opts.join('');
+      sel.value = _dashMapFolder || '';
+      sel.onchange = ()=>{ _dashMapFolder = sel.value; try{ localStorage.setItem('geosort_dash_map_folder', _dashMapFolder); }catch(_){} renderDashMiniMap(); };
+    }
+    let pts = (clients||[]).filter(c=> typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon));
+    if(_dashMapFolder) pts = pts.filter(c=> (c.folder||'')===_dashMapFolder);
     if(_dashMap){ try{ _dashMap.remove(); }catch(_){} _dashMap=null; }
-    if(!pts.length){ el.innerHTML = '<div class="dash-map-empty">אין עדיין לקוחות על המפה</div>'; return; }
+    if(!pts.length){ el.innerHTML = '<div class="dash-map-empty">'+(_dashMapFolder?'אין לקוחות עם מיקום בתיקייה זו':'אין עדיין לקוחות על המפה')+'</div>'; return; }
     el.innerHTML = '';
     try{
       _dashMap = L.map(el, { zoomControl:false, attributionControl:false, dragging:true, scrollWheelZoom:false, doubleClickZoom:false, tap:false });
@@ -8491,7 +8516,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const d = new Date(base.getFullYear(), base.getMonth(), base.getDate()+i);
       const ds = jrDateStr(d.getFullYear(), d.getMonth(), d.getDate());
       const dow = d.getDay();
-      const has = jrEventsFor(ds).length > 0;
+      const has = jrEventsFor(ds).length > 0 || jrRemindersFor(ds).length > 0;
       const cls = ['dash-day'];
       if(dow===5 || dow===6) cls.push('jr-weekend');
       if(ds===todayStr) cls.push('today');
@@ -8505,12 +8530,20 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   function jrHoursHtml(ds){
     const byHour = {};
-    jrEventsFor(ds).forEach(e=>{ const h = (e.time||'00:00').slice(0,2); (byHour[h]=byHour[h]||[]).push(e); });
+    jrEventsFor(ds).forEach(e=>{ const h = (e.time||'00:00').slice(0,2); (byHour[h]=byHour[h]||[]).push({t:'meet', e}); });
+    jrRemindersFor(ds).forEach(r=>{ const h = (r.time||'00:00').slice(0,2); (byHour[h]=byHour[h]||[]).push({t:'rem', e:r}); });
     let rows = '';
     for(let h=0; h<24; h++){
       const hh = jrPad(h);
       const list = byHour[hh] || [];
-      const chips = list.map(e=>`<div class="jr-ev-chip"><span class="jr-ev-time">${escapeHtml(e.time||'')}</span><span class="jr-ev-name">${escapeHtml(e.business||e.clientName||'פגישה')}</span>${e.reminder?`<span class="jr-ev-bell">${JR_BELL_SVG}</span>`:''}</div>`).join('');
+      const chips = list.map(it=>{
+        if(it.t==='rem'){
+          const r = it.e;
+          return `<div class="jr-ev-chip jr-rem-chip"><span class="jr-ev-time">${escapeHtml(r.time||'')}</span><span class="jr-ev-name">${escapeHtml(r.title||'תזכורת')}</span><span class="jr-ev-bell">${JR_BELL_SVG}</span></div>`;
+        }
+        const e = it.e;
+        return `<div class="jr-ev-chip"><span class="jr-ev-time">${escapeHtml(e.time||'')}</span><span class="jr-ev-name">${escapeHtml(e.business||e.clientName||'פגישה')}</span>${e.reminder?`<span class="jr-ev-bell">${JR_BELL_SVG}</span>`:''}</div>`;
+      }).join('');
       rows += `<div class="jr-hour-row" data-date="${ds}" data-hour="${hh}"><span class="jr-hour-time">${hh}:00</span><div class="jr-hour-events">${chips || '<span class="jr-hour-empty">—</span>'}</div><span class="jr-hour-add">${JR_PLUS_SVG}</span></div>`;
     }
     return `<div class="jr-hours">${rows}</div>`;
