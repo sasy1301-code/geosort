@@ -8512,8 +8512,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       sel.value = _dashMapFolder || '';
       sel.onchange = ()=>{ _dashMapFolder = sel.value; try{ localStorage.setItem('geosort_dash_map_folder', _dashMapFolder); }catch(_){} renderDashMiniMap(); };
     }
-    let pts = (clients||[]).filter(c=> typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon));
-    if(_dashMapFolder) pts = pts.filter(c=> (c.folder||'')===_dashMapFolder);
+    // רק כתובות פעילות — בלי לקוחות שסומנו "טופל", "דלג להיום", או לא־פעילים
+    let pts = (clients||[]).filter(c=> typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon) && !c.handled && !c.skipRoute && !c.inactive);
+    if(_dashMapFolder) pts = pts.filter(c=> (c.folder||'')===_dashMapFolder || c.tempFolder===_dashMapFolder);
     if(_dashMap){ try{ _dashMap.remove(); }catch(_){} _dashMap=null; }
     if(!pts.length){ el.innerHTML = '<div class="dash-map-empty">'+(_dashMapFolder?'אין לקוחות עם מיקום בתיקייה זו':'אין עדיין לקוחות על המפה')+'</div>'; return; }
     el.innerHTML = '';
