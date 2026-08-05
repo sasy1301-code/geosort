@@ -973,12 +973,15 @@
   .dash-qbtn.a4 .dash-qic{ background:rgba(37,211,102,.18); color:#25D366; }
   .dash-qtext{ font-size:.95rem; font-weight:600; color:#fff; }
   /* מיני-מפה */
-  .dash-map-select{ width:100%; box-sizing:border-box; -webkit-appearance:none; appearance:none; background:#0f1a2e; color:#fff; border:1px solid rgba(255,255,255,.15); border-radius:12px; padding:11px 14px; font-family:inherit; font-size:.9rem; margin-bottom:9px; cursor:pointer; background-image:linear-gradient(45deg,transparent 50%,#8fb8ff 50%),linear-gradient(135deg,#8fb8ff 50%,transparent 50%); background-position:left 16px center, left 11px center; background-size:5px 5px,5px 5px; background-repeat:no-repeat; }
-  .dash-map-select:focus{ outline:none; border-color:#025ffb; }
-  .dash-map-select option{ background:#0f1a2e; color:#fff; }
+  .dash-map-select{ width:100%; box-sizing:border-box; -webkit-appearance:none; appearance:none; background-color:#fff; color:#0f1a2e; border:1px solid rgba(15,26,46,.16); border-radius:12px; padding:12px 14px 12px 42px; font-family:inherit; font-size:.9rem; font-weight:600; margin-bottom:9px; cursor:pointer; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230277fb' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:left 14px center; background-size:16px; }
+  .dash-map-select:focus{ outline:none; border-color:#0277fb; }
+  .dash-map-select option{ background:#fff; color:#0f1a2e; }
   .dash-minimap{ height:200px; border-radius:15px; overflow:hidden; border:1px solid rgba(15,26,46,.12); background:#0f1a2e; position:relative; }
   .dash-minimap .leaflet-container{ height:100%; width:100%; background:#0f1a2e; }
   .dash-map-empty{ height:100%; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.55); font-size:.9rem; }
+  /* רכב נוסע בעמוד הדשבורד (כמו בעמוד הכניסה) */
+  .dash-van{ position:fixed; top:0; left:0; width:42px; height:auto; z-index:900; pointer-events:none; transform:translate(-50%,-50%); transform-origin:50% 50%; filter:drop-shadow(0 8px 14px rgba(0,0,0,.32)); display:none; }
+  .dash-van.show{ display:block; }
   .dash-placeholder{ margin-top:14px; border:1px dashed rgba(255,255,255,.25); border-radius:15px; padding:18px 16px; text-align:center; color:rgba(255,255,255,.6); font-size:.9rem; }
   .login-title{ font-size:1.35rem; font-weight:700; color:#0f1a2e; margin-bottom:6px; }
   .login-sub{ font-size:.85rem; color:#5b6472; margin-bottom:18px; }
@@ -8503,7 +8506,13 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     host.className='jr-upcoming show';
     host.innerHTML=`<div class="jr-up-bell">${JR_BELL_SVG}</div><div class="jr-up-main"><div class="jr-up-label">הפגישה הקרובה</div><div class="jr-up-title">${name}</div><div class="jr-up-when">${when}</div></div><div class="jr-up-actions">${call}${wa}</div>`;
     const main=host.querySelector('.jr-up-main');
-    if(main) main.addEventListener('click', ()=>{ const p2=(e.date).split('-').map(Number); jrYear=p2[0]; jrMonth=p2[1]-1; jrSelectedDate=e.date; switchView('journal'); try{ renderJournalView(); renderJrDayFolders(true); }catch(_){}} );
+    if(main) main.addEventListener('click', ()=>{
+      // מעבר ליומן קודם (הפעם הראשונה מאתחלת את היומן לתאריך היום), ורק אז קובעים את תאריך האירוע —
+      // אחרת האתחול היה דורס את הבחירה ופותח את היום של היום במקום את היום של האירוע.
+      switchView('journal');
+      const p2=(e.date).split('-').map(Number); jrYear=p2[0]; jrMonth=p2[1]-1; jrSelectedDate=e.date;
+      try{ renderJrCalendar(); renderJrDayFolders(true); }catch(_){}
+    });
   }
   // לוח שבוע — 7 ימים החל מהיום, באותה שפה עיצובית של לוח היומן
   function renderDashWeek(){
@@ -12710,6 +12719,46 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     inp.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); aiSubmit(inp.value); inp.value=''; } });
   }
 
+  // ===================== רכב נוסע בעמוד הדשבורד =====================
+  function setupDashVan(){
+    if(document.getElementById('dashVan')) return;
+    const src = document.getElementById('loginVan');
+    if(!src) return;
+    const van = src.cloneNode(true);
+    van.id = 'dashVan';
+    van.setAttribute('class', 'dash-van');
+    // מזהי גרדיאנט ייחודיים כדי לא להתנגש עם רכב הכניסה
+    van.innerHTML = van.innerHTML.replace(/vanBody/g, 'dashVanBody').replace(/vanGlass/g, 'dashVanGlass');
+    document.body.appendChild(van);
+    let W = window.innerWidth, H = window.innerHeight;
+    let x = W*0.5, y = H*0.4, angle = 0, speed = 1.6, tx = x, ty = y, pointerActive = false, lastMove = 0, last = performance.now();
+    window.addEventListener('resize', ()=>{ W = window.innerWidth; H = window.innerHeight; });
+    window.addEventListener('pointermove', e=>{ if(currentView!=='dashboard') return; tx = e.clientX; ty = e.clientY; pointerActive = true; lastMove = performance.now(); }, { passive:true });
+    function frame(now){
+      const active = (currentView === 'dashboard');
+      van.classList.toggle('show', active);
+      const dt = Math.min(2.4, (now - last) / 16.6667); last = now;
+      if(active){
+        if(!pointerActive || now - lastMove > 2600){
+          const t = now / 1000;
+          tx = W*0.5 + Math.sin(t*0.42) * W*0.34;
+          ty = H*0.5 + Math.sin(t*0.63 + 0.9) * H*0.30;
+        }
+        const dx = tx - x, dy = ty - y, dist = Math.hypot(dx, dy), desired = Math.atan2(dy, dx);
+        let da = desired - angle; while(da > Math.PI) da -= Math.PI*2; while(da < -Math.PI) da += Math.PI*2;
+        const maxTurn = 0.075 * dt; angle += Math.max(-maxTurn, Math.min(maxTurn, da));
+        speed += (Math.min(2.6, dist*0.045) - speed) * 0.06 * dt;
+        x += Math.cos(angle) * speed * dt; y += Math.sin(angle) * speed * dt;
+        const m = 26; if(x < m) x = m; if(x > W-m) x = W-m; if(y < m) y = m; if(y > H-m) y = H-m;
+        const deg = angle * 180 / Math.PI + 90;
+        van.style.left = x + 'px'; van.style.top = y + 'px';
+        van.style.transform = 'translate(-50%,-50%) rotate(' + deg + 'deg)';
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
   // ===================== סנכרון בזמן אמת (Supabase Realtime) =====================
   // כאשר משתמש כלשהו בארגון שומר שינוי ב-app_data, כל שאר המשתמשים המחוברים מקבלים
   // עדכון מיידי ומרעננים את המסך — כך אין "מסך ישן" ולא דורסים אחד את השני.
@@ -12771,6 +12820,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     openDeepLinkedClientIfAny();  // אם יש deep-link ללקוח — יעבור לתצוגת הלקוחות
     startOrgRealtime(); // מתחילים להאזין לשינויים של שאר המשתמשים בארגון
     try{ setupAiAssistant(); }catch(_){}  // עוזר חכם מובנה — כפתור צף
+    try{ setupDashVan(); }catch(_){}  // רכב נוסע בדשבורד
     // התראות כניסה למערכת — רק למנהל
     if(CURRENT_ROLE==='manager' || CURRENT_ROLE==='admin'){
       try{ if('Notification' in window && Notification.permission==='default') Notification.requestPermission(); }catch(_){}
