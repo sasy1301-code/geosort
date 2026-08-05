@@ -1991,10 +1991,12 @@
 
   /* היומן: הלוח נשאר קבוע למעלה, ורשימת הימים היא אזור גלילה משלה — היום הרלוונטי ראשון
      מתחת ללוח, וגלילה/משיחת אצבע כלפי מעלה חושפת את הימים שעברו (כמו רצועת השבוע בדשבורד). */
-  .journal-view{ overflow:hidden; display:flex; flex-direction:column; }
-  .journal-view .products-inner{ display:flex; flex-direction:column; min-height:0; flex:1 1 auto; width:100%; }
-  .journal-view #jrUpcoming{ flex:0 0 auto; }
-  .journal-view .jr-cal-panel{ flex:0 0 auto; }
+  /* חשוב: לתחום רק ל-#journalView ולא ל-.journal-view — הדשבורד חולק את אותו class,
+     ו-overflow:hidden היה מבטל את הגלילה של הדשבורד (לא ניתן היה לגלול למפה שלמטה). */
+  #journalView{ overflow:hidden; display:flex; flex-direction:column; }
+  #journalView .products-inner{ display:flex; flex-direction:column; min-height:0; flex:1 1 auto; width:100%; }
+  #journalView #jrUpcoming{ flex:0 0 auto; }
+  #journalView .jr-cal-panel{ flex:0 0 auto; }
   .jr-day-folders{ margin-top:14px; flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
   .jr-day-group{ margin-bottom:8px; }
   .jr-day-head{ display:flex; align-items:center; gap:10px; background:#025ffb; border:1px solid #4394f7; border-radius:15px; padding:11px 13px; cursor:pointer; transition:background .13s ease; }
