@@ -2925,7 +2925,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       <div class="mappage-handle" id="mapPageHandle" title="הצג/הסתר את הרשימה"><span class="mappage-handle-bar"></span></div>
       <div class="mappage-sheet-scroll">
         <div class="mappage-search-wrap">
-          <input type="text" id="mapPageSearchBox" placeholder="חפש לקוח (שם / כתובת / טלפון) או שם תיקייה...">
+          <input type="text" id="mapPageSearchBox" placeholder="חפש תיקייה / מסלול...">
         </div>
         <div id="mapPageResults" class="mappage-results"></div>
         <div class="mappage-routes-hint">בחר תיקיות להצגת המסלולים במפה — אפשר אחת, כמה, או הכל.</div>
@@ -8766,32 +8766,19 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const host = document.getElementById('mapPageResults'); if(!host) return;
     const q = normalizeSearchText(_mapPageSearch||'');
     if(!q){ host.innerHTML=''; return; }
+    // חיפוש תיקיות (מסלולים) בלבד — אין חיפוש לקוחות בעמוד המפה
     const folderMatches = (folders||[]).filter(f=> normalizeSearchText(f.name).includes(q));
-    const clientMatches = (clients||[]).filter(c=>{
-      const hay = normalizeSearchText([c.business,c.name,c.address,c.phone,c.contact].filter(Boolean).join(' '));
-      return hay.includes(q);
-    }).slice(0, 40);
     let html = '';
     folderMatches.forEach(f=>{
-      const cnt = (clients||[]).filter(c=> (c.folder||'')===f.name).length;
-      html += `<div class="mappage-res" data-folder="${escapeHtml(f.name)}"><span class="mappage-res-swatch" style="background:${escapeHtml(f.color||'#025ffb')}"></span><span class="mappage-res-name">📁 ${escapeHtml(f.name)}</span><span class="mappage-res-sub">${cnt} לקוחות · הצג מסלול</span></div>`;
+      const cnt = (clients||[]).filter(c=> ((c.folder||'')===f.name || c.tempFolder===f.name) && !c.handled && !c.skipRoute && !c.inactive && typeof c.lat==='number' && !isNaN(c.lat)).length;
+      html += `<div class="mappage-res" data-folder="${escapeHtml(f.name)}"><span class="mappage-res-swatch" style="background:${escapeHtml(f.color||'#025ffb')}"></span><span class="mappage-res-name">📁 ${escapeHtml(f.name)}</span><span class="mappage-res-sub">${cnt} כתובות · הצג מסלול</span></div>`;
     });
-    clientMatches.forEach(c=>{
-      const folder = (folders||[]).find(f=>f.name===c.folder);
-      html += `<div class="mappage-res" data-client="${escapeHtml(String(c.id))}"><span class="mappage-res-swatch" style="background:${escapeHtml((folder&&folder.color)||'#7a8699')}"></span><span class="mappage-res-name">${escapeHtml(c.business||c.name||'')}</span><span class="mappage-res-sub">${escapeHtml(c.address||'')}${c.folder?(' · '+escapeHtml(c.folder)):''}</span></div>`;
-    });
-    host.innerHTML = html || '<div class="mappage-empty">לא נמצאו תוצאות</div>';
+    host.innerHTML = html || '<div class="mappage-empty">לא נמצאה תיקייה מתאימה</div>';
     host.querySelectorAll('.mappage-res').forEach(el=>{
       el.addEventListener('click', ()=>{
         if(el.dataset.folder){
           _mapPageAll = false; _mapPageSel.clear(); _mapPageSel.add(el.dataset.folder);
-          renderMapPageFolders(); renderMapPageMap();
-        } else if(el.dataset.client){
-          const c = (clients||[]).find(x=>String(x.id)===String(el.dataset.client));
-          if(c && _pageMap && typeof c.lat==='number' && !isNaN(c.lat)){
-            if(c.folder && !_mapPageAll && !_mapPageSel.has(c.folder)){ _mapPageSel.add(c.folder); renderMapPageFolders(); renderMapPageMap(); }
-            try{ _pageMap.setView([c.lat,c.lon], 15); }catch(_){}
-          }
+          renderMapPageFolders(); renderMapPageStops(); renderMapPageMap();
         }
       });
     });
