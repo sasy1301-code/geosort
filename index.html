@@ -12707,6 +12707,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   (async function init(){
     await authReady; // אתחול האפליקציה מתחיל רק אחרי התחברות והגדרת הארגון
+    try{ switchView('dashboard'); }catch(_){}  // מיד לדשבורד — כדי שהמפה לא תוצג ותקפוץ
     await Promise.all([loadData(), loadFolders(), loadClusterNames(), loadClusterOrder(), loadVehicleStockBaseline(), loadInventoryCountFrom(), loadCatalog(), loadAgents(), loadManagers(), loadBusinessDetails(), loadSettingsPanelOrder(), loadBusinessStock(), loadInventoryPanelOrder(), loadJournal(), loadDocCollections()]);
     populateBusinessDetails();
     applySettingsPanelOrder();
@@ -12723,10 +12724,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(clients.length){
       try{ fitOrCenter(bounds, 14, 40); }catch(e){}
     }
-    openDeepLinkedClientIfAny();
+    try{ if(currentView==='dashboard') renderDashboardView(); }catch(_){}  // רענון הדשבורד עם הנתונים שנטענו
+    openDeepLinkedClientIfAny();  // אם יש deep-link ללקוח — יעבור לתצוגת הלקוחות
     startOrgRealtime(); // מתחילים להאזין לשינויים של שאר המשתמשים בארגון
     try{ setupAiAssistant(); }catch(_){}  // עוזר חכם מובנה — כפתור צף
-    try{ switchView('dashboard'); }catch(_){}  // עמוד כניסה = דשבורד
     // התראות כניסה למערכת — רק למנהל
     if(CURRENT_ROLE==='manager' || CURRENT_ROLE==='admin'){
       try{ if('Notification' in window && Notification.permission==='default') Notification.requestPermission(); }catch(_){}
@@ -12746,6 +12747,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       alert('הלקוח שהקישור מצביע אליו לא נמצא (אולי נמחק).');
       return;
     }
+    try{ switchView('customers'); }catch(_){}  // קישור ללקוח מוביל לתצוגת המפה/לקוחות
     if(c.folder) openFolderNames.add(c.folder);
     if(c.tempFolder) openFolderNames.add(c.tempFolder);
     openClientCards.add(c.id);
