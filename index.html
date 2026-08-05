@@ -8856,12 +8856,23 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const todayStr = localDateString();
     const shortDate = (s)=>{ const p=String(s||'').split('-'); return p.length===3 ? (p[2]+'/'+p[1]) : (s||''); };
     const items = [];
+    // הפרש ימים בין שני תאריכי YYYY-MM-DD (חיובי = בעתיד, שלילי = עבר)
+    const dayDiff = (fromStr, toStr)=>{ const a=new Date(fromStr+'T00:00:00'), b=new Date(toStr+'T00:00:00'); if(isNaN(a.getTime())||isNaN(b.getTime())) return NaN; return Math.round((b-a)/86400000); };
     clients.forEach(c=>{
       const s = collectionStatus(c); if(!s.hasInvoice) return;
       const e = dcEntry(c.id); if(dcIsHandled(c,e)) return;
       if(s.balance <= 0.01) return;
-      if(e && e.dueDate && e.dueDate < todayStr){
-        items.push({ kind:'debt', cid:c.id, name:(c.business||c.name||'לקוח'), sub:'חוב ₪'+Math.round(s.balance)+' · תאריך תשלום עבר ('+shortDate(e.dueDate)+')', phone:c.phone, sortKey:'0'+e.dueDate });
+      if(e && e.dueDate){
+        const diff = dayDiff(todayStr, e.dueDate);
+        // מוצג כשעבר תאריך התשלום, וגם עד 3 ימים לפני המועד
+        if(!isNaN(diff) && diff <= 3){
+          let when;
+          if(diff < 0) when = 'תאריך תשלום עבר ('+shortDate(e.dueDate)+')';
+          else if(diff === 0) when = 'תאריך תשלום היום ('+shortDate(e.dueDate)+')';
+          else if(diff === 1) when = 'תאריך תשלום מחר ('+shortDate(e.dueDate)+')';
+          else when = 'תאריך תשלום בעוד '+diff+' ימים ('+shortDate(e.dueDate)+')';
+          items.push({ kind:'debt', cid:c.id, name:(c.business||c.name||'לקוח'), sub:'חוב ₪'+Math.round(s.balance)+' · '+when, phone:c.phone, sortKey:'0'+e.dueDate });
+        }
       }
     });
     jrEventsFor(todayStr).forEach(ev=>{
@@ -9551,11 +9562,11 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const f = docCollections.folders.find(x=>x.id===fid); if(!f) return;
     if(!Array.isArray(f.files)) f.files = [];
     const filesHtml = f.files.length ? f.files.slice().sort((a,b)=>String(b.updatedAt||'').localeCompare(String(a.updatedAt||''))).map(file=>{
-      const isG = file.kind==='gsheet';
-      const ic = isG?DC_GSHEET_SVG : file.kind==='sheet'?DC_SHEET_SVG : file.kind==='doc'?DC_DOC_SVG : (String(file.mime||'').indexOf('sheet')>=0||/xls/i.test(file.name||'')?DC_SHEET_SVG:DC_DOC_SVG);
-      const kindTxt = isG?'Google Sheets' : file.kind==='sheet'?'טבלה' : file.kind==='doc'?'מסמך' : 'קובץ שהועלה';
-      // כפתור אמצעי: לגיליון מקושר = עריכת קישור, אחרת = הורדה
-      const midBtn = isG
+      const isLinked = file.kind==='gsheet' || file.kind==='link'; // קבצים מקושרים (URL)
+      const ic = file.kind==='gsheet'?DC_GSHEET_SVG : file.kind==='link'?DC_LINK_SVG : file.kind==='sheet'?DC_SHEET_SVG : file.kind==='doc'?DC_DOC_SVG : (String(file.mime||'').indexOf('sheet')>=0||/xls/i.test(file.name||'')?DC_SHEET_SVG:DC_DOC_SVG);
+      const kindTxt = file.kind==='gsheet'?'Google Sheets' : file.kind==='link'?'קישור' : file.kind==='sheet'?'טבלה' : file.kind==='doc'?'מסמך' : 'קובץ שהועלה';
+      // כפתור אמצעי: לקובץ מקושר (גיליון/קישור) = עריכת קישור, אחרת = הורדה
+      const midBtn = isLinked
         ? `<button type="button" class="dc-file-btn" data-flink="${escapeHtml(file.id)}" title="עריכת קישור">${DC_LINK_SVG}</button>`
         : `<button type="button" class="dc-file-btn" data-fdlfile="${escapeHtml(file.id)}" title="הורדה">${DC_DL_SVG}</button>`;
       return `<div class="dc-file" data-file="${escapeHtml(file.id)}" data-kind="${escapeHtml(file.kind||'')}">
@@ -9574,6 +9585,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
           <button type="button" class="dc-addfile" data-add="gsheet" data-fid="${escapeHtml(fid)}">${DC_GSHEET_SVG}<span>Google Sheets</span></button>
           <button type="button" class="dc-addfile" data-add="doc" data-fid="${escapeHtml(fid)}">${DC_DOC_SVG}<span>מסמך (וורד)</span></button>
           <label class="dc-addfile" title="העלאת קובץ קיים">${DC_DL_SVG}<span>העלאת קובץ</span><input type="file" class="dc-upload-input" data-fid="${escapeHtml(fid)}" accept=".xlsx,.xls,.csv,.doc,.docx,.pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden></label>
+          <button type="button" class="dc-addfile" data-add="link" data-fid="${escapeHtml(fid)}">${DC_LINK_SVG}<span>הוספת קישור</span></button>
         </div>
       </div>`;
     // תמיד שולפים את אובייקט התיקייה החי מ-docCollections לפי id (ולא שומרים הפניה ישנה),
@@ -9584,9 +9596,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       const folder = liveFolder(); if(!folder) return;
       if(!Array.isArray(folder.files)) folder.files = [];
       const kind = btn.dataset.add;
-      // Google Sheets: נוצר כרטיס מקושר ונפתח שדה להדבקת הקישור (בלי prompt החסום ב-webview)
-      if(kind==='gsheet'){
-        const gf = { id:dcUid(), name:'Google Sheets', kind:'gsheet', url:'', updatedAt:(typeof localDateString==='function'?localDateString():'') };
+      // Google Sheets / קישור כללי: נוצר כרטיס מקושר ונפתח שדה להדבקת הקישור (בלי prompt החסום ב-webview)
+      if(kind==='gsheet' || kind==='link'){
+        const nm = kind==='link' ? 'קישור' : 'Google Sheets';
+        const gf = { id:dcUid(), name:nm, kind:kind, url:'', updatedAt:(typeof localDateString==='function'?localDateString():'') };
         folder.files.push(gf); saveDocCollections();
         renderCustomFolderBody(body, fid);
         const el = body.querySelector('.dc-file[data-file="'+cssEsc(gf.id)+'"]');
@@ -9623,7 +9636,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
         const folder = liveFolder(); if(!folder) return;
         const file = (folder.files||[]).find(x=>x.id===fileId); if(!file) return;
         if(file.kind==='sheet' || file.kind==='doc') openDocFileEditor(fid, fileId);
-        else if(file.kind==='gsheet'){
+        else if(file.kind==='gsheet' || file.kind==='link'){
           if(file.url){ const w=window.open(file.url,'_blank','noopener'); if(!w){ const a=document.createElement('a'); a.href=file.url; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); a.remove(); } }
           else dcStartGsheetLink(fileEl, folder, file, true);
         }
@@ -9677,20 +9690,26 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     const mainEl = fileEl.querySelector('.dc-file-main');
     if(!mainEl || fileEl.querySelector('.dc-gsheet-link-input')) return;
     const prev = mainEl.innerHTML;
+    const isLinkKind = file.kind==='link';
     const input = document.createElement('input');
     input.type = 'url'; input.value = file.url || ''; input.className = 'dc-file-rename-input dc-gsheet-link-input';
-    input.placeholder = 'הדביקו קישור ל-Google Sheets…'; input.dir = 'ltr';
+    input.placeholder = isLinkKind ? 'הדביקו כתובת קישור (URL)…' : 'הדביקו קישור ל-Google Sheets…'; input.dir = 'ltr';
     mainEl.innerHTML = ''; mainEl.appendChild(input);
     input.focus(); input.select();
     let done = false;
     const finish = (save)=>{
       if(done) return; done = true;
       if(save){
-        const t = (input.value||'').trim();
+        let t = (input.value||'').trim();
+        // השלמת סכימה: קישור בלי http/https יקבל https:// כדי שייפתח כראוי
+        if(t && !/^[a-z][a-z0-9+.\-]*:\/\//i.test(t) && !/^(mailto|tel):/i.test(t)) t = 'https://'+t;
         if(t){
           file.url = t;
           // אם השם עדיין ברירת מחדל — נגזור שם קריא מהקישור
-          if(!file.name || file.name==='Google Sheets'){ try{ const u=new URL(t); file.name = 'Google Sheets · '+u.hostname.replace(/^www\./,''); }catch(_){ file.name='Google Sheets'; } }
+          if(!file.name || file.name==='Google Sheets' || file.name==='קישור'){
+            try{ const u=new URL(t); const host=u.hostname.replace(/^www\./,''); file.name = isLinkKind ? host : ('Google Sheets · '+host); }
+            catch(_){ file.name = isLinkKind ? 'קישור' : 'Google Sheets'; }
+          }
           file.updatedAt = (typeof localDateString==='function'?localDateString():'');
           saveDocCollections();
         } else if(isNew && !file.url){
