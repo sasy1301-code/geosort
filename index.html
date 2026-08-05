@@ -2018,6 +2018,15 @@
   .mappage-sheet-scroll{ flex:1 1 auto; min-height:0; overflow:hidden auto; -webkit-overflow-scrolling:touch; padding:6px 12px calc(16px + env(safe-area-inset-bottom,0px)); box-sizing:border-box; position:relative; z-index:1; }
   /* כותרת חיפוש קבועה (מחוץ לגלילה) — רקע כחול אטום מלא כך שהגלילה נחתכת ומתחבאת מתחתיה ולא נראה כלום מעליה */
   .mappage-search-wrap{ flex:0 0 auto; position:relative; z-index:3; background:#025ffb; padding:2px 12px 10px; margin:0; }
+  /* כפתור "התחל נסיעה" צף בראש המפה + סמן רכב חי */
+  .mappage-trip-btn{ position:absolute; top:calc(12px + env(safe-area-inset-top,0px)); left:50%; transform:translateX(-50%); z-index:520; display:inline-flex; align-items:center; gap:8px; background:#025ffb; color:#fff; border:none; border-radius:24px; padding:10px 18px; font-family:inherit; font-size:.92rem; font-weight:600; cursor:pointer; box-shadow:0 4px 16px rgba(2,95,251,.45); -webkit-tap-highlight-color:transparent; }
+  .mappage-trip-btn .mtb-ic{ display:inline-flex; } .mappage-trip-btn .mtb-ic svg{ width:20px; height:20px; display:block; }
+  .mappage-trip-btn.active{ background:#e5484d; box-shadow:0 4px 16px rgba(229,72,77,.5); }
+  .mappage-van-div{ background:none; border:none; }
+  .mappage-van-badge{ width:42px; height:42px; border-radius:50%; background:#025ffb; border:3px solid #fff; box-shadow:0 3px 12px rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; position:relative; }
+  .mappage-van-badge svg{ width:23px; height:23px; display:block; }
+  .mappage-van-badge::after{ content:''; position:absolute; inset:-3px; border-radius:50%; border:3px solid rgba(2,95,251,.55); animation:vanPulse 1.6s ease-out infinite; }
+  @keyframes vanPulse{ 0%{ transform:scale(1); opacity:.75; } 100%{ transform:scale(1.9); opacity:0; } }
   #mapPageSearchBox{ width:100%; box-sizing:border-box; background:#fff; border:1px solid #cdd7e6; border-radius:12px; color:#0f1a2e; font-family:inherit; font-size:.92rem; padding:11px 14px; outline:none; }
   #mapPageSearchBox::placeholder{ color:#8a93a5; }
   #mapPageSearchBox:focus{ border-color:#0277fb; box-shadow:0 0 0 2px rgba(255,255,255,.5); }
@@ -2928,6 +2937,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
   <div class="products-view view-hidden" id="mapPageView">
     <div id="mapPageMap" class="mappage-map"></div>
+    <button type="button" id="mapPageTripBtn" class="mappage-trip-btn"><span class="mtb-ic"><svg viewBox="0 0 24 24" fill="#fff"><path d="M2.5 5.5A1.5 1.5 0 0 1 4 4h9a1.5 1.5 0 0 1 1.5 1.5V7H17l3 3.2V15a1 1 0 0 1-1 1h-1.1a2.4 2.4 0 0 1-4.8 0H9.4a2.4 2.4 0 0 1-4.8 0H4a1.5 1.5 0 0 1-1.5-1.5V5.5Zm12 2.5v3.2h4V10.6L16.4 8H14.5ZM7 15.6a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/></svg></span><span class="mtb-txt">התחל נסיעה</span></button>
     <div class="mappage-sheet" id="mapPageSheet">
       <div class="mappage-handle" id="mapPageHandle" title="הצג/הסתר את הרשימה"><span class="mappage-handle-bar"></span></div>
       <div class="mappage-search-wrap">
@@ -8571,6 +8581,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     if(box && !box._wired){ box._wired = true; box.value = _mapPageSearch;
       box.addEventListener('input', ()=>{ _mapPageSearch = box.value; try{ renderMapPageResults(); }catch(e){ console.error('map search', e); } }); }
     try{ setupMapSheet(); }catch(e){ console.error('map sheet', e); }
+    // מעקב רכב חי: מחווטים את הכפתור ומתחברים לערוץ השידור (כדי לראות נהג שכבר בנסיעה)
+    try{ ensureLiveChannel(); }catch(e){ console.error('live channel', e); }
+    try{ const tb=document.getElementById('mapPageTripBtn'); if(tb && !tb._wired){ tb._wired=true; tb.addEventListener('click', toggleDriverTrip); } updateTripBtn(); }catch(e){ console.error('trip btn', e); }
     try{ renderMapPageFolders(); }catch(e){ console.error('map folders', e); }
     try{ renderMapPageStops(); }catch(e){ console.error('map stops', e); }
     try{ renderMapPageResults(); }catch(e){ console.error('map results', e); }
@@ -8624,6 +8637,75 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     });
   }
   function mapPageCollapseSheet(){ mapSheetApply('collapsed'); }
+
+  // ===================== מעקב רכב חי (GPS אמיתי) בעמוד המפה =====================
+  // הנהג לוחץ "התחל נסיעה" → הדפדפן קורא את ה-GPS האמיתי (Geolocation) → הרכב נע על המפה,
+  // והמיקום משודר בזמן אמת דרך Supabase Broadcast (הודעות חולפות, בלי כתיבה ל-DB ובלי רענון מלא)
+  // כך שכל מכשיר אחר בארגון שפתוח בעמוד המפה רואה את הרכב זז.
+  const LIVE_VAN_SVG = '<svg viewBox="0 0 24 24" fill="#fff"><path d="M2.5 5.5A1.5 1.5 0 0 1 4 4h9a1.5 1.5 0 0 1 1.5 1.5V7H17l3 3.2V15a1 1 0 0 1-1 1h-1.1a2.4 2.4 0 0 1-4.8 0H9.4a2.4 2.4 0 0 1-4.8 0H4a1.5 1.5 0 0 1-1.5-1.5V5.5Zm12 2.5v3.2h4V10.6L16.4 8H14.5ZM7 15.6a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm9 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/></svg>';
+  let _liveChannel=null, _liveVanMarker=null, _liveVanIcon=null;
+  let _tripActive=false, _driverWatchId=null, _wakeLock=null, _lastLocSent=0;
+  function liveVanIcon(){
+    if(!_liveVanIcon) _liveVanIcon = L.divIcon({ className:'mappage-van-div', html:'<div class="mappage-van-badge">'+LIVE_VAN_SVG+'</div>', iconSize:[42,42], iconAnchor:[21,21] });
+    return _liveVanIcon;
+  }
+  function showLiveVan(lat, lon){
+    if(!_pageMap || typeof lat!=='number' || typeof lon!=='number' || isNaN(lat) || isNaN(lon)) return;
+    const first = !_liveVanMarker;
+    try{
+      if(!_liveVanMarker) _liveVanMarker = L.marker([lat,lon], { icon: liveVanIcon(), zIndexOffset:1000, interactive:false }).addTo(_pageMap);
+      else _liveVanMarker.setLatLng([lat,lon]);
+      if(first) _pageMap.setView([lat,lon], Math.max(_pageMap.getZoom()||13, 14));
+    }catch(_){}
+  }
+  function hideLiveVan(){ if(_liveVanMarker){ try{ _pageMap.removeLayer(_liveVanMarker); }catch(_){} _liveVanMarker=null; } }
+  function ensureLiveChannel(){
+    if(_liveChannel || !CURRENT_ORG_ID || typeof sb==='undefined' || !sb) return _liveChannel;
+    try{
+      _liveChannel = sb.channel('org-live-'+CURRENT_ORG_ID, { config:{ broadcast:{ self:false } } })
+        .on('broadcast', { event:'loc' }, (msg)=>{ const p = msg && msg.payload; if(p && !_tripActive) showLiveVan(p.lat, p.lon); })
+        .on('broadcast', { event:'stop' }, ()=>{ if(!_tripActive) hideLiveVan(); })
+        .subscribe();
+    }catch(e){ console.error('live channel', e); _liveChannel=null; }
+    return _liveChannel;
+  }
+  function updateTripBtn(){
+    const tb=document.getElementById('mapPageTripBtn'); if(!tb) return;
+    tb.classList.toggle('active', _tripActive);
+    const txt=tb.querySelector('.mtb-txt'); if(txt) txt.textContent = _tripActive ? 'סיים נסיעה' : 'התחל נסיעה';
+  }
+  function toggleDriverTrip(){ if(_tripActive) stopDriverTrip(); else startDriverTrip(); }
+  function startDriverTrip(){
+    if(_tripActive) return;
+    if(!navigator.geolocation){ alert('הדפדפן לא תומך במיקום GPS.'); return; }
+    ensureLiveChannel();
+    _tripActive = true; updateTripBtn();
+    // שמירת המסך דלוק בזמן נסיעה (best-effort) כדי שה-GPS לא ייעצר
+    try{ if(navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request('screen').then(w=>{ _wakeLock=w; }).catch(()=>{}); }catch(_){}
+    _driverWatchId = navigator.geolocation.watchPosition(
+      (pos)=>{
+        const lat=pos.coords.latitude, lon=pos.coords.longitude;
+        showLiveVan(lat, lon); // הנהג רואה את עצמו
+        const now=Date.now();
+        if(now - _lastLocSent >= 2000){ // שידור למשרד לכל היותר כל 2 שניות
+          _lastLocSent = now;
+          try{ if(_liveChannel) _liveChannel.send({ type:'broadcast', event:'loc', payload:{ lat, lon, t:now } }); }catch(_){}
+        }
+      },
+      (err)=>{
+        if(err && err.code===1){ alert('כדי לעקוב אחרי הנסיעה צריך לאשר הרשאת מיקום בדפדפן.'); stopDriverTrip(); }
+        else console.error('geo watch', err);
+      },
+      { enableHighAccuracy:true, maximumAge:1000, timeout:15000 }
+    );
+  }
+  function stopDriverTrip(){
+    _tripActive=false; updateTripBtn();
+    if(_driverWatchId!=null){ try{ navigator.geolocation.clearWatch(_driverWatchId); }catch(_){} _driverWatchId=null; }
+    if(_wakeLock){ try{ _wakeLock.release(); }catch(_){} _wakeLock=null; }
+    try{ if(_liveChannel) _liveChannel.send({ type:'broadcast', event:'stop', payload:{ t:Date.now() } }); }catch(_){}
+    hideLiveVan();
+  }
   // רשימת הכתובות המינימלית של המסלולים שנבחרו: מספר במסלול · שם הלקוח · כתובת
   function renderMapPageStops(){
     const host = document.getElementById('mapPageStops'); if(!host) return;
