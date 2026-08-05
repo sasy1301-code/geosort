@@ -9524,13 +9524,23 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     rows.forEach(r=> r.handled = dcIsHandled(r.c, r.e));
     const q = _dcSearch.trim().toLowerCase();
     const filtered = q ? rows.filter(r => (r.c.business||r.c.name||'').toLowerCase().includes(q)) : rows;
-    // דירוג: חוב פתוח (0) → אין חשבונית (1) → טופל/שולם (2, לתחתית)
-    const rank = r => r.handled ? 2 : (r.s.hasInvoice ? 0 : 1);
+    // דירוג לפי שלבי הצנרת:
+    // 0 = הזמנה פתוחה ללא חשבונית → 1 = חשבונית ללא קבלה → 2 = הזמנה+חשבונית+קבלה (שולם) → 3 = ללא פעילות
+    const rank = r => {
+      const c = r.c;
+      const orders = (c.orders||[]);
+      const invoices = (c.invoices||[]);
+      if(orders.some(o=> o && !orderHasInvoice(c, o))) return 0;              // יש הזמנה שאין עליה חשבונית
+      if(r.handled) return 2;                                                 // טופל/שולם — לקבוצת "חשבונית+קבלה"
+      if(invoices.some(inv=> inv && !invoiceHasReceipt(c, inv))) return 1;    // יש חשבונית שאין עליה קבלה
+      if(invoices.length) return 2;                                           // חשבונית + קבלה
+      return 3;                                                               // אין הזמנות/חשבוניות — לתחתית
+    };
     filtered.sort((a,b)=>{
       const ra = rank(a), rb = rank(b);
       if(ra !== rb) return ra - rb;
       const ad = a.e.dueDate || '9999-99-99', bd = b.e.dueDate || '9999-99-99';
-      if(ad !== bd) return ad < bd ? -1 : 1;                    // הקרוב לתשלום קודם
+      if(ad !== bd) return ad < bd ? -1 : 1;                    // בתוך אותה קבוצה: הקרוב לתשלום קודם
       return (a.c.business||a.c.name||'').localeCompare(b.c.business||b.c.name||'');
     });
     return filtered;
