@@ -2015,8 +2015,9 @@
   .mappage-handle{ flex:0 0 auto; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; touch-action:manipulation; }
   .mappage-handle-bar{ width:46px; height:5px; border-radius:3px; background:rgba(255,255,255,.7); transition:background .15s ease; }
   .mappage-handle:hover .mappage-handle-bar{ background:#fff; }
-  .mappage-sheet-scroll{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:2px 12px calc(16px + env(safe-area-inset-bottom,0px)); box-sizing:border-box; }
-  .mappage-search-wrap{ position:sticky; top:0; z-index:5; background:#025ffb; padding:6px 0 10px; margin:0 0 4px; }
+  .mappage-sheet-scroll{ flex:1 1 auto; min-height:0; overflow:hidden auto; -webkit-overflow-scrolling:touch; padding:6px 12px calc(16px + env(safe-area-inset-bottom,0px)); box-sizing:border-box; position:relative; z-index:1; }
+  /* כותרת חיפוש קבועה (מחוץ לגלילה) — רקע כחול אטום מלא כך שהגלילה נחתכת ומתחבאת מתחתיה ולא נראה כלום מעליה */
+  .mappage-search-wrap{ flex:0 0 auto; position:relative; z-index:3; background:#025ffb; padding:2px 12px 10px; margin:0; }
   #mapPageSearchBox{ width:100%; box-sizing:border-box; background:#fff; border:1px solid #cdd7e6; border-radius:12px; color:#0f1a2e; font-family:inherit; font-size:.92rem; padding:11px 14px; outline:none; }
   #mapPageSearchBox::placeholder{ color:#8a93a5; }
   #mapPageSearchBox:focus{ border-color:#0277fb; box-shadow:0 0 0 2px rgba(255,255,255,.5); }
@@ -2929,10 +2930,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     <div id="mapPageMap" class="mappage-map"></div>
     <div class="mappage-sheet" id="mapPageSheet">
       <div class="mappage-handle" id="mapPageHandle" title="הצג/הסתר את הרשימה"><span class="mappage-handle-bar"></span></div>
+      <div class="mappage-search-wrap">
+        <input type="text" id="mapPageSearchBox" placeholder="חפש תיקייה / מסלול...">
+      </div>
       <div class="mappage-sheet-scroll">
-        <div class="mappage-search-wrap">
-          <input type="text" id="mapPageSearchBox" placeholder="חפש תיקייה / מסלול...">
-        </div>
         <div id="mapPageResults" class="mappage-results"></div>
         <div class="mappage-routes-hint">בחר תיקיות להצגת המסלולים במפה — אפשר אחת, כמה, או הכל.</div>
         <div class="mappage-folders" id="mapPageFolders"></div>
