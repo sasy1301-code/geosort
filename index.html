@@ -2004,49 +2004,64 @@
   #mapPageView{ padding:0; overflow:hidden; position:relative; }
   .mappage-map{ position:absolute; inset:0; width:100%; height:100%; background:#e8e9ee; z-index:1; }
   /* מגירה בתחתית: נפתחת עם הרשימה, ונסגרת כלפי מטה כדי לראות את המפה המלאה עם המסלול */
-  .mappage-sheet{ position:absolute; left:0; right:0; bottom:0; z-index:500; display:flex; flex-direction:column; max-height:70%; background:#0b1526; border-top-left-radius:20px; border-top-right-radius:20px; box-shadow:0 -10px 34px rgba(0,0,0,.45); transition:transform .32s cubic-bezier(.4,0,.2,1); }
+  .mappage-sheet{ position:absolute; left:0; right:0; bottom:0; z-index:500; display:flex; flex-direction:column; max-height:70%; background:#025ffb; border-top-left-radius:20px; border-top-right-radius:20px; box-shadow:0 -10px 34px rgba(0,0,0,.45); transition:transform .32s cubic-bezier(.4,0,.2,1); }
   .mappage-sheet.collapsed{ transform:translateY(calc(100% - 42px)); }
   .mappage-handle{ flex:0 0 auto; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; touch-action:manipulation; }
-  .mappage-handle-bar{ width:46px; height:5px; border-radius:3px; background:#3a4a63; transition:background .15s ease; }
-  .mappage-handle:hover .mappage-handle-bar{ background:#54688a; }
+  .mappage-handle-bar{ width:46px; height:5px; border-radius:3px; background:rgba(255,255,255,.7); transition:background .15s ease; }
+  .mappage-handle:hover .mappage-handle-bar{ background:#fff; }
   .mappage-sheet-scroll{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:2px 12px calc(16px + env(safe-area-inset-bottom,0px)); box-sizing:border-box; }
-  .mappage-search-wrap{ position:sticky; top:0; z-index:5; background:#0b1526; padding:6px 0 10px; margin:0 0 4px; }
-  #mapPageSearchBox{ width:100%; box-sizing:border-box; background:#0f1a2e; border:1px solid #23324c; border-radius:12px; color:#fff; font-family:inherit; font-size:.92rem; padding:11px 14px; outline:none; }
+  .mappage-search-wrap{ position:sticky; top:0; z-index:5; background:#025ffb; padding:6px 0 10px; margin:0 0 4px; }
+  #mapPageSearchBox{ width:100%; box-sizing:border-box; background:#fff; border:1px solid #cdd7e6; border-radius:12px; color:#0f1a2e; font-family:inherit; font-size:.92rem; padding:11px 14px; outline:none; }
   #mapPageSearchBox::placeholder{ color:#8a93a5; }
-  #mapPageSearchBox:focus{ border-color:#0277fb; }
+  #mapPageSearchBox:focus{ border-color:#0277fb; box-shadow:0 0 0 2px rgba(255,255,255,.5); }
   .mappage-results:not(:empty){ margin-bottom:12px; }
-  .mappage-routes-hint{ color:#9fb0d0; font-size:.76rem; margin-bottom:9px; }
+  .mappage-routes-hint{ color:rgba(255,255,255,.92); font-size:.76rem; margin-bottom:9px; }
   .mappage-folders{ display:flex; flex-direction:column; gap:7px; margin-bottom:12px; }
-  .mappage-fold{ display:flex; align-items:center; gap:10px; background:#0f1a2e; border:1px solid #23324c; border-radius:13px; padding:10px 12px; cursor:pointer; transition:background .13s ease, border-color .13s ease; }
-  .mappage-fold:hover{ background:#152340; }
-  .mappage-fold.on{ border-color:#0277fb; background:#12213c; }
-  .mappage-fold.all{ background:#12213c; }
-  .mappage-fold-check{ width:20px; height:20px; flex:0 0 auto; border-radius:6px; border:2px solid #4394f7; display:flex; align-items:center; justify-content:center; }
-  .mappage-fold.on .mappage-fold-check{ background:#0277fb; }
-  .mappage-fold-check svg{ width:13px; height:13px; display:none; }
+  .mappage-fold{ display:flex; align-items:center; gap:10px; background:#025ffb; border:1px solid #4394f7; border-radius:15px; padding:11px 12px; cursor:pointer; transition:background .13s ease, border-color .13s ease; }
+  .mappage-fold:hover{ background:#1a72ff; }
+  .mappage-fold.on{ border-color:#bcd8ff; background:#0250c9; }
+  .mappage-fold.all{ background:#025ffb; }
+  .mappage-fold-check{ width:20px; height:20px; flex:0 0 auto; border-radius:6px; border:1px solid rgba(255,255,255,.8); display:flex; align-items:center; justify-content:center; }
+  .mappage-fold.on .mappage-fold-check{ background:#fff; border-color:#fff; }
+  .mappage-fold-check svg{ width:13px; height:13px; display:none; fill:none; stroke:#025ffb; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
   .mappage-fold.on .mappage-fold-check svg{ display:block; }
   .mappage-fold-swatch{ width:12px; height:12px; border-radius:50%; flex:0 0 auto; }
   .mappage-fold-name{ flex:1; min-width:0; color:#fff; font-size:.9rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .mappage-fold-count{ flex:0 0 auto; background:rgba(255,255,255,.1); color:#cdd7e6; font-size:.72rem; font-weight:700; border-radius:9px; padding:2px 8px; }
+  .mappage-fold-count{ flex:0 0 auto; background:#fff; color:#0f1a2e; font-size:.8rem; font-weight:700; width:27px; height:27px; border-radius:50%; display:flex; align-items:center; justify-content:center; padding:0; }
   .mappage-results{ display:flex; flex-direction:column; gap:7px; }
-  .mappage-res{ display:flex; align-items:center; gap:10px; background:#0f1a2e; border:1px solid #23324c; border-radius:12px; padding:9px 12px; cursor:pointer; }
-  .mappage-res:hover{ background:#152340; }
+  .mappage-res{ display:flex; align-items:center; gap:10px; background:#025ffb; border:1px solid #4394f7; border-radius:15px; padding:9px 12px; cursor:pointer; }
+  .mappage-res:hover{ background:#1a72ff; }
   .mappage-res-name{ flex:1; min-width:0; color:#fff; font-size:.88rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .mappage-res-sub{ color:#9fb0d0; font-size:.73rem; }
+  .mappage-res-sub{ color:rgba(255,255,255,.82); font-size:.73rem; }
   .mappage-res-swatch{ width:10px; height:10px; border-radius:50%; flex:0 0 auto; }
-  .mappage-empty{ color:#8a93a5; font-size:.82rem; text-align:center; padding:14px; }
+  .mappage-empty{ color:rgba(255,255,255,.9); font-size:.82rem; text-align:center; padding:14px; }
   .mappage-route-km{ color:#ff7bac; font-weight:700; }
   /* רשימת הכתובות של המסלול (מינימלית: מספר · שם · כתובת) */
   .mappage-stops{ display:flex; flex-direction:column; gap:12px; }
   .mappage-stopgroup{ display:flex; flex-direction:column; gap:5px; }
   .mappage-stopgroup-head{ display:flex; align-items:center; gap:9px; padding:2px 2px 4px; }
-  .mappage-stopgroup-name{ flex:1; min-width:0; color:#cdd7e6; font-size:.82rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .mappage-stop{ display:flex; align-items:center; gap:10px; background:#0f1a2e; border:1px solid #22314a; border-radius:12px; padding:9px 11px; cursor:pointer; transition:background .13s ease; }
-  .mappage-stop:hover{ background:#152340; }
-  .mappage-stop-num{ flex:0 0 auto; min-width:22px; height:22px; padding:0 5px; border-radius:7px; color:#fff; font-size:.74rem; display:flex; align-items:center; justify-content:center; }
+  .mappage-stopgroup-name{ flex:1; min-width:0; color:#fff; font-size:.82rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mappage-route-line{ color:rgba(255,255,255,.92); font-size:.76rem; padding:0 2px 6px; }
+  /* בין כרטיס לכרטיס: זמן טיפול + זמן נסיעה — בהיר וקריא על רקע המגירה הכחול */
+  .mappage-between{ padding:2px 6px; }
+  .mappage-between .service-time-tag{ text-align:center; color:rgba(255,255,255,.9); border-top:none; margin:0; padding:3px 0 1px; }
+  .mappage-between .leg-connector{ margin:0; padding:1px 0 3px; }
+  .mappage-between .leg-connector .leg-line{ background:rgba(255,255,255,.45); }
+  .mappage-between .leg-connector .leg-info{ color:#fff; }
+  /* שורה שטופלה — מעומעמת ומחוץ למסלול (כמו כרטיס "טופל" בלקוחות ואזורים) */
+  .mappage-stop.handled{ opacity:.5; }
+  .mappage-stop .mappage-handled{ margin-inline-start:2px; }
+  .mappage-route-line b{ color:#fff; }
+  .mappage-route-est{ opacity:.7; }
+  .mappage-stop{ display:flex; align-items:center; gap:10px; background:#021236; border:1px solid #0b2a5c; border-radius:15px; padding:10px 11px; cursor:pointer; transition:background .13s ease; }
+  .mappage-stop:hover{ background:#0a1e3f; }
+  .mappage-stop-num{ flex:0 0 auto; min-width:22px; height:22px; padding:0 5px; border-radius:7px; color:#fff; font-size:.74rem; display:flex; align-items:center; justify-content:center; border:1.5px solid rgba(255,255,255,.9); box-sizing:border-box; }
   .mappage-stop-main{ flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
   .mappage-stop-name{ color:#fff; font-size:.88rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .mappage-stop-addr{ color:#9fb0d0; font-size:.75rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mappage-stop-addr{ color:rgba(255,255,255,.72); font-size:.75rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .mappage-stop-nav{ flex:0 0 auto; width:36px; height:36px; border-radius:10px; background:#0d2a4d; color:#4aa3ff; display:flex; align-items:center; justify-content:center; text-decoration:none; }
+  .mappage-stop-nav:hover{ background:#123a66; color:#7fbcff; }
+  .mappage-stop-nav svg{ width:18px; height:18px; }
   /* פתיחת תיקייה עם רשימת לקוחות + כרטיס לקוח לקריאה בלבד */
   .mappage-fold-wrap{ display:flex; flex-direction:column; }
   .mappage-fold-chev{ flex:0 0 auto; color:#7f92b0; width:15px; height:15px; display:inline-flex; transition:transform .15s ease; transform:rotate(90deg); }
@@ -4835,7 +4850,9 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     // map consistent with whatever order you've set up in the folder, at all times.
     const folderPositionByClientId = {};
     folders.forEach(folder=>{
-      const folderMembers = clients.filter(c => (c.folder||"") === folder.name && !c.skipRoute && !c.handled);
+      // מספור הסיכות במפה חייב להיות זהה לכרטיסים בתיקייה: לא סופרים לקוחות לא־פעילים
+      // (הם ממילא לא מצוירים) — אחרת כל השאר נדחפים במספר אחד.
+      const folderMembers = clients.filter(c => (c.folder||"") === folder.name && !c.skipRoute && !c.handled && !c.inactive);
       if(!folderMembers.length) return;
       const ordered = getOrderedFolderMembers(folder, folderMembers);
       ordered.forEach((c, idx)=>{
@@ -8597,23 +8614,72 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
   function renderMapPageStops(){
     const host = document.getElementById('mapPageStops'); if(!host) return;
     if(_mapPageAll){ host.innerHTML = '<div class="mappage-empty">בחר תיקייה אחת או יותר כדי לראות את רשימת הכתובות של המסלול.</div>'; return; }
+    const NAV_SVG = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.43 2.57a1 1 0 0 0-1.05-.23L3.4 8.34c-.9.32-.86 1.62.05 1.9l7.03 2.17 2.17 7.03c.28.91 1.58.95 1.9.05l6-16.98a1 1 0 0 0-.12-.94z"/></svg>`;
     let html = '';
     _mapPageSel.forEach(fname=>{
       const folder = (folders||[]).find(f=>f.name===fname); if(!folder) return;
       const col = folder.color || '#025ffb';
-      const members = (clients||[]).filter(c=> (c.folder||'')===fname && typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon) && !c.handled && !c.skipRoute);
-      const ordered = getOrderedFolderMembers(folder, members).filter(Boolean);
-      html += `<div class="mappage-stopgroup"><div class="mappage-stopgroup-head"><span class="mappage-fold-swatch" style="background:${escapeHtml(col)}"></span><span class="mappage-stopgroup-name">${escapeHtml(fname)}</span><span class="mappage-fold-count">${ordered.length}</span></div>`;
-      html += ordered.length ? ordered.map((c, idx)=>`<div class="mappage-stop" data-client="${escapeHtml(String(c.id))}"><span class="mappage-stop-num" style="background:${escapeHtml(col)}">${idx+1}</span><span class="mappage-stop-main"><span class="mappage-stop-name">${escapeHtml(c.business||c.name||'לקוח')}</span><span class="mappage-stop-addr">${escapeHtml(c.address||'')}</span></span></div>`).join('') : '<div class="mappage-empty">אין כתובות בתיקייה זו</div>';
+      // כמו בלקוחות ואזורים: מציגים את כל הפעילים (כולל "טופל" שיורד לסוף ומחוץ למסלול)
+      const activeMembers = (clients||[]).filter(c=> ((c.folder||'')===fname || c.tempFolder===fname) && typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon) && !c.skipRoute && !c.inactive);
+      let ordered = getOrderedFolderMembers(folder, activeMembers).filter(Boolean);
+      ordered = ordered.filter(c=> !c.handled).concat(ordered.filter(c=> c.handled)); // "טופל" בסוף
+      const calcMembers = ordered.filter(c=> !c.handled); // המסלול בפועל — בלי שטופלו
+      // ק״מ + זמן נסיעה לתיקייה (מסלול אמיתי מ-OSRM אם קיים במטמון, אחרת הערכה בקו אווירי)
+      const cachedRoad = roadRouteCache[fname];
+      const roadMatches = cachedRoad && cachedRoad.fingerprint === routeFingerprint(calcMembers);
+      let routeLine = '';
+      if(calcMembers.length > 1){
+        let totalKm, totalDriveMin, isReal;
+        if(roadMatches){ totalKm = cachedRoad.totalKm; totalDriveMin = cachedRoad.totalMin; isReal = true; }
+        else {
+          totalKm = 0; totalDriveMin = 0; isReal = false;
+          for(let i=0;i<calcMembers.length-1;i++){ const leg = estimateLeg(calcMembers[i], calcMembers[i+1]); totalKm += leg.km; totalDriveMin += leg.minutes; }
+          ensureRoadRoute(folder, calcMembers).then(()=>{ if(currentView==='map') renderMapPageStops(); }).catch(()=>{});
+        }
+        const totalServiceMin = calcMembers.length * STOP_SERVICE_MINUTES;
+        const totalMin = totalDriveMin + totalServiceMin;
+        routeLine = `<div class="mappage-route-line">🚗 <b>${totalKm.toFixed(1)} ק״מ</b> · ${formatDuration(totalDriveMin)} נסיעה${isReal?'':' <span class="mappage-route-est">(הערכה…)</span>'} · <b>${formatDuration(totalMin)}</b> סה״כ</div>`;
+      }
+      const TOGGLE = (c)=>`<label class="handled-switch mappage-handled" title="${c.handled?'טופל — יחזור אוטומטית ללא־טופל בעוד 12 שעות':'סמן כטופל — יורד מהמסלול'}"><input type="checkbox" class="mappage-handled-cb handled-checkbox" ${c.handled?'checked':''}><span class="handled-slider"></span></label>`;
+      html += `<div class="mappage-stopgroup"><div class="mappage-stopgroup-head"><span class="mappage-fold-swatch" style="background:${escapeHtml(col)}"></span><span class="mappage-stopgroup-name">${escapeHtml(fname)}</span></div>${routeLine}`;
+      if(!ordered.length){ html += '<div class="mappage-empty">אין כתובות בתיקייה זו</div>'; }
+      else {
+        ordered.forEach((c, idx)=>{
+          html += `<div class="mappage-stop${c.handled?' handled':''}" data-client="${escapeHtml(String(c.id))}"><span class="mappage-stop-num" style="background:${escapeHtml(col)}">${idx+1}</span><span class="mappage-stop-main"><span class="mappage-stop-name">${escapeHtml(c.business||c.name||'לקוח')}</span><span class="mappage-stop-addr">${escapeHtml(c.address||'')}</span></span>${TOGGLE(c)}<a class="mappage-stop-nav" href="https://waze.com/ul?ll=${c.lat}%2C${c.lon}&navigate=yes" target="_blank" rel="noopener" title="ניווט מהיר בוויז">${NAV_SVG}</a></div>`;
+          // בין כרטיס לכרטיס — זמן טיפול בכתובת + זמן נסיעה לכתובת הבאה (רק בין כתובות שבמסלול)
+          if(idx < ordered.length - 1 && !c.handled && !ordered[idx+1].handled){
+            const next = ordered[idx+1];
+            const realLeg = (roadMatches && cachedRoad.legs && cachedRoad.legs[idx]) ? cachedRoad.legs[idx] : null;
+            const km = realLeg ? realLeg.km : estimateLeg(c, next).km;
+            const mn = realLeg ? realLeg.min : estimateLeg(c, next).minutes;
+            html += `<div class="mappage-between"><div class="service-time-tag">⏱️ ${STOP_SERVICE_MINUTES} דק׳ טיפול בכתובת זו</div><div class="leg-connector"><span class="leg-line"></span><span class="leg-info">🚗 ${km.toFixed(1)} ק״מ · כ-${formatDuration(mn)} נסיעה${realLeg?'':' (הערכה)'}</span><span class="leg-line"></span></div></div>`;
+          }
+        });
+      }
       html += `</div>`;
     });
     host.innerHTML = html;
+    host.querySelectorAll('.mappage-stop-nav').forEach(a=> a.addEventListener('click', (e)=> e.stopPropagation()));
+    // מתג "טופל" — בדיוק כמו בלקוחות ואזורים: מסמן, שומר, ומוריד מהמסלול/מפה
+    host.querySelectorAll('.mappage-handled-cb').forEach(cb=>{
+      cb.addEventListener('click', e=> e.stopPropagation());
+      cb.addEventListener('change', (e)=>{
+        e.stopPropagation();
+        const row = cb.closest('.mappage-stop'); const id = row && row.dataset.client;
+        const c = (clients||[]).find(x=>String(x.id)===String(id)); if(!c) return;
+        c.handled = e.target.checked;
+        c.handledAt = c.handled ? Date.now() : null;
+        saveData();
+        setTimeout(()=>{ if(currentView==='map'){ renderMapPageStops(); renderMapPageFolders(); renderMapPageMap(); } }, 240);
+      });
+    });
     host.querySelectorAll('.mappage-stop').forEach(el=>{
-      el.addEventListener('click', ()=>{
+      el.addEventListener('click', (e)=>{
+        if(e.target.closest('.mappage-stop-nav') || e.target.closest('.mappage-handled')) return; // ניווט/מתג טופל — לא ממקדים
         const c = (clients||[]).find(x=>String(x.id)===String(el.dataset.client));
         if(!c || !_pageMap || typeof c.lat!=='number' || isNaN(c.lat)) return;
         try{ _pageMap.setView([c.lat, c.lon], 16); }catch(_){}
-        try{ L.popup({ closeButton:true }).setLatLng([c.lat, c.lon]).setContent(`<div style="min-width:150px"><div style="font-weight:700">${escapeHtml(c.business||c.name||'')}</div><div style="font-size:.78rem;color:#5B6B6A">${escapeHtml(c.address||'')}</div>${c.phone?`<div style="font-size:.78rem;color:#3E5C76;margin-top:2px">📞 <a href="tel:${escapeHtml(telHref(c.phone))}" style="color:#3E5C76">${escapeHtml(c.phone)}</a></div>`:''}</div>`).openOn(_pageMap); }catch(_){}
+        try{ L.popup({ closeButton:true }).setLatLng([c.lat, c.lon]).setContent(`<div style="min-width:150px"><div style="font-weight:700">${escapeHtml(c.business||c.name||'')}</div><div style="font-size:.78rem;color:#5B6B6A">${escapeHtml(c.address||'')}</div>${c.phone?`<div style="font-size:.78rem;color:#3E5C76;margin-top:2px">📞 <a href="tel:${escapeHtml(telHref(c.phone))}" style="color:#3E5C76">${escapeHtml(c.phone)}</a></div>`:''}<div style="margin-top:6px"><a href="https://waze.com/ul?ll=${c.lat}%2C${c.lon}&navigate=yes" target="_blank" rel="noopener" style="color:#0277fb;font-size:.8rem">🧭 ניווט בוויז</a></div></div>`).openOn(_pageMap); }catch(_){}
         mapPageCollapseSheet(); // מורידים את המגירה כדי לראות את המפה עם המסלול
       });
     });
@@ -8625,7 +8691,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     let html = `<div class="mappage-fold all ${_mapPageAll?'on':''}" data-all="1"><span class="mappage-fold-check">${chk}</span><span class="mappage-fold-name">כל התיקיות · כל המסלולים</span><span class="mappage-fold-count">${all.length}</span></div>`;
     html += all.map(f=>{
       const on = !_mapPageAll && _mapPageSel.has(f.name);
-      const cnt = (clients||[]).filter(c=> (c.folder||'')===f.name && typeof c.lat==='number' && !isNaN(c.lat) && !c.handled && !c.skipRoute).length;
+      const cnt = (clients||[]).filter(c=> ((c.folder||'')===f.name || c.tempFolder===f.name) && typeof c.lat==='number' && !isNaN(c.lat) && !c.handled && !c.skipRoute && !c.inactive).length;
       return `<div class="mappage-fold ${on?'on':''}" data-folder="${escapeHtml(f.name)}"><span class="mappage-fold-check">${chk}</span><span class="mappage-fold-swatch" style="background:${escapeHtml(f.color||'#025ffb')}"></span><span class="mappage-fold-name">${escapeHtml(f.name)}</span><span class="mappage-fold-count">${cnt}</span></div>`;
     }).join('');
     host.innerHTML = html;
@@ -8642,14 +8708,14 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       });
     });
   }
-  function renderMapPageMap(){
+  function renderMapPageMap(fit){
     if(!ensurePageMap()) return;
     _pageMarkers.clearLayers(); _pageRoutes.clearLayers();
     const activeFolders = mapPageActiveFolders();
     const bounds = [];
     activeFolders.forEach(folder=>{
      try{
-      const members = (clients||[]).filter(c=> (c.folder||'')===folder.name && typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon) && !c.handled && !c.skipRoute);
+      const members = (clients||[]).filter(c=> ((c.folder||'')===folder.name || c.tempFolder===folder.name) && typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon) && !c.handled && !c.skipRoute && !c.inactive);
       if(!members.length) return;
       const ordered = getOrderedFolderMembers(folder, members).filter(Boolean);
       ordered.forEach((c, idx)=>{
@@ -8672,7 +8738,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
      }catch(e){ console.error('map page folder', folder && folder.name, e); }
     });
     if(_mapPageAll){
-      (clients||[]).filter(c=> !(c.folder||'') && typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon) && !c.handled && !c.skipRoute).forEach(c=>{
+      (clients||[]).filter(c=> !(c.folder||'') && typeof c.lat==='number' && typeof c.lon==='number' && !isNaN(c.lat) && !isNaN(c.lon) && !c.handled && !c.skipRoute && !c.inactive).forEach(c=>{
         const marker = L.marker([c.lat, c.lon], { icon: pinIcon('#7a8699', '') });
         marker.bindPopup(`<div style="min-width:150px"><div style="font-weight:700">${escapeHtml(c.business||c.name||'')}</div><div style="font-size:.78rem;color:#5B6B6A">${escapeHtml(c.address||'')}</div></div>`);
         marker.addTo(_pageMarkers);
@@ -8680,7 +8746,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       });
     }
     _pageMapBounds = bounds;
-    mapPageFit();
+    if(fit !== false) mapPageFit(); // ברענון אוטומטי (זמן-אמת) לא ממרכזים מחדש כדי לא לקפוץ למשתמש
   }
   function mapPageFit(){
     if(!_pageMap || !_pageMapBounds || !_pageMapBounds.length) return;
@@ -13169,6 +13235,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       try{ if(currentView==='documents' && !document.querySelector('.dce-overlay') && !document.querySelector('.dc-file-rename-input') && !document.querySelector('.cluster-rename-input')) renderDocumentsView(); }catch(_){}
       try{ if(currentView==='collection') renderCollectionView(); }catch(_){}
       try{ if(currentView==='dashboard') renderDashboardView(); }catch(_){}
+      try{ if(currentView==='map'){ renderMapPageFolders(); renderMapPageStops(); renderMapPageMap(false); } }catch(_){}  // עדכון מסלולים/רשימה בעמוד המפה, בלי למרכז מחדש
       try{ await checkLoginNotifications(); }catch(_){}  // התראה למנהל על כניסות חדשות
     }catch(e){ console.error('realtime refresh', e); }
     finally{ _rtRunning = false; }
