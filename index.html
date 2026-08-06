@@ -825,6 +825,9 @@
   }
   #bizLookupBtn:hover{ background:rgba(255,255,255,.18); }
   #bizLookupBtn:disabled{ opacity:.6; cursor:default; }
+  .gps-loc-btn{ width:100%; box-sizing:border-box; background:rgba(2,255,140,.12); border:1px solid rgba(90,220,150,.5); color:#c9ffe0; padding:7px 10px; border-radius:15px; font-size:.8rem; font-family:inherit; cursor:pointer; }
+  .gps-loc-btn:hover{ background:rgba(2,255,140,.2); }
+  .gps-loc-btn:disabled{ opacity:.6; cursor:default; }
   .biz-lookup-suggestions{ margin-top:6px; }
   .biz-lookup-suggestions .suggestion-item{
     padding:9px 10px; font-size:.82rem; cursor:pointer; border:1px solid rgba(255,255,255,.18);
@@ -1973,6 +1976,8 @@
   .panel.jr-cal-panel{ padding:0; overflow:visible; background:transparent; box-shadow:none; border:none; }
   /* לוח שנה לבן עם בורדר 1px בגרדיאנט של באנר התזכורת */
   .jr-cal{ border-radius:10px; padding:14px 14px 16px; box-shadow:none; border:1px solid transparent; background:linear-gradient(#fff,#fff) padding-box, linear-gradient(135deg,#025ffb,#6303ed) border-box; }
+  /* כרטיס "השבוע הקרוב" בדשבורד — רדיוס פינות זהה לשאר הכרטיסים (15px) */
+  #dashboardHost .jr-cal{ border-radius:15px; }
   .jr-cal-top{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:12px; }
   .jr-cal-title{ font-size:15pt; font-weight:600; color:#0f1a2e; text-align:center; flex:1; }
   .jr-nav{ -webkit-appearance:none; appearance:none; width:38px; height:38px; flex:0 0 auto; border:none; border-radius:50%; background:#025ffb; color:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background .15s ease, transform .12s ease; }
@@ -2618,6 +2623,9 @@
           <input type="text" id="f-business" placeholder="לדוגמה: מספרת שי, פיצה רומא...">
           <div class="biz-lookup-row">
             <button type="button" id="bizLookupBtn">🔍 מצא כתובת לפי שם העסק</button>
+          </div>
+          <div class="biz-lookup-row">
+            <button type="button" id="bizGpsBtn" class="gps-loc-btn">📍 כתובת לפי המיקום הנוכחי שלי</button>
           </div>
           <div class="biz-lookup-suggestions" id="bizLookupSuggestions"></div>
           <label for="f-businessid">ח.פ/ת.ז</label>
@@ -6073,6 +6081,7 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       <input type="text" class="edit-street" value="${escapeHtml(origStreetParam)}">
       <label>מספר (משפיע על מיקום הכתובת במפה)</label>
       <input type="text" class="edit-housenum" value="${escapeHtml(c.houseNumber||'')}">
+      <button type="button" class="gps-loc-btn edit-gps-btn" style="margin-top:8px">📍 כתובת לפי המיקום הנוכחי שלי</button>
       <label>הערות</label>
       <textarea class="edit-notes">${escapeHtml(c.notes||'')}</textarea>
       <label>הודעת וואטסאפ מוכנה מראש</label>
@@ -6094,6 +6103,19 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     card.querySelector('.edit-street').addEventListener('blur', ()=>{
       splitTrailingHouseNumber(card.querySelector('.edit-street'), card.querySelector('.edit-housenum'));
     });
+    // עריכה ידנית של הכתובת מבטלת מיקום GPS שנקלט (כדי שהשמירה תעשה גאוקודינג רגיל)
+    ['edit-city','edit-street','edit-housenum'].forEach(cls=>{ const el=card.querySelector('.'+cls); if(el) el.addEventListener('input', ()=>{ card._gpsOverride = null; }); });
+    { const gb = card.querySelector('.edit-gps-btn'); if(gb) gb.addEventListener('click', ()=>{
+        const orig=gb.textContent; gb.disabled=true; gb.textContent='📍 מאתר מיקום...';
+        useMyLocation((g)=>{
+          if(g.city) card.querySelector('.edit-city').value = g.city;
+          card.querySelector('.edit-street').value = g.road || (g.city ? card.querySelector('.edit-street').value : 'מיקום GPS');
+          card.querySelector('.edit-housenum').value = g.house || '';
+          card._gpsOverride = { lat:g.lat, lon:g.lon, city:g.city, label:g.label }; // קואורדינטות GPS מדויקות, עוקף גאוקודינג בשמירה
+          gb.disabled=false; gb.textContent=orig;
+          const errEl=card.querySelector('.edit-error'); if(errEl){ errEl.style.color='#8ff08a'; errEl.textContent='📍 המיקום הנוכחי נקלט ('+g.lat.toFixed(5)+', '+g.lon.toFixed(5)+'). לחצו שמור.'; errEl.style.display='block'; }
+        }, ()=>{ gb.disabled=false; gb.textContent=orig; });
+      }); }
 
     function renderEditUpdates(){
       const listEl = card.querySelector('.edit-updates-list');
@@ -6194,6 +6216,16 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
       if(!business){
         errEl.textContent = "שם העסק הוא שדה חובה.";
         errEl.style.display = 'block';
+        return;
+      }
+      // מיקום GPS נקלט → שומרים ישירות את הקואורדינטות המדויקות בלי גאוקודינג
+      if(card._gpsOverride){
+        applyNonAddressFields();
+        c.houseNumber = card.querySelector('.edit-housenum').value.trim();
+        const g = card._gpsOverride;
+        c.address = g.label; c.lat = g.lat; c.lon = g.lon; c.city = g.city || '';
+        card._gpsOverride = null;
+        finishSave();
         return;
       }
       const newStreetParam = card.querySelector('.edit-street').value.trim();
@@ -7891,6 +7923,51 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
     renderAll();
   });
 
+  // ===== כתובת לפי המיקום הנוכחי (GPS) =====
+  // גאוקודינג הפוך: קואורדינטות → כתובת מילולית לתצוגה. תמיד שומרים את הקואורדינטות המדויקות.
+  async function reverseGeocode(lat, lon){
+    return scheduleRequest(async ()=>{
+      const url = `https://api.maptiler.com/geocoding/${lon},${lat}.json?key=${MAPTILER_API_KEY}&language=he&limit=1`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('reverse geocode failed ('+res.status+')');
+      const data = await res.json();
+      const features = (data && data.features) || [];
+      return features.length ? toGeoItem(features[0]) : null;
+    });
+  }
+  // מבקש את המיקום הנוכחי, עושה גאוקודינג הפוך, ומחזיר {lat,lon,city,road,house,label}
+  function useMyLocation(onResolved, onError){
+    if(!navigator.geolocation){ alert('הדפדפן לא תומך במיקום GPS.'); if(onError) onError(); return; }
+    navigator.geolocation.getCurrentPosition(
+      async (pos)=>{
+        const lat = pos.coords.latitude, lon = pos.coords.longitude;
+        let geo = null; try{ geo = await reverseGeocode(lat, lon); }catch(_){ geo = null; }
+        const label = (geo && geo.label) ? geo.label : ('מיקום מדויק (GPS): '+lat.toFixed(5)+', '+lon.toFixed(5));
+        onResolved({ lat, lon, city:(geo&&geo.city)||'', road:(geo&&geo.road)||'', house:(geo&&geo.house)||'', label });
+      },
+      (err)=>{
+        if(err && err.code===1) alert('כדי להשתמש במיקום הנוכחי צריך לאשר הרשאת מיקום בדפדפן.');
+        else alert('לא הצלחתי לקבל את המיקום הנוכחי. נסו שוב, רצוי במקום פתוח.');
+        if(onError) onError(err);
+      },
+      { enableHighAccuracy:true, maximumAge:0, timeout:15000 }
+    );
+  }
+  document.getElementById('bizGpsBtn').addEventListener('click', ()=>{
+    const btn = document.getElementById('bizGpsBtn');
+    const box = document.getElementById('bizLookupSuggestions');
+    const orig = btn.textContent; btn.disabled = true; btn.textContent = '📍 מאתר מיקום...';
+    useMyLocation((g)=>{
+      if(g.city) document.getElementById('f-city').value = g.city;
+      if(g.road) document.getElementById('f-street').value = g.road;
+      else if(!g.city) document.getElementById('f-street').value = 'מיקום GPS';
+      document.getElementById('f-housenum').value = g.house || '';
+      // הקואורדינטות המדויקות של ה-GPS נשמרות ישירות (עוקף גאוקודינג בהוספה)
+      selectedGeo = { lat:g.lat, lon:g.lon, city:g.city, label:g.label, road:g.road, house:g.house };
+      btn.disabled = false; btn.textContent = orig;
+      if(box) box.innerHTML = '<div style="color:#8ff08a;font-size:.78rem;padding:6px 2px">📍 המיקום הנוכחי נקלט ('+g.lat.toFixed(5)+', '+g.lon.toFixed(5)+'). אפשר להוסיף את הלקוח.</div>';
+    }, ()=>{ btn.disabled = false; btn.textContent = orig; });
+  });
   document.getElementById('bizLookupBtn').addEventListener('click', async ()=>{
     const btn = document.getElementById('bizLookupBtn');
     const box = document.getElementById('bizLookupSuggestions');
