@@ -1907,15 +1907,17 @@
     border:none;
   }
   /* refresh / show-all / background buttons, centered above "הוספת לקוח" at the top of the sidebar */
+  /* כפתורי רענון / הצג הכל — צפים בפינה הימנית העליונה מעל המפה */
   .map-actions{
-    flex:0 0 auto; display:flex; justify-content:center; align-items:center;
-    gap:10px; padding:12px 10px; flex-wrap:wrap;
+    position:absolute; top:10px; right:10px; z-index:1001;
+    display:flex; justify-content:flex-end; align-items:center; gap:8px; flex-wrap:wrap;
   }
   .map-actions button.ghost{
-    background:transparent; border:1px solid rgba(15,26,46,.3); color:#0f1a2e;
+    background:rgba(255,255,255,.92); border:1px solid rgba(15,26,46,.18); color:#0f1a2e;
     padding:7px 14px; border-radius:999px; font-size:.95rem; font-family:inherit; font-weight:400; cursor:pointer;
+    -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
   }
-  .map-actions button.ghost:hover{ background:rgba(15,26,46,.06); }
+  .map-actions button.ghost:hover{ background:#fff; }
   .leaflet-popup-content{ font-family:inherit; direction:rtl; }
 
 
@@ -1936,8 +1938,8 @@
     /* ידית משיכה/לחיצה מעל רצועת ה-megira בתחתית המפה, עם חץ לבן כלפי מטה */
     .mainmap-handle{ display:block; position:absolute; left:0; right:0; bottom:0; height:46px; cursor:pointer; z-index:6; touch-action:none; }
     .mainmap-handle .mappage-cap-arrow{ bottom:8px; transform:translateX(-50%) scaleY(-1); }
-    .map-actions{ padding:8px; gap:6px; }
-    .map-actions button.ghost{ padding:5px 8px; font-size:.82rem; white-space:nowrap; }
+    .map-actions{ top:8px; right:8px; gap:6px; }
+    .map-actions button.ghost{ padding:6px 11px; font-size:.82rem; white-space:nowrap; }
     /* on phones the tab rides over the map — drop it 40px so it sits toward the map's middle */
     .side-menu-tab{ top:40px; }
     section.panel{ margin-bottom:10px; }
@@ -2615,10 +2617,6 @@
 
   <div class="main view-hidden">
     <div class="sidebar">
-      <div class="map-actions">
-        <button class="ghost" id="refreshBtn" title="טען מחדש מהאחסון">↻ רענון</button>
-        <button class="ghost" id="fitAllBtn" title="הצג את כל הלקוחות במפה">⤢ הצג הכל</button>
-      </div>
       <div class="scroll">
 
         <section class="panel" id="addClientPanel">
@@ -2746,6 +2744,10 @@ https://drive.google.com/file/d/1WoY1KQv7xXA8MEkQMwwP8GVphZjWgvEf/view?usp=shari
 
     <div class="map-wrap">
       <div id="map"></div>
+      <div class="map-actions">
+        <button class="ghost" id="refreshBtn" title="טען מחדש מהאחסון">↻ רענון</button>
+        <button class="ghost" id="fitAllBtn" title="הצג את כל הלקוחות במפה">⤢ הצג הכל</button>
+      </div>
       <div class="mainmap-handle" id="mainMapHandle" title="הצג/הסתר את המפה"><svg class="mappage-cap-arrow" viewBox="0 0 81.4 9.8"><path d="M0,9.8c6.7-2,14.2-4.1,21.1-5.9,2.2-.6,5.1-1.3,7-1.8C32,.7,36.3,0,40.6,0c4.1,0,8.9.8,12.5,2.1,4.2,1.1,10.1,2.6,14.2,3.7,4.7,1.3,9.4,2.6,14.1,4-7.2-1.3-14.4-2.8-21.6-4.3,0,0-7.2-1.6-7.2-1.6-3.9-1.3-8-2-12-1.9-4.1,0-8.1.7-12,1.9-2.4.5-4.8,1.1-7.1,1.6-6.9,1.5-14.5,3.1-21.4,4.3h0Z"/></svg></div>
     </div>
   </div>
